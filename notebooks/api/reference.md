@@ -19,7 +19,8 @@ Causalis: A Python package for causal inference.
 - [**causaldata_instrumental**](#causalis.data_contracts.causaldata_instrumental) –
 - [**multicausal_estimate**](#causalis.data_contracts.multicausal_estimate) –
 - [**multicausaldata**](#causalis.data_contracts.multicausaldata) – Causalis Dataclass for storing Cross-sectional DataFrame and column metadata
-- [**regression_checks**](#causalis.data_contracts.regression_checks) –
+- [**panel_data_scm**](#causalis.data_contracts.panel_data_scm) –
+- [**panel_estimate**](#causalis.data_contracts.panel_estimate) –
 
 **Classes:**
 
@@ -29,6 +30,8 @@ Causalis: A Python package for causal inference.
 - [**CausalEstimate**](#causalis.data_contracts.CausalEstimate) – Result container for causal effect estimates.
 - [**DiagnosticData**](#causalis.data_contracts.DiagnosticData) – Base class for all diagnostic data_contracts.
 - [**MultiCausalData**](#causalis.data_contracts.MultiCausalData) – Data contract for cross-sectional causal data with multi-class one-hot treatments.
+- [**PanelDataSCM**](#causalis.data_contracts.PanelDataSCM) – Validated long-format panel contract for Synthetic Control estimators.
+- [**PanelEstimate**](#causalis.data_contracts.PanelEstimate) – Result contract for panel estimators such as Synthetic Control.
 - [**RegressionChecks**](#causalis.data_contracts.RegressionChecks) – Lightweight OLS/regression health checks for CUPED diagnostics.
 - [**UnconfoundednessDiagnosticData**](#causalis.data_contracts.UnconfoundednessDiagnosticData) – Fields common to all models assuming unconfoundedness.
 
@@ -108,7 +111,14 @@ df: pd.DataFrame
 ##### `from_df`
 
 ```python
-from_df(df: pd.DataFrame, treatment: str, outcome: str, confounders: Optional[Union[str, List[str]]] = None, user_id: Optional[str] = None, **kwargs: Any) -> 'CausalData'
+from_df(
+    df: pd.DataFrame,
+    treatment: str,
+    outcome: str,
+    confounders: Optional[Union[str, List[str]]] = None,
+    user_id: Optional[str] = None,
+    **kwargs: Any
+) -> "CausalData"
 ```
 
 Friendly constructor for CausalData.
@@ -129,7 +139,13 @@ Friendly constructor for CausalData.
 ##### `get_df`
 
 ```python
-get_df(columns: Optional[List[str]] = None, include_treatment: bool = True, include_outcome: bool = True, include_confounders: bool = True, include_user_id: bool = False) -> pd.DataFrame
+get_df(
+    columns: Optional[List[str]] = None,
+    include_treatment: bool = True,
+    include_outcome: bool = True,
+    include_confounders: bool = True,
+    include_user_id: bool = False,
+) -> pd.DataFrame
 ```
 
 Get a DataFrame with specified columns.
@@ -153,7 +169,10 @@ Get a DataFrame with specified columns.
 ##### `model_config`
 
 ```python
-model_config = ConfigDict(arbitrary_types_allowed=True, populate_by_name=True, extra='forbid')
+model_config = ConfigDict(
+    arbitrary_types_allowed=True, populate_by_name=True, extra="forbid"
+)
+
 ```
 
 ##### `outcome`
@@ -228,7 +247,15 @@ Container for causal inference datasets with causaldata_instrumental variables.
 ##### `from_df`
 
 ```python
-from_df(df: pd.DataFrame, treatment: str, outcome: str, confounders: Optional[Union[str, List[str]]] = None, user_id: Optional[str] = None, instrument: str = None, **kwargs: Any) -> 'CausalDataInstrumental'
+from_df(
+    df: pd.DataFrame,
+    treatment: str,
+    outcome: str,
+    confounders: Optional[Union[str, List[str]]] = None,
+    user_id: Optional[str] = None,
+    instrument: str = None,
+    **kwargs: Any
+) -> "CausalDataInstrumental"
 ```
 
 Friendly constructor for CausalDataInstrumental.
@@ -250,7 +277,14 @@ Friendly constructor for CausalDataInstrumental.
 ##### `get_df`
 
 ```python
-get_df(columns: Optional[List[str]] = None, include_treatment: bool = True, include_outcome: bool = True, include_confounders: bool = True, include_user_id: bool = False, include_instrument: bool = False) -> pd.DataFrame
+get_df(
+    columns: Optional[List[str]] = None,
+    include_treatment: bool = True,
+    include_outcome: bool = True,
+    include_confounders: bool = True,
+    include_user_id: bool = False,
+    include_instrument: bool = False,
+) -> pd.DataFrame
 ```
 
 Get a DataFrame with specified columns including instrument.
@@ -293,7 +327,38 @@ instrument_name: str = Field(alias='instrument')
 #### `CausalDatasetGenerator`
 
 ```python
-CausalDatasetGenerator(theta: float = 1.0, tau: Optional[Callable[[np.ndarray], np.ndarray]] = None, beta_y: Optional[np.ndarray] = None, beta_d: Optional[np.ndarray] = None, g_y: Optional[Callable[[np.ndarray], np.ndarray]] = None, g_d: Optional[Callable[[np.ndarray], np.ndarray]] = None, alpha_y: float = 0.0, alpha_d: float = 0.0, sigma_y: float = 1.0, outcome_type: str = 'continuous', confounder_specs: Optional[List[Dict[str, Any]]] = None, k: int = 5, x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None, use_copula: bool = False, copula_corr: Optional[np.ndarray] = None, target_d_rate: Optional[float] = None, u_strength_d: float = 0.0, u_strength_y: float = 0.0, propensity_sharpness: float = 1.0, score_bounding: Optional[float] = None, alpha_zi: float = -1.0, beta_zi: Optional[np.ndarray] = None, g_zi: Optional[Callable[[np.ndarray], np.ndarray]] = None, u_strength_zi: float = 0.0, tau_zi: Optional[Callable[[np.ndarray], np.ndarray]] = None, pos_dist: str = 'gamma', gamma_shape: float = 2.0, lognormal_sigma: float = 1.0, include_oracle: bool = True, seed: Optional[int] = None) -> None
+CausalDatasetGenerator(
+    theta: float = 1.0,
+    tau: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+    beta_y: Optional[np.ndarray] = None,
+    beta_d: Optional[np.ndarray] = None,
+    g_y: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+    g_d: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+    alpha_y: float = 0.0,
+    alpha_d: float = 0.0,
+    sigma_y: float = 1.0,
+    outcome_type: str = "continuous",
+    confounder_specs: Optional[List[Dict[str, Any]]] = None,
+    k: int = 5,
+    x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None,
+    use_copula: bool = False,
+    copula_corr: Optional[np.ndarray] = None,
+    target_d_rate: Optional[float] = None,
+    u_strength_d: float = 0.0,
+    u_strength_y: float = 0.0,
+    propensity_sharpness: float = 1.0,
+    score_bounding: Optional[float] = None,
+    alpha_zi: float = -1.0,
+    beta_zi: Optional[np.ndarray] = None,
+    g_zi: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+    u_strength_zi: float = 0.0,
+    tau_zi: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+    pos_dist: str = "gamma",
+    gamma_shape: float = 2.0,
+    lognormal_sigma: float = 1.0,
+    include_oracle: bool = True,
+    seed: Optional[int] = None,
+) -> None
 ```
 
 Generate synthetic causal inference datasets with controllable confounding,
@@ -560,7 +625,9 @@ theta: float = 1.0
 ##### `to_causal_data`
 
 ```python
-to_causal_data(n: int, confounders: Optional[Union[str, List[str]]] = None) -> CausalData
+to_causal_data(
+    n: int, confounders: Optional[Union[str, List[str]]] = None
+) -> CausalData
 ```
 
 Generate a dataset and convert it to a CausalData object.
@@ -755,7 +822,8 @@ Return a summary DataFrame of the results.
 ##### `time`
 
 ```python
-time: str = Field(default_factory=(lambda: datetime.now().strftime('%Y-%m-%d')))
+time: str = Field(default_factory=(lambda: datetime.now().strftime("%Y-%m-%d")))
+
 ```
 
 ##### `treatment`
@@ -881,7 +949,16 @@ df: pd.DataFrame
 ##### `from_df`
 
 ```python
-from_df(df: pd.DataFrame, *, outcome: str, treatment_names: Union[str, List[str]], confounders: Optional[Union[str, List[str]]] = None, user_id: Optional[str] = None, control_treatment: str, **kwargs: Any) -> 'MultiCausalData'
+from_df(
+    df: pd.DataFrame,
+    *,
+    outcome: str,
+    treatment_names: Union[str, List[str]],
+    confounders: Optional[Union[str, List[str]]] = None,
+    user_id: Optional[str] = None,
+    control_treatment: str,
+    **kwargs: Any
+) -> "MultiCausalData"
 ```
 
 Create a MultiCausalData instance from a pandas DataFrame.
@@ -903,7 +980,13 @@ Create a MultiCausalData instance from a pandas DataFrame.
 ##### `get_df`
 
 ```python
-get_df(columns: Optional[List[str]] = None, include_outcome: bool = True, include_confounders: bool = True, include_treatments: bool = True, include_user_id: bool = False) -> pd.DataFrame
+get_df(
+    columns: Optional[List[str]] = None,
+    include_outcome: bool = True,
+    include_confounders: bool = True,
+    include_treatments: bool = True,
+    include_user_id: bool = False,
+) -> pd.DataFrame
 ```
 
 Get a subset of the underlying DataFrame.
@@ -974,6 +1057,511 @@ Return the treatment columns as a pandas DataFrame.
 
 ```python
 user_id: Optional[str] = None
+```
+
+#### `PanelDataSCM`
+
+Bases: <code>[BaseModel](#pydantic.BaseModel)</code>
+
+Validated long-format panel contract for Synthetic Control estimators.
+
+**Parameters:**
+
+- **df** (<code>[DataFrame](#pandas.DataFrame)</code>) – Long-format panel data, one row per observed `(unit, time)` cell.
+- **unit_col** (<code>[str](#str)</code>) – Column name that identifies observational units.
+- **time_col** (<code>[str](#str)</code>) – Column name containing explicit calendar time values.
+- **time_freq** (<code>[str](#str)</code>) – Regular panel frequency alias understood by pandas Period, for example
+  `"D"`, `"W"`, `"M"`, `"Q"`, or `"Y"`.
+- **y** (<code>[str](#str)</code>) – Outcome column name.
+- **treated_unit** (<code>[Hashable](#typing.Hashable)</code>) – Identifier of the treated unit.
+- **treatment_start** (<code>[TimeLike](#causalis.data_contracts.panel_data_scm.TimeLike)</code>) – First treated period (inclusive): pre periods satisfy
+  `t < treatment_start` and post periods satisfy
+  `t >= treatment_start`.
+- **donor_units** (<code>sequence of Hashable</code>) – Explicit donor pool. If `None`, all non-treated units are donors.
+- **time_window** (<code>[tuple](#tuple)([TimeLike](#causalis.data_contracts.panel_data_scm.TimeLike) or None, [TimeLike](#causalis.data_contracts.panel_data_scm.TimeLike) or None)</code>) – Inclusive analysis window `(t_min, t_max)` after time coercion.
+- **pre_periods** (<code>sequence of TimeLike</code>) – Explicit pre-treatment periods. If provided, they override inferred pre periods.
+- **post_periods** (<code>sequence of TimeLike</code>) – Explicit post-treatment periods. If provided, they override inferred post periods.
+- **covariate_cols** (<code>sequence of str</code>) – Additional covariate columns.
+- **observed_col** (<code>[str](#str)</code>) – Optional boolean/0-1 column indicating whether outcome is observed.
+- **weights_col** (<code>[str](#str)</code>) – Optional non-negative row weights.
+- **allow_missing_outcome** (<code>[bool](#bool)</code>) – If `False`, requires fully observed numeric outcomes.
+- **allow_duplicate_unit_time** (<code>[bool](#bool)</code>) – If `False`, requires unique `(unit_col, time_col)` after coercion.
+- **strict_observed_mask** (<code>[bool](#bool)</code>) – If `True`, requires observed mask to match outcome missingness exactly
+  and forbids null values in `observed_col`.
+- **allow_gapped_time_axis** (<code>[bool](#bool)</code>) – If `False`, requires contiguous analysis periods at `time_freq`.
+
+<details class="note" open markdown="1">
+<summary>Notes</summary>
+
+All time-like fields are normalized to `pandas.Period` at `time_freq`.
+Timezone-aware datetimes are rejected; normalize to naive or UTC timestamps
+before constructing this contract.
+
+</details>
+
+**Functions:**
+
+- [**analysis_times**](#causalis.data_contracts.PanelDataSCM.analysis_times) – Return sorted unique time axis of analysis data.
+- [**df_analysis**](#causalis.data_contracts.PanelDataSCM.df_analysis) – Build the estimator-facing analysis dataframe.
+- [**donor_pool**](#causalis.data_contracts.PanelDataSCM.donor_pool) – Return donor units used in analysis.
+- [**post_times**](#causalis.data_contracts.PanelDataSCM.post_times) – Return post-treatment periods used by estimators.
+- [**pre_times**](#causalis.data_contracts.PanelDataSCM.pre_times) – Return pre-treatment periods used by estimators.
+- [**time_to_index**](#causalis.data_contracts.PanelDataSCM.time_to_index) – Build dense integer mapping for matrix estimators.
+- [**treatment_start_idx**](#causalis.data_contracts.PanelDataSCM.treatment_start_idx) – Return index position of treatment start on analysis time axis.
+
+##### `allow_duplicate_unit_time`
+
+```python
+allow_duplicate_unit_time: bool = Field(
+    default=False,
+    description="If False, requires uniqueness of (unit_col, time_col).",
+)
+
+```
+
+##### `allow_gapped_time_axis`
+
+```python
+allow_gapped_time_axis: bool = Field(
+    default=False,
+    description="If False, requires contiguous analysis periods at time_freq (no gaps between min and max analysis times).",
+)
+
+```
+
+##### `allow_missing_outcome`
+
+```python
+allow_missing_outcome: bool = Field(
+    default=True,
+    description="If False, requires y to be numeric and fully observed.",
+)
+
+```
+
+##### `analysis_times`
+
+```python
+analysis_times() -> Sequence[pd.Period]
+```
+
+Return sorted unique time axis of analysis data.
+
+**Returns:**
+
+- <code>sequence of pandas.Period</code> – Sorted analysis periods.
+
+##### `covariate_cols`
+
+```python
+covariate_cols: Sequence[str] = Field(
+    default_factory=tuple, description="Optional covariate columns."
+)
+
+```
+
+##### `df`
+
+```python
+df: pd.DataFrame = Field(..., description='Long-format panel data.')
+```
+
+##### `df_analysis`
+
+```python
+df_analysis() -> pd.DataFrame
+```
+
+Build the estimator-facing analysis dataframe.
+
+**Returns:**
+
+- <code>[DataFrame](#pandas.DataFrame)</code> – Data restricted to treated plus donor units and filtered by time window.
+
+##### `donor_pool`
+
+```python
+donor_pool() -> Sequence[Hashable]
+```
+
+Return donor units used in analysis.
+
+**Returns:**
+
+- <code>sequence of Hashable</code> – Explicit donor pool if provided, otherwise all non-treated units.
+
+##### `donor_units`
+
+```python
+donor_units: Optional[Sequence[Hashable]] = Field(
+    default=None,
+    description="Optional explicit donor pool. If None, all non-treated units are donors.",
+)
+
+```
+
+##### `model_config`
+
+```python
+model_config = ConfigDict(
+    arbitrary_types_allowed=True, extra="forbid", frozen=True
+)
+
+```
+
+##### `observed_col`
+
+```python
+observed_col: Optional[str] = Field(
+    default=None,
+    description="Optional boolean/0-1 column indicating whether outcome is observed.",
+)
+
+```
+
+##### `post_periods`
+
+```python
+post_periods: Optional[Sequence[TimeLike]] = Field(
+    default=None, description="Optional explicit post-treatment periods."
+)
+
+```
+
+##### `post_times`
+
+```python
+post_times() -> Sequence[pd.Period]
+```
+
+Return post-treatment periods used by estimators.
+
+**Returns:**
+
+- <code>sequence of pandas.Period</code> – Explicit `post_periods` when provided, else inferred periods with
+  `t >= treatment_start`.
+
+##### `pre_periods`
+
+```python
+pre_periods: Optional[Sequence[TimeLike]] = Field(
+    default=None, description="Optional explicit pre-treatment periods."
+)
+
+```
+
+##### `pre_times`
+
+```python
+pre_times() -> Sequence[pd.Period]
+```
+
+Return pre-treatment periods used by estimators.
+
+**Returns:**
+
+- <code>sequence of pandas.Period</code> – Explicit `pre_periods` when provided, else inferred periods with
+  `t < treatment_start`.
+
+##### `strict_observed_mask`
+
+```python
+strict_observed_mask: bool = Field(
+    default=True,
+    description="If True, observed_col must match y missingness exactly.",
+)
+
+```
+
+##### `time_col`
+
+```python
+time_col: str = Field(..., description='Calendar time column in df.')
+```
+
+##### `time_freq`
+
+```python
+time_freq: str = Field(
+    default="M",
+    description="Regular panel frequency, e.g. 'D', 'W', 'M', 'Q', 'Y'.",
+)
+
+```
+
+##### `time_to_index`
+
+```python
+time_to_index() -> dict[pd.Period, int]
+```
+
+Build dense integer mapping for matrix estimators.
+
+**Returns:**
+
+- <code>dict of pandas.Period to int</code> – Mapping from analysis period to zero-based integer index.
+
+##### `time_window`
+
+```python
+time_window: Optional[Tuple[Optional[TimeLike], Optional[TimeLike]]] = Field(
+    default=None,
+    description="Inclusive analysis period window: (t_min, t_max). Use None for open ends.",
+)
+
+```
+
+##### `treated_unit`
+
+```python
+treated_unit: Hashable = Field(..., description='ID of the treated unit.')
+```
+
+##### `treatment_start`
+
+```python
+treatment_start: TimeLike = Field(
+    ...,
+    description="First treated period (inclusive). Pre: t < treatment_start, Post: t >= treatment_start.",
+)
+
+```
+
+##### `treatment_start_idx`
+
+```python
+treatment_start_idx() -> int
+```
+
+Return index position of treatment start on analysis time axis.
+
+**Returns:**
+
+- <code>[int](#int)</code> – Zero-based index corresponding to `treatment_start`.
+
+**Raises:**
+
+- <code>[ValueError](#ValueError)</code> – If `treatment_start` is outside the analysis time axis.
+
+##### `unit_col`
+
+```python
+unit_col: str = Field(..., description='Unit identifier column in df.')
+```
+
+##### `weights_col`
+
+```python
+weights_col: Optional[str] = Field(
+    default=None, description="Optional non-negative row weights."
+)
+
+```
+
+##### `y`
+
+```python
+y: str = Field(..., description='Outcome column in df.')
+```
+
+#### `PanelEstimate`
+
+Bases: <code>[BaseModel](#pydantic.BaseModel)</code>
+
+Result contract for panel estimators such as Synthetic Control.
+
+**Parameters:**
+
+- **model** (<code>[str](#str)</code>) – Name of the fitted estimator or pipeline.
+- **treated_unit** (<code>[Hashable](#typing.Hashable)</code>) – Identifier of the treated unit.
+- **treatment_start** (<code>[TimeLike](#causalis.data_contracts.panel_data_scm.TimeLike)</code>) – Treatment boundary used to split pre/post periods.
+- **pre_times** (<code>[list](#list)\[[TimeLike](#causalis.data_contracts.panel_data_scm.TimeLike)\]</code>) – Sorted, strictly pre-treatment periods.
+- **post_times** (<code>[list](#list)\[[TimeLike](#causalis.data_contracts.panel_data_scm.TimeLike)\]</code>) – Sorted, strictly post-treatment periods.
+
+<details class="note" open markdown="1">
+<summary>Notes</summary>
+
+The contract stores aggregate ATTE metrics, full time paths, donor weights,
+and basic diagnostics needed for reporting or downstream checks.
+
+</details>
+
+**Functions:**
+
+- [**summary**](#causalis.data_contracts.PanelEstimate.summary) – Return a compact tabular summary of key estimate metadata.
+
+##### `alpha`
+
+```python
+alpha: Optional[float] = None
+```
+
+##### `att`
+
+```python
+att: float
+```
+
+##### `att_by_time`
+
+```python
+att_by_time: pd.Series
+```
+
+##### `att_by_time_sc`
+
+```python
+att_by_time_sc: pd.Series
+```
+
+##### `att_sc`
+
+```python
+att_sc: float
+```
+
+##### `ci_lower_absolute`
+
+```python
+ci_lower_absolute: Optional[float] = None
+```
+
+##### `ci_lower_relative`
+
+```python
+ci_lower_relative: Optional[float] = None
+```
+
+##### `ci_upper_absolute`
+
+```python
+ci_upper_absolute: Optional[float] = None
+```
+
+##### `ci_upper_relative`
+
+```python
+ci_upper_relative: Optional[float] = None
+```
+
+##### `created_at`
+
+```python
+created_at: datetime = Field(
+    default_factory=(lambda: datetime.now(timezone.utc))
+)
+
+```
+
+##### `diagnostics`
+
+```python
+diagnostics: Dict[str, Any] = Field(default_factory=dict)
+```
+
+##### `donor_weights_augmented`
+
+```python
+donor_weights_augmented: Dict[Hashable, float]
+```
+
+##### `donor_weights_sc`
+
+```python
+donor_weights_sc: Dict[Hashable, float]
+```
+
+##### `estimand`
+
+```python
+estimand: str = 'ATTE'
+```
+
+##### `is_significant`
+
+```python
+is_significant: Optional[bool] = None
+```
+
+##### `model`
+
+```python
+model: str
+```
+
+##### `model_config`
+
+```python
+model_config = ConfigDict(
+    arbitrary_types_allowed=True, extra="forbid", validate_assignment=True
+)
+
+```
+
+##### `observed_outcome`
+
+```python
+observed_outcome: pd.Series
+```
+
+##### `p_value`
+
+```python
+p_value: Optional[float] = None
+```
+
+##### `post_times`
+
+```python
+post_times: List[TimeLike]
+```
+
+##### `pre_times`
+
+```python
+pre_times: List[TimeLike]
+```
+
+##### `summary`
+
+```python
+summary() -> pd.DataFrame
+```
+
+Return a compact tabular summary of key estimate metadata.
+
+**Returns:**
+
+- <code>[DataFrame](#pandas.DataFrame)</code> – Two-column dataframe indexed by field name.
+
+##### `synthetic_outcome`
+
+```python
+synthetic_outcome: pd.Series
+```
+
+##### `synthetic_outcome_sc`
+
+```python
+synthetic_outcome_sc: pd.Series
+```
+
+##### `treated_unit`
+
+```python
+treated_unit: Hashable
+```
+
+##### `treatment_start`
+
+```python
+treatment_start: TimeLike
+```
+
+##### `value_relative`
+
+```python
+value_relative: Optional[float] = None
 ```
 
 #### `RegressionChecks`
@@ -1106,6 +1694,7 @@ n_tiny_one_minus_h: int
 
 ```python
 near_duplicate_pairs: List[Tuple[str, str, float]] = Field(default_factory=list)
+
 ```
 
 ##### `p_main_covariates`
@@ -1821,7 +2410,8 @@ Return a summary DataFrame of the results.
 ###### `time`
 
 ```python
-time: str = Field(default_factory=(lambda: datetime.now().strftime('%Y-%m-%d')))
+time: str = Field(default_factory=(lambda: datetime.now().strftime("%Y-%m-%d")))
+
 ```
 
 ###### `treatment`
@@ -1919,7 +2509,14 @@ df: pd.DataFrame
 ###### `from_df`
 
 ```python
-from_df(df: pd.DataFrame, treatment: str, outcome: str, confounders: Optional[Union[str, List[str]]] = None, user_id: Optional[str] = None, **kwargs: Any) -> 'CausalData'
+from_df(
+    df: pd.DataFrame,
+    treatment: str,
+    outcome: str,
+    confounders: Optional[Union[str, List[str]]] = None,
+    user_id: Optional[str] = None,
+    **kwargs: Any
+) -> "CausalData"
 ```
 
 Friendly constructor for CausalData.
@@ -1940,7 +2537,13 @@ Friendly constructor for CausalData.
 ###### `get_df`
 
 ```python
-get_df(columns: Optional[List[str]] = None, include_treatment: bool = True, include_outcome: bool = True, include_confounders: bool = True, include_user_id: bool = False) -> pd.DataFrame
+get_df(
+    columns: Optional[List[str]] = None,
+    include_treatment: bool = True,
+    include_outcome: bool = True,
+    include_confounders: bool = True,
+    include_user_id: bool = False,
+) -> pd.DataFrame
 ```
 
 Get a DataFrame with specified columns.
@@ -1964,7 +2567,10 @@ Get a DataFrame with specified columns.
 ###### `model_config`
 
 ```python
-model_config = ConfigDict(arbitrary_types_allowed=True, populate_by_name=True, extra='forbid')
+model_config = ConfigDict(
+    arbitrary_types_allowed=True, populate_by_name=True, extra="forbid"
+)
+
 ```
 
 ###### `outcome`
@@ -2045,7 +2651,15 @@ Container for causal inference datasets with causaldata_instrumental variables.
 ###### `from_df`
 
 ```python
-from_df(df: pd.DataFrame, treatment: str, outcome: str, confounders: Optional[Union[str, List[str]]] = None, user_id: Optional[str] = None, instrument: str = None, **kwargs: Any) -> 'CausalDataInstrumental'
+from_df(
+    df: pd.DataFrame,
+    treatment: str,
+    outcome: str,
+    confounders: Optional[Union[str, List[str]]] = None,
+    user_id: Optional[str] = None,
+    instrument: str = None,
+    **kwargs: Any
+) -> "CausalDataInstrumental"
 ```
 
 Friendly constructor for CausalDataInstrumental.
@@ -2067,7 +2681,14 @@ Friendly constructor for CausalDataInstrumental.
 ###### `get_df`
 
 ```python
-get_df(columns: Optional[List[str]] = None, include_treatment: bool = True, include_outcome: bool = True, include_confounders: bool = True, include_user_id: bool = False, include_instrument: bool = False) -> pd.DataFrame
+get_df(
+    columns: Optional[List[str]] = None,
+    include_treatment: bool = True,
+    include_outcome: bool = True,
+    include_confounders: bool = True,
+    include_user_id: bool = False,
+    include_instrument: bool = False,
+) -> pd.DataFrame
 ```
 
 Get a DataFrame with specified columns including instrument.
@@ -2110,7 +2731,22 @@ instrument_name: str = Field(alias='instrument')
 #### `classic_rct_gamma`
 
 ```python
-classic_rct_gamma(n: int = 10000, split: float = 0.5, random_state: Optional[int] = 42, outcome_params: Optional[Dict] = None, add_pre: bool = False, beta_y: Optional[Union[List[float], np.ndarray]] = None, outcome_depends_on_x: bool = True, prognostic_scale: float = 1.0, pre_corr: float = 0.7, add_ancillary: bool = True, deterministic_ids: bool = False, include_oracle: bool = True, return_causal_data: bool = False, **kwargs: bool) -> Union[pd.DataFrame, CausalData]
+classic_rct_gamma(
+    n: int = 10000,
+    split: float = 0.5,
+    random_state: Optional[int] = 42,
+    outcome_params: Optional[Dict] = None,
+    add_pre: bool = False,
+    beta_y: Optional[Union[List[float], np.ndarray]] = None,
+    outcome_depends_on_x: bool = True,
+    prognostic_scale: float = 1.0,
+    pre_corr: float = 0.7,
+    add_ancillary: bool = True,
+    deterministic_ids: bool = False,
+    include_oracle: bool = True,
+    return_causal_data: bool = False,
+    **kwargs: bool
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Generate a classic RCT dataset with three binary confounders and a gamma outcome.
@@ -2144,7 +2780,21 @@ real-world metric (e.g., spend or revenue).
 #### `classic_rct_gamma_26`
 
 ```python
-classic_rct_gamma_26(seed: int = 42, add_pre: bool = False, beta_y: Optional[Union[List[float], np.ndarray]] = None, outcome_depends_on_x: bool = True, include_oracle: bool = False, return_causal_data: bool = True, *, n: int = 10000, split: float = 0.5, outcome_params: Optional[Dict] = None, add_ancillary: bool = True, deterministic_ids: bool = True, **kwargs: bool)
+classic_rct_gamma_26(
+    seed: int = 42,
+    add_pre: bool = False,
+    beta_y: Optional[Union[List[float], np.ndarray]] = None,
+    outcome_depends_on_x: bool = True,
+    include_oracle: bool = False,
+    return_causal_data: bool = True,
+    *,
+    n: int = 10000,
+    split: float = 0.5,
+    outcome_params: Optional[Dict] = None,
+    add_ancillary: bool = True,
+    deterministic_ids: bool = True,
+    **kwargs: bool
+)
 ```
 
 A pre-configured classic RCT dataset with a gamma outcome.
@@ -2173,7 +2823,22 @@ Includes deterministic `user_id` and ancillary columns.
 #### `generate_classic_rct`
 
 ```python
-generate_classic_rct(n: int = 10000, split: float = 0.5, random_state: Optional[int] = 42, outcome_params: Optional[Dict] = None, add_pre: bool = False, beta_y: Optional[Union[List[float], np.ndarray]] = None, outcome_depends_on_x: bool = True, prognostic_scale: float = 1.0, pre_corr: float = 0.7, return_causal_data: bool = False, add_ancillary: bool = False, deterministic_ids: bool = False, include_oracle: bool = True, **kwargs: bool) -> Union[pd.DataFrame, CausalData]
+generate_classic_rct(
+    n: int = 10000,
+    split: float = 0.5,
+    random_state: Optional[int] = 42,
+    outcome_params: Optional[Dict] = None,
+    add_pre: bool = False,
+    beta_y: Optional[Union[List[float], np.ndarray]] = None,
+    outcome_depends_on_x: bool = True,
+    prognostic_scale: float = 1.0,
+    pre_corr: float = 0.7,
+    return_causal_data: bool = False,
+    add_ancillary: bool = False,
+    deterministic_ids: bool = False,
+    include_oracle: bool = True,
+    **kwargs: bool
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Generate a classic RCT dataset with three binary confounders:
@@ -2204,7 +2869,21 @@ platform_ios, country_usa, and source_paid.
 #### `generate_classic_rct_26`
 
 ```python
-generate_classic_rct_26(seed: int = 42, add_pre: bool = False, beta_y: Optional[Union[List[float], np.ndarray]] = None, outcome_depends_on_x: bool = True, include_oracle: bool = False, return_causal_data: bool = True, *, n: int = 10000, split: float = 0.5, outcome_params: Optional[Dict] = None, add_ancillary: bool = False, deterministic_ids: bool = True, **kwargs: bool)
+generate_classic_rct_26(
+    seed: int = 42,
+    add_pre: bool = False,
+    beta_y: Optional[Union[List[float], np.ndarray]] = None,
+    outcome_depends_on_x: bool = True,
+    include_oracle: bool = False,
+    return_causal_data: bool = True,
+    *,
+    n: int = 10000,
+    split: float = 0.5,
+    outcome_params: Optional[Dict] = None,
+    add_ancillary: bool = False,
+    deterministic_ids: bool = True,
+    **kwargs: bool
+)
 ```
 
 A pre-configured classic RCT dataset with 3 binary confounders.
@@ -2235,7 +2914,17 @@ deterministic `user_id` column.
 #### `generate_cuped_binary`
 
 ```python
-generate_cuped_binary(n: int = 10000, seed: int = 42, add_pre: bool = True, pre_name: str = 'y_pre', pre_target_corr: float = 0.65, pre_spec: Optional[PreCorrSpec] = None, include_oracle: bool = True, return_causal_data: bool = True, theta_logit: float = 0.38) -> Union[pd.DataFrame, CausalData]
+generate_cuped_binary(
+    n: int = 10000,
+    seed: int = 42,
+    add_pre: bool = True,
+    pre_name: str = "y_pre",
+    pre_target_corr: float = 0.65,
+    pre_spec: Optional[PreCorrSpec] = None,
+    include_oracle: bool = True,
+    return_causal_data: bool = True,
+    theta_logit: float = 0.38,
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Binary CUPED-oriented DGP with richer confounders and structured HTE.
@@ -2263,7 +2952,27 @@ pre-period covariate while preserving exact oracle cate under include_oracle.
 #### `generate_rct`
 
 ```python
-generate_rct(n: int = 20000, split: float = 0.5, random_state: Optional[int] = 42, outcome_type: str = 'binary', outcome_params: Optional[Dict] = None, confounder_specs: Optional[List[Dict[str, Any]]] = None, k: int = 0, x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None, add_ancillary: bool = True, deterministic_ids: bool = False, add_pre: bool = True, pre_name: str = 'y_pre', pre_corr: float = 0.7, prognostic_scale: float = 1.0, beta_y: Optional[Union[List[float], np.ndarray]] = None, g_y: Optional[Callable[[np.ndarray], np.ndarray]] = None, use_prognostic: Optional[bool] = None, include_oracle: bool = True, return_causal_data: bool = False) -> Union[pd.DataFrame, CausalData]
+generate_rct(
+    n: int = 20000,
+    split: float = 0.5,
+    random_state: Optional[int] = 42,
+    outcome_type: str = "binary",
+    outcome_params: Optional[Dict] = None,
+    confounder_specs: Optional[List[Dict[str, Any]]] = None,
+    k: int = 0,
+    x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None,
+    add_ancillary: bool = True,
+    deterministic_ids: bool = False,
+    add_pre: bool = True,
+    pre_name: str = "y_pre",
+    pre_corr: float = 0.7,
+    prognostic_scale: float = 1.0,
+    beta_y: Optional[Union[List[float], np.ndarray]] = None,
+    g_y: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+    use_prognostic: Optional[bool] = None,
+    include_oracle: bool = True,
+    return_causal_data: bool = False,
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Generate an RCT dataset with randomized treatment assignment.
@@ -2310,7 +3019,17 @@ avoiding outcome leakage and post-treatment adjustment issues.
 #### `make_cuped_binary_26`
 
 ```python
-make_cuped_binary_26(n: int = 10000, seed: int = 42, add_pre: bool = True, pre_name: str = 'y_pre', pre_target_corr: float = 0.65, pre_spec: Optional[PreCorrSpec] = None, include_oracle: bool = True, return_causal_data: bool = True, theta_logit: float = 0.38) -> Union[pd.DataFrame, CausalData]
+make_cuped_binary_26(
+    n: int = 10000,
+    seed: int = 42,
+    add_pre: bool = True,
+    pre_name: str = "y_pre",
+    pre_target_corr: float = 0.65,
+    pre_spec: Optional[PreCorrSpec] = None,
+    include_oracle: bool = True,
+    return_causal_data: bool = True,
+    theta_logit: float = 0.38,
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Binary CUPED benchmark with richer confounders and structured HTE.
@@ -2509,7 +3228,8 @@ Return a CausalEstimate-like summary for all baseline contrasts.
 ###### `time`
 
 ```python
-time: str = Field(default_factory=(lambda: datetime.now().strftime('%Y-%m-%d')))
+time: str = Field(default_factory=(lambda: datetime.now().strftime("%Y-%m-%d")))
+
 ```
 
 ###### `treatment`
@@ -2632,7 +3352,16 @@ df: pd.DataFrame
 ###### `from_df`
 
 ```python
-from_df(df: pd.DataFrame, *, outcome: str, treatment_names: Union[str, List[str]], confounders: Optional[Union[str, List[str]]] = None, user_id: Optional[str] = None, control_treatment: str, **kwargs: Any) -> 'MultiCausalData'
+from_df(
+    df: pd.DataFrame,
+    *,
+    outcome: str,
+    treatment_names: Union[str, List[str]],
+    confounders: Optional[Union[str, List[str]]] = None,
+    user_id: Optional[str] = None,
+    control_treatment: str,
+    **kwargs: Any
+) -> "MultiCausalData"
 ```
 
 Create a MultiCausalData instance from a pandas DataFrame.
@@ -2654,7 +3383,13 @@ Create a MultiCausalData instance from a pandas DataFrame.
 ###### `get_df`
 
 ```python
-get_df(columns: Optional[List[str]] = None, include_outcome: bool = True, include_confounders: bool = True, include_treatments: bool = True, include_user_id: bool = False) -> pd.DataFrame
+get_df(
+    columns: Optional[List[str]] = None,
+    include_outcome: bool = True,
+    include_confounders: bool = True,
+    include_treatments: bool = True,
+    include_user_id: bool = False,
+) -> pd.DataFrame
 ```
 
 Get a subset of the underlying DataFrame.
@@ -2730,7 +3465,12 @@ user_id: Optional[str] = None
 #### `obs_linear_26_dataset`
 
 ```python
-obs_linear_26_dataset(n: int = 10000, seed: int = 42, include_oracle: bool = True, return_causal_data: bool = True)
+obs_linear_26_dataset(
+    n: int = 10000,
+    seed: int = 42,
+    include_oracle: bool = True,
+    return_causal_data: bool = True,
+)
 ```
 
 A pre-configured observational linear dataset with 5 standard confounders.
@@ -2746,7 +3486,22 @@ Based on the scenario in docs/cases/dml_ate.ipynb.
 #### `obs_linear_effect`
 
 ```python
-obs_linear_effect(n: int = 10000, theta: float = 1.0, outcome_type: str = 'continuous', sigma_y: float = 1.0, target_d_rate: Optional[float] = None, confounder_specs: Optional[List[Dict[str, Any]]] = None, beta_y: Optional[np.ndarray] = None, beta_d: Optional[np.ndarray] = None, random_state: Optional[int] = 42, k: int = 0, x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None, include_oracle: bool = True, add_ancillary: bool = False, deterministic_ids: bool = False) -> pd.DataFrame
+obs_linear_effect(
+    n: int = 10000,
+    theta: float = 1.0,
+    outcome_type: str = "continuous",
+    sigma_y: float = 1.0,
+    target_d_rate: Optional[float] = None,
+    confounder_specs: Optional[List[Dict[str, Any]]] = None,
+    beta_y: Optional[np.ndarray] = None,
+    beta_d: Optional[np.ndarray] = None,
+    random_state: Optional[int] = 42,
+    k: int = 0,
+    x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None,
+    include_oracle: bool = True,
+    add_ancillary: bool = False,
+    deterministic_ids: bool = False,
+) -> pd.DataFrame
 ```
 
 Generate an observational dataset with linear effects of confounders and a constant treatment effect.
@@ -2772,172 +3527,527 @@ Generate an observational dataset with linear effects of confounders and a const
 
 - <code>[DataFrame](#pandas.DataFrame)</code> – Synthetic observational dataset.
 
-#### `regression_checks`
+#### `panel_data_scm`
 
 **Classes:**
 
-- [**RegressionChecks**](#causalis.data_contracts.regression_checks.RegressionChecks) – Lightweight OLS/regression health checks for CUPED diagnostics.
+- [**PanelDataSCM**](#causalis.data_contracts.panel_data_scm.PanelDataSCM) – Validated long-format panel contract for Synthetic Control estimators.
 
-##### `RegressionChecks`
+##### `PanelDataSCM`
 
 Bases: <code>[BaseModel](#pydantic.BaseModel)</code>
 
-Lightweight OLS/regression health checks for CUPED diagnostics.
+Validated long-format panel contract for Synthetic Control estimators.
 
-###### `ate_adj`
+**Parameters:**
+
+- **df** (<code>[DataFrame](#pandas.DataFrame)</code>) – Long-format panel data, one row per observed `(unit, time)` cell.
+- **unit_col** (<code>[str](#str)</code>) – Column name that identifies observational units.
+- **time_col** (<code>[str](#str)</code>) – Column name containing explicit calendar time values.
+- **time_freq** (<code>[str](#str)</code>) – Regular panel frequency alias understood by pandas Period, for example
+  `"D"`, `"W"`, `"M"`, `"Q"`, or `"Y"`.
+- **y** (<code>[str](#str)</code>) – Outcome column name.
+- **treated_unit** (<code>[Hashable](#typing.Hashable)</code>) – Identifier of the treated unit.
+- **treatment_start** (<code>[TimeLike](#causalis.data_contracts.panel_data_scm.TimeLike)</code>) – First treated period (inclusive): pre periods satisfy
+  `t < treatment_start` and post periods satisfy
+  `t >= treatment_start`.
+- **donor_units** (<code>sequence of Hashable</code>) – Explicit donor pool. If `None`, all non-treated units are donors.
+- **time_window** (<code>[tuple](#tuple)([TimeLike](#causalis.data_contracts.panel_data_scm.TimeLike) or None, [TimeLike](#causalis.data_contracts.panel_data_scm.TimeLike) or None)</code>) – Inclusive analysis window `(t_min, t_max)` after time coercion.
+- **pre_periods** (<code>sequence of TimeLike</code>) – Explicit pre-treatment periods. If provided, they override inferred pre periods.
+- **post_periods** (<code>sequence of TimeLike</code>) – Explicit post-treatment periods. If provided, they override inferred post periods.
+- **covariate_cols** (<code>sequence of str</code>) – Additional covariate columns.
+- **observed_col** (<code>[str](#str)</code>) – Optional boolean/0-1 column indicating whether outcome is observed.
+- **weights_col** (<code>[str](#str)</code>) – Optional non-negative row weights.
+- **allow_missing_outcome** (<code>[bool](#bool)</code>) – If `False`, requires fully observed numeric outcomes.
+- **allow_duplicate_unit_time** (<code>[bool](#bool)</code>) – If `False`, requires unique `(unit_col, time_col)` after coercion.
+- **strict_observed_mask** (<code>[bool](#bool)</code>) – If `True`, requires observed mask to match outcome missingness exactly
+  and forbids null values in `observed_col`.
+- **allow_gapped_time_axis** (<code>[bool](#bool)</code>) – If `False`, requires contiguous analysis periods at `time_freq`.
+
+<details class="note" open markdown="1">
+<summary>Notes</summary>
+
+All time-like fields are normalized to `pandas.Period` at `time_freq`.
+Timezone-aware datetimes are rejected; normalize to naive or UTC timestamps
+before constructing this contract.
+
+</details>
+
+**Functions:**
+
+- [**analysis_times**](#causalis.data_contracts.panel_data_scm.PanelDataSCM.analysis_times) – Return sorted unique time axis of analysis data.
+- [**df_analysis**](#causalis.data_contracts.panel_data_scm.PanelDataSCM.df_analysis) – Build the estimator-facing analysis dataframe.
+- [**donor_pool**](#causalis.data_contracts.panel_data_scm.PanelDataSCM.donor_pool) – Return donor units used in analysis.
+- [**post_times**](#causalis.data_contracts.panel_data_scm.PanelDataSCM.post_times) – Return post-treatment periods used by estimators.
+- [**pre_times**](#causalis.data_contracts.panel_data_scm.PanelDataSCM.pre_times) – Return pre-treatment periods used by estimators.
+- [**time_to_index**](#causalis.data_contracts.panel_data_scm.PanelDataSCM.time_to_index) – Build dense integer mapping for matrix estimators.
+- [**treatment_start_idx**](#causalis.data_contracts.panel_data_scm.PanelDataSCM.treatment_start_idx) – Return index position of treatment start on analysis time axis.
+
+###### `allow_duplicate_unit_time`
 
 ```python
-ate_adj: float
+allow_duplicate_unit_time: bool = Field(
+    default=False,
+    description="If False, requires uniqueness of (unit_col, time_col).",
+)
+
 ```
 
-###### `ate_adj_winsor`
+###### `allow_gapped_time_axis`
 
 ```python
-ate_adj_winsor: Optional[float] = None
+allow_gapped_time_axis: bool = Field(
+    default=False,
+    description="If False, requires contiguous analysis periods at time_freq (no gaps between min and max analysis times).",
+)
+
 ```
 
-###### `ate_adj_winsor_gap`
+###### `allow_missing_outcome`
 
 ```python
-ate_adj_winsor_gap: Optional[float] = None
+allow_missing_outcome: bool = Field(
+    default=True,
+    description="If False, requires y to be numeric and fully observed.",
+)
+
 ```
 
-###### `ate_gap`
+###### `analysis_times`
 
 ```python
-ate_gap: float
+analysis_times() -> Sequence[pd.Period]
 ```
 
-###### `ate_gap_over_se_naive`
+Return sorted unique time axis of analysis data.
+
+**Returns:**
+
+- <code>sequence of pandas.Period</code> – Sorted analysis periods.
+
+###### `covariate_cols`
 
 ```python
-ate_gap_over_se_naive: Optional[float] = None
+covariate_cols: Sequence[str] = Field(
+    default_factory=tuple, description="Optional covariate columns."
+)
+
 ```
 
-###### `ate_naive`
+###### `df`
 
 ```python
-ate_naive: float
+df: pd.DataFrame = Field(..., description='Long-format panel data.')
 ```
 
-###### `condition_number`
+###### `df_analysis`
 
 ```python
-condition_number: float
+df_analysis() -> pd.DataFrame
 ```
 
-###### `cooks_cutoff`
+Build the estimator-facing analysis dataframe.
+
+**Returns:**
+
+- <code>[DataFrame](#pandas.DataFrame)</code> – Data restricted to treated plus donor units and filtered by time window.
+
+###### `donor_pool`
 
 ```python
-cooks_cutoff: float
+donor_pool() -> Sequence[Hashable]
 ```
 
-###### `full_rank`
+Return donor units used in analysis.
+
+**Returns:**
+
+- <code>sequence of Hashable</code> – Explicit donor pool if provided, otherwise all non-treated units.
+
+###### `donor_units`
 
 ```python
-full_rank: bool
+donor_units: Optional[Sequence[Hashable]] = Field(
+    default=None,
+    description="Optional explicit donor pool. If None, all non-treated units are donors.",
+)
+
 ```
 
-###### `k`
+###### `model_config`
 
 ```python
-k: int
+model_config = ConfigDict(
+    arbitrary_types_allowed=True, extra="forbid", frozen=True
+)
+
 ```
 
-###### `leverage_cutoff`
+###### `observed_col`
 
 ```python
-leverage_cutoff: float
+observed_col: Optional[str] = Field(
+    default=None,
+    description="Optional boolean/0-1 column indicating whether outcome is observed.",
+)
+
 ```
 
-###### `max_abs_std_resid`
+###### `post_periods`
 
 ```python
-max_abs_std_resid: float
+post_periods: Optional[Sequence[TimeLike]] = Field(
+    default=None, description="Optional explicit post-treatment periods."
+)
+
 ```
 
-###### `max_cooks`
+###### `post_times`
 
 ```python
-max_cooks: float
+post_times() -> Sequence[pd.Period]
 ```
 
-###### `max_leverage`
+Return post-treatment periods used by estimators.
+
+**Returns:**
+
+- <code>sequence of pandas.Period</code> – Explicit `post_periods` when provided, else inferred periods with
+  `t >= treatment_start`.
+
+###### `pre_periods`
 
 ```python
-max_leverage: float
+pre_periods: Optional[Sequence[TimeLike]] = Field(
+    default=None, description="Optional explicit pre-treatment periods."
+)
+
 ```
 
-###### `min_one_minus_h`
+###### `pre_times`
 
 ```python
-min_one_minus_h: float
+pre_times() -> Sequence[pd.Period]
 ```
 
-###### `n_high_cooks`
+Return pre-treatment periods used by estimators.
+
+**Returns:**
+
+- <code>sequence of pandas.Period</code> – Explicit `pre_periods` when provided, else inferred periods with
+  `t < treatment_start`.
+
+###### `strict_observed_mask`
 
 ```python
-n_high_cooks: int
+strict_observed_mask: bool = Field(
+    default=True,
+    description="If True, observed_col must match y missingness exactly.",
+)
+
 ```
 
-###### `n_high_leverage`
+###### `time_col`
 
 ```python
-n_high_leverage: int
+time_col: str = Field(..., description='Calendar time column in df.')
 ```
 
-###### `n_std_resid_gt_3`
+###### `time_freq`
 
 ```python
-n_std_resid_gt_3: int
+time_freq: str = Field(
+    default="M",
+    description="Regular panel frequency, e.g. 'D', 'W', 'M', 'Q', 'Y'.",
+)
+
 ```
 
-###### `n_std_resid_gt_4`
+###### `time_to_index`
 
 ```python
-n_std_resid_gt_4: int
+time_to_index() -> dict[pd.Period, int]
 ```
 
-###### `n_tiny_one_minus_h`
+Build dense integer mapping for matrix estimators.
+
+**Returns:**
+
+- <code>dict of pandas.Period to int</code> – Mapping from analysis period to zero-based integer index.
+
+###### `time_window`
 
 ```python
-n_tiny_one_minus_h: int
+time_window: Optional[Tuple[Optional[TimeLike], Optional[TimeLike]]] = Field(
+    default=None,
+    description="Inclusive analysis period window: (t_min, t_max). Use None for open ends.",
+)
+
 ```
 
-###### `near_duplicate_pairs`
+###### `treated_unit`
 
 ```python
-near_duplicate_pairs: List[Tuple[str, str, float]] = Field(default_factory=list)
+treated_unit: Hashable = Field(..., description='ID of the treated unit.')
 ```
 
-###### `p_main_covariates`
+###### `treatment_start`
 
 ```python
-p_main_covariates: int
+treatment_start: TimeLike = Field(
+    ...,
+    description="First treated period (inclusive). Pre: t < treatment_start, Post: t >= treatment_start.",
+)
+
 ```
 
-###### `rank`
+###### `treatment_start_idx`
 
 ```python
-rank: int
+treatment_start_idx() -> int
 ```
 
-###### `resid_scale_mad`
+Return index position of treatment start on analysis time axis.
+
+**Returns:**
+
+- <code>[int](#int)</code> – Zero-based index corresponding to `treatment_start`.
+
+**Raises:**
+
+- <code>[ValueError](#ValueError)</code> – If `treatment_start` is outside the analysis time axis.
+
+###### `unit_col`
 
 ```python
-resid_scale_mad: float
+unit_col: str = Field(..., description='Unit identifier column in df.')
 ```
 
-###### `vif`
+###### `weights_col`
 
 ```python
-vif: Optional[Dict[str, float]] = None
+weights_col: Optional[str] = Field(
+    default=None, description="Optional non-negative row weights."
+)
+
 ```
 
-###### `winsor_q`
+###### `y`
 
 ```python
-winsor_q: Optional[float] = None
+y: str = Field(..., description='Outcome column in df.')
+```
+
+##### `TimeLike`
+
+```python
+TimeLike = Union[str, date, datetime, pd.Timestamp, pd.Period]
+```
+
+#### `panel_estimate`
+
+**Classes:**
+
+- [**PanelEstimate**](#causalis.data_contracts.panel_estimate.PanelEstimate) – Result contract for panel estimators such as Synthetic Control.
+
+##### `PanelEstimate`
+
+Bases: <code>[BaseModel](#pydantic.BaseModel)</code>
+
+Result contract for panel estimators such as Synthetic Control.
+
+**Parameters:**
+
+- **model** (<code>[str](#str)</code>) – Name of the fitted estimator or pipeline.
+- **treated_unit** (<code>[Hashable](#typing.Hashable)</code>) – Identifier of the treated unit.
+- **treatment_start** (<code>[TimeLike](#causalis.data_contracts.panel_data_scm.TimeLike)</code>) – Treatment boundary used to split pre/post periods.
+- **pre_times** (<code>[list](#list)\[[TimeLike](#causalis.data_contracts.panel_data_scm.TimeLike)\]</code>) – Sorted, strictly pre-treatment periods.
+- **post_times** (<code>[list](#list)\[[TimeLike](#causalis.data_contracts.panel_data_scm.TimeLike)\]</code>) – Sorted, strictly post-treatment periods.
+
+<details class="note" open markdown="1">
+<summary>Notes</summary>
+
+The contract stores aggregate ATTE metrics, full time paths, donor weights,
+and basic diagnostics needed for reporting or downstream checks.
+
+</details>
+
+**Functions:**
+
+- [**summary**](#causalis.data_contracts.panel_estimate.PanelEstimate.summary) – Return a compact tabular summary of key estimate metadata.
+
+###### `alpha`
+
+```python
+alpha: Optional[float] = None
+```
+
+###### `att`
+
+```python
+att: float
+```
+
+###### `att_by_time`
+
+```python
+att_by_time: pd.Series
+```
+
+###### `att_by_time_sc`
+
+```python
+att_by_time_sc: pd.Series
+```
+
+###### `att_sc`
+
+```python
+att_sc: float
+```
+
+###### `ci_lower_absolute`
+
+```python
+ci_lower_absolute: Optional[float] = None
+```
+
+###### `ci_lower_relative`
+
+```python
+ci_lower_relative: Optional[float] = None
+```
+
+###### `ci_upper_absolute`
+
+```python
+ci_upper_absolute: Optional[float] = None
+```
+
+###### `ci_upper_relative`
+
+```python
+ci_upper_relative: Optional[float] = None
+```
+
+###### `created_at`
+
+```python
+created_at: datetime = Field(
+    default_factory=(lambda: datetime.now(timezone.utc))
+)
+
+```
+
+###### `diagnostics`
+
+```python
+diagnostics: Dict[str, Any] = Field(default_factory=dict)
+```
+
+###### `donor_weights_augmented`
+
+```python
+donor_weights_augmented: Dict[Hashable, float]
+```
+
+###### `donor_weights_sc`
+
+```python
+donor_weights_sc: Dict[Hashable, float]
+```
+
+###### `estimand`
+
+```python
+estimand: str = 'ATTE'
+```
+
+###### `is_significant`
+
+```python
+is_significant: Optional[bool] = None
+```
+
+###### `model`
+
+```python
+model: str
+```
+
+###### `model_config`
+
+```python
+model_config = ConfigDict(
+    arbitrary_types_allowed=True, extra="forbid", validate_assignment=True
+)
+
+```
+
+###### `observed_outcome`
+
+```python
+observed_outcome: pd.Series
+```
+
+###### `p_value`
+
+```python
+p_value: Optional[float] = None
+```
+
+###### `post_times`
+
+```python
+post_times: List[TimeLike]
+```
+
+###### `pre_times`
+
+```python
+pre_times: List[TimeLike]
+```
+
+###### `summary`
+
+```python
+summary() -> pd.DataFrame
+```
+
+Return a compact tabular summary of key estimate metadata.
+
+**Returns:**
+
+- <code>[DataFrame](#pandas.DataFrame)</code> – Two-column dataframe indexed by field name.
+
+###### `synthetic_outcome`
+
+```python
+synthetic_outcome: pd.Series
+```
+
+###### `synthetic_outcome_sc`
+
+```python
+synthetic_outcome_sc: pd.Series
+```
+
+###### `treated_unit`
+
+```python
+treated_unit: Hashable
+```
+
+###### `treatment_start`
+
+```python
+treatment_start: TimeLike
+```
+
+###### `value_relative`
+
+```python
+value_relative: Optional[float] = None
 ```
 
 ### `causalis.dgp`
@@ -2948,6 +4058,7 @@ winsor_q: Optional[float] = None
 - [**causaldata**](#causalis.dgp.causaldata) –
 - [**causaldata_instrumental**](#causalis.dgp.causaldata_instrumental) –
 - [**multicausaldata**](#causalis.dgp.multicausaldata) –
+- [**panel_data_scm**](#causalis.dgp.panel_data_scm) –
 
 **Classes:**
 
@@ -2963,6 +4074,7 @@ winsor_q: Optional[float] = None
 - [**generate_cuped_tweedie_26**](#causalis.dgp.generate_cuped_tweedie_26) – Gold standard Tweedie-like DGP with mixed marginals and structured HTE.
 - [**generate_iv_data**](#causalis.dgp.generate_iv_data) – Generate synthetic dataset with instrumental variables.
 - [**generate_rct**](#causalis.dgp.generate_rct) – Generate an RCT dataset with randomized treatment assignment.
+- [**generate_scm_data**](#causalis.dgp.generate_scm_data) – Medium-level wrapper for Gaussian SCM panel generation.
 - [**make_cuped_binary_26**](#causalis.dgp.make_cuped_binary_26) – Binary CUPED benchmark with richer confounders and structured HTE.
 - [**make_cuped_tweedie**](#causalis.dgp.make_cuped_tweedie) – Tweedie-like DGP with mixed marginals and structured HTE.
 - [**make_gold_linear**](#causalis.dgp.make_gold_linear) – A standard linear benchmark with moderate confounding.
@@ -2972,7 +4084,38 @@ winsor_q: Optional[float] = None
 #### `CausalDatasetGenerator`
 
 ```python
-CausalDatasetGenerator(theta: float = 1.0, tau: Optional[Callable[[np.ndarray], np.ndarray]] = None, beta_y: Optional[np.ndarray] = None, beta_d: Optional[np.ndarray] = None, g_y: Optional[Callable[[np.ndarray], np.ndarray]] = None, g_d: Optional[Callable[[np.ndarray], np.ndarray]] = None, alpha_y: float = 0.0, alpha_d: float = 0.0, sigma_y: float = 1.0, outcome_type: str = 'continuous', confounder_specs: Optional[List[Dict[str, Any]]] = None, k: int = 5, x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None, use_copula: bool = False, copula_corr: Optional[np.ndarray] = None, target_d_rate: Optional[float] = None, u_strength_d: float = 0.0, u_strength_y: float = 0.0, propensity_sharpness: float = 1.0, score_bounding: Optional[float] = None, alpha_zi: float = -1.0, beta_zi: Optional[np.ndarray] = None, g_zi: Optional[Callable[[np.ndarray], np.ndarray]] = None, u_strength_zi: float = 0.0, tau_zi: Optional[Callable[[np.ndarray], np.ndarray]] = None, pos_dist: str = 'gamma', gamma_shape: float = 2.0, lognormal_sigma: float = 1.0, include_oracle: bool = True, seed: Optional[int] = None) -> None
+CausalDatasetGenerator(
+    theta: float = 1.0,
+    tau: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+    beta_y: Optional[np.ndarray] = None,
+    beta_d: Optional[np.ndarray] = None,
+    g_y: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+    g_d: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+    alpha_y: float = 0.0,
+    alpha_d: float = 0.0,
+    sigma_y: float = 1.0,
+    outcome_type: str = "continuous",
+    confounder_specs: Optional[List[Dict[str, Any]]] = None,
+    k: int = 5,
+    x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None,
+    use_copula: bool = False,
+    copula_corr: Optional[np.ndarray] = None,
+    target_d_rate: Optional[float] = None,
+    u_strength_d: float = 0.0,
+    u_strength_y: float = 0.0,
+    propensity_sharpness: float = 1.0,
+    score_bounding: Optional[float] = None,
+    alpha_zi: float = -1.0,
+    beta_zi: Optional[np.ndarray] = None,
+    g_zi: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+    u_strength_zi: float = 0.0,
+    tau_zi: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+    pos_dist: str = "gamma",
+    gamma_shape: float = 2.0,
+    lognormal_sigma: float = 1.0,
+    include_oracle: bool = True,
+    seed: Optional[int] = None,
+) -> None
 ```
 
 Generate synthetic causal inference datasets with controllable confounding,
@@ -3239,7 +4382,9 @@ theta: float = 1.0
 ##### `to_causal_data`
 
 ```python
-to_causal_data(n: int, confounders: Optional[Union[str, List[str]]] = None) -> CausalData
+to_causal_data(
+    n: int, confounders: Optional[Union[str, List[str]]] = None
+) -> CausalData
 ```
 
 Generate a dataset and convert it to a CausalData object.
@@ -3392,7 +4537,14 @@ df: pd.DataFrame
 ###### `from_df`
 
 ```python
-from_df(df: pd.DataFrame, treatment: str, outcome: str, confounders: Optional[Union[str, List[str]]] = None, user_id: Optional[str] = None, **kwargs: Any) -> 'CausalData'
+from_df(
+    df: pd.DataFrame,
+    treatment: str,
+    outcome: str,
+    confounders: Optional[Union[str, List[str]]] = None,
+    user_id: Optional[str] = None,
+    **kwargs: Any
+) -> "CausalData"
 ```
 
 Friendly constructor for CausalData.
@@ -3413,7 +4565,13 @@ Friendly constructor for CausalData.
 ###### `get_df`
 
 ```python
-get_df(columns: Optional[List[str]] = None, include_treatment: bool = True, include_outcome: bool = True, include_confounders: bool = True, include_user_id: bool = False) -> pd.DataFrame
+get_df(
+    columns: Optional[List[str]] = None,
+    include_treatment: bool = True,
+    include_outcome: bool = True,
+    include_confounders: bool = True,
+    include_user_id: bool = False,
+) -> pd.DataFrame
 ```
 
 Get a DataFrame with specified columns.
@@ -3437,7 +4595,10 @@ Get a DataFrame with specified columns.
 ###### `model_config`
 
 ```python
-model_config = ConfigDict(arbitrary_types_allowed=True, populate_by_name=True, extra='forbid')
+model_config = ConfigDict(
+    arbitrary_types_allowed=True, populate_by_name=True, extra="forbid"
+)
+
 ```
 
 ###### `outcome`
@@ -3497,7 +4658,38 @@ user_id_name: Optional[str] = Field(alias='user_id', default=None)
 ##### `CausalDatasetGenerator`
 
 ```python
-CausalDatasetGenerator(theta: float = 1.0, tau: Optional[Callable[[np.ndarray], np.ndarray]] = None, beta_y: Optional[np.ndarray] = None, beta_d: Optional[np.ndarray] = None, g_y: Optional[Callable[[np.ndarray], np.ndarray]] = None, g_d: Optional[Callable[[np.ndarray], np.ndarray]] = None, alpha_y: float = 0.0, alpha_d: float = 0.0, sigma_y: float = 1.0, outcome_type: str = 'continuous', confounder_specs: Optional[List[Dict[str, Any]]] = None, k: int = 5, x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None, use_copula: bool = False, copula_corr: Optional[np.ndarray] = None, target_d_rate: Optional[float] = None, u_strength_d: float = 0.0, u_strength_y: float = 0.0, propensity_sharpness: float = 1.0, score_bounding: Optional[float] = None, alpha_zi: float = -1.0, beta_zi: Optional[np.ndarray] = None, g_zi: Optional[Callable[[np.ndarray], np.ndarray]] = None, u_strength_zi: float = 0.0, tau_zi: Optional[Callable[[np.ndarray], np.ndarray]] = None, pos_dist: str = 'gamma', gamma_shape: float = 2.0, lognormal_sigma: float = 1.0, include_oracle: bool = True, seed: Optional[int] = None) -> None
+CausalDatasetGenerator(
+    theta: float = 1.0,
+    tau: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+    beta_y: Optional[np.ndarray] = None,
+    beta_d: Optional[np.ndarray] = None,
+    g_y: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+    g_d: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+    alpha_y: float = 0.0,
+    alpha_d: float = 0.0,
+    sigma_y: float = 1.0,
+    outcome_type: str = "continuous",
+    confounder_specs: Optional[List[Dict[str, Any]]] = None,
+    k: int = 5,
+    x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None,
+    use_copula: bool = False,
+    copula_corr: Optional[np.ndarray] = None,
+    target_d_rate: Optional[float] = None,
+    u_strength_d: float = 0.0,
+    u_strength_y: float = 0.0,
+    propensity_sharpness: float = 1.0,
+    score_bounding: Optional[float] = None,
+    alpha_zi: float = -1.0,
+    beta_zi: Optional[np.ndarray] = None,
+    g_zi: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+    u_strength_zi: float = 0.0,
+    tau_zi: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+    pos_dist: str = "gamma",
+    gamma_shape: float = 2.0,
+    lognormal_sigma: float = 1.0,
+    include_oracle: bool = True,
+    seed: Optional[int] = None,
+) -> None
 ```
 
 Generate synthetic causal inference datasets with controllable confounding,
@@ -3764,7 +4956,9 @@ theta: float = 1.0
 ###### `to_causal_data`
 
 ```python
-to_causal_data(n: int, confounders: Optional[Union[str, List[str]]] = None) -> CausalData
+to_causal_data(
+    n: int, confounders: Optional[Union[str, List[str]]] = None
+) -> CausalData
 ```
 
 Generate a dataset and convert it to a CausalData object.
@@ -3817,7 +5011,38 @@ x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None
 ###### `CausalDatasetGenerator`
 
 ```python
-CausalDatasetGenerator(theta: float = 1.0, tau: Optional[Callable[[np.ndarray], np.ndarray]] = None, beta_y: Optional[np.ndarray] = None, beta_d: Optional[np.ndarray] = None, g_y: Optional[Callable[[np.ndarray], np.ndarray]] = None, g_d: Optional[Callable[[np.ndarray], np.ndarray]] = None, alpha_y: float = 0.0, alpha_d: float = 0.0, sigma_y: float = 1.0, outcome_type: str = 'continuous', confounder_specs: Optional[List[Dict[str, Any]]] = None, k: int = 5, x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None, use_copula: bool = False, copula_corr: Optional[np.ndarray] = None, target_d_rate: Optional[float] = None, u_strength_d: float = 0.0, u_strength_y: float = 0.0, propensity_sharpness: float = 1.0, score_bounding: Optional[float] = None, alpha_zi: float = -1.0, beta_zi: Optional[np.ndarray] = None, g_zi: Optional[Callable[[np.ndarray], np.ndarray]] = None, u_strength_zi: float = 0.0, tau_zi: Optional[Callable[[np.ndarray], np.ndarray]] = None, pos_dist: str = 'gamma', gamma_shape: float = 2.0, lognormal_sigma: float = 1.0, include_oracle: bool = True, seed: Optional[int] = None) -> None
+CausalDatasetGenerator(
+    theta: float = 1.0,
+    tau: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+    beta_y: Optional[np.ndarray] = None,
+    beta_d: Optional[np.ndarray] = None,
+    g_y: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+    g_d: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+    alpha_y: float = 0.0,
+    alpha_d: float = 0.0,
+    sigma_y: float = 1.0,
+    outcome_type: str = "continuous",
+    confounder_specs: Optional[List[Dict[str, Any]]] = None,
+    k: int = 5,
+    x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None,
+    use_copula: bool = False,
+    copula_corr: Optional[np.ndarray] = None,
+    target_d_rate: Optional[float] = None,
+    u_strength_d: float = 0.0,
+    u_strength_y: float = 0.0,
+    propensity_sharpness: float = 1.0,
+    score_bounding: Optional[float] = None,
+    alpha_zi: float = -1.0,
+    beta_zi: Optional[np.ndarray] = None,
+    g_zi: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+    u_strength_zi: float = 0.0,
+    tau_zi: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+    pos_dist: str = "gamma",
+    gamma_shape: float = 2.0,
+    lognormal_sigma: float = 1.0,
+    include_oracle: bool = True,
+    seed: Optional[int] = None,
+) -> None
 ```
 
 Generate synthetic causal inference datasets with controllable confounding,
@@ -4084,7 +5309,9 @@ theta: float = 1.0
 ####### `to_causal_data`
 
 ```python
-to_causal_data(n: int, confounders: Optional[Union[str, List[str]]] = None) -> CausalData
+to_causal_data(
+    n: int, confounders: Optional[Union[str, List[str]]] = None
+) -> CausalData
 ```
 
 Generate a dataset and convert it to a CausalData object.
@@ -4131,7 +5358,22 @@ x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None
 ##### `classic_rct_gamma`
 
 ```python
-classic_rct_gamma(n: int = 10000, split: float = 0.5, random_state: Optional[int] = 42, outcome_params: Optional[Dict] = None, add_pre: bool = False, beta_y: Optional[Union[List[float], np.ndarray]] = None, outcome_depends_on_x: bool = True, prognostic_scale: float = 1.0, pre_corr: float = 0.7, add_ancillary: bool = True, deterministic_ids: bool = False, include_oracle: bool = True, return_causal_data: bool = False, **kwargs: bool) -> Union[pd.DataFrame, CausalData]
+classic_rct_gamma(
+    n: int = 10000,
+    split: float = 0.5,
+    random_state: Optional[int] = 42,
+    outcome_params: Optional[Dict] = None,
+    add_pre: bool = False,
+    beta_y: Optional[Union[List[float], np.ndarray]] = None,
+    outcome_depends_on_x: bool = True,
+    prognostic_scale: float = 1.0,
+    pre_corr: float = 0.7,
+    add_ancillary: bool = True,
+    deterministic_ids: bool = False,
+    include_oracle: bool = True,
+    return_causal_data: bool = False,
+    **kwargs: bool
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Generate a classic RCT dataset with three binary confounders and a gamma outcome.
@@ -4165,7 +5407,21 @@ real-world metric (e.g., spend or revenue).
 ##### `classic_rct_gamma_26`
 
 ```python
-classic_rct_gamma_26(seed: int = 42, add_pre: bool = False, beta_y: Optional[Union[List[float], np.ndarray]] = None, outcome_depends_on_x: bool = True, include_oracle: bool = False, return_causal_data: bool = True, *, n: int = 10000, split: float = 0.5, outcome_params: Optional[Dict] = None, add_ancillary: bool = True, deterministic_ids: bool = True, **kwargs: bool)
+classic_rct_gamma_26(
+    seed: int = 42,
+    add_pre: bool = False,
+    beta_y: Optional[Union[List[float], np.ndarray]] = None,
+    outcome_depends_on_x: bool = True,
+    include_oracle: bool = False,
+    return_causal_data: bool = True,
+    *,
+    n: int = 10000,
+    split: float = 0.5,
+    outcome_params: Optional[Dict] = None,
+    add_ancillary: bool = True,
+    deterministic_ids: bool = True,
+    **kwargs: bool
+)
 ```
 
 A pre-configured classic RCT dataset with a gamma outcome.
@@ -4206,7 +5462,22 @@ Includes deterministic `user_id` and ancillary columns.
 ###### `classic_rct_gamma`
 
 ```python
-classic_rct_gamma(n: int = 10000, split: float = 0.5, random_state: Optional[int] = 42, outcome_params: Optional[Dict] = None, add_pre: bool = False, beta_y: Optional[Union[List[float], np.ndarray]] = None, outcome_depends_on_x: bool = True, prognostic_scale: float = 1.0, pre_corr: float = 0.7, add_ancillary: bool = True, deterministic_ids: bool = False, include_oracle: bool = True, return_causal_data: bool = False, **kwargs: bool) -> Union[pd.DataFrame, CausalData]
+classic_rct_gamma(
+    n: int = 10000,
+    split: float = 0.5,
+    random_state: Optional[int] = 42,
+    outcome_params: Optional[Dict] = None,
+    add_pre: bool = False,
+    beta_y: Optional[Union[List[float], np.ndarray]] = None,
+    outcome_depends_on_x: bool = True,
+    prognostic_scale: float = 1.0,
+    pre_corr: float = 0.7,
+    add_ancillary: bool = True,
+    deterministic_ids: bool = False,
+    include_oracle: bool = True,
+    return_causal_data: bool = False,
+    **kwargs: bool
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Generate a classic RCT dataset with three binary confounders and a gamma outcome.
@@ -4240,7 +5511,22 @@ real-world metric (e.g., spend or revenue).
 ###### `generate_classic_rct`
 
 ```python
-generate_classic_rct(n: int = 10000, split: float = 0.5, random_state: Optional[int] = 42, outcome_params: Optional[Dict] = None, add_pre: bool = False, beta_y: Optional[Union[List[float], np.ndarray]] = None, outcome_depends_on_x: bool = True, prognostic_scale: float = 1.0, pre_corr: float = 0.7, return_causal_data: bool = False, add_ancillary: bool = False, deterministic_ids: bool = False, include_oracle: bool = True, **kwargs: bool) -> Union[pd.DataFrame, CausalData]
+generate_classic_rct(
+    n: int = 10000,
+    split: float = 0.5,
+    random_state: Optional[int] = 42,
+    outcome_params: Optional[Dict] = None,
+    add_pre: bool = False,
+    beta_y: Optional[Union[List[float], np.ndarray]] = None,
+    outcome_depends_on_x: bool = True,
+    prognostic_scale: float = 1.0,
+    pre_corr: float = 0.7,
+    return_causal_data: bool = False,
+    add_ancillary: bool = False,
+    deterministic_ids: bool = False,
+    include_oracle: bool = True,
+    **kwargs: bool
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Generate a classic RCT dataset with three binary confounders:
@@ -4271,7 +5557,17 @@ platform_ios, country_usa, and source_paid.
 ###### `generate_cuped_binary`
 
 ```python
-generate_cuped_binary(n: int = 10000, seed: int = 42, add_pre: bool = True, pre_name: str = 'y_pre', pre_target_corr: float = 0.65, pre_spec: Optional[PreCorrSpec] = None, include_oracle: bool = True, return_causal_data: bool = True, theta_logit: float = 0.38) -> Union[pd.DataFrame, CausalData]
+generate_cuped_binary(
+    n: int = 10000,
+    seed: int = 42,
+    add_pre: bool = True,
+    pre_name: str = "y_pre",
+    pre_target_corr: float = 0.65,
+    pre_spec: Optional[PreCorrSpec] = None,
+    include_oracle: bool = True,
+    return_causal_data: bool = True,
+    theta_logit: float = 0.38,
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Binary CUPED-oriented DGP with richer confounders and structured HTE.
@@ -4299,7 +5595,27 @@ pre-period covariate while preserving exact oracle cate under include_oracle.
 ###### `generate_rct`
 
 ```python
-generate_rct(n: int = 20000, split: float = 0.5, random_state: Optional[int] = 42, outcome_type: str = 'binary', outcome_params: Optional[Dict] = None, confounder_specs: Optional[List[Dict[str, Any]]] = None, k: int = 0, x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None, add_ancillary: bool = True, deterministic_ids: bool = False, add_pre: bool = True, pre_name: str = 'y_pre', pre_corr: float = 0.7, prognostic_scale: float = 1.0, beta_y: Optional[Union[List[float], np.ndarray]] = None, g_y: Optional[Callable[[np.ndarray], np.ndarray]] = None, use_prognostic: Optional[bool] = None, include_oracle: bool = True, return_causal_data: bool = False) -> Union[pd.DataFrame, CausalData]
+generate_rct(
+    n: int = 20000,
+    split: float = 0.5,
+    random_state: Optional[int] = 42,
+    outcome_type: str = "binary",
+    outcome_params: Optional[Dict] = None,
+    confounder_specs: Optional[List[Dict[str, Any]]] = None,
+    k: int = 0,
+    x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None,
+    add_ancillary: bool = True,
+    deterministic_ids: bool = False,
+    add_pre: bool = True,
+    pre_name: str = "y_pre",
+    pre_corr: float = 0.7,
+    prognostic_scale: float = 1.0,
+    beta_y: Optional[Union[List[float], np.ndarray]] = None,
+    g_y: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+    use_prognostic: Optional[bool] = None,
+    include_oracle: bool = True,
+    return_causal_data: bool = False,
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Generate an RCT dataset with randomized treatment assignment.
@@ -4346,7 +5662,17 @@ avoiding outcome leakage and post-treatment adjustment issues.
 ###### `make_cuped_tweedie`
 
 ```python
-make_cuped_tweedie(n: int = 10000, seed: int = 42, add_pre: bool = True, pre_name: str = 'y_pre', pre_target_corr: float = 0.6, pre_spec: Optional[PreCorrSpec] = None, include_oracle: bool = False, return_causal_data: bool = True, theta_log: float = 0.2) -> Union[pd.DataFrame, CausalData]
+make_cuped_tweedie(
+    n: int = 10000,
+    seed: int = 42,
+    add_pre: bool = True,
+    pre_name: str = "y_pre",
+    pre_target_corr: float = 0.6,
+    pre_spec: Optional[PreCorrSpec] = None,
+    include_oracle: bool = False,
+    return_causal_data: bool = True,
+    theta_log: float = 0.2,
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Tweedie-like DGP with mixed marginals and structured HTE.
@@ -4381,7 +5707,22 @@ Based on the benchmark scenario in docs/research/dgp_benchmarking.ipynb.
 ###### `obs_linear_effect`
 
 ```python
-obs_linear_effect(n: int = 10000, theta: float = 1.0, outcome_type: str = 'continuous', sigma_y: float = 1.0, target_d_rate: Optional[float] = None, confounder_specs: Optional[List[Dict[str, Any]]] = None, beta_y: Optional[np.ndarray] = None, beta_d: Optional[np.ndarray] = None, random_state: Optional[int] = 42, k: int = 0, x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None, include_oracle: bool = True, add_ancillary: bool = False, deterministic_ids: bool = False) -> pd.DataFrame
+obs_linear_effect(
+    n: int = 10000,
+    theta: float = 1.0,
+    outcome_type: str = "continuous",
+    sigma_y: float = 1.0,
+    target_d_rate: Optional[float] = None,
+    confounder_specs: Optional[List[Dict[str, Any]]] = None,
+    beta_y: Optional[np.ndarray] = None,
+    beta_d: Optional[np.ndarray] = None,
+    random_state: Optional[int] = 42,
+    k: int = 0,
+    x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None,
+    include_oracle: bool = True,
+    add_ancillary: bool = False,
+    deterministic_ids: bool = False,
+) -> pd.DataFrame
 ```
 
 Generate an observational dataset with linear effects of confounders and a constant treatment effect.
@@ -4410,7 +5751,22 @@ Generate an observational dataset with linear effects of confounders and a const
 ##### `generate_classic_rct`
 
 ```python
-generate_classic_rct(n: int = 10000, split: float = 0.5, random_state: Optional[int] = 42, outcome_params: Optional[Dict] = None, add_pre: bool = False, beta_y: Optional[Union[List[float], np.ndarray]] = None, outcome_depends_on_x: bool = True, prognostic_scale: float = 1.0, pre_corr: float = 0.7, return_causal_data: bool = False, add_ancillary: bool = False, deterministic_ids: bool = False, include_oracle: bool = True, **kwargs: bool) -> Union[pd.DataFrame, CausalData]
+generate_classic_rct(
+    n: int = 10000,
+    split: float = 0.5,
+    random_state: Optional[int] = 42,
+    outcome_params: Optional[Dict] = None,
+    add_pre: bool = False,
+    beta_y: Optional[Union[List[float], np.ndarray]] = None,
+    outcome_depends_on_x: bool = True,
+    prognostic_scale: float = 1.0,
+    pre_corr: float = 0.7,
+    return_causal_data: bool = False,
+    add_ancillary: bool = False,
+    deterministic_ids: bool = False,
+    include_oracle: bool = True,
+    **kwargs: bool
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Generate a classic RCT dataset with three binary confounders:
@@ -4441,7 +5797,21 @@ platform_ios, country_usa, and source_paid.
 ##### `generate_classic_rct_26`
 
 ```python
-generate_classic_rct_26(seed: int = 42, add_pre: bool = False, beta_y: Optional[Union[List[float], np.ndarray]] = None, outcome_depends_on_x: bool = True, include_oracle: bool = False, return_causal_data: bool = True, *, n: int = 10000, split: float = 0.5, outcome_params: Optional[Dict] = None, add_ancillary: bool = False, deterministic_ids: bool = True, **kwargs: bool)
+generate_classic_rct_26(
+    seed: int = 42,
+    add_pre: bool = False,
+    beta_y: Optional[Union[List[float], np.ndarray]] = None,
+    outcome_depends_on_x: bool = True,
+    include_oracle: bool = False,
+    return_causal_data: bool = True,
+    *,
+    n: int = 10000,
+    split: float = 0.5,
+    outcome_params: Optional[Dict] = None,
+    add_ancillary: bool = False,
+    deterministic_ids: bool = True,
+    **kwargs: bool
+)
 ```
 
 A pre-configured classic RCT dataset with 3 binary confounders.
@@ -4472,7 +5842,17 @@ deterministic `user_id` column.
 ##### `generate_cuped_binary`
 
 ```python
-generate_cuped_binary(n: int = 10000, seed: int = 42, add_pre: bool = True, pre_name: str = 'y_pre', pre_target_corr: float = 0.65, pre_spec: Optional[PreCorrSpec] = None, include_oracle: bool = True, return_causal_data: bool = True, theta_logit: float = 0.38) -> Union[pd.DataFrame, CausalData]
+generate_cuped_binary(
+    n: int = 10000,
+    seed: int = 42,
+    add_pre: bool = True,
+    pre_name: str = "y_pre",
+    pre_target_corr: float = 0.65,
+    pre_spec: Optional[PreCorrSpec] = None,
+    include_oracle: bool = True,
+    return_causal_data: bool = True,
+    theta_logit: float = 0.38,
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Binary CUPED-oriented DGP with richer confounders and structured HTE.
@@ -4500,7 +5880,19 @@ pre-period covariate while preserving exact oracle cate under include_oracle.
 ##### `generate_cuped_tweedie_26`
 
 ```python
-generate_cuped_tweedie_26(n: int = 20000, seed: int = 42, add_pre: bool = True, pre_name: str = 'y_pre', pre_name_2: Optional[str] = None, pre_target_corr: float = 0.82, pre_target_corr_2: Optional[float] = None, pre_spec: Optional[PreCorrSpec] = None, include_oracle: bool = False, return_causal_data: bool = True, theta_log: float = 0.38) -> Union[pd.DataFrame, CausalData]
+generate_cuped_tweedie_26(
+    n: int = 20000,
+    seed: int = 42,
+    add_pre: bool = True,
+    pre_name: str = "y_pre",
+    pre_name_2: Optional[str] = None,
+    pre_target_corr: float = 0.82,
+    pre_target_corr_2: Optional[float] = None,
+    pre_spec: Optional[PreCorrSpec] = None,
+    include_oracle: bool = False,
+    return_causal_data: bool = True,
+    theta_log: float = 0.38,
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Gold standard Tweedie-like DGP with mixed marginals and structured HTE.
@@ -4531,7 +5923,12 @@ Wrapper for make_tweedie().
 ##### `generate_obs_hte_26`
 
 ```python
-generate_obs_hte_26(n: int = 10000, seed: int = 42, include_oracle: bool = True, return_causal_data: bool = True) -> Union[pd.DataFrame, CausalData]
+generate_obs_hte_26(
+    n: int = 10000,
+    seed: int = 42,
+    include_oracle: bool = True,
+    return_causal_data: bool = True,
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Observational dataset with nonlinear outcome model, nonlinear treatment assignment,
@@ -4548,7 +5945,12 @@ Based on the scenario in notebooks/cases/dml_atte.ipynb.
 ##### `generate_obs_hte_26_rich`
 
 ```python
-generate_obs_hte_26_rich(n: int = 100000, seed: int = 42, include_oracle: bool = True, return_causal_data: bool = True) -> Union[pd.DataFrame, CausalData]
+generate_obs_hte_26_rich(
+    n: int = 100000,
+    seed: int = 42,
+    include_oracle: bool = True,
+    return_causal_data: bool = True,
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Observational dataset with richer confounding, nonlinear outcome model,
@@ -4565,7 +5967,12 @@ Adds additional realistic covariates and dependencies to mimic real data.
 ##### `generate_obs_hte_binary_26`
 
 ```python
-generate_obs_hte_binary_26(n: int = 100000, seed: int = 42, include_oracle: bool = True, return_causal_data: bool = True) -> Union[pd.DataFrame, CausalData]
+generate_obs_hte_binary_26(
+    n: int = 100000,
+    seed: int = 42,
+    include_oracle: bool = True,
+    return_causal_data: bool = True,
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Observational binary-outcome dataset with nonlinear confounding and
@@ -4584,7 +5991,27 @@ a binary outcome model and a modified confounder set.
 ##### `generate_rct`
 
 ```python
-generate_rct(n: int = 20000, split: float = 0.5, random_state: Optional[int] = 42, outcome_type: str = 'binary', outcome_params: Optional[Dict] = None, confounder_specs: Optional[List[Dict[str, Any]]] = None, k: int = 0, x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None, add_ancillary: bool = True, deterministic_ids: bool = False, add_pre: bool = True, pre_name: str = 'y_pre', pre_corr: float = 0.7, prognostic_scale: float = 1.0, beta_y: Optional[Union[List[float], np.ndarray]] = None, g_y: Optional[Callable[[np.ndarray], np.ndarray]] = None, use_prognostic: Optional[bool] = None, include_oracle: bool = True, return_causal_data: bool = False) -> Union[pd.DataFrame, CausalData]
+generate_rct(
+    n: int = 20000,
+    split: float = 0.5,
+    random_state: Optional[int] = 42,
+    outcome_type: str = "binary",
+    outcome_params: Optional[Dict] = None,
+    confounder_specs: Optional[List[Dict[str, Any]]] = None,
+    k: int = 0,
+    x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None,
+    add_ancillary: bool = True,
+    deterministic_ids: bool = False,
+    add_pre: bool = True,
+    pre_name: str = "y_pre",
+    pre_corr: float = 0.7,
+    prognostic_scale: float = 1.0,
+    beta_y: Optional[Union[List[float], np.ndarray]] = None,
+    g_y: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+    use_prognostic: Optional[bool] = None,
+    include_oracle: bool = True,
+    return_causal_data: bool = False,
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Generate an RCT dataset with randomized treatment assignment.
@@ -4631,7 +6058,17 @@ avoiding outcome leakage and post-treatment adjustment issues.
 ##### `make_cuped_binary_26`
 
 ```python
-make_cuped_binary_26(n: int = 10000, seed: int = 42, add_pre: bool = True, pre_name: str = 'y_pre', pre_target_corr: float = 0.65, pre_spec: Optional[PreCorrSpec] = None, include_oracle: bool = True, return_causal_data: bool = True, theta_logit: float = 0.38) -> Union[pd.DataFrame, CausalData]
+make_cuped_binary_26(
+    n: int = 10000,
+    seed: int = 42,
+    add_pre: bool = True,
+    pre_name: str = "y_pre",
+    pre_target_corr: float = 0.65,
+    pre_spec: Optional[PreCorrSpec] = None,
+    include_oracle: bool = True,
+    return_causal_data: bool = True,
+    theta_logit: float = 0.38,
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Binary CUPED benchmark with richer confounders and structured HTE.
@@ -4657,7 +6094,17 @@ Wrapper for generate_cuped_binary().
 ##### `make_cuped_tweedie`
 
 ```python
-make_cuped_tweedie(n: int = 10000, seed: int = 42, add_pre: bool = True, pre_name: str = 'y_pre', pre_target_corr: float = 0.6, pre_spec: Optional[PreCorrSpec] = None, include_oracle: bool = False, return_causal_data: bool = True, theta_log: float = 0.2) -> Union[pd.DataFrame, CausalData]
+make_cuped_tweedie(
+    n: int = 10000,
+    seed: int = 42,
+    add_pre: bool = True,
+    pre_name: str = "y_pre",
+    pre_target_corr: float = 0.6,
+    pre_spec: Optional[PreCorrSpec] = None,
+    include_oracle: bool = False,
+    return_causal_data: bool = True,
+    theta_log: float = 0.2,
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Tweedie-like DGP with mixed marginals and structured HTE.
@@ -4692,7 +6139,12 @@ Based on the benchmark scenario in docs/research/dgp_benchmarking.ipynb.
 ##### `obs_linear_26_dataset`
 
 ```python
-obs_linear_26_dataset(n: int = 10000, seed: int = 42, include_oracle: bool = True, return_causal_data: bool = True)
+obs_linear_26_dataset(
+    n: int = 10000,
+    seed: int = 42,
+    include_oracle: bool = True,
+    return_causal_data: bool = True,
+)
 ```
 
 A pre-configured observational linear dataset with 5 standard confounders.
@@ -4708,7 +6160,22 @@ Based on the scenario in docs/cases/dml_ate.ipynb.
 ##### `obs_linear_effect`
 
 ```python
-obs_linear_effect(n: int = 10000, theta: float = 1.0, outcome_type: str = 'continuous', sigma_y: float = 1.0, target_d_rate: Optional[float] = None, confounder_specs: Optional[List[Dict[str, Any]]] = None, beta_y: Optional[np.ndarray] = None, beta_d: Optional[np.ndarray] = None, random_state: Optional[int] = 42, k: int = 0, x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None, include_oracle: bool = True, add_ancillary: bool = False, deterministic_ids: bool = False) -> pd.DataFrame
+obs_linear_effect(
+    n: int = 10000,
+    theta: float = 1.0,
+    outcome_type: str = "continuous",
+    sigma_y: float = 1.0,
+    target_d_rate: Optional[float] = None,
+    confounder_specs: Optional[List[Dict[str, Any]]] = None,
+    beta_y: Optional[np.ndarray] = None,
+    beta_d: Optional[np.ndarray] = None,
+    random_state: Optional[int] = 42,
+    k: int = 0,
+    x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None,
+    include_oracle: bool = True,
+    add_ancillary: bool = False,
+    deterministic_ids: bool = False,
+) -> pd.DataFrame
 ```
 
 Generate an observational dataset with linear effects of confounders and a constant treatment effect.
@@ -4755,7 +6222,16 @@ CorrMethod = Literal['pearson', 'spearman']
 ###### `PreCorrSpec`
 
 ```python
-PreCorrSpec(target_corr: float = 0.7, transform: Transform = 'log1p', winsor_q: Optional[float] = 0.999, method: CorrMethod = 'pearson', sigma_lo: float = 0.0, sigma_hi: float = 50.0, sigma_tol: float = 0.001, max_iter: int = 40) -> None
+PreCorrSpec(
+    target_corr: float = 0.7,
+    transform: Transform = "log1p",
+    winsor_q: Optional[float] = 0.999,
+    method: CorrMethod = "pearson",
+    sigma_lo: float = 0.0,
+    sigma_hi: float = 50.0,
+    sigma_tol: float = 0.001,
+    max_iter: int = 40,
+) -> None
 ```
 
 ####### `max_iter`
@@ -4815,7 +6291,16 @@ Transform = Literal['none', 'log1p', 'rank']
 ###### `add_preperiod_covariate`
 
 ```python
-add_preperiod_covariate(df: pd.DataFrame, y_col: str, d_col: str, pre_name: str, base_builder: Callable[[pd.DataFrame], np.ndarray], spec: PreCorrSpec, rng: np.random.Generator, mask: Optional[np.ndarray] = None) -> pd.DataFrame
+add_preperiod_covariate(
+    df: pd.DataFrame,
+    y_col: str,
+    d_col: str,
+    pre_name: str,
+    base_builder: Callable[[pd.DataFrame], np.ndarray],
+    spec: PreCorrSpec,
+    rng: np.random.Generator,
+    mask: Optional[np.ndarray] = None,
+) -> pd.DataFrame
 ```
 
 Standardized utility to add a calibrated pre-period covariate to a DataFrame.
@@ -4835,7 +6320,14 @@ Standardized utility to add a calibrated pre-period covariate to a DataFrame.
 ###### `calibrate_sigma_for_target_corr`
 
 ```python
-calibrate_sigma_for_target_corr(y_pre_base: np.ndarray, y_post: np.ndarray, rng: np.random.Generator, spec: PreCorrSpec, *, noise: Optional[np.ndarray] = None) -> Tuple[float, float]
+calibrate_sigma_for_target_corr(
+    y_pre_base: np.ndarray,
+    y_post: np.ndarray,
+    rng: np.random.Generator,
+    spec: PreCorrSpec,
+    *,
+    noise: Optional[np.ndarray] = None
+) -> Tuple[float, float]
 ```
 
 Find sigma such that Corr(T(y_pre_base + sigma\*eps), T(y_post)) ~ target_corr.
@@ -4844,7 +6336,14 @@ Returns (sigma, achieved_corr).
 ###### `corr_on_scale`
 
 ```python
-corr_on_scale(y_pre: np.ndarray, y_post: np.ndarray, *, transform: Transform = 'log1p', winsor_q: Optional[float] = 0.999, method: CorrMethod = 'pearson') -> float
+corr_on_scale(
+    y_pre: np.ndarray,
+    y_post: np.ndarray,
+    *,
+    transform: Transform = "log1p",
+    winsor_q: Optional[float] = 0.999,
+    method: CorrMethod = "pearson"
+) -> float
 ```
 
 #### `causaldata_instrumental`
@@ -4993,7 +6492,22 @@ Placeholder implementation.
 #### `classic_rct_gamma`
 
 ```python
-classic_rct_gamma(n: int = 10000, split: float = 0.5, random_state: Optional[int] = 42, outcome_params: Optional[Dict] = None, add_pre: bool = False, beta_y: Optional[Union[List[float], np.ndarray]] = None, outcome_depends_on_x: bool = True, prognostic_scale: float = 1.0, pre_corr: float = 0.7, add_ancillary: bool = True, deterministic_ids: bool = False, include_oracle: bool = True, return_causal_data: bool = False, **kwargs: bool) -> Union[pd.DataFrame, CausalData]
+classic_rct_gamma(
+    n: int = 10000,
+    split: float = 0.5,
+    random_state: Optional[int] = 42,
+    outcome_params: Optional[Dict] = None,
+    add_pre: bool = False,
+    beta_y: Optional[Union[List[float], np.ndarray]] = None,
+    outcome_depends_on_x: bool = True,
+    prognostic_scale: float = 1.0,
+    pre_corr: float = 0.7,
+    add_ancillary: bool = True,
+    deterministic_ids: bool = False,
+    include_oracle: bool = True,
+    return_causal_data: bool = False,
+    **kwargs: bool
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Generate a classic RCT dataset with three binary confounders and a gamma outcome.
@@ -5027,7 +6541,21 @@ real-world metric (e.g., spend or revenue).
 #### `classic_rct_gamma_26`
 
 ```python
-classic_rct_gamma_26(seed: int = 42, add_pre: bool = False, beta_y: Optional[Union[List[float], np.ndarray]] = None, outcome_depends_on_x: bool = True, include_oracle: bool = False, return_causal_data: bool = True, *, n: int = 10000, split: float = 0.5, outcome_params: Optional[Dict] = None, add_ancillary: bool = True, deterministic_ids: bool = True, **kwargs: bool)
+classic_rct_gamma_26(
+    seed: int = 42,
+    add_pre: bool = False,
+    beta_y: Optional[Union[List[float], np.ndarray]] = None,
+    outcome_depends_on_x: bool = True,
+    include_oracle: bool = False,
+    return_causal_data: bool = True,
+    *,
+    n: int = 10000,
+    split: float = 0.5,
+    outcome_params: Optional[Dict] = None,
+    add_ancillary: bool = True,
+    deterministic_ids: bool = True,
+    **kwargs: bool
+)
 ```
 
 A pre-configured classic RCT dataset with a gamma outcome.
@@ -5056,7 +6584,22 @@ Includes deterministic `user_id` and ancillary columns.
 #### `generate_classic_rct`
 
 ```python
-generate_classic_rct(n: int = 10000, split: float = 0.5, random_state: Optional[int] = 42, outcome_params: Optional[Dict] = None, add_pre: bool = False, beta_y: Optional[Union[List[float], np.ndarray]] = None, outcome_depends_on_x: bool = True, prognostic_scale: float = 1.0, pre_corr: float = 0.7, return_causal_data: bool = False, add_ancillary: bool = False, deterministic_ids: bool = False, include_oracle: bool = True, **kwargs: bool) -> Union[pd.DataFrame, CausalData]
+generate_classic_rct(
+    n: int = 10000,
+    split: float = 0.5,
+    random_state: Optional[int] = 42,
+    outcome_params: Optional[Dict] = None,
+    add_pre: bool = False,
+    beta_y: Optional[Union[List[float], np.ndarray]] = None,
+    outcome_depends_on_x: bool = True,
+    prognostic_scale: float = 1.0,
+    pre_corr: float = 0.7,
+    return_causal_data: bool = False,
+    add_ancillary: bool = False,
+    deterministic_ids: bool = False,
+    include_oracle: bool = True,
+    **kwargs: bool
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Generate a classic RCT dataset with three binary confounders:
@@ -5087,7 +6630,21 @@ platform_ios, country_usa, and source_paid.
 #### `generate_classic_rct_26`
 
 ```python
-generate_classic_rct_26(seed: int = 42, add_pre: bool = False, beta_y: Optional[Union[List[float], np.ndarray]] = None, outcome_depends_on_x: bool = True, include_oracle: bool = False, return_causal_data: bool = True, *, n: int = 10000, split: float = 0.5, outcome_params: Optional[Dict] = None, add_ancillary: bool = False, deterministic_ids: bool = True, **kwargs: bool)
+generate_classic_rct_26(
+    seed: int = 42,
+    add_pre: bool = False,
+    beta_y: Optional[Union[List[float], np.ndarray]] = None,
+    outcome_depends_on_x: bool = True,
+    include_oracle: bool = False,
+    return_causal_data: bool = True,
+    *,
+    n: int = 10000,
+    split: float = 0.5,
+    outcome_params: Optional[Dict] = None,
+    add_ancillary: bool = False,
+    deterministic_ids: bool = True,
+    **kwargs: bool
+)
 ```
 
 A pre-configured classic RCT dataset with 3 binary confounders.
@@ -5118,7 +6675,17 @@ deterministic `user_id` column.
 #### `generate_cuped_binary`
 
 ```python
-generate_cuped_binary(n: int = 10000, seed: int = 42, add_pre: bool = True, pre_name: str = 'y_pre', pre_target_corr: float = 0.65, pre_spec: Optional[PreCorrSpec] = None, include_oracle: bool = True, return_causal_data: bool = True, theta_logit: float = 0.38) -> Union[pd.DataFrame, CausalData]
+generate_cuped_binary(
+    n: int = 10000,
+    seed: int = 42,
+    add_pre: bool = True,
+    pre_name: str = "y_pre",
+    pre_target_corr: float = 0.65,
+    pre_spec: Optional[PreCorrSpec] = None,
+    include_oracle: bool = True,
+    return_causal_data: bool = True,
+    theta_logit: float = 0.38,
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Binary CUPED-oriented DGP with richer confounders and structured HTE.
@@ -5146,7 +6713,19 @@ pre-period covariate while preserving exact oracle cate under include_oracle.
 #### `generate_cuped_tweedie_26`
 
 ```python
-generate_cuped_tweedie_26(n: int = 20000, seed: int = 42, add_pre: bool = True, pre_name: str = 'y_pre', pre_name_2: Optional[str] = None, pre_target_corr: float = 0.82, pre_target_corr_2: Optional[float] = None, pre_spec: Optional[PreCorrSpec] = None, include_oracle: bool = False, return_causal_data: bool = True, theta_log: float = 0.38) -> Union[pd.DataFrame, CausalData]
+generate_cuped_tweedie_26(
+    n: int = 20000,
+    seed: int = 42,
+    add_pre: bool = True,
+    pre_name: str = "y_pre",
+    pre_name_2: Optional[str] = None,
+    pre_target_corr: float = 0.82,
+    pre_target_corr_2: Optional[float] = None,
+    pre_spec: Optional[PreCorrSpec] = None,
+    include_oracle: bool = False,
+    return_causal_data: bool = True,
+    theta_log: float = 0.38,
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Gold standard Tweedie-like DGP with mixed marginals and structured HTE.
@@ -5195,7 +6774,27 @@ Placeholder implementation.
 #### `generate_rct`
 
 ```python
-generate_rct(n: int = 20000, split: float = 0.5, random_state: Optional[int] = 42, outcome_type: str = 'binary', outcome_params: Optional[Dict] = None, confounder_specs: Optional[List[Dict[str, Any]]] = None, k: int = 0, x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None, add_ancillary: bool = True, deterministic_ids: bool = False, add_pre: bool = True, pre_name: str = 'y_pre', pre_corr: float = 0.7, prognostic_scale: float = 1.0, beta_y: Optional[Union[List[float], np.ndarray]] = None, g_y: Optional[Callable[[np.ndarray], np.ndarray]] = None, use_prognostic: Optional[bool] = None, include_oracle: bool = True, return_causal_data: bool = False) -> Union[pd.DataFrame, CausalData]
+generate_rct(
+    n: int = 20000,
+    split: float = 0.5,
+    random_state: Optional[int] = 42,
+    outcome_type: str = "binary",
+    outcome_params: Optional[Dict] = None,
+    confounder_specs: Optional[List[Dict[str, Any]]] = None,
+    k: int = 0,
+    x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None,
+    add_ancillary: bool = True,
+    deterministic_ids: bool = False,
+    add_pre: bool = True,
+    pre_name: str = "y_pre",
+    pre_corr: float = 0.7,
+    prognostic_scale: float = 1.0,
+    beta_y: Optional[Union[List[float], np.ndarray]] = None,
+    g_y: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+    use_prognostic: Optional[bool] = None,
+    include_oracle: bool = True,
+    return_causal_data: bool = False,
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Generate an RCT dataset with randomized treatment assignment.
@@ -5239,10 +6838,59 @@ avoiding outcome leakage and post-treatment adjustment issues.
 
 - <code>[DataFrame](#pandas.DataFrame) or [CausalData](#causalis.dgp.causaldata.CausalData)</code> – Synthetic RCT dataset.
 
+#### `generate_scm_data`
+
+```python
+generate_scm_data(
+    n_donors: int = 5,
+    n_pre_periods: int = 20,
+    n_post_periods: int = 10,
+    treatment_effect: float = 2.0,
+    treatment_effect_slope: float = 0.0,
+    donor_noise_std: float = 0.2,
+    treated_noise_std: float = 0.1,
+    common_factor_std: float = 0.15,
+    time_start: int = 1,
+    treated_unit: Hashable = "treated",
+    donor_prefix: str = "donor_",
+    random_state: Optional[int] = 42,
+    missing_outcome_frac: float = 0.0,
+    missing_cell_frac: float = 0.0,
+    return_panel_data: bool = True,
+    dirichlet_alpha: float = 1.0,
+    rho_common: float = 0.0,
+    rho_donor: float = 0.0,
+    n_latent_factors: int = 0,
+    latent_factor_std: float = 0.2,
+    latent_loading_std: float = 0.35,
+    rho_latent: float = 0.0,
+    prefit_mismatch_std: float = 0.0,
+    rho_prefit_mismatch: float = 0.0,
+    missing_block_frac: float = 0.0,
+    missing_block_min_len: int = 2,
+    missing_block_max_len: Optional[int] = None,
+    protect_treated_pre: bool = False,
+    protect_treated_post: bool = False,
+    treatment_effect_mode: Literal["additive", "multiplicative"] = "additive",
+) -> Union[pd.DataFrame, PanelDataSCM]
+```
+
+Medium-level wrapper for Gaussian SCM panel generation.
+
 #### `make_cuped_binary_26`
 
 ```python
-make_cuped_binary_26(n: int = 10000, seed: int = 42, add_pre: bool = True, pre_name: str = 'y_pre', pre_target_corr: float = 0.65, pre_spec: Optional[PreCorrSpec] = None, include_oracle: bool = True, return_causal_data: bool = True, theta_logit: float = 0.38) -> Union[pd.DataFrame, CausalData]
+make_cuped_binary_26(
+    n: int = 10000,
+    seed: int = 42,
+    add_pre: bool = True,
+    pre_name: str = "y_pre",
+    pre_target_corr: float = 0.65,
+    pre_spec: Optional[PreCorrSpec] = None,
+    include_oracle: bool = True,
+    return_causal_data: bool = True,
+    theta_logit: float = 0.38,
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Binary CUPED benchmark with richer confounders and structured HTE.
@@ -5268,7 +6916,17 @@ Wrapper for generate_cuped_binary().
 #### `make_cuped_tweedie`
 
 ```python
-make_cuped_tweedie(n: int = 10000, seed: int = 42, add_pre: bool = True, pre_name: str = 'y_pre', pre_target_corr: float = 0.6, pre_spec: Optional[PreCorrSpec] = None, include_oracle: bool = False, return_causal_data: bool = True, theta_log: float = 0.2) -> Union[pd.DataFrame, CausalData]
+make_cuped_tweedie(
+    n: int = 10000,
+    seed: int = 42,
+    add_pre: bool = True,
+    pre_name: str = "y_pre",
+    pre_target_corr: float = 0.6,
+    pre_spec: Optional[PreCorrSpec] = None,
+    include_oracle: bool = False,
+    return_causal_data: bool = True,
+    theta_log: float = 0.2,
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Tweedie-like DGP with mixed marginals and structured HTE.
@@ -5406,7 +7064,16 @@ df: pd.DataFrame
 ###### `from_df`
 
 ```python
-from_df(df: pd.DataFrame, *, outcome: str, treatment_names: Union[str, List[str]], confounders: Optional[Union[str, List[str]]] = None, user_id: Optional[str] = None, control_treatment: str, **kwargs: Any) -> 'MultiCausalData'
+from_df(
+    df: pd.DataFrame,
+    *,
+    outcome: str,
+    treatment_names: Union[str, List[str]],
+    confounders: Optional[Union[str, List[str]]] = None,
+    user_id: Optional[str] = None,
+    control_treatment: str,
+    **kwargs: Any
+) -> "MultiCausalData"
 ```
 
 Create a MultiCausalData instance from a pandas DataFrame.
@@ -5428,7 +7095,13 @@ Create a MultiCausalData instance from a pandas DataFrame.
 ###### `get_df`
 
 ```python
-get_df(columns: Optional[List[str]] = None, include_outcome: bool = True, include_confounders: bool = True, include_treatments: bool = True, include_user_id: bool = False) -> pd.DataFrame
+get_df(
+    columns: Optional[List[str]] = None,
+    include_outcome: bool = True,
+    include_confounders: bool = True,
+    include_treatments: bool = True,
+    include_user_id: bool = False,
+) -> pd.DataFrame
 ```
 
 Get a subset of the underlying DataFrame.
@@ -5504,7 +7177,42 @@ user_id: Optional[str] = None
 ##### `MultiCausalDatasetGenerator`
 
 ```python
-MultiCausalDatasetGenerator(n_treatments: int = 3, d_names: Optional[List[str]] = None, theta: Optional[Union[float, List[float], np.ndarray]] = 1.0, tau: Optional[Union[Callable[[np.ndarray], np.ndarray], List[Optional[Callable[[np.ndarray], np.ndarray]]]]] = None, beta_y: Optional[np.ndarray] = None, g_y: Optional[Callable[[np.ndarray], np.ndarray]] = None, alpha_y: float = 0.0, sigma_y: float = 1.0, outcome_type: str = 'continuous', gamma_shape: float = 2.0, u_strength_y: float = 0.0, confounder_specs: Optional[List[Dict[str, Any]]] = None, k: int = 5, x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None, use_copula: bool = False, copula_corr: Optional[np.ndarray] = None, beta_d: Optional[Union[np.ndarray, List[Optional[np.ndarray]]]] = None, g_d: Optional[Union[Callable[[np.ndarray], np.ndarray], List[Optional[Callable[[np.ndarray], np.ndarray]]]]] = None, alpha_d: Optional[Union[float, List[float], np.ndarray]] = None, u_strength_d: Union[float, List[float], np.ndarray] = 0.0, propensity_sharpness: float = 1.0, target_d_rate: Optional[Union[List[float], np.ndarray]] = None, include_oracle: bool = True, seed: Optional[int] = None) -> None
+MultiCausalDatasetGenerator(
+    n_treatments: int = 3,
+    d_names: Optional[List[str]] = None,
+    theta: Optional[Union[float, List[float], np.ndarray]] = 1.0,
+    tau: Optional[
+        Union[
+            Callable[[np.ndarray], np.ndarray],
+            List[Optional[Callable[[np.ndarray], np.ndarray]]],
+        ]
+    ] = None,
+    beta_y: Optional[np.ndarray] = None,
+    g_y: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+    alpha_y: float = 0.0,
+    sigma_y: float = 1.0,
+    outcome_type: str = "continuous",
+    gamma_shape: float = 2.0,
+    u_strength_y: float = 0.0,
+    confounder_specs: Optional[List[Dict[str, Any]]] = None,
+    k: int = 5,
+    x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None,
+    use_copula: bool = False,
+    copula_corr: Optional[np.ndarray] = None,
+    beta_d: Optional[Union[np.ndarray, List[Optional[np.ndarray]]]] = None,
+    g_d: Optional[
+        Union[
+            Callable[[np.ndarray], np.ndarray],
+            List[Optional[Callable[[np.ndarray], np.ndarray]]],
+        ]
+    ] = None,
+    alpha_d: Optional[Union[float, List[float], np.ndarray]] = None,
+    u_strength_d: Union[float, List[float], np.ndarray] = 0.0,
+    propensity_sharpness: float = 1.0,
+    target_d_rate: Optional[Union[List[float], np.ndarray]] = None,
+    include_oracle: bool = True,
+    seed: Optional[int] = None,
+) -> None
 ```
 
 Generate synthetic causal datasets with multi-class (one-hot) treatments.
@@ -5614,7 +7322,13 @@ d_names: Optional[List[str]] = None
 ###### `g_d`
 
 ```python
-g_d: Optional[Union[Callable[[np.ndarray], np.ndarray], List[Optional[Callable[[np.ndarray], np.ndarray]]]]] = None
+g_d: Optional[
+    Union[
+        Callable[[np.ndarray], np.ndarray],
+        List[Optional[Callable[[np.ndarray], np.ndarray]]],
+    ]
+] = None
+
 ```
 
 ###### `g_y`
@@ -5692,7 +7406,13 @@ target_d_rate: Optional[Union[List[float], np.ndarray]] = None
 ###### `tau`
 
 ```python
-tau: Optional[Union[Callable[[np.ndarray], np.ndarray], List[Optional[Callable[[np.ndarray], np.ndarray]]]]] = None
+tau: Optional[
+    Union[
+        Callable[[np.ndarray], np.ndarray],
+        List[Optional[Callable[[np.ndarray], np.ndarray]]],
+    ]
+] = None
+
 ```
 
 ###### `theta`
@@ -5704,7 +7424,9 @@ theta: Optional[Union[float, List[float], np.ndarray]] = 1.0
 ###### `to_multicausal_data`
 
 ```python
-to_multicausal_data(n: int, confounders: Optional[Union[str, List[str]]] = None) -> MultiCausalData
+to_multicausal_data(
+    n: int, confounders: Optional[Union[str, List[str]]] = None
+) -> MultiCausalData
 ```
 
 ###### `u_strength_d`
@@ -5740,7 +7462,42 @@ x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None
 ###### `MultiCausalDatasetGenerator`
 
 ```python
-MultiCausalDatasetGenerator(n_treatments: int = 3, d_names: Optional[List[str]] = None, theta: Optional[Union[float, List[float], np.ndarray]] = 1.0, tau: Optional[Union[Callable[[np.ndarray], np.ndarray], List[Optional[Callable[[np.ndarray], np.ndarray]]]]] = None, beta_y: Optional[np.ndarray] = None, g_y: Optional[Callable[[np.ndarray], np.ndarray]] = None, alpha_y: float = 0.0, sigma_y: float = 1.0, outcome_type: str = 'continuous', gamma_shape: float = 2.0, u_strength_y: float = 0.0, confounder_specs: Optional[List[Dict[str, Any]]] = None, k: int = 5, x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None, use_copula: bool = False, copula_corr: Optional[np.ndarray] = None, beta_d: Optional[Union[np.ndarray, List[Optional[np.ndarray]]]] = None, g_d: Optional[Union[Callable[[np.ndarray], np.ndarray], List[Optional[Callable[[np.ndarray], np.ndarray]]]]] = None, alpha_d: Optional[Union[float, List[float], np.ndarray]] = None, u_strength_d: Union[float, List[float], np.ndarray] = 0.0, propensity_sharpness: float = 1.0, target_d_rate: Optional[Union[List[float], np.ndarray]] = None, include_oracle: bool = True, seed: Optional[int] = None) -> None
+MultiCausalDatasetGenerator(
+    n_treatments: int = 3,
+    d_names: Optional[List[str]] = None,
+    theta: Optional[Union[float, List[float], np.ndarray]] = 1.0,
+    tau: Optional[
+        Union[
+            Callable[[np.ndarray], np.ndarray],
+            List[Optional[Callable[[np.ndarray], np.ndarray]]],
+        ]
+    ] = None,
+    beta_y: Optional[np.ndarray] = None,
+    g_y: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+    alpha_y: float = 0.0,
+    sigma_y: float = 1.0,
+    outcome_type: str = "continuous",
+    gamma_shape: float = 2.0,
+    u_strength_y: float = 0.0,
+    confounder_specs: Optional[List[Dict[str, Any]]] = None,
+    k: int = 5,
+    x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None,
+    use_copula: bool = False,
+    copula_corr: Optional[np.ndarray] = None,
+    beta_d: Optional[Union[np.ndarray, List[Optional[np.ndarray]]]] = None,
+    g_d: Optional[
+        Union[
+            Callable[[np.ndarray], np.ndarray],
+            List[Optional[Callable[[np.ndarray], np.ndarray]]],
+        ]
+    ] = None,
+    alpha_d: Optional[Union[float, List[float], np.ndarray]] = None,
+    u_strength_d: Union[float, List[float], np.ndarray] = 0.0,
+    propensity_sharpness: float = 1.0,
+    target_d_rate: Optional[Union[List[float], np.ndarray]] = None,
+    include_oracle: bool = True,
+    seed: Optional[int] = None,
+) -> None
 ```
 
 Generate synthetic causal datasets with multi-class (one-hot) treatments.
@@ -5850,7 +7607,13 @@ d_names: Optional[List[str]] = None
 ####### `g_d`
 
 ```python
-g_d: Optional[Union[Callable[[np.ndarray], np.ndarray], List[Optional[Callable[[np.ndarray], np.ndarray]]]]] = None
+g_d: Optional[
+    Union[
+        Callable[[np.ndarray], np.ndarray],
+        List[Optional[Callable[[np.ndarray], np.ndarray]]],
+    ]
+] = None
+
 ```
 
 ####### `g_y`
@@ -5928,7 +7691,13 @@ target_d_rate: Optional[Union[List[float], np.ndarray]] = None
 ####### `tau`
 
 ```python
-tau: Optional[Union[Callable[[np.ndarray], np.ndarray], List[Optional[Callable[[np.ndarray], np.ndarray]]]]] = None
+tau: Optional[
+    Union[
+        Callable[[np.ndarray], np.ndarray],
+        List[Optional[Callable[[np.ndarray], np.ndarray]]],
+    ]
+] = None
+
 ```
 
 ####### `theta`
@@ -5940,7 +7709,9 @@ theta: Optional[Union[float, List[float], np.ndarray]] = 1.0
 ####### `to_multicausal_data`
 
 ```python
-to_multicausal_data(n: int, confounders: Optional[Union[str, List[str]]] = None) -> MultiCausalData
+to_multicausal_data(
+    n: int, confounders: Optional[Union[str, List[str]]] = None
+) -> MultiCausalData
 ```
 
 ####### `u_strength_d`
@@ -5976,7 +7747,28 @@ x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None
 ###### `generate_multitreatment`
 
 ```python
-generate_multitreatment(n: int = 10000, n_treatments: int = 3, outcome_type: str = 'continuous', sigma_y: float = 1.0, alpha_y: float = 0.0, gamma_shape: float = 2.0, tau: Optional[Any] = None, target_d_rate: Optional[Union[List[float], Any]] = None, confounder_specs: Optional[List[Dict[str, Any]]] = None, beta_y: Optional[Any] = None, beta_d: Optional[Any] = None, theta: Optional[Any] = None, random_state: Optional[int] = 42, k: int = 0, x_sampler: Optional[Any] = None, use_copula: bool = False, copula_corr: Optional[Any] = None, include_oracle: bool = True, return_causal_data: bool = False, d_names: Optional[List[str]] = None) -> Union[pd.DataFrame, MultiCausalData]
+generate_multitreatment(
+    n: int = 10000,
+    n_treatments: int = 3,
+    outcome_type: str = "continuous",
+    sigma_y: float = 1.0,
+    alpha_y: float = 0.0,
+    gamma_shape: float = 2.0,
+    tau: Optional[Any] = None,
+    target_d_rate: Optional[Union[List[float], Any]] = None,
+    confounder_specs: Optional[List[Dict[str, Any]]] = None,
+    beta_y: Optional[Any] = None,
+    beta_d: Optional[Any] = None,
+    theta: Optional[Any] = None,
+    random_state: Optional[int] = 42,
+    k: int = 0,
+    x_sampler: Optional[Any] = None,
+    use_copula: bool = False,
+    copula_corr: Optional[Any] = None,
+    include_oracle: bool = True,
+    return_causal_data: bool = False,
+    d_names: Optional[List[str]] = None,
+) -> Union[pd.DataFrame, MultiCausalData]
 ```
 
 Generate a multi-treatment dataset using MultiCausalDatasetGenerator.
@@ -6012,7 +7804,28 @@ Generate a multi-treatment dataset using MultiCausalDatasetGenerator.
 ##### `generate_multitreatment`
 
 ```python
-generate_multitreatment(n: int = 10000, n_treatments: int = 3, outcome_type: str = 'continuous', sigma_y: float = 1.0, alpha_y: float = 0.0, gamma_shape: float = 2.0, tau: Optional[Any] = None, target_d_rate: Optional[Union[List[float], Any]] = None, confounder_specs: Optional[List[Dict[str, Any]]] = None, beta_y: Optional[Any] = None, beta_d: Optional[Any] = None, theta: Optional[Any] = None, random_state: Optional[int] = 42, k: int = 0, x_sampler: Optional[Any] = None, use_copula: bool = False, copula_corr: Optional[Any] = None, include_oracle: bool = True, return_causal_data: bool = False, d_names: Optional[List[str]] = None) -> Union[pd.DataFrame, MultiCausalData]
+generate_multitreatment(
+    n: int = 10000,
+    n_treatments: int = 3,
+    outcome_type: str = "continuous",
+    sigma_y: float = 1.0,
+    alpha_y: float = 0.0,
+    gamma_shape: float = 2.0,
+    tau: Optional[Any] = None,
+    target_d_rate: Optional[Union[List[float], Any]] = None,
+    confounder_specs: Optional[List[Dict[str, Any]]] = None,
+    beta_y: Optional[Any] = None,
+    beta_d: Optional[Any] = None,
+    theta: Optional[Any] = None,
+    random_state: Optional[int] = 42,
+    k: int = 0,
+    x_sampler: Optional[Any] = None,
+    use_copula: bool = False,
+    copula_corr: Optional[Any] = None,
+    include_oracle: bool = True,
+    return_causal_data: bool = False,
+    d_names: Optional[List[str]] = None,
+) -> Union[pd.DataFrame, MultiCausalData]
 ```
 
 Generate a multi-treatment dataset using MultiCausalDatasetGenerator.
@@ -6066,7 +7879,12 @@ generate_multitreatment_irm_26(*args, **kwargs)
 #### `obs_linear_26_dataset`
 
 ```python
-obs_linear_26_dataset(n: int = 10000, seed: int = 42, include_oracle: bool = True, return_causal_data: bool = True)
+obs_linear_26_dataset(
+    n: int = 10000,
+    seed: int = 42,
+    include_oracle: bool = True,
+    return_causal_data: bool = True,
+)
 ```
 
 A pre-configured observational linear dataset with 5 standard confounders.
@@ -6082,7 +7900,22 @@ Based on the scenario in docs/cases/dml_ate.ipynb.
 #### `obs_linear_effect`
 
 ```python
-obs_linear_effect(n: int = 10000, theta: float = 1.0, outcome_type: str = 'continuous', sigma_y: float = 1.0, target_d_rate: Optional[float] = None, confounder_specs: Optional[List[Dict[str, Any]]] = None, beta_y: Optional[np.ndarray] = None, beta_d: Optional[np.ndarray] = None, random_state: Optional[int] = 42, k: int = 0, x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None, include_oracle: bool = True, add_ancillary: bool = False, deterministic_ids: bool = False) -> pd.DataFrame
+obs_linear_effect(
+    n: int = 10000,
+    theta: float = 1.0,
+    outcome_type: str = "continuous",
+    sigma_y: float = 1.0,
+    target_d_rate: Optional[float] = None,
+    confounder_specs: Optional[List[Dict[str, Any]]] = None,
+    beta_y: Optional[np.ndarray] = None,
+    beta_d: Optional[np.ndarray] = None,
+    random_state: Optional[int] = 42,
+    k: int = 0,
+    x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None,
+    include_oracle: bool = True,
+    add_ancillary: bool = False,
+    deterministic_ids: bool = False,
+) -> pd.DataFrame
 ```
 
 Generate an observational dataset with linear effects of confounders and a constant treatment effect.
@@ -6108,6 +7941,841 @@ Generate an observational dataset with linear effects of confounders and a const
 
 - <code>[DataFrame](#pandas.DataFrame)</code> – Synthetic observational dataset.
 
+#### `panel_data_scm`
+
+**Modules:**
+
+- [**base**](#causalis.dgp.panel_data_scm.base) –
+- [**functional**](#causalis.dgp.panel_data_scm.functional) –
+
+**Classes:**
+
+- [**PanelSCMGenerator**](#causalis.dgp.panel_data_scm.PanelSCMGenerator) – Low-level panel SCM generator supporting Gaussian, Gamma, and Poisson outcomes.
+- [**PanelSCMGeneratorConfig**](#causalis.dgp.panel_data_scm.PanelSCMGeneratorConfig) –
+
+**Functions:**
+
+- [**generate_scm_data**](#causalis.dgp.panel_data_scm.generate_scm_data) – Medium-level wrapper for Gaussian SCM panel generation.
+- [**generate_scm_gamma_data**](#causalis.dgp.panel_data_scm.generate_scm_gamma_data) – Medium-level wrapper for realistic Gamma SCM panel generation.
+- [**generate_scm_poisson_data**](#causalis.dgp.panel_data_scm.generate_scm_poisson_data) – Medium-level wrapper for realistic Poisson SCM panel generation.
+
+##### `PanelSCMGenerator`
+
+```python
+PanelSCMGenerator(config: PanelSCMGeneratorConfig)
+```
+
+Low-level panel SCM generator supporting Gaussian, Gamma, and Poisson outcomes.
+
+**Functions:**
+
+- [**generate**](#causalis.dgp.panel_data_scm.PanelSCMGenerator.generate) –
+
+###### `config`
+
+```python
+config = config
+```
+
+###### `generate`
+
+```python
+generate(
+    *, return_panel_data: Optional[bool] = None
+) -> Union[pd.DataFrame, PanelDataSCM]
+```
+
+##### `PanelSCMGeneratorConfig`
+
+```python
+PanelSCMGeneratorConfig(
+    n_donors: int = 5,
+    n_pre_periods: int = 20,
+    n_post_periods: int = 10,
+    time_start: int = 1,
+    time_freq: str = "M",
+    calendar_start: str = "2000-01",
+    treated_unit: Hashable = "treated",
+    donor_prefix: str = "donor_",
+    random_state: Optional[int] = 42,
+    return_panel_data: bool = True,
+    dirichlet_alpha: float = 1.0,
+    rho_common: float = 0.0,
+    rho_donor: float = 0.0,
+    n_latent_factors: int = 0,
+    latent_loading_std: float = 0.35,
+    rho_latent: float = 0.0,
+    rho_prefit_mismatch: float = 0.0,
+    missing_outcome_frac: float = 0.0,
+    missing_cell_frac: float = 0.0,
+    missing_block_frac: float = 0.0,
+    missing_block_min_len: int = 2,
+    missing_block_max_len: Optional[int] = None,
+    protect_treated_pre: bool = False,
+    protect_treated_post: bool = False,
+    outcome_distribution: Literal["gaussian", "gamma", "poisson"] = "gaussian",
+    treatment_effect: float = 2.0,
+    treatment_effect_slope: float = 0.0,
+    donor_noise_std: float = 0.2,
+    treated_noise_std: float = 0.1,
+    common_factor_std: float = 0.15,
+    latent_factor_std: float = 0.2,
+    prefit_mismatch_std: float = 0.0,
+    treatment_effect_mode: Literal["additive", "multiplicative"] = "additive",
+    treatment_effect_rate: float = 0.12,
+    gamma_shape: float = 6.0,
+    donor_noise_std_log: float = 0.15,
+    common_factor_std_log: float = 0.1,
+    latent_factor_std_log: float = 0.1,
+    prefit_mismatch_std_log: float = 0.08,
+) -> None
+```
+
+###### `calendar_start`
+
+```python
+calendar_start: str = '2000-01'
+```
+
+###### `common_factor_std`
+
+```python
+common_factor_std: float = 0.15
+```
+
+###### `common_factor_std_log`
+
+```python
+common_factor_std_log: float = 0.1
+```
+
+###### `dirichlet_alpha`
+
+```python
+dirichlet_alpha: float = 1.0
+```
+
+###### `donor_noise_std`
+
+```python
+donor_noise_std: float = 0.2
+```
+
+###### `donor_noise_std_log`
+
+```python
+donor_noise_std_log: float = 0.15
+```
+
+###### `donor_prefix`
+
+```python
+donor_prefix: str = 'donor_'
+```
+
+###### `gamma_shape`
+
+```python
+gamma_shape: float = 6.0
+```
+
+###### `latent_factor_std`
+
+```python
+latent_factor_std: float = 0.2
+```
+
+###### `latent_factor_std_log`
+
+```python
+latent_factor_std_log: float = 0.1
+```
+
+###### `latent_loading_std`
+
+```python
+latent_loading_std: float = 0.35
+```
+
+###### `missing_block_frac`
+
+```python
+missing_block_frac: float = 0.0
+```
+
+###### `missing_block_max_len`
+
+```python
+missing_block_max_len: Optional[int] = None
+```
+
+###### `missing_block_min_len`
+
+```python
+missing_block_min_len: int = 2
+```
+
+###### `missing_cell_frac`
+
+```python
+missing_cell_frac: float = 0.0
+```
+
+###### `missing_outcome_frac`
+
+```python
+missing_outcome_frac: float = 0.0
+```
+
+###### `n_donors`
+
+```python
+n_donors: int = 5
+```
+
+###### `n_latent_factors`
+
+```python
+n_latent_factors: int = 0
+```
+
+###### `n_post_periods`
+
+```python
+n_post_periods: int = 10
+```
+
+###### `n_pre_periods`
+
+```python
+n_pre_periods: int = 20
+```
+
+###### `outcome_distribution`
+
+```python
+outcome_distribution: Literal['gaussian', 'gamma', 'poisson'] = 'gaussian'
+```
+
+###### `prefit_mismatch_std`
+
+```python
+prefit_mismatch_std: float = 0.0
+```
+
+###### `prefit_mismatch_std_log`
+
+```python
+prefit_mismatch_std_log: float = 0.08
+```
+
+###### `protect_treated_post`
+
+```python
+protect_treated_post: bool = False
+```
+
+###### `protect_treated_pre`
+
+```python
+protect_treated_pre: bool = False
+```
+
+###### `random_state`
+
+```python
+random_state: Optional[int] = 42
+```
+
+###### `return_panel_data`
+
+```python
+return_panel_data: bool = True
+```
+
+###### `rho_common`
+
+```python
+rho_common: float = 0.0
+```
+
+###### `rho_donor`
+
+```python
+rho_donor: float = 0.0
+```
+
+###### `rho_latent`
+
+```python
+rho_latent: float = 0.0
+```
+
+###### `rho_prefit_mismatch`
+
+```python
+rho_prefit_mismatch: float = 0.0
+```
+
+###### `time_freq`
+
+```python
+time_freq: str = 'M'
+```
+
+###### `time_start`
+
+```python
+time_start: int = 1
+```
+
+###### `treated_noise_std`
+
+```python
+treated_noise_std: float = 0.1
+```
+
+###### `treated_unit`
+
+```python
+treated_unit: Hashable = 'treated'
+```
+
+###### `treatment_effect`
+
+```python
+treatment_effect: float = 2.0
+```
+
+###### `treatment_effect_mode`
+
+```python
+treatment_effect_mode: Literal['additive', 'multiplicative'] = 'additive'
+```
+
+###### `treatment_effect_rate`
+
+```python
+treatment_effect_rate: float = 0.12
+```
+
+###### `treatment_effect_slope`
+
+```python
+treatment_effect_slope: float = 0.0
+```
+
+##### `base`
+
+**Classes:**
+
+- [**PanelSCMGenerator**](#causalis.dgp.panel_data_scm.base.PanelSCMGenerator) – Low-level panel SCM generator supporting Gaussian, Gamma, and Poisson outcomes.
+- [**PanelSCMGeneratorConfig**](#causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig) –
+
+###### `PanelSCMGenerator`
+
+```python
+PanelSCMGenerator(config: PanelSCMGeneratorConfig)
+```
+
+Low-level panel SCM generator supporting Gaussian, Gamma, and Poisson outcomes.
+
+**Functions:**
+
+- [**generate**](#causalis.dgp.panel_data_scm.base.PanelSCMGenerator.generate) –
+
+####### `config`
+
+```python
+config = config
+```
+
+####### `generate`
+
+```python
+generate(
+    *, return_panel_data: Optional[bool] = None
+) -> Union[pd.DataFrame, PanelDataSCM]
+```
+
+###### `PanelSCMGeneratorConfig`
+
+```python
+PanelSCMGeneratorConfig(
+    n_donors: int = 5,
+    n_pre_periods: int = 20,
+    n_post_periods: int = 10,
+    time_start: int = 1,
+    time_freq: str = "M",
+    calendar_start: str = "2000-01",
+    treated_unit: Hashable = "treated",
+    donor_prefix: str = "donor_",
+    random_state: Optional[int] = 42,
+    return_panel_data: bool = True,
+    dirichlet_alpha: float = 1.0,
+    rho_common: float = 0.0,
+    rho_donor: float = 0.0,
+    n_latent_factors: int = 0,
+    latent_loading_std: float = 0.35,
+    rho_latent: float = 0.0,
+    rho_prefit_mismatch: float = 0.0,
+    missing_outcome_frac: float = 0.0,
+    missing_cell_frac: float = 0.0,
+    missing_block_frac: float = 0.0,
+    missing_block_min_len: int = 2,
+    missing_block_max_len: Optional[int] = None,
+    protect_treated_pre: bool = False,
+    protect_treated_post: bool = False,
+    outcome_distribution: Literal["gaussian", "gamma", "poisson"] = "gaussian",
+    treatment_effect: float = 2.0,
+    treatment_effect_slope: float = 0.0,
+    donor_noise_std: float = 0.2,
+    treated_noise_std: float = 0.1,
+    common_factor_std: float = 0.15,
+    latent_factor_std: float = 0.2,
+    prefit_mismatch_std: float = 0.0,
+    treatment_effect_mode: Literal["additive", "multiplicative"] = "additive",
+    treatment_effect_rate: float = 0.12,
+    gamma_shape: float = 6.0,
+    donor_noise_std_log: float = 0.15,
+    common_factor_std_log: float = 0.1,
+    latent_factor_std_log: float = 0.1,
+    prefit_mismatch_std_log: float = 0.08,
+) -> None
+```
+
+####### `calendar_start`
+
+```python
+calendar_start: str = '2000-01'
+```
+
+####### `common_factor_std`
+
+```python
+common_factor_std: float = 0.15
+```
+
+####### `common_factor_std_log`
+
+```python
+common_factor_std_log: float = 0.1
+```
+
+####### `dirichlet_alpha`
+
+```python
+dirichlet_alpha: float = 1.0
+```
+
+####### `donor_noise_std`
+
+```python
+donor_noise_std: float = 0.2
+```
+
+####### `donor_noise_std_log`
+
+```python
+donor_noise_std_log: float = 0.15
+```
+
+####### `donor_prefix`
+
+```python
+donor_prefix: str = 'donor_'
+```
+
+####### `gamma_shape`
+
+```python
+gamma_shape: float = 6.0
+```
+
+####### `latent_factor_std`
+
+```python
+latent_factor_std: float = 0.2
+```
+
+####### `latent_factor_std_log`
+
+```python
+latent_factor_std_log: float = 0.1
+```
+
+####### `latent_loading_std`
+
+```python
+latent_loading_std: float = 0.35
+```
+
+####### `missing_block_frac`
+
+```python
+missing_block_frac: float = 0.0
+```
+
+####### `missing_block_max_len`
+
+```python
+missing_block_max_len: Optional[int] = None
+```
+
+####### `missing_block_min_len`
+
+```python
+missing_block_min_len: int = 2
+```
+
+####### `missing_cell_frac`
+
+```python
+missing_cell_frac: float = 0.0
+```
+
+####### `missing_outcome_frac`
+
+```python
+missing_outcome_frac: float = 0.0
+```
+
+####### `n_donors`
+
+```python
+n_donors: int = 5
+```
+
+####### `n_latent_factors`
+
+```python
+n_latent_factors: int = 0
+```
+
+####### `n_post_periods`
+
+```python
+n_post_periods: int = 10
+```
+
+####### `n_pre_periods`
+
+```python
+n_pre_periods: int = 20
+```
+
+####### `outcome_distribution`
+
+```python
+outcome_distribution: Literal['gaussian', 'gamma', 'poisson'] = 'gaussian'
+```
+
+####### `prefit_mismatch_std`
+
+```python
+prefit_mismatch_std: float = 0.0
+```
+
+####### `prefit_mismatch_std_log`
+
+```python
+prefit_mismatch_std_log: float = 0.08
+```
+
+####### `protect_treated_post`
+
+```python
+protect_treated_post: bool = False
+```
+
+####### `protect_treated_pre`
+
+```python
+protect_treated_pre: bool = False
+```
+
+####### `random_state`
+
+```python
+random_state: Optional[int] = 42
+```
+
+####### `return_panel_data`
+
+```python
+return_panel_data: bool = True
+```
+
+####### `rho_common`
+
+```python
+rho_common: float = 0.0
+```
+
+####### `rho_donor`
+
+```python
+rho_donor: float = 0.0
+```
+
+####### `rho_latent`
+
+```python
+rho_latent: float = 0.0
+```
+
+####### `rho_prefit_mismatch`
+
+```python
+rho_prefit_mismatch: float = 0.0
+```
+
+####### `time_freq`
+
+```python
+time_freq: str = 'M'
+```
+
+####### `time_start`
+
+```python
+time_start: int = 1
+```
+
+####### `treated_noise_std`
+
+```python
+treated_noise_std: float = 0.1
+```
+
+####### `treated_unit`
+
+```python
+treated_unit: Hashable = 'treated'
+```
+
+####### `treatment_effect`
+
+```python
+treatment_effect: float = 2.0
+```
+
+####### `treatment_effect_mode`
+
+```python
+treatment_effect_mode: Literal['additive', 'multiplicative'] = 'additive'
+```
+
+####### `treatment_effect_rate`
+
+```python
+treatment_effect_rate: float = 0.12
+```
+
+####### `treatment_effect_slope`
+
+```python
+treatment_effect_slope: float = 0.0
+```
+
+##### `functional`
+
+**Functions:**
+
+- [**generate_scm_data**](#causalis.dgp.panel_data_scm.functional.generate_scm_data) – Medium-level wrapper for Gaussian SCM panel generation.
+- [**generate_scm_gamma_data**](#causalis.dgp.panel_data_scm.functional.generate_scm_gamma_data) – Medium-level wrapper for realistic Gamma SCM panel generation.
+- [**generate_scm_poisson_data**](#causalis.dgp.panel_data_scm.functional.generate_scm_poisson_data) – Medium-level wrapper for realistic Poisson SCM panel generation.
+
+###### `generate_scm_data`
+
+```python
+generate_scm_data(
+    n_donors: int = 5,
+    n_pre_periods: int = 20,
+    n_post_periods: int = 10,
+    treatment_effect: float = 2.0,
+    treatment_effect_slope: float = 0.0,
+    donor_noise_std: float = 0.2,
+    treated_noise_std: float = 0.1,
+    common_factor_std: float = 0.15,
+    time_start: int = 1,
+    treated_unit: Hashable = "treated",
+    donor_prefix: str = "donor_",
+    random_state: Optional[int] = 42,
+    missing_outcome_frac: float = 0.0,
+    missing_cell_frac: float = 0.0,
+    return_panel_data: bool = True,
+    dirichlet_alpha: float = 1.0,
+    rho_common: float = 0.0,
+    rho_donor: float = 0.0,
+    n_latent_factors: int = 0,
+    latent_factor_std: float = 0.2,
+    latent_loading_std: float = 0.35,
+    rho_latent: float = 0.0,
+    prefit_mismatch_std: float = 0.0,
+    rho_prefit_mismatch: float = 0.0,
+    missing_block_frac: float = 0.0,
+    missing_block_min_len: int = 2,
+    missing_block_max_len: Optional[int] = None,
+    protect_treated_pre: bool = False,
+    protect_treated_post: bool = False,
+    treatment_effect_mode: Literal["additive", "multiplicative"] = "additive",
+) -> Union[pd.DataFrame, PanelDataSCM]
+```
+
+Medium-level wrapper for Gaussian SCM panel generation.
+
+###### `generate_scm_gamma_data`
+
+```python
+generate_scm_gamma_data(
+    n: int = 432,
+    seed: int = 42,
+    return_panel_data: bool = True,
+    n_donors: int = 8,
+    treatment_effect_rate: float = 0.12,
+    treatment_effect_slope: float = 0.01,
+    missing_outcome_frac: float = 0.0,
+    n_pre_periods: Optional[int] = None,
+    n_post_periods: Optional[int] = None,
+    **advanced_params: Optional[int]
+) -> Union[pd.DataFrame, PanelDataSCM]
+```
+
+Medium-level wrapper for realistic Gamma SCM panel generation.
+
+Preferred usage is explicit `n_pre_periods` and `n_post_periods`. If both
+are omitted, they are inferred from `n`.
+The post-treatment effect path uses a ramp-in: at the first post period, the
+effective relative lift is
+`treatment_effect_rate * (1 - exp(-1 / 2.5))` (about 0.33x of the parameter
+when slope is zero).
+
+###### `generate_scm_poisson_data`
+
+```python
+generate_scm_poisson_data(
+    n: int = 432,
+    seed: int = 42,
+    return_panel_data: bool = True,
+    n_donors: int = 8,
+    treatment_effect_rate: float = 0.1,
+    treatment_effect_slope: float = 0.005,
+    donor_missing_block_frac: float = 0.08,
+    donor_missing_block_min_len: int = 2,
+    donor_missing_block_max_len: Optional[int] = 4,
+    n_pre_periods: Optional[int] = None,
+    n_post_periods: Optional[int] = None,
+    **advanced_params: Optional[int]
+) -> Union[pd.DataFrame, PanelDataSCM]
+```
+
+Medium-level wrapper for realistic Poisson SCM panel generation.
+
+Preferred usage is explicit `n_pre_periods` and `n_post_periods`. If both
+are omitted, they are inferred from `n`. Default behavior injects donor-only
+missing periods, keeping treated post periods observed so
+RobustSyntheticControl can be exercised reliably.
+The post-treatment effect path uses a ramp-in: at the first post period, the
+effective relative lift is
+`treatment_effect_rate * (1 - exp(-1 / 2.5))` (about 0.33x of the parameter
+when slope is zero).
+
+##### `generate_scm_data`
+
+```python
+generate_scm_data(
+    n_donors: int = 5,
+    n_pre_periods: int = 20,
+    n_post_periods: int = 10,
+    treatment_effect: float = 2.0,
+    treatment_effect_slope: float = 0.0,
+    donor_noise_std: float = 0.2,
+    treated_noise_std: float = 0.1,
+    common_factor_std: float = 0.15,
+    time_start: int = 1,
+    treated_unit: Hashable = "treated",
+    donor_prefix: str = "donor_",
+    random_state: Optional[int] = 42,
+    missing_outcome_frac: float = 0.0,
+    missing_cell_frac: float = 0.0,
+    return_panel_data: bool = True,
+    dirichlet_alpha: float = 1.0,
+    rho_common: float = 0.0,
+    rho_donor: float = 0.0,
+    n_latent_factors: int = 0,
+    latent_factor_std: float = 0.2,
+    latent_loading_std: float = 0.35,
+    rho_latent: float = 0.0,
+    prefit_mismatch_std: float = 0.0,
+    rho_prefit_mismatch: float = 0.0,
+    missing_block_frac: float = 0.0,
+    missing_block_min_len: int = 2,
+    missing_block_max_len: Optional[int] = None,
+    protect_treated_pre: bool = False,
+    protect_treated_post: bool = False,
+    treatment_effect_mode: Literal["additive", "multiplicative"] = "additive",
+) -> Union[pd.DataFrame, PanelDataSCM]
+```
+
+Medium-level wrapper for Gaussian SCM panel generation.
+
+##### `generate_scm_gamma_data`
+
+```python
+generate_scm_gamma_data(
+    n: int = 432,
+    seed: int = 42,
+    return_panel_data: bool = True,
+    n_donors: int = 8,
+    treatment_effect_rate: float = 0.12,
+    treatment_effect_slope: float = 0.01,
+    missing_outcome_frac: float = 0.0,
+    n_pre_periods: Optional[int] = None,
+    n_post_periods: Optional[int] = None,
+    **advanced_params: Optional[int]
+) -> Union[pd.DataFrame, PanelDataSCM]
+```
+
+Medium-level wrapper for realistic Gamma SCM panel generation.
+
+Preferred usage is explicit `n_pre_periods` and `n_post_periods`. If both
+are omitted, they are inferred from `n`.
+The post-treatment effect path uses a ramp-in: at the first post period, the
+effective relative lift is
+`treatment_effect_rate * (1 - exp(-1 / 2.5))` (about 0.33x of the parameter
+when slope is zero).
+
+##### `generate_scm_poisson_data`
+
+```python
+generate_scm_poisson_data(
+    n: int = 432,
+    seed: int = 42,
+    return_panel_data: bool = True,
+    n_donors: int = 8,
+    treatment_effect_rate: float = 0.1,
+    treatment_effect_slope: float = 0.005,
+    donor_missing_block_frac: float = 0.08,
+    donor_missing_block_min_len: int = 2,
+    donor_missing_block_max_len: Optional[int] = 4,
+    n_pre_periods: Optional[int] = None,
+    n_post_periods: Optional[int] = None,
+    **advanced_params: Optional[int]
+) -> Union[pd.DataFrame, PanelDataSCM]
+```
+
+Medium-level wrapper for realistic Poisson SCM panel generation.
+
+Preferred usage is explicit `n_pre_periods` and `n_post_periods`. If both
+are omitted, they are inferred from `n`. Default behavior injects donor-only
+missing periods, keeping treated post periods observed so
+RobustSyntheticControl can be exercised reliably.
+The post-treatment effect path uses a ramp-in: at the first post period, the
+effective relative lift is
+`treatment_effect_rate * (1 - exp(-1 / 2.5))` (about 0.33x of the parameter
+when slope is zero).
+
 ### `causalis.scenarios`
 
 **Modules:**
@@ -6116,6 +8784,7 @@ Generate an observational dataset with linear effects of confounders and a const
 - [**classic_rct**](#causalis.scenarios.classic_rct) –
 - [**cuped**](#causalis.scenarios.cuped) –
 - [**multi_unconfoundedness**](#causalis.scenarios.multi_unconfoundedness) –
+- [**synthetic_control**](#causalis.scenarios.synthetic_control) –
 - [**unconfoundedness**](#causalis.scenarios.unconfoundedness) –
 
 #### `cate`
@@ -6447,7 +9116,15 @@ signals (an estimate of the conditional average treatment effect for each unit).
 ####### `cate_esimand`
 
 ```python
-cate_esimand(data: CausalData, ml_g: Optional[Any] = None, ml_m: Optional[Any] = None, n_folds: int = 5, n_rep: int = 1, use_blp: bool = False, X_new: Optional[pd.DataFrame] = None) -> pd.DataFrame
+cate_esimand(
+    data: CausalData,
+    ml_g: Optional[Any] = None,
+    ml_m: Optional[Any] = None,
+    n_folds: int = 5,
+    n_rep: int = 1,
+    use_blp: bool = False,
+    X_new: Optional[pd.DataFrame] = None,
+) -> pd.DataFrame
 ```
 
 Estimate per-observation CATEs using IRM and return a DataFrame with a new 'cate' column.
@@ -6496,7 +9173,16 @@ Group Average Treatment Effect (GATE) estimation using local DML IRM and BLP.
 ####### `gate_esimand`
 
 ```python
-gate_esimand(data: CausalData, groups: Optional[Union[pd.Series, pd.DataFrame]] = None, n_groups: int = 5, ml_g: Optional[Any] = None, ml_m: Optional[Any] = None, n_folds: int = 5, n_rep: int = 1, alpha: float = 0.05) -> pd.DataFrame
+gate_esimand(
+    data: CausalData,
+    groups: Optional[Union[pd.Series, pd.DataFrame]] = None,
+    n_groups: int = 5,
+    ml_g: Optional[Any] = None,
+    ml_m: Optional[Any] = None,
+    n_folds: int = 5,
+    n_rep: int = 1,
+    alpha: float = 0.05,
+) -> pd.DataFrame
 ```
 
 Estimate Group Average Treatment Effects (GATEs).
@@ -6548,7 +9234,12 @@ data: Optional[CausalData] = None
 ###### `estimate`
 
 ```python
-estimate(method: Literal['ttest', 'bootstrap', 'conversion_ztest'] = 'ttest', alpha: float = 0.05, diagnostic_data: bool = True, **kwargs: Any) -> CausalEstimate
+estimate(
+    method: Literal["ttest", "bootstrap", "conversion_ztest"] = "ttest",
+    alpha: float = 0.05,
+    diagnostic_data: bool = True,
+    **kwargs: Any
+) -> CausalEstimate
 ```
 
 Compute the treatment effect using the specified method.
@@ -6587,7 +9278,15 @@ Fit the model by storing the CausalData object.
 ##### `SRMResult`
 
 ```python
-SRMResult(chi2: float, p_value: float, expected: Dict[Hashable, float], observed: Dict[Hashable, int], alpha: float, is_srm: bool, warning: str | None = None) -> None
+SRMResult(
+    chi2: float,
+    p_value: float,
+    expected: Dict[Hashable, float],
+    observed: Dict[Hashable, int],
+    alpha: float,
+    is_srm: bool,
+    warning: str | None = None,
+) -> None
 ```
 
 Result of a Sample Ratio Mismatch (SRM) check.
@@ -6647,7 +9346,15 @@ warning: str | None = None
 ##### `bootstrap_diff_means`
 
 ```python
-bootstrap_diff_means(data: CausalData, alpha: float = 0.05, n_simul: int = 10000, *, batch_size: int = 512, seed: Optional[int] = None, index_dtype: Optional[int] = np.int32) -> Dict[str, Any]
+bootstrap_diff_means(
+    data: CausalData,
+    alpha: float = 0.05,
+    n_simul: int = 10000,
+    *,
+    batch_size: int = 512,
+    seed: Optional[int] = None,
+    index_dtype: Optional[int] = np.int32
+) -> Dict[str, Any]
 ```
 
 Bootstrap inference for difference in means between treated and control groups.
@@ -6682,7 +9389,15 @@ and relative difference with its corresponding confidence interval.
 ##### `check_srm`
 
 ```python
-check_srm(assignments: Union[Iterable[Hashable], pd.Series, CausalData, Mapping[Hashable, Number]], target_allocation: Dict[Hashable, Number], alpha: float = 0.001, min_expected: float = 5.0, strict_variants: bool = True) -> SRMResult
+check_srm(
+    assignments: Union[
+        Iterable[Hashable], pd.Series, CausalData, Mapping[Hashable, Number]
+    ],
+    target_allocation: Dict[Hashable, Number],
+    alpha: float = 0.001,
+    min_expected: float = 5.0,
+    strict_variants: bool = True,
+) -> SRMResult
 ```
 
 Check Sample Ratio Mismatch (SRM) for an RCT via a chi-square goodness-of-fit test.
@@ -6747,7 +9462,12 @@ Returns p-value, absolute/relative differences, and their confidence intervals
 ###### `conversion_ztest`
 
 ```python
-conversion_ztest(data: CausalData, alpha: float = 0.05, ci_method: Literal['newcombe', 'wald_unpooled', 'wald_pooled'] = 'newcombe', se_for_test: Literal['pooled', 'unpooled'] = 'pooled') -> Dict[str, Any]
+conversion_ztest(
+    data: CausalData,
+    alpha: float = 0.05,
+    ci_method: Literal["newcombe", "wald_unpooled", "wald_pooled"] = "newcombe",
+    se_for_test: Literal["pooled", "unpooled"] = "pooled",
+) -> Dict[str, Any]
 ```
 
 Perform a two-proportion z-test on a CausalData object with a binary outcome (conversion).
@@ -6785,7 +9505,21 @@ Perform a two-proportion z-test on a CausalData object with a binary outcome (co
 ###### `classic_rct_gamma_26`
 
 ```python
-classic_rct_gamma_26(seed: int = 42, add_pre: bool = False, beta_y: Optional[Union[List[float], np.ndarray]] = None, outcome_depends_on_x: bool = True, include_oracle: bool = False, return_causal_data: bool = True, *, n: int = 10000, split: float = 0.5, outcome_params: Optional[Dict] = None, add_ancillary: bool = True, deterministic_ids: bool = True, **kwargs: bool)
+classic_rct_gamma_26(
+    seed: int = 42,
+    add_pre: bool = False,
+    beta_y: Optional[Union[List[float], np.ndarray]] = None,
+    outcome_depends_on_x: bool = True,
+    include_oracle: bool = False,
+    return_causal_data: bool = True,
+    *,
+    n: int = 10000,
+    split: float = 0.5,
+    outcome_params: Optional[Dict] = None,
+    add_ancillary: bool = True,
+    deterministic_ids: bool = True,
+    **kwargs: bool
+)
 ```
 
 A pre-configured classic RCT dataset with a gamma outcome.
@@ -6814,7 +9548,21 @@ Includes deterministic `user_id` and ancillary columns.
 ###### `generate_classic_rct_26`
 
 ```python
-generate_classic_rct_26(seed: int = 42, add_pre: bool = False, beta_y: Optional[Union[List[float], np.ndarray]] = None, outcome_depends_on_x: bool = True, include_oracle: bool = False, return_causal_data: bool = True, *, n: int = 10000, split: float = 0.5, outcome_params: Optional[Dict] = None, add_ancillary: bool = False, deterministic_ids: bool = True, **kwargs: bool)
+generate_classic_rct_26(
+    seed: int = 42,
+    add_pre: bool = False,
+    beta_y: Optional[Union[List[float], np.ndarray]] = None,
+    outcome_depends_on_x: bool = True,
+    include_oracle: bool = False,
+    return_causal_data: bool = True,
+    *,
+    n: int = 10000,
+    split: float = 0.5,
+    outcome_params: Optional[Dict] = None,
+    add_ancillary: bool = False,
+    deterministic_ids: bool = True,
+    **kwargs: bool
+)
 ```
 
 A pre-configured classic RCT dataset with 3 binary confounders.
@@ -6873,7 +9621,15 @@ This module computes the ATE-style difference in means (treated - control) and p
 ####### `bootstrap_diff_means`
 
 ```python
-bootstrap_diff_means(data: CausalData, alpha: float = 0.05, n_simul: int = 10000, *, batch_size: int = 512, seed: Optional[int] = None, index_dtype: Optional[int] = np.int32) -> Dict[str, Any]
+bootstrap_diff_means(
+    data: CausalData,
+    alpha: float = 0.05,
+    n_simul: int = 10000,
+    *,
+    batch_size: int = 512,
+    seed: Optional[int] = None,
+    index_dtype: Optional[int] = np.int32
+) -> Dict[str, Any]
 ```
 
 Bootstrap inference for difference in means between treated and control groups.
@@ -6908,7 +9664,15 @@ and relative difference with its corresponding confidence interval.
 ###### `bootstrap_diff_means`
 
 ```python
-bootstrap_diff_means(data: CausalData, alpha: float = 0.05, n_simul: int = 10000, *, batch_size: int = 512, seed: Optional[int] = None, index_dtype: Optional[int] = np.int32) -> Dict[str, Any]
+bootstrap_diff_means(
+    data: CausalData,
+    alpha: float = 0.05,
+    n_simul: int = 10000,
+    *,
+    batch_size: int = 512,
+    seed: Optional[int] = None,
+    index_dtype: Optional[int] = np.int32
+) -> Dict[str, Any]
 ```
 
 Bootstrap inference for difference in means between treated and control groups.
@@ -6954,7 +9718,12 @@ Returns p-value, absolute/relative differences, and their confidence intervals
 ####### `conversion_ztest`
 
 ```python
-conversion_ztest(data: CausalData, alpha: float = 0.05, ci_method: Literal['newcombe', 'wald_unpooled', 'wald_pooled'] = 'newcombe', se_for_test: Literal['pooled', 'unpooled'] = 'pooled') -> Dict[str, Any]
+conversion_ztest(
+    data: CausalData,
+    alpha: float = 0.05,
+    ci_method: Literal["newcombe", "wald_unpooled", "wald_pooled"] = "newcombe",
+    se_for_test: Literal["pooled", "unpooled"] = "pooled",
+) -> Dict[str, Any]
 ```
 
 Perform a two-proportion z-test on a CausalData object with a binary outcome (conversion).
@@ -7056,7 +9825,12 @@ data: Optional[CausalData] = None
 ####### `estimate`
 
 ```python
-estimate(method: Literal['ttest', 'bootstrap', 'conversion_ztest'] = 'ttest', alpha: float = 0.05, diagnostic_data: bool = True, **kwargs: Any) -> CausalEstimate
+estimate(
+    method: Literal["ttest", "bootstrap", "conversion_ztest"] = "ttest",
+    alpha: float = 0.05,
+    diagnostic_data: bool = True,
+    **kwargs: Any
+) -> CausalEstimate
 ```
 
 Compute the treatment effect using the specified method.
@@ -7109,7 +9883,15 @@ Design module for experimental rct_design utilities.
 ###### `SRMResult`
 
 ```python
-SRMResult(chi2: float, p_value: float, expected: Dict[Hashable, float], observed: Dict[Hashable, int], alpha: float, is_srm: bool, warning: str | None = None) -> None
+SRMResult(
+    chi2: float,
+    p_value: float,
+    expected: Dict[Hashable, float],
+    observed: Dict[Hashable, int],
+    alpha: float,
+    is_srm: bool,
+    warning: str | None = None,
+) -> None
 ```
 
 Result of a Sample Ratio Mismatch (SRM) check.
@@ -7169,7 +9951,16 @@ warning: str | None = None
 ###### `assign_variants_df`
 
 ```python
-assign_variants_df(df: pd.DataFrame, id_col: str, experiment_id: str, variants: Dict[str, float], *, salt: str = 'global_ab_salt', layer_id: str = 'default', variant_col: str = 'variant') -> pd.DataFrame
+assign_variants_df(
+    df: pd.DataFrame,
+    id_col: str,
+    experiment_id: str,
+    variants: Dict[str, float],
+    *,
+    salt: str = "global_ab_salt",
+    layer_id: str = "default",
+    variant_col: str = "variant"
+) -> pd.DataFrame
 ```
 
 Deterministically assign variants for each row in df based on id_col.
@@ -7196,7 +9987,15 @@ Deterministically assign variants for each row in df based on id_col.
 ###### `calculate_mde`
 
 ```python
-calculate_mde(sample_size: Union[int, Tuple[int, int]], baseline_rate: Optional[float] = None, variance: Optional[Union[float, Tuple[float, float]]] = None, alpha: float = 0.05, power: float = 0.8, data_type: str = 'conversion', ratio: float = 0.5) -> Dict[str, Any]
+calculate_mde(
+    sample_size: Union[int, Tuple[int, int]],
+    baseline_rate: Optional[float] = None,
+    variance: Optional[Union[float, Tuple[float, float]]] = None,
+    alpha: float = 0.05,
+    power: float = 0.8,
+    data_type: str = "conversion",
+    ratio: float = 0.5,
+) -> Dict[str, Any]
 ```
 
 Calculate the Minimum Detectable Effect (MDE) for conversion or continuous data_contracts.
@@ -7258,7 +10057,15 @@ where:
 ###### `check_srm`
 
 ```python
-check_srm(assignments: Union[Iterable[Hashable], pd.Series, CausalData, Mapping[Hashable, Number]], target_allocation: Dict[Hashable, Number], alpha: float = 0.001, min_expected: float = 5.0, strict_variants: bool = True) -> SRMResult
+check_srm(
+    assignments: Union[
+        Iterable[Hashable], pd.Series, CausalData, Mapping[Hashable, Number]
+    ],
+    target_allocation: Dict[Hashable, Number],
+    alpha: float = 0.001,
+    min_expected: float = 5.0,
+    strict_variants: bool = True,
+) -> SRMResult
 ```
 
 Check Sample Ratio Mismatch (SRM) for an RCT via a chi-square goodness-of-fit test.
@@ -7376,7 +10183,25 @@ If control_mean is near 0, relative stats are undefined/unstable and return inf/
 ##### `CUPEDModel`
 
 ```python
-CUPEDModel(cov_type: str = 'HC2', alpha: float = 0.05, strict_binary_treatment: bool = True, use_t: Optional[bool] = None, use_t_auto_n_threshold: int = 5000, relative_ci_method: Literal['delta_nocov', 'bootstrap'] = 'delta_nocov', relative_ci_bootstrap_draws: int = 1000, relative_ci_bootstrap_seed: Optional[int] = None, covariate_variance_min: float = 1e-12, condition_number_warn_threshold: float = 100000000.0, run_regression_checks: bool = True, check_action: Literal['ignore', 'raise'] = 'ignore', raise_on_yellow: bool = False, corr_near_one_tol: float = 1e-10, vif_warn_threshold: float = 20.0, winsor_q: Optional[float] = 0.01, tiny_one_minus_h_tol: float = 1e-08) -> None
+CUPEDModel(
+    cov_type: str = "HC2",
+    alpha: float = 0.05,
+    strict_binary_treatment: bool = True,
+    use_t: Optional[bool] = None,
+    use_t_auto_n_threshold: int = 5000,
+    relative_ci_method: Literal["delta_nocov", "bootstrap"] = "delta_nocov",
+    relative_ci_bootstrap_draws: int = 1000,
+    relative_ci_bootstrap_seed: Optional[int] = None,
+    covariate_variance_min: float = 1e-12,
+    condition_number_warn_threshold: float = 100000000.0,
+    run_regression_checks: bool = True,
+    check_action: Literal["ignore", "raise"] = "ignore",
+    raise_on_yellow: bool = False,
+    corr_near_one_tol: float = 1e-10,
+    vif_warn_threshold: float = 20.0,
+    winsor_q: Optional[float] = 0.01,
+    tiny_one_minus_h_tol: float = 1e-08,
+) -> None
 ```
 
 CUPED-style regression adjustment estimator for ATE/ITT in randomized experiments.
@@ -7507,7 +10332,9 @@ covariate_variance_min = float(covariate_variance_min)
 ###### `estimate`
 
 ```python
-estimate(alpha: Optional[float] = None, diagnostic_data: bool = True) -> CausalEstimate
+estimate(
+    alpha: Optional[float] = None, diagnostic_data: bool = True
+) -> CausalEstimate
 ```
 
 Return the adjusted ATE/ITT estimate and inference.
@@ -7524,7 +10351,11 @@ Return the adjusted ATE/ITT estimate and inference.
 ###### `fit`
 
 ```python
-fit(data: CausalData, covariates: Optional[Sequence[str]] = None, run_checks: Optional[bool] = None) -> CUPEDModel
+fit(
+    data: CausalData,
+    covariates: Optional[Sequence[str]] = None,
+    run_checks: Optional[bool] = None,
+) -> CUPEDModel
 ```
 
 Fit CUPED-style regression adjustment (Lin-interacted OLS) on a CausalData object.
@@ -7633,7 +10464,21 @@ winsor_q = None
 ##### `cuped_forest_plot`
 
 ```python
-cuped_forest_plot(estimate_with_cuped: CausalEstimate, estimate_without_cuped: Optional[CausalEstimate] = None, ax: Optional[plt.Axes] = None, figsize: Tuple[float, float] = (8.5, 3.8), dpi: int = 220, font_scale: float = 1.1, label_with_cuped: str = 'With CUPED', label_without_cuped: str = 'Without CUPED', color_with_cuped: str = 'C0', color_without_cuped: str = 'C1', save: Optional[str] = None, save_dpi: Optional[int] = None, transparent: bool = False) -> plt.Figure
+cuped_forest_plot(
+    estimate_with_cuped: CausalEstimate,
+    estimate_without_cuped: Optional[CausalEstimate] = None,
+    ax: Optional[plt.Axes] = None,
+    figsize: Tuple[float, float] = (8.5, 3.8),
+    dpi: int = 220,
+    font_scale: float = 1.1,
+    label_with_cuped: str = "With CUPED",
+    label_without_cuped: str = "Without CUPED",
+    color_with_cuped: str = "C0",
+    color_without_cuped: str = "C1",
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False,
+) -> plt.Figure
 ```
 
 Forest plot of absolute estimates and CIs for CUPED vs non-CUPED.
@@ -7655,7 +10500,19 @@ Forest plot of absolute estimates and CIs for CUPED vs non-CUPED.
 ###### `generate_cuped_tweedie_26`
 
 ```python
-generate_cuped_tweedie_26(n: int = 20000, seed: int = 42, add_pre: bool = True, pre_name: str = 'y_pre', pre_name_2: Optional[str] = None, pre_target_corr: float = 0.82, pre_target_corr_2: Optional[float] = None, pre_spec: Optional[PreCorrSpec] = None, include_oracle: bool = False, return_causal_data: bool = True, theta_log: float = 0.38) -> Union[pd.DataFrame, CausalData]
+generate_cuped_tweedie_26(
+    n: int = 20000,
+    seed: int = 42,
+    add_pre: bool = True,
+    pre_name: str = "y_pre",
+    pre_name_2: Optional[str] = None,
+    pre_target_corr: float = 0.82,
+    pre_target_corr_2: Optional[float] = None,
+    pre_spec: Optional[PreCorrSpec] = None,
+    include_oracle: bool = False,
+    return_causal_data: bool = True,
+    theta_log: float = 0.38,
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Gold standard Tweedie-like DGP with mixed marginals and structured HTE.
@@ -7686,7 +10543,17 @@ Wrapper for make_tweedie().
 ###### `make_cuped_binary_26`
 
 ```python
-make_cuped_binary_26(n: int = 10000, seed: int = 42, add_pre: bool = True, pre_name: str = 'y_pre', pre_target_corr: float = 0.65, pre_spec: Optional[PreCorrSpec] = None, include_oracle: bool = True, return_causal_data: bool = True, theta_logit: float = 0.38) -> Union[pd.DataFrame, CausalData]
+make_cuped_binary_26(
+    n: int = 10000,
+    seed: int = 42,
+    add_pre: bool = True,
+    pre_name: str = "y_pre",
+    pre_target_corr: float = 0.65,
+    pre_spec: Optional[PreCorrSpec] = None,
+    include_oracle: bool = True,
+    return_causal_data: bool = True,
+    theta_logit: float = 0.38,
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Binary CUPED benchmark with richer confounders and structured HTE.
@@ -7760,7 +10627,11 @@ FLAG_YELLOW = 'YELLOW'
 ###### `assumption_ate_gap`
 
 ```python
-assumption_ate_gap(checks: RegressionChecks, yellow_threshold: float = 2.0, red_threshold: float = 2.5) -> Dict[str, Any]
+assumption_ate_gap(
+    checks: RegressionChecks,
+    yellow_threshold: float = 2.0,
+    red_threshold: float = 2.5,
+) -> Dict[str, Any]
 ```
 
 Check adjusted-vs-naive ATE gap relative to naive SE.
@@ -7768,7 +10639,11 @@ Check adjusted-vs-naive ATE gap relative to naive SE.
 ###### `assumption_condition_number`
 
 ```python
-assumption_condition_number(checks: RegressionChecks, warn_threshold: float = 100000000.0, red_multiplier: float = 100.0) -> Dict[str, Any]
+assumption_condition_number(
+    checks: RegressionChecks,
+    warn_threshold: float = 100000000.0,
+    red_multiplier: float = 100.0,
+) -> Dict[str, Any]
 ```
 
 Check global collinearity via condition number.
@@ -7776,7 +10651,11 @@ Check global collinearity via condition number.
 ###### `assumption_cooks`
 
 ```python
-assumption_cooks(checks: RegressionChecks, yellow_threshold: float = 0.1, red_threshold: float = 1.0) -> Dict[str, Any]
+assumption_cooks(
+    checks: RegressionChecks,
+    yellow_threshold: float = 0.1,
+    red_threshold: float = 1.0,
+) -> Dict[str, Any]
 ```
 
 Check Cook's distance influence diagnostics.
@@ -7792,7 +10671,9 @@ Check that the design matrix is full rank.
 ###### `assumption_hc23_stability`
 
 ```python
-assumption_hc23_stability(checks: RegressionChecks, cov_type: str, tiny_one_minus_h_tol: float = 1e-08) -> Dict[str, Any]
+assumption_hc23_stability(
+    checks: RegressionChecks, cov_type: str, tiny_one_minus_h_tol: float = 1e-08
+) -> Dict[str, Any]
 ```
 
 Check HC2/HC3 stability when leverage terms approach one.
@@ -7800,7 +10681,12 @@ Check HC2/HC3 stability when leverage terms approach one.
 ###### `assumption_leverage`
 
 ```python
-assumption_leverage(checks: RegressionChecks, yellow_multiplier: float = 5.0, red_multiplier: float = 10.0, red_floor: float = 0.5) -> Dict[str, Any]
+assumption_leverage(
+    checks: RegressionChecks,
+    yellow_multiplier: float = 5.0,
+    red_multiplier: float = 10.0,
+    red_floor: float = 0.5,
+) -> Dict[str, Any]
 ```
 
 Check leverage concentration.
@@ -7808,7 +10694,9 @@ Check leverage concentration.
 ###### `assumption_near_duplicates`
 
 ```python
-assumption_near_duplicates(checks: RegressionChecks, red_pairs_threshold: int = 3) -> Dict[str, Any]
+assumption_near_duplicates(
+    checks: RegressionChecks, red_pairs_threshold: int = 3
+) -> Dict[str, Any]
 ```
 
 Check near-duplicate centered covariate pairs.
@@ -7816,7 +10704,11 @@ Check near-duplicate centered covariate pairs.
 ###### `assumption_residual_tails`
 
 ```python
-assumption_residual_tails(checks: RegressionChecks, yellow_abs_std_resid: float = 7.0, red_abs_std_resid: float = 10.0) -> Dict[str, Any]
+assumption_residual_tails(
+    checks: RegressionChecks,
+    yellow_abs_std_resid: float = 7.0,
+    red_abs_std_resid: float = 10.0,
+) -> Dict[str, Any]
 ```
 
 Check residual extremes using max standardized residual only.
@@ -7824,7 +10716,11 @@ Check residual extremes using max standardized residual only.
 ###### `assumption_vif`
 
 ```python
-assumption_vif(checks: RegressionChecks, warn_threshold: float = 20.0, red_multiplier: float = 2.0) -> Dict[str, Any]
+assumption_vif(
+    checks: RegressionChecks,
+    warn_threshold: float = 20.0,
+    red_multiplier: float = 2.0,
+) -> Dict[str, Any]
 ```
 
 Check VIF from centered main-effect covariates.
@@ -7832,7 +10728,14 @@ Check VIF from centered main-effect covariates.
 ###### `assumption_winsor_sensitivity`
 
 ```python
-assumption_winsor_sensitivity(checks: RegressionChecks, winsor_reference_se: Optional[float] = None, yellow_sigma: float = 1.0, red_sigma: float = 2.0, yellow_ratio: float = 0.1, red_ratio: float = 0.25) -> Dict[str, Any]
+assumption_winsor_sensitivity(
+    checks: RegressionChecks,
+    winsor_reference_se: Optional[float] = None,
+    yellow_sigma: float = 1.0,
+    red_sigma: float = 2.0,
+    yellow_ratio: float = 0.1,
+    red_ratio: float = 0.25,
+) -> Dict[str, Any]
 ```
 
 Check sensitivity of adjusted ATE to winsorized-outcome refit.
@@ -7840,7 +10743,21 @@ Check sensitivity of adjusted ATE to winsorized-outcome refit.
 ###### `cuped_forest_plot`
 
 ```python
-cuped_forest_plot(estimate_with_cuped: CausalEstimate, estimate_without_cuped: Optional[CausalEstimate] = None, ax: Optional[plt.Axes] = None, figsize: Tuple[float, float] = (8.5, 3.8), dpi: int = 220, font_scale: float = 1.1, label_with_cuped: str = 'With CUPED', label_without_cuped: str = 'Without CUPED', color_with_cuped: str = 'C0', color_without_cuped: str = 'C1', save: Optional[str] = None, save_dpi: Optional[int] = None, transparent: bool = False) -> plt.Figure
+cuped_forest_plot(
+    estimate_with_cuped: CausalEstimate,
+    estimate_without_cuped: Optional[CausalEstimate] = None,
+    ax: Optional[plt.Axes] = None,
+    figsize: Tuple[float, float] = (8.5, 3.8),
+    dpi: int = 220,
+    font_scale: float = 1.1,
+    label_with_cuped: str = "With CUPED",
+    label_without_cuped: str = "Without CUPED",
+    color_with_cuped: str = "C0",
+    color_without_cuped: str = "C1",
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False,
+) -> plt.Figure
 ```
 
 Forest plot of absolute estimates and CIs for CUPED vs non-CUPED.
@@ -7869,7 +10786,21 @@ Return rank/conditioning diagnostics for a numeric design matrix.
 ####### `cuped_forest_plot`
 
 ```python
-cuped_forest_plot(estimate_with_cuped: CausalEstimate, estimate_without_cuped: Optional[CausalEstimate] = None, ax: Optional[plt.Axes] = None, figsize: Tuple[float, float] = (8.5, 3.8), dpi: int = 220, font_scale: float = 1.1, label_with_cuped: str = 'With CUPED', label_without_cuped: str = 'Without CUPED', color_with_cuped: str = 'C0', color_without_cuped: str = 'C1', save: Optional[str] = None, save_dpi: Optional[int] = None, transparent: bool = False) -> plt.Figure
+cuped_forest_plot(
+    estimate_with_cuped: CausalEstimate,
+    estimate_without_cuped: Optional[CausalEstimate] = None,
+    ax: Optional[plt.Axes] = None,
+    figsize: Tuple[float, float] = (8.5, 3.8),
+    dpi: int = 220,
+    font_scale: float = 1.1,
+    label_with_cuped: str = "With CUPED",
+    label_without_cuped: str = "Without CUPED",
+    color_with_cuped: str = "C0",
+    color_without_cuped: str = "C1",
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False,
+) -> plt.Figure
 ```
 
 Forest plot of absolute estimates and CIs for CUPED vs non-CUPED.
@@ -7892,7 +10823,14 @@ Return overall GREEN/YELLOW/RED status from an assumptions table.
 ###### `regression_assumption_rows_from_checks`
 
 ```python
-regression_assumption_rows_from_checks(checks: RegressionChecks, cov_type: str = 'HC2', condition_number_warn_threshold: float = 100000000.0, vif_warn_threshold: float = 20.0, tiny_one_minus_h_tol: float = 1e-08, winsor_reference_se: Optional[float] = None) -> list[Dict[str, Any]]
+regression_assumption_rows_from_checks(
+    checks: RegressionChecks,
+    cov_type: str = "HC2",
+    condition_number_warn_threshold: float = 100000000.0,
+    vif_warn_threshold: float = 20.0,
+    tiny_one_minus_h_tol: float = 1e-08,
+    winsor_reference_se: Optional[float] = None,
+) -> list[Dict[str, Any]]
 ```
 
 Run all CUPED regression assumption tests and return row payloads.
@@ -7900,7 +10838,14 @@ Run all CUPED regression assumption tests and return row payloads.
 ###### `regression_assumptions_table_from_checks`
 
 ```python
-regression_assumptions_table_from_checks(checks: RegressionChecks, cov_type: str = 'HC2', condition_number_warn_threshold: float = 100000000.0, vif_warn_threshold: float = 20.0, tiny_one_minus_h_tol: float = 1e-08, winsor_reference_se: Optional[float] = None) -> pd.DataFrame
+regression_assumptions_table_from_checks(
+    checks: RegressionChecks,
+    cov_type: str = "HC2",
+    condition_number_warn_threshold: float = 100000000.0,
+    vif_warn_threshold: float = 20.0,
+    tiny_one_minus_h_tol: float = 1e-08,
+    winsor_reference_se: Optional[float] = None,
+) -> pd.DataFrame
 ```
 
 Return a table of GREEN/YELLOW/RED assumption flags from checks payload.
@@ -7908,7 +10853,12 @@ Return a table of GREEN/YELLOW/RED assumption flags from checks payload.
 ###### `regression_assumptions_table_from_data`
 
 ```python
-regression_assumptions_table_from_data(data: CausalData, covariates: Sequence[str], model_kwargs: Optional[Dict[str, Any]] = None, fit_kwargs: Optional[Dict[str, Any]] = None) -> pd.DataFrame
+regression_assumptions_table_from_data(
+    data: CausalData,
+    covariates: Sequence[str],
+    model_kwargs: Optional[Dict[str, Any]] = None,
+    fit_kwargs: Optional[Dict[str, Any]] = None,
+) -> pd.DataFrame
 ```
 
 Fit CUPED on `CausalData` and return the assumptions flag table.
@@ -7916,7 +10866,14 @@ Fit CUPED on `CausalData` and return the assumptions flag table.
 ###### `regression_assumptions_table_from_diagnostic_data`
 
 ```python
-regression_assumptions_table_from_diagnostic_data(diagnostic_data: CUPEDDiagnosticData, cov_type: str = 'HC2', condition_number_warn_threshold: float = 100000000.0, vif_warn_threshold: float = 20.0, tiny_one_minus_h_tol: float = 1e-08, winsor_reference_se: Optional[float] = None) -> pd.DataFrame
+regression_assumptions_table_from_diagnostic_data(
+    diagnostic_data: CUPEDDiagnosticData,
+    cov_type: str = "HC2",
+    condition_number_warn_threshold: float = 100000000.0,
+    vif_warn_threshold: float = 20.0,
+    tiny_one_minus_h_tol: float = 1e-08,
+    winsor_reference_se: Optional[float] = None,
+) -> pd.DataFrame
 ```
 
 Build assumption table from `CUPEDDiagnosticData` payload.
@@ -7924,7 +10881,17 @@ Build assumption table from `CUPEDDiagnosticData` payload.
 ###### `regression_assumptions_table_from_estimate`
 
 ```python
-regression_assumptions_table_from_estimate(data_or_estimate: CausalData | CausalEstimate, estimate: Optional[CausalEstimate] = None, style_regression_assumptions_table: Optional[Callable[[pd.DataFrame], Any]] = None, cov_type: Optional[str] = None, condition_number_warn_threshold: float = 100000000.0, vif_warn_threshold: float = 20.0, tiny_one_minus_h_tol: float = 1e-08) -> Any
+regression_assumptions_table_from_estimate(
+    data_or_estimate: CausalData | CausalEstimate,
+    estimate: Optional[CausalEstimate] = None,
+    style_regression_assumptions_table: Optional[
+        Callable[[pd.DataFrame], Any]
+    ] = None,
+    cov_type: Optional[str] = None,
+    condition_number_warn_threshold: float = 100000000.0,
+    vif_warn_threshold: float = 20.0,
+    tiny_one_minus_h_tol: float = 1e-08,
+) -> Any
 ```
 
 Build assumptions table from a CUPED estimate.
@@ -7965,7 +10932,12 @@ Supports both call styles:
 ####### `FLAG_COLOR`
 
 ```python
-FLAG_COLOR = {FLAG_GREEN: '#2e7d32', FLAG_YELLOW: '#f9a825', FLAG_RED: '#c62828'}
+FLAG_COLOR = {
+    FLAG_GREEN: "#2e7d32",
+    FLAG_YELLOW: "#f9a825",
+    FLAG_RED: "#c62828",
+}
+
 ```
 
 ####### `FLAG_GREEN`
@@ -7995,7 +10967,11 @@ FLAG_YELLOW = 'YELLOW'
 ####### `assumption_ate_gap`
 
 ```python
-assumption_ate_gap(checks: RegressionChecks, yellow_threshold: float = 2.0, red_threshold: float = 2.5) -> Dict[str, Any]
+assumption_ate_gap(
+    checks: RegressionChecks,
+    yellow_threshold: float = 2.0,
+    red_threshold: float = 2.5,
+) -> Dict[str, Any]
 ```
 
 Check adjusted-vs-naive ATE gap relative to naive SE.
@@ -8003,7 +10979,11 @@ Check adjusted-vs-naive ATE gap relative to naive SE.
 ####### `assumption_condition_number`
 
 ```python
-assumption_condition_number(checks: RegressionChecks, warn_threshold: float = 100000000.0, red_multiplier: float = 100.0) -> Dict[str, Any]
+assumption_condition_number(
+    checks: RegressionChecks,
+    warn_threshold: float = 100000000.0,
+    red_multiplier: float = 100.0,
+) -> Dict[str, Any]
 ```
 
 Check global collinearity via condition number.
@@ -8011,7 +10991,11 @@ Check global collinearity via condition number.
 ####### `assumption_cooks`
 
 ```python
-assumption_cooks(checks: RegressionChecks, yellow_threshold: float = 0.1, red_threshold: float = 1.0) -> Dict[str, Any]
+assumption_cooks(
+    checks: RegressionChecks,
+    yellow_threshold: float = 0.1,
+    red_threshold: float = 1.0,
+) -> Dict[str, Any]
 ```
 
 Check Cook's distance influence diagnostics.
@@ -8027,7 +11011,9 @@ Check that the design matrix is full rank.
 ####### `assumption_hc23_stability`
 
 ```python
-assumption_hc23_stability(checks: RegressionChecks, cov_type: str, tiny_one_minus_h_tol: float = 1e-08) -> Dict[str, Any]
+assumption_hc23_stability(
+    checks: RegressionChecks, cov_type: str, tiny_one_minus_h_tol: float = 1e-08
+) -> Dict[str, Any]
 ```
 
 Check HC2/HC3 stability when leverage terms approach one.
@@ -8035,7 +11021,12 @@ Check HC2/HC3 stability when leverage terms approach one.
 ####### `assumption_leverage`
 
 ```python
-assumption_leverage(checks: RegressionChecks, yellow_multiplier: float = 5.0, red_multiplier: float = 10.0, red_floor: float = 0.5) -> Dict[str, Any]
+assumption_leverage(
+    checks: RegressionChecks,
+    yellow_multiplier: float = 5.0,
+    red_multiplier: float = 10.0,
+    red_floor: float = 0.5,
+) -> Dict[str, Any]
 ```
 
 Check leverage concentration.
@@ -8043,7 +11034,9 @@ Check leverage concentration.
 ####### `assumption_near_duplicates`
 
 ```python
-assumption_near_duplicates(checks: RegressionChecks, red_pairs_threshold: int = 3) -> Dict[str, Any]
+assumption_near_duplicates(
+    checks: RegressionChecks, red_pairs_threshold: int = 3
+) -> Dict[str, Any]
 ```
 
 Check near-duplicate centered covariate pairs.
@@ -8051,7 +11044,11 @@ Check near-duplicate centered covariate pairs.
 ####### `assumption_residual_tails`
 
 ```python
-assumption_residual_tails(checks: RegressionChecks, yellow_abs_std_resid: float = 7.0, red_abs_std_resid: float = 10.0) -> Dict[str, Any]
+assumption_residual_tails(
+    checks: RegressionChecks,
+    yellow_abs_std_resid: float = 7.0,
+    red_abs_std_resid: float = 10.0,
+) -> Dict[str, Any]
 ```
 
 Check residual extremes using max standardized residual only.
@@ -8059,7 +11056,11 @@ Check residual extremes using max standardized residual only.
 ####### `assumption_vif`
 
 ```python
-assumption_vif(checks: RegressionChecks, warn_threshold: float = 20.0, red_multiplier: float = 2.0) -> Dict[str, Any]
+assumption_vif(
+    checks: RegressionChecks,
+    warn_threshold: float = 20.0,
+    red_multiplier: float = 2.0,
+) -> Dict[str, Any]
 ```
 
 Check VIF from centered main-effect covariates.
@@ -8067,7 +11068,14 @@ Check VIF from centered main-effect covariates.
 ####### `assumption_winsor_sensitivity`
 
 ```python
-assumption_winsor_sensitivity(checks: RegressionChecks, winsor_reference_se: Optional[float] = None, yellow_sigma: float = 1.0, red_sigma: float = 2.0, yellow_ratio: float = 0.1, red_ratio: float = 0.25) -> Dict[str, Any]
+assumption_winsor_sensitivity(
+    checks: RegressionChecks,
+    winsor_reference_se: Optional[float] = None,
+    yellow_sigma: float = 1.0,
+    red_sigma: float = 2.0,
+    yellow_ratio: float = 0.1,
+    red_ratio: float = 0.25,
+) -> Dict[str, Any]
 ```
 
 Check sensitivity of adjusted ATE to winsorized-outcome refit.
@@ -8083,7 +11091,9 @@ Return rank/conditioning diagnostics for a numeric design matrix.
 ####### `leverage_and_cooks`
 
 ```python
-leverage_and_cooks(y: np.ndarray, z: np.ndarray, params: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]
+leverage_and_cooks(
+    y: np.ndarray, z: np.ndarray, params: np.ndarray
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]
 ```
 
 Compute leverage, Cook's distance, and internally studentized residuals.
@@ -8091,7 +11101,9 @@ Compute leverage, Cook's distance, and internally studentized residuals.
 ####### `near_duplicate_corr_pairs`
 
 ```python
-near_duplicate_corr_pairs(x: pd.DataFrame, tol: float, max_pairs: int = 50) -> list[tuple[str, str, float]]
+near_duplicate_corr_pairs(
+    x: pd.DataFrame, tol: float, max_pairs: int = 50
+) -> list[tuple[str, str, float]]
 ```
 
 Find pairs with absolute correlation very close to one.
@@ -8107,7 +11119,14 @@ Return overall GREEN/YELLOW/RED status from an assumptions table.
 ####### `regression_assumption_rows_from_checks`
 
 ```python
-regression_assumption_rows_from_checks(checks: RegressionChecks, cov_type: str = 'HC2', condition_number_warn_threshold: float = 100000000.0, vif_warn_threshold: float = 20.0, tiny_one_minus_h_tol: float = 1e-08, winsor_reference_se: Optional[float] = None) -> list[Dict[str, Any]]
+regression_assumption_rows_from_checks(
+    checks: RegressionChecks,
+    cov_type: str = "HC2",
+    condition_number_warn_threshold: float = 100000000.0,
+    vif_warn_threshold: float = 20.0,
+    tiny_one_minus_h_tol: float = 1e-08,
+    winsor_reference_se: Optional[float] = None,
+) -> list[Dict[str, Any]]
 ```
 
 Run all CUPED regression assumption tests and return row payloads.
@@ -8115,7 +11134,14 @@ Run all CUPED regression assumption tests and return row payloads.
 ####### `regression_assumptions_table_from_checks`
 
 ```python
-regression_assumptions_table_from_checks(checks: RegressionChecks, cov_type: str = 'HC2', condition_number_warn_threshold: float = 100000000.0, vif_warn_threshold: float = 20.0, tiny_one_minus_h_tol: float = 1e-08, winsor_reference_se: Optional[float] = None) -> pd.DataFrame
+regression_assumptions_table_from_checks(
+    checks: RegressionChecks,
+    cov_type: str = "HC2",
+    condition_number_warn_threshold: float = 100000000.0,
+    vif_warn_threshold: float = 20.0,
+    tiny_one_minus_h_tol: float = 1e-08,
+    winsor_reference_se: Optional[float] = None,
+) -> pd.DataFrame
 ```
 
 Return a table of GREEN/YELLOW/RED assumption flags from checks payload.
@@ -8123,7 +11149,12 @@ Return a table of GREEN/YELLOW/RED assumption flags from checks payload.
 ####### `regression_assumptions_table_from_data`
 
 ```python
-regression_assumptions_table_from_data(data: CausalData, covariates: Sequence[str], model_kwargs: Optional[Dict[str, Any]] = None, fit_kwargs: Optional[Dict[str, Any]] = None) -> pd.DataFrame
+regression_assumptions_table_from_data(
+    data: CausalData,
+    covariates: Sequence[str],
+    model_kwargs: Optional[Dict[str, Any]] = None,
+    fit_kwargs: Optional[Dict[str, Any]] = None,
+) -> pd.DataFrame
 ```
 
 Fit CUPED on `CausalData` and return the assumptions flag table.
@@ -8131,7 +11162,14 @@ Fit CUPED on `CausalData` and return the assumptions flag table.
 ####### `regression_assumptions_table_from_diagnostic_data`
 
 ```python
-regression_assumptions_table_from_diagnostic_data(diagnostic_data: CUPEDDiagnosticData, cov_type: str = 'HC2', condition_number_warn_threshold: float = 100000000.0, vif_warn_threshold: float = 20.0, tiny_one_minus_h_tol: float = 1e-08, winsor_reference_se: Optional[float] = None) -> pd.DataFrame
+regression_assumptions_table_from_diagnostic_data(
+    diagnostic_data: CUPEDDiagnosticData,
+    cov_type: str = "HC2",
+    condition_number_warn_threshold: float = 100000000.0,
+    vif_warn_threshold: float = 20.0,
+    tiny_one_minus_h_tol: float = 1e-08,
+    winsor_reference_se: Optional[float] = None,
+) -> pd.DataFrame
 ```
 
 Build assumption table from `CUPEDDiagnosticData` payload.
@@ -8139,7 +11177,17 @@ Build assumption table from `CUPEDDiagnosticData` payload.
 ####### `regression_assumptions_table_from_estimate`
 
 ```python
-regression_assumptions_table_from_estimate(data_or_estimate: CausalData | CausalEstimate, estimate: Optional[CausalEstimate] = None, style_regression_assumptions_table: Optional[Callable[[pd.DataFrame], Any]] = None, cov_type: Optional[str] = None, condition_number_warn_threshold: float = 100000000.0, vif_warn_threshold: float = 20.0, tiny_one_minus_h_tol: float = 1e-08) -> Any
+regression_assumptions_table_from_estimate(
+    data_or_estimate: CausalData | CausalEstimate,
+    estimate: Optional[CausalEstimate] = None,
+    style_regression_assumptions_table: Optional[
+        Callable[[pd.DataFrame], Any]
+    ] = None,
+    cov_type: Optional[str] = None,
+    condition_number_warn_threshold: float = 100000000.0,
+    vif_warn_threshold: float = 20.0,
+    tiny_one_minus_h_tol: float = 1e-08,
+) -> Any
 ```
 
 Build assumptions table from a CUPED estimate.
@@ -8152,7 +11200,17 @@ Supports both call styles:
 ####### `run_regression_checks`
 
 ```python
-run_regression_checks(y: pd.Series, design: pd.DataFrame, result: Any, result_naive: Any, cov_type: str, use_t_fit: bool, corr_near_one_tol: float, tiny_one_minus_h_tol: float, winsor_q: Optional[float]) -> RegressionChecks
+run_regression_checks(
+    y: pd.Series,
+    design: pd.DataFrame,
+    result: Any,
+    result_naive: Any,
+    cov_type: str,
+    use_t_fit: bool,
+    corr_near_one_tol: float,
+    tiny_one_minus_h_tol: float,
+    winsor_q: Optional[float],
+) -> RegressionChecks
 ```
 
 Build a compact payload with design, residual, and influence diagnostics.
@@ -8176,7 +11234,13 @@ Approximate VIF from inverse correlation matrix of standardized covariates.
 ####### `winsor_fit_tau`
 
 ```python
-winsor_fit_tau(y: pd.Series, design: pd.DataFrame, cov_type: str, use_t_fit: bool, winsor_q: Optional[float]) -> Optional[float]
+winsor_fit_tau(
+    y: pd.Series,
+    design: pd.DataFrame,
+    cov_type: str,
+    use_t_fit: bool,
+    winsor_q: Optional[float],
+) -> Optional[float]
 ```
 
 Refit OLS on winsorized outcome and return treatment coefficient.
@@ -8184,7 +11248,17 @@ Refit OLS on winsorized outcome and return treatment coefficient.
 ###### `run_regression_checks`
 
 ```python
-run_regression_checks(y: pd.Series, design: pd.DataFrame, result: Any, result_naive: Any, cov_type: str, use_t_fit: bool, corr_near_one_tol: float, tiny_one_minus_h_tol: float, winsor_q: Optional[float]) -> RegressionChecks
+run_regression_checks(
+    y: pd.Series,
+    design: pd.DataFrame,
+    result: Any,
+    result_naive: Any,
+    cov_type: str,
+    use_t_fit: bool,
+    corr_near_one_tol: float,
+    tiny_one_minus_h_tol: float,
+    winsor_q: Optional[float],
+) -> RegressionChecks
 ```
 
 Build a compact payload with design, residual, and influence diagnostics.
@@ -8206,7 +11280,25 @@ Return pandas Styler with colored flag cells for notebook display.
 ###### `CUPEDModel`
 
 ```python
-CUPEDModel(cov_type: str = 'HC2', alpha: float = 0.05, strict_binary_treatment: bool = True, use_t: Optional[bool] = None, use_t_auto_n_threshold: int = 5000, relative_ci_method: Literal['delta_nocov', 'bootstrap'] = 'delta_nocov', relative_ci_bootstrap_draws: int = 1000, relative_ci_bootstrap_seed: Optional[int] = None, covariate_variance_min: float = 1e-12, condition_number_warn_threshold: float = 100000000.0, run_regression_checks: bool = True, check_action: Literal['ignore', 'raise'] = 'ignore', raise_on_yellow: bool = False, corr_near_one_tol: float = 1e-10, vif_warn_threshold: float = 20.0, winsor_q: Optional[float] = 0.01, tiny_one_minus_h_tol: float = 1e-08) -> None
+CUPEDModel(
+    cov_type: str = "HC2",
+    alpha: float = 0.05,
+    strict_binary_treatment: bool = True,
+    use_t: Optional[bool] = None,
+    use_t_auto_n_threshold: int = 5000,
+    relative_ci_method: Literal["delta_nocov", "bootstrap"] = "delta_nocov",
+    relative_ci_bootstrap_draws: int = 1000,
+    relative_ci_bootstrap_seed: Optional[int] = None,
+    covariate_variance_min: float = 1e-12,
+    condition_number_warn_threshold: float = 100000000.0,
+    run_regression_checks: bool = True,
+    check_action: Literal["ignore", "raise"] = "ignore",
+    raise_on_yellow: bool = False,
+    corr_near_one_tol: float = 1e-10,
+    vif_warn_threshold: float = 20.0,
+    winsor_q: Optional[float] = 0.01,
+    tiny_one_minus_h_tol: float = 1e-08,
+) -> None
 ```
 
 CUPED-style regression adjustment estimator for ATE/ITT in randomized experiments.
@@ -8337,7 +11429,9 @@ covariate_variance_min = float(covariate_variance_min)
 ####### `estimate`
 
 ```python
-estimate(alpha: Optional[float] = None, diagnostic_data: bool = True) -> CausalEstimate
+estimate(
+    alpha: Optional[float] = None, diagnostic_data: bool = True
+) -> CausalEstimate
 ```
 
 Return the adjusted ATE/ITT estimate and inference.
@@ -8354,7 +11448,11 @@ Return the adjusted ATE/ITT estimate and inference.
 ####### `fit`
 
 ```python
-fit(data: CausalData, covariates: Optional[Sequence[str]] = None, run_checks: Optional[bool] = None) -> CUPEDModel
+fit(
+    data: CausalData,
+    covariates: Optional[Sequence[str]] = None,
+    run_checks: Optional[bool] = None,
+) -> CUPEDModel
 ```
 
 Fit CUPED-style regression adjustment (Lin-interacted OLS) on a CausalData object.
@@ -8463,7 +11561,12 @@ winsor_q = None
 ##### `regression_assumptions_table_from_data`
 
 ```python
-regression_assumptions_table_from_data(data: CausalData, covariates: Sequence[str], model_kwargs: Optional[Dict[str, Any]] = None, fit_kwargs: Optional[Dict[str, Any]] = None) -> pd.DataFrame
+regression_assumptions_table_from_data(
+    data: CausalData,
+    covariates: Sequence[str],
+    model_kwargs: Optional[Dict[str, Any]] = None,
+    fit_kwargs: Optional[Dict[str, Any]] = None,
+) -> pd.DataFrame
 ```
 
 Fit CUPED on `CausalData` and return the assumptions flag table.
@@ -8471,7 +11574,17 @@ Fit CUPED on `CausalData` and return the assumptions flag table.
 ##### `regression_assumptions_table_from_estimate`
 
 ```python
-regression_assumptions_table_from_estimate(data_or_estimate: CausalData | CausalEstimate, estimate: Optional[CausalEstimate] = None, style_regression_assumptions_table: Optional[Callable[[pd.DataFrame], Any]] = None, cov_type: Optional[str] = None, condition_number_warn_threshold: float = 100000000.0, vif_warn_threshold: float = 20.0, tiny_one_minus_h_tol: float = 1e-08) -> Any
+regression_assumptions_table_from_estimate(
+    data_or_estimate: CausalData | CausalEstimate,
+    estimate: Optional[CausalEstimate] = None,
+    style_regression_assumptions_table: Optional[
+        Callable[[pd.DataFrame], Any]
+    ] = None,
+    cov_type: Optional[str] = None,
+    condition_number_warn_threshold: float = 100000000.0,
+    vif_warn_threshold: float = 20.0,
+    tiny_one_minus_h_tol: float = 1e-08,
+) -> Any
 ```
 
 Build assumptions table from a CUPED estimate.
@@ -8504,7 +11617,18 @@ Return pandas Styler with colored flag cells for notebook display.
 ##### `MultiTreatmentIRM`
 
 ```python
-MultiTreatmentIRM(data: Optional[MultiCausalData] = None, ml_g: Any = None, ml_m: Any = None, *, n_folds: int = 5, n_rep: int = 1, normalize_ipw: bool = False, trimming_rule: str = 'truncate', trimming_threshold: float = 0.01, random_state: Optional[int] = None)
+MultiTreatmentIRM(
+    data: Optional[MultiCausalData] = None,
+    ml_g: Any = None,
+    ml_m: Any = None,
+    *,
+    n_folds: int = 5,
+    n_rep: int = 1,
+    normalize_ipw: bool = False,
+    trimming_rule: str = "truncate",
+    trimming_threshold: float = 0.01,
+    random_state: Optional[int] = None
+)
 ```
 
 Bases: <code>[BaseEstimator](#sklearn.base.BaseEstimator)</code>
@@ -8589,7 +11713,9 @@ Return diagnostic data.
 ###### `estimate`
 
 ```python
-estimate(score: str = 'ATE', alpha: float = 0.05, diagnostic_data: bool = True) -> MultiCausalEstimate
+estimate(
+    score: str = "ATE", alpha: float = 0.05, diagnostic_data: bool = True
+) -> MultiCausalEstimate
 ```
 
 ###### `fit`
@@ -8679,7 +11805,15 @@ Return the standard error of the estimate.
 ###### `sensitivity_analysis`
 
 ```python
-sensitivity_analysis(cf_y: Optional[float] = None, r2_d: Any = 0.0, rho: Any = 1.0, H0: float = 0.0, alpha: float = 0.05, *, r2_y: Optional[float] = None) -> 'MultiTreatmentIRM'
+sensitivity_analysis(
+    cf_y: Optional[float] = None,
+    r2_d: Any = 0.0,
+    rho: Any = 1.0,
+    H0: float = 0.0,
+    alpha: float = 0.05,
+    *,
+    r2_y: Optional[float] = None
+) -> "MultiTreatmentIRM"
 ```
 
 ###### `summary`
@@ -8717,7 +11851,12 @@ trimming_threshold = float(trimming_threshold)
 ###### `generate_multitreatment_binary_26`
 
 ```python
-generate_multitreatment_binary_26(n: int = 100000, seed: int = 42, include_oracle: bool = False, return_causal_data: bool = True) -> Union[pd.DataFrame, MultiCausalData]
+generate_multitreatment_binary_26(
+    n: int = 100000,
+    seed: int = 42,
+    include_oracle: bool = False,
+    return_causal_data: bool = True,
+) -> Union[pd.DataFrame, MultiCausalData]
 ```
 
 Pre-configured multi-treatment dataset with Binary outcome.
@@ -8730,7 +11869,12 @@ Pre-configured multi-treatment dataset with Binary outcome.
 ###### `generate_multitreatment_gamma_26`
 
 ```python
-generate_multitreatment_gamma_26(n: int = 100000, seed: int = 42, include_oracle: bool = False, return_causal_data: bool = True) -> Union[pd.DataFrame, MultiCausalData]
+generate_multitreatment_gamma_26(
+    n: int = 100000,
+    seed: int = 42,
+    include_oracle: bool = False,
+    return_causal_data: bool = True,
+) -> Union[pd.DataFrame, MultiCausalData]
 ```
 
 Pre-configured multi-treatment dataset with Gamma-distributed outcome.
@@ -8743,7 +11887,12 @@ Pre-configured multi-treatment dataset with Gamma-distributed outcome.
 ###### `generate_multitreatment_irm_26`
 
 ```python
-generate_multitreatment_irm_26(n: int = 100000, seed: int = 42, include_oracle: bool = False, return_causal_data: bool = True) -> Union[pd.DataFrame, MultiCausalData]
+generate_multitreatment_irm_26(
+    n: int = 100000,
+    seed: int = 42,
+    include_oracle: bool = False,
+    return_causal_data: bool = True,
+) -> Union[pd.DataFrame, MultiCausalData]
 ```
 
 ##### `model`
@@ -8761,7 +11910,18 @@ HAS_CATBOOST = True
 ###### `MultiTreatmentIRM`
 
 ```python
-MultiTreatmentIRM(data: Optional[MultiCausalData] = None, ml_g: Any = None, ml_m: Any = None, *, n_folds: int = 5, n_rep: int = 1, normalize_ipw: bool = False, trimming_rule: str = 'truncate', trimming_threshold: float = 0.01, random_state: Optional[int] = None)
+MultiTreatmentIRM(
+    data: Optional[MultiCausalData] = None,
+    ml_g: Any = None,
+    ml_m: Any = None,
+    *,
+    n_folds: int = 5,
+    n_rep: int = 1,
+    normalize_ipw: bool = False,
+    trimming_rule: str = "truncate",
+    trimming_threshold: float = 0.01,
+    random_state: Optional[int] = None
+)
 ```
 
 Bases: <code>[BaseEstimator](#sklearn.base.BaseEstimator)</code>
@@ -8846,7 +12006,9 @@ Return diagnostic data.
 ####### `estimate`
 
 ```python
-estimate(score: str = 'ATE', alpha: float = 0.05, diagnostic_data: bool = True) -> MultiCausalEstimate
+estimate(
+    score: str = "ATE", alpha: float = 0.05, diagnostic_data: bool = True
+) -> MultiCausalEstimate
 ```
 
 ####### `fit`
@@ -8936,7 +12098,15 @@ Return the standard error of the estimate.
 ####### `sensitivity_analysis`
 
 ```python
-sensitivity_analysis(cf_y: Optional[float] = None, r2_d: Any = 0.0, rho: Any = 1.0, H0: float = 0.0, alpha: float = 0.05, *, r2_y: Optional[float] = None) -> 'MultiTreatmentIRM'
+sensitivity_analysis(
+    cf_y: Optional[float] = None,
+    r2_d: Any = 0.0,
+    rho: Any = 1.0,
+    H0: float = 0.0,
+    alpha: float = 0.05,
+    *,
+    r2_y: Optional[float] = None
+) -> "MultiTreatmentIRM"
 ```
 
 ####### `summary`
@@ -8990,13 +12160,26 @@ Refutation utilities for multi-treatment unconfoundedness.
 ###### `compute_bias_aware_ci`
 
 ```python
-compute_bias_aware_ci(effect_estimation: Dict[str, Any] | Any, _: Dict[str, Any] | Any = None, cf_y: float = 0.0, r2_d: Union[float, np.ndarray] = 0.0, rho: Union[float, np.ndarray] = 1.0, H0: float = 0.0, alpha: float = 0.05, use_signed_rr: bool = False) -> Dict[str, Any]
+compute_bias_aware_ci(
+    effect_estimation: Dict[str, Any] | Any,
+    _: Dict[str, Any] | Any = None,
+    cf_y: float = 0.0,
+    r2_d: Union[float, np.ndarray] = 0.0,
+    rho: Union[float, np.ndarray] = 1.0,
+    H0: float = 0.0,
+    alpha: float = 0.05,
+    use_signed_rr: bool = False,
+) -> Dict[str, Any]
 ```
 
 ###### `get_sensitivity_summary`
 
 ```python
-get_sensitivity_summary(effect_estimation: Dict[str, Any] | Any, _: Dict[str, Any] | Any = None, label: Optional[str] = None) -> Optional[str]
+get_sensitivity_summary(
+    effect_estimation: Dict[str, Any] | Any,
+    _: Dict[str, Any] | Any = None,
+    label: Optional[str] = None,
+) -> Optional[str]
 ```
 
 ###### `overlap`
@@ -9021,7 +12204,9 @@ get_sensitivity_summary(effect_estimation: Dict[str, Any] | Any, _: Dict[str, An
 ######## `overlap_plot`
 
 ```python
-overlap_plot(data: MultiCausalData, estimate: MultiCausalEstimate, **kwargs: Any) -> plt.Figure
+overlap_plot(
+    data: MultiCausalData, estimate: MultiCausalEstimate, **kwargs: Any
+) -> plt.Figure
 ```
 
 Convenience wrapper to match `overlap_plot(data, estimate)` API style.
@@ -9029,7 +12214,28 @@ Convenience wrapper to match `overlap_plot(data, estimate)` API style.
 ######## `plot_m_overlap`
 
 ```python
-plot_m_overlap(diag: Union[MultiUnconfoundednessDiagnosticData, MultiCausalEstimate, dict, Any], clip: Tuple[float, float] = (0.01, 0.99), bins: Any = 'fd', kde: bool = True, shade_overlap: bool = True, ax: Optional[plt.Axes] = None, figsize: Tuple[float, float] = (9, 5.5), dpi: int = 220, font_scale: float = 1.15, save: Optional[str] = None, save_dpi: Optional[int] = None, transparent: bool = False, color_t: Optional[Any] = None, color_c: Optional[Any] = None, *, treatment_idx: Optional[Union[int, List[int]]] = None, baseline_idx: int = 0, treatment_names: Optional[List[str]] = None) -> plt.Figure
+plot_m_overlap(
+    diag: Union[
+        MultiUnconfoundednessDiagnosticData, MultiCausalEstimate, dict, Any
+    ],
+    clip: Tuple[float, float] = (0.01, 0.99),
+    bins: Any = "fd",
+    kde: bool = True,
+    shade_overlap: bool = True,
+    ax: Optional[plt.Axes] = None,
+    figsize: Tuple[float, float] = (9, 5.5),
+    dpi: int = 220,
+    font_scale: float = 1.15,
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False,
+    color_t: Optional[Any] = None,
+    color_c: Optional[Any] = None,
+    *,
+    treatment_idx: Optional[Union[int, List[int]]] = None,
+    baseline_idx: int = 0,
+    treatment_names: Optional[List[str]] = None
+) -> plt.Figure
 ```
 
 Multi-treatment overlap plot for pairwise conditional propensity scores.
@@ -9064,7 +12270,15 @@ Overlap diagnostics for multi-treatment unconfoundedness.
 ######## `run_overlap_diagnostics`
 
 ```python
-run_overlap_diagnostics(data: MultiCausalData, estimate: MultiCausalEstimate, *, thresholds: Optional[Dict[str, float]] = None, use_hajek: Optional[bool] = None, return_summary: bool = True, auc_flip_margin: float = 0.05) -> Dict[str, Any]
+run_overlap_diagnostics(
+    data: MultiCausalData,
+    estimate: MultiCausalEstimate,
+    *,
+    thresholds: Optional[Dict[str, float]] = None,
+    use_hajek: Optional[bool] = None,
+    return_summary: bool = True,
+    auc_flip_margin: float = 0.05
+) -> Dict[str, Any]
 ```
 
 Run multi-treatment overlap diagnostics from data and estimate.
@@ -9076,7 +12290,28 @@ P(D=k | X, D in {0, k}) as the comparison score.
 ####### `plot_m_overlap`
 
 ```python
-plot_m_overlap(diag: Union[MultiUnconfoundednessDiagnosticData, MultiCausalEstimate, dict, Any], clip: Tuple[float, float] = (0.01, 0.99), bins: Any = 'fd', kde: bool = True, shade_overlap: bool = True, ax: Optional[plt.Axes] = None, figsize: Tuple[float, float] = (9, 5.5), dpi: int = 220, font_scale: float = 1.15, save: Optional[str] = None, save_dpi: Optional[int] = None, transparent: bool = False, color_t: Optional[Any] = None, color_c: Optional[Any] = None, *, treatment_idx: Optional[Union[int, List[int]]] = None, baseline_idx: int = 0, treatment_names: Optional[List[str]] = None) -> plt.Figure
+plot_m_overlap(
+    diag: Union[
+        MultiUnconfoundednessDiagnosticData, MultiCausalEstimate, dict, Any
+    ],
+    clip: Tuple[float, float] = (0.01, 0.99),
+    bins: Any = "fd",
+    kde: bool = True,
+    shade_overlap: bool = True,
+    ax: Optional[plt.Axes] = None,
+    figsize: Tuple[float, float] = (9, 5.5),
+    dpi: int = 220,
+    font_scale: float = 1.15,
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False,
+    color_t: Optional[Any] = None,
+    color_c: Optional[Any] = None,
+    *,
+    treatment_idx: Optional[Union[int, List[int]]] = None,
+    baseline_idx: int = 0,
+    treatment_names: Optional[List[str]] = None
+) -> plt.Figure
 ```
 
 Multi-treatment overlap plot for pairwise conditional propensity scores.
@@ -9103,7 +12338,15 @@ Returns matplotlib.figure.Figure.
 ####### `run_overlap_diagnostics`
 
 ```python
-run_overlap_diagnostics(data: MultiCausalData, estimate: MultiCausalEstimate, *, thresholds: Optional[Dict[str, float]] = None, use_hajek: Optional[bool] = None, return_summary: bool = True, auc_flip_margin: float = 0.05) -> Dict[str, Any]
+run_overlap_diagnostics(
+    data: MultiCausalData,
+    estimate: MultiCausalEstimate,
+    *,
+    thresholds: Optional[Dict[str, float]] = None,
+    use_hajek: Optional[bool] = None,
+    return_summary: bool = True,
+    auc_flip_margin: float = 0.05
+) -> Dict[str, Any]
 ```
 
 Run multi-treatment overlap diagnostics from data and estimate.
@@ -9122,7 +12365,9 @@ P(D=k | X, D in {0, k}) as the comparison score.
 ####### `overlap_plot`
 
 ```python
-overlap_plot(data: MultiCausalData, estimate: MultiCausalEstimate, **kwargs: Any) -> plt.Figure
+overlap_plot(
+    data: MultiCausalData, estimate: MultiCausalEstimate, **kwargs: Any
+) -> plt.Figure
 ```
 
 Convenience wrapper to match `overlap_plot(data, estimate)` API style.
@@ -9130,7 +12375,28 @@ Convenience wrapper to match `overlap_plot(data, estimate)` API style.
 ####### `plot_m_overlap`
 
 ```python
-plot_m_overlap(diag: Union[MultiUnconfoundednessDiagnosticData, MultiCausalEstimate, dict, Any], clip: Tuple[float, float] = (0.01, 0.99), bins: Any = 'fd', kde: bool = True, shade_overlap: bool = True, ax: Optional[plt.Axes] = None, figsize: Tuple[float, float] = (9, 5.5), dpi: int = 220, font_scale: float = 1.15, save: Optional[str] = None, save_dpi: Optional[int] = None, transparent: bool = False, color_t: Optional[Any] = None, color_c: Optional[Any] = None, *, treatment_idx: Optional[Union[int, List[int]]] = None, baseline_idx: int = 0, treatment_names: Optional[List[str]] = None) -> plt.Figure
+plot_m_overlap(
+    diag: Union[
+        MultiUnconfoundednessDiagnosticData, MultiCausalEstimate, dict, Any
+    ],
+    clip: Tuple[float, float] = (0.01, 0.99),
+    bins: Any = "fd",
+    kde: bool = True,
+    shade_overlap: bool = True,
+    ax: Optional[plt.Axes] = None,
+    figsize: Tuple[float, float] = (9, 5.5),
+    dpi: int = 220,
+    font_scale: float = 1.15,
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False,
+    color_t: Optional[Any] = None,
+    color_c: Optional[Any] = None,
+    *,
+    treatment_idx: Optional[Union[int, List[int]]] = None,
+    baseline_idx: int = 0,
+    treatment_names: Optional[List[str]] = None
+) -> plt.Figure
 ```
 
 Multi-treatment overlap plot for pairwise conditional propensity scores.
@@ -9157,7 +12423,28 @@ Returns matplotlib.figure.Figure.
 ###### `plot_m_overlap`
 
 ```python
-plot_m_overlap(diag: Union[MultiUnconfoundednessDiagnosticData, MultiCausalEstimate, dict, Any], clip: Tuple[float, float] = (0.01, 0.99), bins: Any = 'fd', kde: bool = True, shade_overlap: bool = True, ax: Optional[plt.Axes] = None, figsize: Tuple[float, float] = (9, 5.5), dpi: int = 220, font_scale: float = 1.15, save: Optional[str] = None, save_dpi: Optional[int] = None, transparent: bool = False, color_t: Optional[Any] = None, color_c: Optional[Any] = None, *, treatment_idx: Optional[Union[int, List[int]]] = None, baseline_idx: int = 0, treatment_names: Optional[List[str]] = None) -> plt.Figure
+plot_m_overlap(
+    diag: Union[
+        MultiUnconfoundednessDiagnosticData, MultiCausalEstimate, dict, Any
+    ],
+    clip: Tuple[float, float] = (0.01, 0.99),
+    bins: Any = "fd",
+    kde: bool = True,
+    shade_overlap: bool = True,
+    ax: Optional[plt.Axes] = None,
+    figsize: Tuple[float, float] = (9, 5.5),
+    dpi: int = 220,
+    font_scale: float = 1.15,
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False,
+    color_t: Optional[Any] = None,
+    color_c: Optional[Any] = None,
+    *,
+    treatment_idx: Optional[Union[int, List[int]]] = None,
+    baseline_idx: int = 0,
+    treatment_names: Optional[List[str]] = None
+) -> plt.Figure
 ```
 
 Multi-treatment overlap plot for pairwise conditional propensity scores.
@@ -9184,7 +12471,21 @@ Returns matplotlib.figure.Figure.
 ###### `plot_residual_diagnostics`
 
 ```python
-plot_residual_diagnostics(estimate: MultiCausalEstimate, data: Optional[MultiCausalData] = None, *, clip_propensity: float = 1e-06, n_bins: int = 20, marker_size: float = 12.0, alpha: float = 0.35, figsize: Tuple[float, float] = (14.0, 4.8), dpi: int = 220, font_scale: float = 1.1, save: Optional[str] = None, save_dpi: Optional[int] = None, transparent: bool = False) -> plt.Figure
+plot_residual_diagnostics(
+    estimate: MultiCausalEstimate,
+    data: Optional[MultiCausalData] = None,
+    *,
+    clip_propensity: float = 1e-06,
+    n_bins: int = 20,
+    marker_size: float = 12.0,
+    alpha: float = 0.35,
+    figsize: Tuple[float, float] = (14.0, 4.8),
+    dpi: int = 220,
+    font_scale: float = 1.1,
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False
+) -> plt.Figure
 ```
 
 Plot residual diagnostics for multi-treatment nuisance models.
@@ -9202,7 +12503,15 @@ K+1. Binned calibration error for each arm:
 ###### `run_overlap_diagnostics`
 
 ```python
-run_overlap_diagnostics(data: MultiCausalData, estimate: MultiCausalEstimate, *, thresholds: Optional[Dict[str, float]] = None, use_hajek: Optional[bool] = None, return_summary: bool = True, auc_flip_margin: float = 0.05) -> Dict[str, Any]
+run_overlap_diagnostics(
+    data: MultiCausalData,
+    estimate: MultiCausalEstimate,
+    *,
+    thresholds: Optional[Dict[str, float]] = None,
+    use_hajek: Optional[bool] = None,
+    return_summary: bool = True,
+    auc_flip_margin: float = 0.05
+) -> Dict[str, Any]
 ```
 
 Run multi-treatment overlap diagnostics from data and estimate.
@@ -9214,7 +12523,14 @@ P(D=k | X, D in {0, k}) as the comparison score.
 ###### `run_score_diagnostics`
 
 ```python
-run_score_diagnostics(data: MultiCausalData, estimate: MultiCausalEstimate, *, trimming_threshold: Optional[float] = None, n_basis_funcs: Optional[int] = None, return_summary: bool = True) -> Dict[str, Any]
+run_score_diagnostics(
+    data: MultiCausalData,
+    estimate: MultiCausalEstimate,
+    *,
+    trimming_threshold: Optional[float] = None,
+    n_basis_funcs: Optional[int] = None,
+    return_summary: bool = True
+) -> Dict[str, Any]
 ```
 
 Run score diagnostics for multi-treatment baseline contrasts.
@@ -9222,7 +12538,14 @@ Run score diagnostics for multi-treatment baseline contrasts.
 ###### `run_unconfoundedness_diagnostics`
 
 ```python
-run_unconfoundedness_diagnostics(data: MultiCausalData, estimate: MultiCausalEstimate, *, threshold: float = 0.1, normalize: Optional[bool] = None, return_summary: bool = True) -> Dict[str, Any]
+run_unconfoundedness_diagnostics(
+    data: MultiCausalData,
+    estimate: MultiCausalEstimate,
+    *,
+    threshold: float = 0.1,
+    normalize: Optional[bool] = None,
+    return_summary: bool = True
+) -> Dict[str, Any]
 ```
 
 Run multi-treatment unconfoundedness diagnostics from data and estimate.
@@ -9245,7 +12568,21 @@ pairwise balance between baseline treatment 0 and each active treatment k.
 ####### `plot_residual_diagnostics`
 
 ```python
-plot_residual_diagnostics(estimate: MultiCausalEstimate, data: Optional[MultiCausalData] = None, *, clip_propensity: float = 1e-06, n_bins: int = 20, marker_size: float = 12.0, alpha: float = 0.35, figsize: Tuple[float, float] = (14.0, 4.8), dpi: int = 220, font_scale: float = 1.1, save: Optional[str] = None, save_dpi: Optional[int] = None, transparent: bool = False) -> plt.Figure
+plot_residual_diagnostics(
+    estimate: MultiCausalEstimate,
+    data: Optional[MultiCausalData] = None,
+    *,
+    clip_propensity: float = 1e-06,
+    n_bins: int = 20,
+    marker_size: float = 12.0,
+    alpha: float = 0.35,
+    figsize: Tuple[float, float] = (14.0, 4.8),
+    dpi: int = 220,
+    font_scale: float = 1.1,
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False
+) -> plt.Figure
 ```
 
 Plot residual diagnostics for multi-treatment nuisance models.
@@ -9271,7 +12608,21 @@ Residual diagnostic plots for multi-treatment nuisance models g_k and m_k.
 ######## `plot_residual_diagnostics`
 
 ```python
-plot_residual_diagnostics(estimate: MultiCausalEstimate, data: Optional[MultiCausalData] = None, *, clip_propensity: float = 1e-06, n_bins: int = 20, marker_size: float = 12.0, alpha: float = 0.35, figsize: Tuple[float, float] = (14.0, 4.8), dpi: int = 220, font_scale: float = 1.1, save: Optional[str] = None, save_dpi: Optional[int] = None, transparent: bool = False) -> plt.Figure
+plot_residual_diagnostics(
+    estimate: MultiCausalEstimate,
+    data: Optional[MultiCausalData] = None,
+    *,
+    clip_propensity: float = 1e-06,
+    n_bins: int = 20,
+    marker_size: float = 12.0,
+    alpha: float = 0.35,
+    figsize: Tuple[float, float] = (14.0, 4.8),
+    dpi: int = 220,
+    font_scale: float = 1.1,
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False
+) -> plt.Figure
 ```
 
 Plot residual diagnostics for multi-treatment nuisance models.
@@ -9289,7 +12640,14 @@ K+1. Binned calibration error for each arm:
 ####### `run_score_diagnostics`
 
 ```python
-run_score_diagnostics(data: MultiCausalData, estimate: MultiCausalEstimate, *, trimming_threshold: Optional[float] = None, n_basis_funcs: Optional[int] = None, return_summary: bool = True) -> Dict[str, Any]
+run_score_diagnostics(
+    data: MultiCausalData,
+    estimate: MultiCausalEstimate,
+    *,
+    trimming_threshold: Optional[float] = None,
+    n_basis_funcs: Optional[int] = None,
+    return_summary: bool = True
+) -> Dict[str, Any]
 ```
 
 Run score diagnostics for multi-treatment baseline contrasts.
@@ -9305,7 +12663,14 @@ Score diagnostics for multi-treatment unconfoundedness.
 ######## `run_score_diagnostics`
 
 ```python
-run_score_diagnostics(data: MultiCausalData, estimate: MultiCausalEstimate, *, trimming_threshold: Optional[float] = None, n_basis_funcs: Optional[int] = None, return_summary: bool = True) -> Dict[str, Any]
+run_score_diagnostics(
+    data: MultiCausalData,
+    estimate: MultiCausalEstimate,
+    *,
+    trimming_threshold: Optional[float] = None,
+    n_basis_funcs: Optional[int] = None,
+    return_summary: bool = True
+) -> Dict[str, Any]
 ```
 
 Run score diagnostics for multi-treatment baseline contrasts.
@@ -9313,13 +12678,27 @@ Run score diagnostics for multi-treatment baseline contrasts.
 ###### `sensitivity_analysis`
 
 ```python
-sensitivity_analysis(effect_estimation: Dict[str, Any] | Any, _: Dict[str, Any] | Any = None, cf_y: Optional[float] = None, r2_y: Optional[float] = None, r2_d: Union[float, np.ndarray] = 0.0, rho: Union[float, np.ndarray] = 1.0, H0: float = 0.0, alpha: float = 0.05, use_signed_rr: bool = False) -> Dict[str, Any]
+sensitivity_analysis(
+    effect_estimation: Dict[str, Any] | Any,
+    _: Dict[str, Any] | Any = None,
+    cf_y: Optional[float] = None,
+    r2_y: Optional[float] = None,
+    r2_d: Union[float, np.ndarray] = 0.0,
+    rho: Union[float, np.ndarray] = 1.0,
+    H0: float = 0.0,
+    alpha: float = 0.05,
+    use_signed_rr: bool = False,
+) -> Dict[str, Any]
 ```
 
 ###### `sensitivity_benchmark`
 
 ```python
-sensitivity_benchmark(effect_estimation: Dict[str, Any] | Any, benchmarking_set: List[str], fit_args: Optional[Dict[str, Any]] = None) -> pd.DataFrame
+sensitivity_benchmark(
+    effect_estimation: Dict[str, Any] | Any,
+    benchmarking_set: List[str],
+    fit_args: Optional[Dict[str, Any]] = None,
+) -> pd.DataFrame
 ```
 
 ###### `unconfoundedness`
@@ -9341,19 +12720,39 @@ sensitivity_benchmark(effect_estimation: Dict[str, Any] | Any, benchmarking_set:
 ####### `compute_bias_aware_ci`
 
 ```python
-compute_bias_aware_ci(effect_estimation: Dict[str, Any] | Any, _: Dict[str, Any] | Any = None, cf_y: float = 0.0, r2_d: Union[float, np.ndarray] = 0.0, rho: Union[float, np.ndarray] = 1.0, H0: float = 0.0, alpha: float = 0.05, use_signed_rr: bool = False) -> Dict[str, Any]
+compute_bias_aware_ci(
+    effect_estimation: Dict[str, Any] | Any,
+    _: Dict[str, Any] | Any = None,
+    cf_y: float = 0.0,
+    r2_d: Union[float, np.ndarray] = 0.0,
+    rho: Union[float, np.ndarray] = 1.0,
+    H0: float = 0.0,
+    alpha: float = 0.05,
+    use_signed_rr: bool = False,
+) -> Dict[str, Any]
 ```
 
 ####### `get_sensitivity_summary`
 
 ```python
-get_sensitivity_summary(effect_estimation: Dict[str, Any] | Any, _: Dict[str, Any] | Any = None, label: Optional[str] = None) -> Optional[str]
+get_sensitivity_summary(
+    effect_estimation: Dict[str, Any] | Any,
+    _: Dict[str, Any] | Any = None,
+    label: Optional[str] = None,
+) -> Optional[str]
 ```
 
 ####### `run_unconfoundedness_diagnostics`
 
 ```python
-run_unconfoundedness_diagnostics(data: MultiCausalData, estimate: MultiCausalEstimate, *, threshold: float = 0.1, normalize: Optional[bool] = None, return_summary: bool = True) -> Dict[str, Any]
+run_unconfoundedness_diagnostics(
+    data: MultiCausalData,
+    estimate: MultiCausalEstimate,
+    *,
+    threshold: float = 0.1,
+    normalize: Optional[bool] = None,
+    return_summary: bool = True
+) -> Dict[str, Any]
 ```
 
 Run multi-treatment unconfoundedness diagnostics from data and estimate.
@@ -9373,37 +12772,78 @@ pairwise balance between baseline treatment 0 and each active treatment k.
 ######## `compute_bias_aware_ci`
 
 ```python
-compute_bias_aware_ci(effect_estimation: Dict[str, Any] | Any, _: Dict[str, Any] | Any = None, cf_y: float = 0.0, r2_d: Union[float, np.ndarray] = 0.0, rho: Union[float, np.ndarray] = 1.0, H0: float = 0.0, alpha: float = 0.05, use_signed_rr: bool = False) -> Dict[str, Any]
+compute_bias_aware_ci(
+    effect_estimation: Dict[str, Any] | Any,
+    _: Dict[str, Any] | Any = None,
+    cf_y: float = 0.0,
+    r2_d: Union[float, np.ndarray] = 0.0,
+    rho: Union[float, np.ndarray] = 1.0,
+    H0: float = 0.0,
+    alpha: float = 0.05,
+    use_signed_rr: bool = False,
+) -> Dict[str, Any]
 ```
 
 ######## `get_sensitivity_summary`
 
 ```python
-get_sensitivity_summary(effect_estimation: Dict[str, Any] | Any, _: Dict[str, Any] | Any = None, label: Optional[str] = None) -> Optional[str]
+get_sensitivity_summary(
+    effect_estimation: Dict[str, Any] | Any,
+    _: Dict[str, Any] | Any = None,
+    label: Optional[str] = None,
+) -> Optional[str]
 ```
 
 ######## `sensitivity_analysis`
 
 ```python
-sensitivity_analysis(effect_estimation: Dict[str, Any] | Any, _: Dict[str, Any] | Any = None, cf_y: Optional[float] = None, r2_y: Optional[float] = None, r2_d: Union[float, np.ndarray] = 0.0, rho: Union[float, np.ndarray] = 1.0, H0: float = 0.0, alpha: float = 0.05, use_signed_rr: bool = False) -> Dict[str, Any]
+sensitivity_analysis(
+    effect_estimation: Dict[str, Any] | Any,
+    _: Dict[str, Any] | Any = None,
+    cf_y: Optional[float] = None,
+    r2_y: Optional[float] = None,
+    r2_d: Union[float, np.ndarray] = 0.0,
+    rho: Union[float, np.ndarray] = 1.0,
+    H0: float = 0.0,
+    alpha: float = 0.05,
+    use_signed_rr: bool = False,
+) -> Dict[str, Any]
 ```
 
 ######## `sensitivity_benchmark`
 
 ```python
-sensitivity_benchmark(effect_estimation: Dict[str, Any] | Any, benchmarking_set: List[str], fit_args: Optional[Dict[str, Any]] = None) -> pd.DataFrame
+sensitivity_benchmark(
+    effect_estimation: Dict[str, Any] | Any,
+    benchmarking_set: List[str],
+    fit_args: Optional[Dict[str, Any]] = None,
+) -> pd.DataFrame
 ```
 
 ####### `sensitivity_analysis`
 
 ```python
-sensitivity_analysis(effect_estimation: Dict[str, Any] | Any, _: Dict[str, Any] | Any = None, cf_y: Optional[float] = None, r2_y: Optional[float] = None, r2_d: Union[float, np.ndarray] = 0.0, rho: Union[float, np.ndarray] = 1.0, H0: float = 0.0, alpha: float = 0.05, use_signed_rr: bool = False) -> Dict[str, Any]
+sensitivity_analysis(
+    effect_estimation: Dict[str, Any] | Any,
+    _: Dict[str, Any] | Any = None,
+    cf_y: Optional[float] = None,
+    r2_y: Optional[float] = None,
+    r2_d: Union[float, np.ndarray] = 0.0,
+    rho: Union[float, np.ndarray] = 1.0,
+    H0: float = 0.0,
+    alpha: float = 0.05,
+    use_signed_rr: bool = False,
+) -> Dict[str, Any]
 ```
 
 ####### `sensitivity_benchmark`
 
 ```python
-sensitivity_benchmark(effect_estimation: Dict[str, Any] | Any, benchmarking_set: List[str], fit_args: Optional[Dict[str, Any]] = None) -> pd.DataFrame
+sensitivity_benchmark(
+    effect_estimation: Dict[str, Any] | Any,
+    benchmarking_set: List[str],
+    fit_args: Optional[Dict[str, Any]] = None,
+) -> pd.DataFrame
 ```
 
 ####### `unconfoundedness_validation`
@@ -9418,7 +12858,14 @@ Unconfoundedness diagnostics for multi-treatment settings.
 ######## `run_unconfoundedness_diagnostics`
 
 ```python
-run_unconfoundedness_diagnostics(data: MultiCausalData, estimate: MultiCausalEstimate, *, threshold: float = 0.1, normalize: Optional[bool] = None, return_summary: bool = True) -> Dict[str, Any]
+run_unconfoundedness_diagnostics(
+    data: MultiCausalData,
+    estimate: MultiCausalEstimate,
+    *,
+    threshold: float = 0.1,
+    normalize: Optional[bool] = None,
+    return_summary: bool = True
+) -> Dict[str, Any]
 ```
 
 Run multi-treatment unconfoundedness diagnostics from data and estimate.
@@ -9429,7 +12876,13 @@ pairwise balance between baseline treatment 0 and each active treatment k.
 ######## `validate_unconfoundedness_balance`
 
 ```python
-validate_unconfoundedness_balance(data: MultiCausalData, estimate: MultiCausalEstimate, *, threshold: float = 0.1, normalize: Optional[bool] = None) -> Dict[str, Any]
+validate_unconfoundedness_balance(
+    data: MultiCausalData,
+    estimate: MultiCausalEstimate,
+    *,
+    threshold: float = 0.1,
+    normalize: Optional[bool] = None
+) -> Dict[str, Any]
 ```
 
 Convenience wrapper returning the balance block only.
@@ -9437,7 +12890,13 @@ Convenience wrapper returning the balance block only.
 ####### `validate_unconfoundedness_balance`
 
 ```python
-validate_unconfoundedness_balance(data: MultiCausalData, estimate: MultiCausalEstimate, *, threshold: float = 0.1, normalize: Optional[bool] = None) -> Dict[str, Any]
+validate_unconfoundedness_balance(
+    data: MultiCausalData,
+    estimate: MultiCausalEstimate,
+    *,
+    threshold: float = 0.1,
+    normalize: Optional[bool] = None
+) -> Dict[str, Any]
 ```
 
 Convenience wrapper returning the balance block only.
@@ -9445,10 +12904,1502 @@ Convenience wrapper returning the balance block only.
 ###### `validate_unconfoundedness_balance`
 
 ```python
-validate_unconfoundedness_balance(data: MultiCausalData, estimate: MultiCausalEstimate, *, threshold: float = 0.1, normalize: Optional[bool] = None) -> Dict[str, Any]
+validate_unconfoundedness_balance(
+    data: MultiCausalData,
+    estimate: MultiCausalEstimate,
+    *,
+    threshold: float = 0.1,
+    normalize: Optional[bool] = None
+) -> Dict[str, Any]
 ```
 
 Convenience wrapper returning the balance block only.
+
+#### `synthetic_control`
+
+**Modules:**
+
+- [**dgp**](#causalis.scenarios.synthetic_control.dgp) –
+- [**missing_panel_plot**](#causalis.scenarios.synthetic_control.missing_panel_plot) –
+- [**model**](#causalis.scenarios.synthetic_control.model) –
+- [**outcome_panel_plot**](#causalis.scenarios.synthetic_control.outcome_panel_plot) –
+- [**refutation**](#causalis.scenarios.synthetic_control.refutation) –
+
+**Classes:**
+
+- [**AugmentedSyntheticControl**](#causalis.scenarios.synthetic_control.AugmentedSyntheticControl) – Augmented Synthetic Control Method (ASCM) for a single treated unit.
+- [**RobustSyntheticControl**](#causalis.scenarios.synthetic_control.RobustSyntheticControl) – Robust Synthetic Control for missing panel outcomes.
+- [**SyntheticControl**](#causalis.scenarios.synthetic_control.SyntheticControl) – Auto-selecting Synthetic Control estimator.
+
+**Functions:**
+
+- [**gap_over_time_plot**](#causalis.scenarios.synthetic_control.gap_over_time_plot) – Plot observed-minus-synthetic gap over time with intervention boundary.
+- [**generate_scm_gamma_26**](#causalis.scenarios.synthetic_control.generate_scm_gamma_26) – Generate realistic Gamma synthetic-control panel data.
+- [**generate_scm_poisson_26**](#causalis.scenarios.synthetic_control.generate_scm_poisson_26) – Generate realistic Poisson synthetic-control panel data.
+- [**observed_vs_synthetic_plot**](#causalis.scenarios.synthetic_control.observed_vs_synthetic_plot) – Plot observed treated path against augmented/SC synthetic paths.
+- [**placebo_att_histogram_plot**](#causalis.scenarios.synthetic_control.placebo_att_histogram_plot) – Plot placebo ATT histogram with treated ATT line.
+- [**run_scm_diagnostics**](#causalis.scenarios.synthetic_control.run_scm_diagnostics) – Run compact SCM diagnostics and save the three v1 diagnostic plots.
+
+##### `ASCM`
+
+```python
+ASCM = AugmentedSyntheticControl
+```
+
+##### `AugmentedSyntheticControl`
+
+```python
+AugmentedSyntheticControl(
+    *,
+    lambda_aug: float = 1.0,
+    lambda_sc: float = 1e-06,
+    max_iter: int = 2000,
+    tol: float = 1e-09,
+    enforce_sum_to_one_augmented: bool = True,
+    inference_policy: Literal["placebo"] = "placebo"
+) -> None
+```
+
+Augmented Synthetic Control Method (ASCM) for a single treated unit.
+
+This implementation uses a ridge-augmented donor-weight formulation:
+it first fits simplex-constrained SCM weights, then computes an augmented
+ridge solution (optionally constrained to sum to one).
+
+Interface:
+
+- fit(data: PanelDataSCM) -> self
+- estimate() -> PanelEstimate
+
+**Functions:**
+
+- [**estimate**](#causalis.scenarios.synthetic_control.AugmentedSyntheticControl.estimate) – Return fitted ASCM estimate as a PanelEstimate contract.
+- [**fit**](#causalis.scenarios.synthetic_control.AugmentedSyntheticControl.fit) – Fit ASCM on a balanced pre/post block extracted from PanelDataSCM.
+
+###### `enforce_sum_to_one_augmented`
+
+```python
+enforce_sum_to_one_augmented = bool(enforce_sum_to_one_augmented)
+```
+
+###### `estimate`
+
+```python
+estimate() -> PanelEstimate
+```
+
+Return fitted ASCM estimate as a PanelEstimate contract.
+
+###### `fit`
+
+```python
+fit(data: PanelDataSCM) -> 'AugmentedSyntheticControl'
+```
+
+Fit ASCM on a balanced pre/post block extracted from PanelDataSCM.
+
+Fit-time ASCM checks enforced here:
+
+- balanced unit-time block for treated + donor units
+- no missing outcomes in pre/post periods
+
+###### `inference_policy`
+
+```python
+inference_policy = str(inference_policy)
+```
+
+###### `lambda_aug`
+
+```python
+lambda_aug = float(lambda_aug)
+```
+
+###### `lambda_sc`
+
+```python
+lambda_sc = float(lambda_sc)
+```
+
+###### `max_iter`
+
+```python
+max_iter = int(max_iter)
+```
+
+###### `tol`
+
+```python
+tol = float(tol)
+```
+
+##### `RSCM`
+
+```python
+RSCM = RobustSyntheticControl
+```
+
+##### `RobustSyntheticControl`
+
+```python
+RobustSyntheticControl(
+    *,
+    lambda_aug: float = 1.0,
+    lambda_sc: float = 1e-06,
+    max_iter: int = 2000,
+    tol: float = 1e-09,
+    enforce_sum_to_one_augmented: bool = True,
+    inference_policy: Literal["placebo"] = "placebo",
+    completion_max_iter: int = 500,
+    completion_tol: float = 1e-06,
+    sv_threshold: float | None = None,
+    sv_threshold_ratio: float = 0.5,
+    max_rank: int | None = None,
+    min_pre_observed: int = 1
+) -> None
+```
+
+Bases: <code>[AugmentedSyntheticControl](#causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl)</code>
+
+Robust Synthetic Control for missing panel outcomes.
+
+This model supports unit-time gaps and missing outcomes by first applying
+low-rank matrix completion (soft-impute style) on the treated + donor panel,
+then fitting standard simplex SC and ridge-augmented weights on the completed
+pre-treatment block.
+
+**Functions:**
+
+- [**fit**](#causalis.scenarios.synthetic_control.RobustSyntheticControl.fit) – Fit robust SC on PanelDataSCM with optional missing outcomes/cells.
+
+###### `completion_max_iter`
+
+```python
+completion_max_iter = int(completion_max_iter)
+```
+
+###### `completion_tol`
+
+```python
+completion_tol = float(completion_tol)
+```
+
+###### `fit`
+
+```python
+fit(data: PanelDataSCM) -> 'RobustSyntheticControl'
+```
+
+Fit robust SC on PanelDataSCM with optional missing outcomes/cells.
+
+Workflow:
+
+1. Build treated + donor panel over pre/post windows.
+1. Complete missing cells by low-rank soft-impute iterations.
+1. Fit simplex SC and ridge-augmented weights on completed pre-period.
+
+###### `inference_policy`
+
+```python
+inference_policy = str(inference_policy)
+```
+
+###### `max_rank`
+
+```python
+max_rank = None if max_rank is None else int(max_rank)
+```
+
+###### `min_pre_observed`
+
+```python
+min_pre_observed = int(min_pre_observed)
+```
+
+###### `sv_threshold`
+
+```python
+sv_threshold = None if sv_threshold is None else float(sv_threshold)
+```
+
+###### `sv_threshold_ratio`
+
+```python
+sv_threshold_ratio = float(sv_threshold_ratio)
+```
+
+##### `SCM`
+
+```python
+SCM = SyntheticControl
+```
+
+##### `SyntheticControl`
+
+```python
+SyntheticControl(
+    *,
+    lambda_aug: float = 1.0,
+    lambda_sc: float = 1e-06,
+    max_iter: int = 2000,
+    tol: float = 1e-09,
+    enforce_sum_to_one_augmented: bool = True,
+    completion_max_iter: int = 500,
+    completion_tol: float = 1e-06,
+    sv_threshold: float | None = None,
+    sv_threshold_ratio: float = 0.5,
+    max_rank: int | None = None,
+    min_pre_observed: int = 1,
+    inference_policy: Literal["placebo"] = "placebo"
+) -> None
+```
+
+Auto-selecting Synthetic Control estimator.
+
+**Parameters:**
+
+- **lambda_aug** (<code>[float](#float)</code>) – Ridge penalty used by the augmented donor-weight step.
+- **lambda_sc** (<code>[float](#float)</code>) – L2 regularization used in simplex-constrained SC weight optimization.
+- **max_iter** (<code>[int](#int)</code>) – Maximum optimizer iterations for simplex-constrained SC weights.
+- **tol** (<code>[float](#float)</code>) – Numerical tolerance used by the SC optimizer.
+- **enforce_sum_to_one_augmented** (<code>[bool](#bool)</code>) – If `True`, project augmented donor weights to sum to one.
+- **completion_max_iter** (<code>[int](#int)</code>) – Maximum matrix-completion iterations used by robust SC.
+- **completion_tol** (<code>[float](#float)</code>) – Relative convergence tolerance for robust SC matrix completion.
+- **sv_threshold** (<code>[float](#float) or None</code>) – Absolute singular-value shrinkage threshold for robust completion.
+  If `None`, `sv_threshold_ratio` times the leading singular value
+  of the initialized matrix is used.
+- **sv_threshold_ratio** (<code>[float](#float)</code>) – Relative threshold used when `sv_threshold` is `None`.
+- **max_rank** (<code>[int](#int) or None</code>) – Optional cap on effective rank in robust matrix completion.
+- **min_pre_observed** (<code>[int](#int)</code>) – Minimum number of observed pre-treatment outcomes required for the
+  treated unit and each retained donor in robust SC.
+
+<details class="note" open markdown="1">
+<summary>Notes</summary>
+
+Model selection is performed during :meth:`fit`. If any treated/donor
+analysis-block cell is missing or marked unobserved, robust SC is used;
+otherwise augmented SC is used.
+
+</details>
+
+**Functions:**
+
+- [**estimate**](#causalis.scenarios.synthetic_control.SyntheticControl.estimate) – Return estimate from the selected synthetic-control delegate model.
+- [**fit**](#causalis.scenarios.synthetic_control.SyntheticControl.fit) – Fit by selecting augmented SC or robust SC from observed missingness.
+
+**Parameters:**
+
+- **lambda_aug** (<code>[float](#float)</code>) – Ridge penalty used by the augmented donor-weight step.
+- **lambda_sc** (<code>[float](#float)</code>) – L2 regularization used in simplex-constrained SC weight optimization.
+- **max_iter** (<code>[int](#int)</code>) – Maximum optimizer iterations for simplex-constrained SC weights.
+- **tol** (<code>[float](#float)</code>) – Numerical tolerance used by the SC optimizer.
+- **enforce_sum_to_one_augmented** (<code>[bool](#bool)</code>) – If `True`, project augmented donor weights to sum to one.
+- **completion_max_iter** (<code>[int](#int)</code>) – Maximum matrix-completion iterations used by robust SC.
+- **completion_tol** (<code>[float](#float)</code>) – Relative convergence tolerance for robust SC matrix completion.
+- **sv_threshold** (<code>[float](#float) or None</code>) – Absolute singular-value shrinkage threshold for robust completion.
+- **sv_threshold_ratio** (<code>[float](#float)</code>) – Relative threshold used when `sv_threshold` is `None`.
+- **max_rank** (<code>[int](#int) or None</code>) – Optional cap on effective rank in robust matrix completion.
+- **min_pre_observed** (<code>[int](#int)</code>) – Minimum observed treated/donor pre-period outcomes for robust SC.
+
+###### `completion_max_iter`
+
+```python
+completion_max_iter = int(completion_max_iter)
+```
+
+###### `completion_tol`
+
+```python
+completion_tol = float(completion_tol)
+```
+
+###### `enforce_sum_to_one_augmented`
+
+```python
+enforce_sum_to_one_augmented = bool(enforce_sum_to_one_augmented)
+```
+
+###### `estimate`
+
+```python
+estimate() -> PanelEstimate
+```
+
+Return estimate from the selected synthetic-control delegate model.
+
+**Returns:**
+
+- <code>[PanelEstimate](#causalis.data_contracts.panel_estimate.PanelEstimate)</code> – Delegate estimate with selection diagnostics appended:
+  `selected_model` and `selection_reason`.
+
+**Raises:**
+
+- <code>[RuntimeError](#RuntimeError)</code> – If the estimator has not been successfully fitted.
+
+###### `fit`
+
+```python
+fit(data: PanelDataSCM) -> 'SyntheticControl'
+```
+
+Fit by selecting augmented SC or robust SC from observed missingness.
+
+**Parameters:**
+
+- **data** (<code>[PanelDataSCM](#causalis.data_contracts.panel_data_scm.PanelDataSCM)</code>) – Panel data contract containing treated unit, donors, and pre/post
+  time windows.
+
+**Returns:**
+
+- <code>[SyntheticControl](#causalis.scenarios.synthetic_control.model.SyntheticControl)</code> – Fitted estimator with an internally selected delegate model.
+
+**Raises:**
+
+- <code>[ValueError](#ValueError)</code> – If `data` is not a `PanelDataSCM` object or delegate fit-time
+  validation fails.
+
+###### `inference_policy`
+
+```python
+inference_policy = str(inference_policy)
+```
+
+###### `lambda_aug`
+
+```python
+lambda_aug = float(lambda_aug)
+```
+
+###### `lambda_sc`
+
+```python
+lambda_sc = float(lambda_sc)
+```
+
+###### `max_iter`
+
+```python
+max_iter = int(max_iter)
+```
+
+###### `max_rank`
+
+```python
+max_rank = None if max_rank is None else int(max_rank)
+```
+
+###### `min_pre_observed`
+
+```python
+min_pre_observed = int(min_pre_observed)
+```
+
+###### `sv_threshold`
+
+```python
+sv_threshold = None if sv_threshold is None else float(sv_threshold)
+```
+
+###### `sv_threshold_ratio`
+
+```python
+sv_threshold_ratio = float(sv_threshold_ratio)
+```
+
+###### `tol`
+
+```python
+tol = float(tol)
+```
+
+##### `dgp`
+
+**Functions:**
+
+- [**generate_scm_gamma_26**](#causalis.scenarios.synthetic_control.dgp.generate_scm_gamma_26) – Generate realistic Gamma synthetic-control panel data.
+- [**generate_scm_poisson_26**](#causalis.scenarios.synthetic_control.dgp.generate_scm_poisson_26) – Generate realistic Poisson synthetic-control panel data.
+
+###### `generate_scm_gamma_26`
+
+```python
+generate_scm_gamma_26(
+    n: Optional[int] = None,
+    seed: int = 42,
+    return_panel_data: bool = True,
+    include_oracles: bool = False,
+    n_donors: int = 10,
+    n_pre_periods: Optional[int] = 24,
+    n_post_periods: Optional[int] = 3,
+    treatment_effect_rate: float = 0.12,
+    treatment_effect_slope: float = 0.01,
+    missing_outcome_frac: float = 0.0,
+    **advanced_params: float
+) -> Union[pd.DataFrame, PanelDataSCM]
+```
+
+Generate realistic Gamma synthetic-control panel data.
+
+**Parameters:**
+
+- **n** (<code>[int](#int) or None</code>) – Legacy compatibility argument. Scenario defaults no longer infer periods
+  from `n`; default horizon is controlled by `n_pre_periods` and
+  `n_post_periods`.
+- **seed** (<code>[int](#int)</code>) – Random seed.
+- **return_panel_data** (<code>[bool](#bool)</code>) – If True, return a :class:`~causalis.data_contracts.panel_data_scm.PanelDataSCM`
+  object. If False, return a pandas DataFrame.
+- **include_oracles** (<code>[bool](#bool)</code>) – Whether to include oracle truth columns in the returned data:
+  `is_treated_unit`, `y_cf`, `tau_realized_true`, `mu_cf`,
+  `mu_treated`, `tau_mean_true`.
+  Scenario-level outputs always exclude synthetic covariates
+  `exposure`, `macro_index`, `seasonality_index`.
+- **n_donors** (<code>[int](#int)</code>) – Number of donor units.
+- **n_pre_periods** (<code>[int](#int) or None</code>) – Number of pre-treatment periods. Preferred explicit horizon control.
+  When both `n_pre_periods` and `n_post_periods` are omitted, scenario
+  defaults are used (`36` pre, `12` post). The generated panel includes
+  one explicit intervention-anchor period, so each unit has
+  `n_pre_periods + 1 + n_post_periods` rows.
+- **n_post_periods** (<code>[int](#int) or None</code>) – Number of post-treatment periods. Must be provided together with
+  `n_pre_periods` when using explicit horizon control.
+- **treatment_effect_rate** (<code>[float](#float)</code>) – Long-run post-treatment relative effect scale. The first post period is
+  attenuated by a ramp factor `1 - exp(-1 / 2.5)` (about 0.33x when slope
+  is zero).
+- **treatment_effect_slope** (<code>[float](#float)</code>) – Linear slope of the post-treatment relative effect path.
+- **missing_outcome_frac** (<code>[float](#float)</code>) – Fraction of outcomes to mask as missing in the base generator.
+- \*\***advanced_params** – Forwarded to :func:`causalis.dgp.panel_data_scm.generate_scm_gamma_data`.
+  Common advanced knobs include `n_pre_periods`, `n_post_periods`,
+  and `time_start`.
+
+**Returns:**
+
+- <code>[DataFrame](#pandas.DataFrame) or [PanelDataSCM](#causalis.data_contracts.panel_data_scm.PanelDataSCM)</code> – Long panel data for SCM experiments.
+
+<details class="note" open markdown="1">
+<summary>Notes</summary>
+
+Time-axis semantics:
+
+- `n_pre_periods`: number of periods strictly before the intervention anchor.
+- One explicit intervention-anchor period is included in the output.
+- `n_post_periods`: number of periods strictly after the intervention anchor.
+- `time_start`: offset for the first `calendar_time` period relative to
+  `calendar_start` (default `calendar_start="2000-01"` and `time_start=1`).
+- `treatment_start`: first treated/post period in the returned panel
+  (the intervention anchor is one period earlier).
+- With this function's default arguments, the explicit values are:
+  `n_pre_periods=24`, `n_post_periods=3`, `calendar_start='2000-01'`,
+  `time_start=1`, `treatment_start=Period('2002-02', 'M')`,
+  intervention anchor at `Period('2002-01', 'M')`.
+
+</details>
+
+###### `generate_scm_poisson_26`
+
+```python
+generate_scm_poisson_26(
+    n: Optional[int] = None,
+    seed: int = 42,
+    return_panel_data: bool = True,
+    include_oracles: bool = False,
+    n_donors: int = 10,
+    n_pre_periods: Optional[int] = 24,
+    n_post_periods: Optional[int] = 3,
+    treatment_effect_rate: float = 0.1,
+    treatment_effect_slope: float = 0.005,
+    donor_missing_block_frac: float = 0.08,
+    **advanced_params: float
+) -> Union[pd.DataFrame, PanelDataSCM]
+```
+
+Generate realistic Poisson synthetic-control panel data.
+
+**Parameters:**
+
+- **n** (<code>[int](#int) or None</code>) – Legacy compatibility argument. Scenario defaults no longer infer periods
+  from `n`; default horizon is controlled by `n_pre_periods` and
+  `n_post_periods`.
+- **seed** (<code>[int](#int)</code>) – Random seed.
+- **return_panel_data** (<code>[bool](#bool)</code>) – If True, return a :class:`~causalis.data_contracts.panel_data_scm.PanelDataSCM`
+  object. If False, return a pandas DataFrame.
+- **include_oracles** (<code>[bool](#bool)</code>) – Whether to include oracle truth columns in the returned data:
+  `is_treated_unit`, `y_cf`, `tau_realized_true`, `mu_cf`,
+  `mu_treated`, `tau_mean_true`.
+  Scenario-level outputs always exclude synthetic covariates
+  `exposure`, `macro_index`, `seasonality_index`.
+- **n_donors** (<code>[int](#int)</code>) – Number of donor units.
+- **n_pre_periods** (<code>[int](#int) or None</code>) – Number of pre-treatment periods. Preferred explicit horizon control.
+  When both `n_pre_periods` and `n_post_periods` are omitted, scenario
+  defaults are used (`36` pre, `12` post). The generated panel includes
+  one explicit intervention-anchor period, so each unit has
+  `n_pre_periods + 1 + n_post_periods` rows.
+- **n_post_periods** (<code>[int](#int) or None</code>) – Number of post-treatment periods. Must be provided together with
+  `n_pre_periods` when using explicit horizon control.
+- **treatment_effect_rate** (<code>[float](#float)</code>) – Long-run post-treatment relative effect scale. The first post period is
+  attenuated by a ramp factor `1 - exp(-1 / 2.5)` (about 0.33x when slope
+  is zero).
+- **treatment_effect_slope** (<code>[float](#float)</code>) – Linear slope of the post-treatment relative effect path.
+- **donor_missing_block_frac** (<code>[float](#float)</code>) – Fraction of donor-only rows to mask via contiguous missing-time blocks.
+- \*\***advanced_params** – Forwarded to :func:`causalis.dgp.panel_data_scm.generate_scm_poisson_data`.
+  Common advanced knobs include `n_pre_periods`, `n_post_periods`,
+  and `time_start`.
+
+**Returns:**
+
+- <code>[DataFrame](#pandas.DataFrame) or [PanelDataSCM](#causalis.data_contracts.panel_data_scm.PanelDataSCM)</code> – Long panel data for SCM experiments.
+
+<details class="note" open markdown="1">
+<summary>Notes</summary>
+
+Time-axis semantics:
+
+- `n_pre_periods`: number of periods strictly before the intervention anchor.
+- One explicit intervention-anchor period is included in the output.
+- `n_post_periods`: number of periods strictly after the intervention anchor.
+- `time_start`: offset for the first `calendar_time` period relative to
+  `calendar_start` (default `calendar_start="2000-01"` and `time_start=1`).
+- `treatment_start`: intervention boundary period, computed as
+  `calendar_start + (time_start - 1) + n_pre_periods`.
+- With this function's default arguments, the explicit values are:
+  `n_pre_periods=36`, `n_post_periods=12`, `calendar_start='2000-01'`,
+  `time_start=1`, `treatment_start=Period('2003-01', 'M')`,
+  first post period at `Period('2003-02', 'M')`.
+
+</details>
+
+##### `gap_over_time_plot`
+
+```python
+gap_over_time_plot(
+    estimate: PanelEstimate,
+    *,
+    show_sc: bool = True,
+    figsize: Tuple[float, float] = (10.0, 5.5),
+    dpi: int = 220,
+    font_scale: float = 1.1
+) -> plt.Figure
+```
+
+Plot observed-minus-synthetic gap over time with intervention boundary.
+
+##### `generate_scm_gamma_26`
+
+```python
+generate_scm_gamma_26(
+    n: Optional[int] = None,
+    seed: int = 42,
+    return_panel_data: bool = True,
+    include_oracles: bool = False,
+    n_donors: int = 10,
+    n_pre_periods: Optional[int] = 24,
+    n_post_periods: Optional[int] = 3,
+    treatment_effect_rate: float = 0.12,
+    treatment_effect_slope: float = 0.01,
+    missing_outcome_frac: float = 0.0,
+    **advanced_params: float
+) -> Union[pd.DataFrame, PanelDataSCM]
+```
+
+Generate realistic Gamma synthetic-control panel data.
+
+**Parameters:**
+
+- **n** (<code>[int](#int) or None</code>) – Legacy compatibility argument. Scenario defaults no longer infer periods
+  from `n`; default horizon is controlled by `n_pre_periods` and
+  `n_post_periods`.
+- **seed** (<code>[int](#int)</code>) – Random seed.
+- **return_panel_data** (<code>[bool](#bool)</code>) – If True, return a :class:`~causalis.data_contracts.panel_data_scm.PanelDataSCM`
+  object. If False, return a pandas DataFrame.
+- **include_oracles** (<code>[bool](#bool)</code>) – Whether to include oracle truth columns in the returned data:
+  `is_treated_unit`, `y_cf`, `tau_realized_true`, `mu_cf`,
+  `mu_treated`, `tau_mean_true`.
+  Scenario-level outputs always exclude synthetic covariates
+  `exposure`, `macro_index`, `seasonality_index`.
+- **n_donors** (<code>[int](#int)</code>) – Number of donor units.
+- **n_pre_periods** (<code>[int](#int) or None</code>) – Number of pre-treatment periods. Preferred explicit horizon control.
+  When both `n_pre_periods` and `n_post_periods` are omitted, scenario
+  defaults are used (`36` pre, `12` post). The generated panel includes
+  one explicit intervention-anchor period, so each unit has
+  `n_pre_periods + 1 + n_post_periods` rows.
+- **n_post_periods** (<code>[int](#int) or None</code>) – Number of post-treatment periods. Must be provided together with
+  `n_pre_periods` when using explicit horizon control.
+- **treatment_effect_rate** (<code>[float](#float)</code>) – Long-run post-treatment relative effect scale. The first post period is
+  attenuated by a ramp factor `1 - exp(-1 / 2.5)` (about 0.33x when slope
+  is zero).
+- **treatment_effect_slope** (<code>[float](#float)</code>) – Linear slope of the post-treatment relative effect path.
+- **missing_outcome_frac** (<code>[float](#float)</code>) – Fraction of outcomes to mask as missing in the base generator.
+- \*\***advanced_params** – Forwarded to :func:`causalis.dgp.panel_data_scm.generate_scm_gamma_data`.
+  Common advanced knobs include `n_pre_periods`, `n_post_periods`,
+  and `time_start`.
+
+**Returns:**
+
+- <code>[DataFrame](#pandas.DataFrame) or [PanelDataSCM](#causalis.data_contracts.panel_data_scm.PanelDataSCM)</code> – Long panel data for SCM experiments.
+
+<details class="note" open markdown="1">
+<summary>Notes</summary>
+
+Time-axis semantics:
+
+- `n_pre_periods`: number of periods strictly before the intervention anchor.
+- One explicit intervention-anchor period is included in the output.
+- `n_post_periods`: number of periods strictly after the intervention anchor.
+- `time_start`: offset for the first `calendar_time` period relative to
+  `calendar_start` (default `calendar_start="2000-01"` and `time_start=1`).
+- `treatment_start`: first treated/post period in the returned panel
+  (the intervention anchor is one period earlier).
+- With this function's default arguments, the explicit values are:
+  `n_pre_periods=24`, `n_post_periods=3`, `calendar_start='2000-01'`,
+  `time_start=1`, `treatment_start=Period('2002-02', 'M')`,
+  intervention anchor at `Period('2002-01', 'M')`.
+
+</details>
+
+##### `generate_scm_poisson_26`
+
+```python
+generate_scm_poisson_26(
+    n: Optional[int] = None,
+    seed: int = 42,
+    return_panel_data: bool = True,
+    include_oracles: bool = False,
+    n_donors: int = 10,
+    n_pre_periods: Optional[int] = 24,
+    n_post_periods: Optional[int] = 3,
+    treatment_effect_rate: float = 0.1,
+    treatment_effect_slope: float = 0.005,
+    donor_missing_block_frac: float = 0.08,
+    **advanced_params: float
+) -> Union[pd.DataFrame, PanelDataSCM]
+```
+
+Generate realistic Poisson synthetic-control panel data.
+
+**Parameters:**
+
+- **n** (<code>[int](#int) or None</code>) – Legacy compatibility argument. Scenario defaults no longer infer periods
+  from `n`; default horizon is controlled by `n_pre_periods` and
+  `n_post_periods`.
+- **seed** (<code>[int](#int)</code>) – Random seed.
+- **return_panel_data** (<code>[bool](#bool)</code>) – If True, return a :class:`~causalis.data_contracts.panel_data_scm.PanelDataSCM`
+  object. If False, return a pandas DataFrame.
+- **include_oracles** (<code>[bool](#bool)</code>) – Whether to include oracle truth columns in the returned data:
+  `is_treated_unit`, `y_cf`, `tau_realized_true`, `mu_cf`,
+  `mu_treated`, `tau_mean_true`.
+  Scenario-level outputs always exclude synthetic covariates
+  `exposure`, `macro_index`, `seasonality_index`.
+- **n_donors** (<code>[int](#int)</code>) – Number of donor units.
+- **n_pre_periods** (<code>[int](#int) or None</code>) – Number of pre-treatment periods. Preferred explicit horizon control.
+  When both `n_pre_periods` and `n_post_periods` are omitted, scenario
+  defaults are used (`36` pre, `12` post). The generated panel includes
+  one explicit intervention-anchor period, so each unit has
+  `n_pre_periods + 1 + n_post_periods` rows.
+- **n_post_periods** (<code>[int](#int) or None</code>) – Number of post-treatment periods. Must be provided together with
+  `n_pre_periods` when using explicit horizon control.
+- **treatment_effect_rate** (<code>[float](#float)</code>) – Long-run post-treatment relative effect scale. The first post period is
+  attenuated by a ramp factor `1 - exp(-1 / 2.5)` (about 0.33x when slope
+  is zero).
+- **treatment_effect_slope** (<code>[float](#float)</code>) – Linear slope of the post-treatment relative effect path.
+- **donor_missing_block_frac** (<code>[float](#float)</code>) – Fraction of donor-only rows to mask via contiguous missing-time blocks.
+- \*\***advanced_params** – Forwarded to :func:`causalis.dgp.panel_data_scm.generate_scm_poisson_data`.
+  Common advanced knobs include `n_pre_periods`, `n_post_periods`,
+  and `time_start`.
+
+**Returns:**
+
+- <code>[DataFrame](#pandas.DataFrame) or [PanelDataSCM](#causalis.data_contracts.panel_data_scm.PanelDataSCM)</code> – Long panel data for SCM experiments.
+
+<details class="note" open markdown="1">
+<summary>Notes</summary>
+
+Time-axis semantics:
+
+- `n_pre_periods`: number of periods strictly before the intervention anchor.
+- One explicit intervention-anchor period is included in the output.
+- `n_post_periods`: number of periods strictly after the intervention anchor.
+- `time_start`: offset for the first `calendar_time` period relative to
+  `calendar_start` (default `calendar_start="2000-01"` and `time_start=1`).
+- `treatment_start`: intervention boundary period, computed as
+  `calendar_start + (time_start - 1) + n_pre_periods`.
+- With this function's default arguments, the explicit values are:
+  `n_pre_periods=36`, `n_post_periods=12`, `calendar_start='2000-01'`,
+  `time_start=1`, `treatment_start=Period('2003-01', 'M')`,
+  first post period at `Period('2003-02', 'M')`.
+
+</details>
+
+##### `missing_panel_plot`
+
+**Functions:**
+
+- [**missing_panel_plot**](#causalis.scenarios.synthetic_control.missing_panel_plot.missing_panel_plot) – Plot panel missingness as a unit-by-time heatmap.
+
+###### `missing_panel_plot`
+
+```python
+missing_panel_plot(
+    paneldata: PanelDataSCM,
+    *,
+    show_intervention: bool = True,
+    max_xticks: int = 12,
+    figsize: Tuple[float, float] = (10.0, 5.5),
+    dpi: int = 220,
+    font_scale: float = 1.1,
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False
+) -> plt.Figure
+```
+
+Plot panel missingness as a unit-by-time heatmap.
+
+A cell value of 0 means observed and 1 means missing. Missingness is
+inferred from `observed_col` when available (plus outcome NaNs),
+otherwise directly from outcome NaNs.
+
+**Parameters:**
+
+- **paneldata** (<code>[PanelDataSCM](#causalis.data_contracts.panel_data_scm.PanelDataSCM)</code>) – Validated long-format panel contract.
+- **show_intervention** (<code>[bool](#bool)</code>) – If True, draw the intervention boundary as a vertical dashed line.
+- **max_xticks** (<code>[int](#int)</code>) – Maximum number of x-axis tick labels shown.
+- **figsize** (<code>[tuple](#tuple)</code>) – Figure size in inches.
+- **dpi** (<code>[int](#int)</code>) – Dots per inch.
+- **font_scale** (<code>[float](#float)</code>) – Font scaling factor.
+- **save** (<code>[str](#str)</code>) – Optional path to save the figure.
+- **save_dpi** (<code>[int](#int)</code>) – DPI for saved raster outputs.
+- **transparent** (<code>[bool](#bool)</code>) – Whether to save with a transparent background.
+
+**Returns:**
+
+- <code>[Figure](#matplotlib.figure.Figure)</code> – The generated figure.
+
+##### `model`
+
+**Classes:**
+
+- [**AugmentedSyntheticControl**](#causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl) – Augmented Synthetic Control Method (ASCM) for a single treated unit.
+- [**RobustSyntheticControl**](#causalis.scenarios.synthetic_control.model.RobustSyntheticControl) – Robust Synthetic Control for missing panel outcomes.
+- [**SyntheticControl**](#causalis.scenarios.synthetic_control.model.SyntheticControl) – Auto-selecting Synthetic Control estimator.
+
+###### `ASCM`
+
+```python
+ASCM = AugmentedSyntheticControl
+```
+
+###### `AugmentedSyntheticControl`
+
+```python
+AugmentedSyntheticControl(
+    *,
+    lambda_aug: float = 1.0,
+    lambda_sc: float = 1e-06,
+    max_iter: int = 2000,
+    tol: float = 1e-09,
+    enforce_sum_to_one_augmented: bool = True,
+    inference_policy: Literal["placebo"] = "placebo"
+) -> None
+```
+
+Augmented Synthetic Control Method (ASCM) for a single treated unit.
+
+This implementation uses a ridge-augmented donor-weight formulation:
+it first fits simplex-constrained SCM weights, then computes an augmented
+ridge solution (optionally constrained to sum to one).
+
+Interface:
+
+- fit(data: PanelDataSCM) -> self
+- estimate() -> PanelEstimate
+
+**Functions:**
+
+- [**estimate**](#causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl.estimate) – Return fitted ASCM estimate as a PanelEstimate contract.
+- [**fit**](#causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl.fit) – Fit ASCM on a balanced pre/post block extracted from PanelDataSCM.
+
+####### `enforce_sum_to_one_augmented`
+
+```python
+enforce_sum_to_one_augmented = bool(enforce_sum_to_one_augmented)
+```
+
+####### `estimate`
+
+```python
+estimate() -> PanelEstimate
+```
+
+Return fitted ASCM estimate as a PanelEstimate contract.
+
+####### `fit`
+
+```python
+fit(data: PanelDataSCM) -> 'AugmentedSyntheticControl'
+```
+
+Fit ASCM on a balanced pre/post block extracted from PanelDataSCM.
+
+Fit-time ASCM checks enforced here:
+
+- balanced unit-time block for treated + donor units
+- no missing outcomes in pre/post periods
+
+####### `inference_policy`
+
+```python
+inference_policy = str(inference_policy)
+```
+
+####### `lambda_aug`
+
+```python
+lambda_aug = float(lambda_aug)
+```
+
+####### `lambda_sc`
+
+```python
+lambda_sc = float(lambda_sc)
+```
+
+####### `max_iter`
+
+```python
+max_iter = int(max_iter)
+```
+
+####### `tol`
+
+```python
+tol = float(tol)
+```
+
+###### `RSCM`
+
+```python
+RSCM = RobustSyntheticControl
+```
+
+###### `RobustSyntheticControl`
+
+```python
+RobustSyntheticControl(
+    *,
+    lambda_aug: float = 1.0,
+    lambda_sc: float = 1e-06,
+    max_iter: int = 2000,
+    tol: float = 1e-09,
+    enforce_sum_to_one_augmented: bool = True,
+    inference_policy: Literal["placebo"] = "placebo",
+    completion_max_iter: int = 500,
+    completion_tol: float = 1e-06,
+    sv_threshold: float | None = None,
+    sv_threshold_ratio: float = 0.5,
+    max_rank: int | None = None,
+    min_pre_observed: int = 1
+) -> None
+```
+
+Bases: <code>[AugmentedSyntheticControl](#causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl)</code>
+
+Robust Synthetic Control for missing panel outcomes.
+
+This model supports unit-time gaps and missing outcomes by first applying
+low-rank matrix completion (soft-impute style) on the treated + donor panel,
+then fitting standard simplex SC and ridge-augmented weights on the completed
+pre-treatment block.
+
+**Functions:**
+
+- [**fit**](#causalis.scenarios.synthetic_control.model.RobustSyntheticControl.fit) – Fit robust SC on PanelDataSCM with optional missing outcomes/cells.
+
+####### `completion_max_iter`
+
+```python
+completion_max_iter = int(completion_max_iter)
+```
+
+####### `completion_tol`
+
+```python
+completion_tol = float(completion_tol)
+```
+
+####### `fit`
+
+```python
+fit(data: PanelDataSCM) -> 'RobustSyntheticControl'
+```
+
+Fit robust SC on PanelDataSCM with optional missing outcomes/cells.
+
+Workflow:
+
+1. Build treated + donor panel over pre/post windows.
+1. Complete missing cells by low-rank soft-impute iterations.
+1. Fit simplex SC and ridge-augmented weights on completed pre-period.
+
+####### `inference_policy`
+
+```python
+inference_policy = str(inference_policy)
+```
+
+####### `max_rank`
+
+```python
+max_rank = None if max_rank is None else int(max_rank)
+```
+
+####### `min_pre_observed`
+
+```python
+min_pre_observed = int(min_pre_observed)
+```
+
+####### `sv_threshold`
+
+```python
+sv_threshold = None if sv_threshold is None else float(sv_threshold)
+```
+
+####### `sv_threshold_ratio`
+
+```python
+sv_threshold_ratio = float(sv_threshold_ratio)
+```
+
+###### `SCM`
+
+```python
+SCM = SyntheticControl
+```
+
+###### `SyntheticControl`
+
+```python
+SyntheticControl(
+    *,
+    lambda_aug: float = 1.0,
+    lambda_sc: float = 1e-06,
+    max_iter: int = 2000,
+    tol: float = 1e-09,
+    enforce_sum_to_one_augmented: bool = True,
+    completion_max_iter: int = 500,
+    completion_tol: float = 1e-06,
+    sv_threshold: float | None = None,
+    sv_threshold_ratio: float = 0.5,
+    max_rank: int | None = None,
+    min_pre_observed: int = 1,
+    inference_policy: Literal["placebo"] = "placebo"
+) -> None
+```
+
+Auto-selecting Synthetic Control estimator.
+
+**Parameters:**
+
+- **lambda_aug** (<code>[float](#float)</code>) – Ridge penalty used by the augmented donor-weight step.
+- **lambda_sc** (<code>[float](#float)</code>) – L2 regularization used in simplex-constrained SC weight optimization.
+- **max_iter** (<code>[int](#int)</code>) – Maximum optimizer iterations for simplex-constrained SC weights.
+- **tol** (<code>[float](#float)</code>) – Numerical tolerance used by the SC optimizer.
+- **enforce_sum_to_one_augmented** (<code>[bool](#bool)</code>) – If `True`, project augmented donor weights to sum to one.
+- **completion_max_iter** (<code>[int](#int)</code>) – Maximum matrix-completion iterations used by robust SC.
+- **completion_tol** (<code>[float](#float)</code>) – Relative convergence tolerance for robust SC matrix completion.
+- **sv_threshold** (<code>[float](#float) or None</code>) – Absolute singular-value shrinkage threshold for robust completion.
+  If `None`, `sv_threshold_ratio` times the leading singular value
+  of the initialized matrix is used.
+- **sv_threshold_ratio** (<code>[float](#float)</code>) – Relative threshold used when `sv_threshold` is `None`.
+- **max_rank** (<code>[int](#int) or None</code>) – Optional cap on effective rank in robust matrix completion.
+- **min_pre_observed** (<code>[int](#int)</code>) – Minimum number of observed pre-treatment outcomes required for the
+  treated unit and each retained donor in robust SC.
+
+<details class="note" open markdown="1">
+<summary>Notes</summary>
+
+Model selection is performed during :meth:`fit`. If any treated/donor
+analysis-block cell is missing or marked unobserved, robust SC is used;
+otherwise augmented SC is used.
+
+</details>
+
+**Functions:**
+
+- [**estimate**](#causalis.scenarios.synthetic_control.model.SyntheticControl.estimate) – Return estimate from the selected synthetic-control delegate model.
+- [**fit**](#causalis.scenarios.synthetic_control.model.SyntheticControl.fit) – Fit by selecting augmented SC or robust SC from observed missingness.
+
+**Parameters:**
+
+- **lambda_aug** (<code>[float](#float)</code>) – Ridge penalty used by the augmented donor-weight step.
+- **lambda_sc** (<code>[float](#float)</code>) – L2 regularization used in simplex-constrained SC weight optimization.
+- **max_iter** (<code>[int](#int)</code>) – Maximum optimizer iterations for simplex-constrained SC weights.
+- **tol** (<code>[float](#float)</code>) – Numerical tolerance used by the SC optimizer.
+- **enforce_sum_to_one_augmented** (<code>[bool](#bool)</code>) – If `True`, project augmented donor weights to sum to one.
+- **completion_max_iter** (<code>[int](#int)</code>) – Maximum matrix-completion iterations used by robust SC.
+- **completion_tol** (<code>[float](#float)</code>) – Relative convergence tolerance for robust SC matrix completion.
+- **sv_threshold** (<code>[float](#float) or None</code>) – Absolute singular-value shrinkage threshold for robust completion.
+- **sv_threshold_ratio** (<code>[float](#float)</code>) – Relative threshold used when `sv_threshold` is `None`.
+- **max_rank** (<code>[int](#int) or None</code>) – Optional cap on effective rank in robust matrix completion.
+- **min_pre_observed** (<code>[int](#int)</code>) – Minimum observed treated/donor pre-period outcomes for robust SC.
+
+####### `completion_max_iter`
+
+```python
+completion_max_iter = int(completion_max_iter)
+```
+
+####### `completion_tol`
+
+```python
+completion_tol = float(completion_tol)
+```
+
+####### `enforce_sum_to_one_augmented`
+
+```python
+enforce_sum_to_one_augmented = bool(enforce_sum_to_one_augmented)
+```
+
+####### `estimate`
+
+```python
+estimate() -> PanelEstimate
+```
+
+Return estimate from the selected synthetic-control delegate model.
+
+**Returns:**
+
+- <code>[PanelEstimate](#causalis.data_contracts.panel_estimate.PanelEstimate)</code> – Delegate estimate with selection diagnostics appended:
+  `selected_model` and `selection_reason`.
+
+**Raises:**
+
+- <code>[RuntimeError](#RuntimeError)</code> – If the estimator has not been successfully fitted.
+
+####### `fit`
+
+```python
+fit(data: PanelDataSCM) -> 'SyntheticControl'
+```
+
+Fit by selecting augmented SC or robust SC from observed missingness.
+
+**Parameters:**
+
+- **data** (<code>[PanelDataSCM](#causalis.data_contracts.panel_data_scm.PanelDataSCM)</code>) – Panel data contract containing treated unit, donors, and pre/post
+  time windows.
+
+**Returns:**
+
+- <code>[SyntheticControl](#causalis.scenarios.synthetic_control.model.SyntheticControl)</code> – Fitted estimator with an internally selected delegate model.
+
+**Raises:**
+
+- <code>[ValueError](#ValueError)</code> – If `data` is not a `PanelDataSCM` object or delegate fit-time
+  validation fails.
+
+####### `inference_policy`
+
+```python
+inference_policy = str(inference_policy)
+```
+
+####### `lambda_aug`
+
+```python
+lambda_aug = float(lambda_aug)
+```
+
+####### `lambda_sc`
+
+```python
+lambda_sc = float(lambda_sc)
+```
+
+####### `max_iter`
+
+```python
+max_iter = int(max_iter)
+```
+
+####### `max_rank`
+
+```python
+max_rank = None if max_rank is None else int(max_rank)
+```
+
+####### `min_pre_observed`
+
+```python
+min_pre_observed = int(min_pre_observed)
+```
+
+####### `sv_threshold`
+
+```python
+sv_threshold = None if sv_threshold is None else float(sv_threshold)
+```
+
+####### `sv_threshold_ratio`
+
+```python
+sv_threshold_ratio = float(sv_threshold_ratio)
+```
+
+####### `tol`
+
+```python
+tol = float(tol)
+```
+
+##### `observed_vs_synthetic_plot`
+
+```python
+observed_vs_synthetic_plot(
+    estimate: PanelEstimate,
+    *,
+    show_sc: bool = True,
+    figsize: Tuple[float, float] = (10.0, 5.5),
+    dpi: int = 220,
+    font_scale: float = 1.1
+) -> plt.Figure
+```
+
+Plot observed treated path against augmented/SC synthetic paths.
+
+##### `outcome_panel_plot`
+
+**Functions:**
+
+- [**outcome_panel_plot**](#causalis.scenarios.synthetic_control.outcome_panel_plot.outcome_panel_plot) – Plot SCM panel outcomes over time.
+
+###### `outcome_panel_plot`
+
+```python
+outcome_panel_plot(
+    paneldata: PanelDataSCM,
+    *,
+    show_donor_units: bool = True,
+    donor_max_lines: Optional[int] = 20,
+    show_donor_mean: bool = True,
+    donor_alpha: float = 0.35,
+    donor_linewidth: float = 1.2,
+    shade_post_period: bool = True,
+    figsize: Tuple[float, float] = (10.0, 5.5),
+    dpi: int = 220,
+    font_scale: float = 1.1,
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False
+) -> plt.Figure
+```
+
+Plot SCM panel outcomes over time.
+
+The figure shows treated-unit outcomes over time, optional donor-unit paths,
+optional donor mean, and the intervention boundary.
+
+**Parameters:**
+
+- **paneldata** (<code>[PanelDataSCM](#causalis.data_contracts.panel_data_scm.PanelDataSCM)</code>) – Validated long-format panel contract.
+- **show_donor_units** (<code>[bool](#bool)</code>) – If True, draw donor trajectories.
+- **donor_max_lines** (<code>[int](#int) or None</code>) – Maximum number of donor-unit lines to draw. `None` draws all donors.
+- **show_donor_mean** (<code>[bool](#bool)</code>) – If True, draw the donor-pool mean outcome path.
+- **donor_alpha** (<code>[float](#float)</code>) – Opacity for donor-unit lines.
+- **donor_linewidth** (<code>[float](#float)</code>) – Line width for donor-unit lines.
+- **shade_post_period** (<code>[bool](#bool)</code>) – If True, lightly shade the post-treatment region.
+- **figsize** (<code>[tuple](#tuple)</code>) – Figure size in inches.
+- **dpi** (<code>[int](#int)</code>) – Dots per inch.
+- **font_scale** (<code>[float](#float)</code>) – Font scaling factor.
+- **save** (<code>[str](#str)</code>) – Optional path to save the figure.
+- **save_dpi** (<code>[int](#int)</code>) – DPI for saved raster outputs.
+- **transparent** (<code>[bool](#bool)</code>) – Whether to save with a transparent background.
+
+**Returns:**
+
+- <code>[Figure](#matplotlib.figure.Figure)</code> – The generated figure.
+
+##### `placebo_att_histogram_plot`
+
+```python
+placebo_att_histogram_plot(
+    estimate: PanelEstimate,
+    *,
+    source: Literal["augmented", "sc"] = "augmented",
+    bins: Optional[int] = None,
+    figsize: Tuple[float, float] = (10.0, 5.5),
+    dpi: int = 220,
+    font_scale: float = 1.1
+) -> plt.Figure
+```
+
+Plot placebo ATT histogram with treated ATT line.
+
+##### `refutation`
+
+**Modules:**
+
+- [**diagnostic_plots**](#causalis.scenarios.synthetic_control.refutation.diagnostic_plots) –
+- [**missing_panel_plot**](#causalis.scenarios.synthetic_control.refutation.missing_panel_plot) –
+- [**outcome_panel_plot**](#causalis.scenarios.synthetic_control.refutation.outcome_panel_plot) –
+- [**scm_diagnostics**](#causalis.scenarios.synthetic_control.refutation.scm_diagnostics) –
+
+**Functions:**
+
+- [**gap_over_time_plot**](#causalis.scenarios.synthetic_control.refutation.gap_over_time_plot) – Plot observed-minus-synthetic gap over time with intervention boundary.
+- [**observed_vs_synthetic_plot**](#causalis.scenarios.synthetic_control.refutation.observed_vs_synthetic_plot) – Plot observed treated path against augmented/SC synthetic paths.
+- [**placebo_att_histogram_plot**](#causalis.scenarios.synthetic_control.refutation.placebo_att_histogram_plot) – Plot placebo ATT histogram with treated ATT line.
+- [**run_scm_diagnostics**](#causalis.scenarios.synthetic_control.refutation.run_scm_diagnostics) – Run compact SCM diagnostics and save the three v1 diagnostic plots.
+
+###### `diagnostic_plots`
+
+**Functions:**
+
+- [**gap_over_time_plot**](#causalis.scenarios.synthetic_control.refutation.diagnostic_plots.gap_over_time_plot) – Plot observed-minus-synthetic gap over time with intervention boundary.
+- [**observed_vs_synthetic_plot**](#causalis.scenarios.synthetic_control.refutation.diagnostic_plots.observed_vs_synthetic_plot) – Plot observed treated path against augmented/SC synthetic paths.
+- [**placebo_att_histogram_plot**](#causalis.scenarios.synthetic_control.refutation.diagnostic_plots.placebo_att_histogram_plot) – Plot placebo ATT histogram with treated ATT line.
+
+####### `gap_over_time_plot`
+
+```python
+gap_over_time_plot(
+    estimate: PanelEstimate,
+    *,
+    show_sc: bool = True,
+    figsize: Tuple[float, float] = (10.0, 5.5),
+    dpi: int = 220,
+    font_scale: float = 1.1
+) -> plt.Figure
+```
+
+Plot observed-minus-synthetic gap over time with intervention boundary.
+
+####### `observed_vs_synthetic_plot`
+
+```python
+observed_vs_synthetic_plot(
+    estimate: PanelEstimate,
+    *,
+    show_sc: bool = True,
+    figsize: Tuple[float, float] = (10.0, 5.5),
+    dpi: int = 220,
+    font_scale: float = 1.1
+) -> plt.Figure
+```
+
+Plot observed treated path against augmented/SC synthetic paths.
+
+####### `placebo_att_histogram_plot`
+
+```python
+placebo_att_histogram_plot(
+    estimate: PanelEstimate,
+    *,
+    source: Literal["augmented", "sc"] = "augmented",
+    bins: Optional[int] = None,
+    figsize: Tuple[float, float] = (10.0, 5.5),
+    dpi: int = 220,
+    font_scale: float = 1.1
+) -> plt.Figure
+```
+
+Plot placebo ATT histogram with treated ATT line.
+
+###### `gap_over_time_plot`
+
+```python
+gap_over_time_plot(
+    estimate: PanelEstimate,
+    *,
+    show_sc: bool = True,
+    figsize: Tuple[float, float] = (10.0, 5.5),
+    dpi: int = 220,
+    font_scale: float = 1.1
+) -> plt.Figure
+```
+
+Plot observed-minus-synthetic gap over time with intervention boundary.
+
+###### `missing_panel_plot`
+
+**Functions:**
+
+- [**missing_panel_plot**](#causalis.scenarios.synthetic_control.refutation.missing_panel_plot.missing_panel_plot) – Plot panel missingness as a unit-by-time heatmap.
+
+####### `missing_panel_plot`
+
+```python
+missing_panel_plot(
+    paneldata: PanelDataSCM,
+    *,
+    show_intervention: bool = True,
+    max_xticks: int = 12,
+    figsize: Tuple[float, float] = (10.0, 5.5),
+    dpi: int = 220,
+    font_scale: float = 1.1,
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False
+) -> plt.Figure
+```
+
+Plot panel missingness as a unit-by-time heatmap.
+
+A cell value of 0 means observed and 1 means missing. Missingness is
+inferred from `observed_col` when available (plus outcome NaNs),
+otherwise directly from outcome NaNs.
+
+**Parameters:**
+
+- **paneldata** (<code>[PanelDataSCM](#causalis.data_contracts.panel_data_scm.PanelDataSCM)</code>) – Validated long-format panel contract.
+- **show_intervention** (<code>[bool](#bool)</code>) – If True, draw the intervention boundary as a vertical dashed line.
+- **max_xticks** (<code>[int](#int)</code>) – Maximum number of x-axis tick labels shown.
+- **figsize** (<code>[tuple](#tuple)</code>) – Figure size in inches.
+- **dpi** (<code>[int](#int)</code>) – Dots per inch.
+- **font_scale** (<code>[float](#float)</code>) – Font scaling factor.
+- **save** (<code>[str](#str)</code>) – Optional path to save the figure.
+- **save_dpi** (<code>[int](#int)</code>) – DPI for saved raster outputs.
+- **transparent** (<code>[bool](#bool)</code>) – Whether to save with a transparent background.
+
+**Returns:**
+
+- <code>[Figure](#matplotlib.figure.Figure)</code> – The generated figure.
+
+###### `observed_vs_synthetic_plot`
+
+```python
+observed_vs_synthetic_plot(
+    estimate: PanelEstimate,
+    *,
+    show_sc: bool = True,
+    figsize: Tuple[float, float] = (10.0, 5.5),
+    dpi: int = 220,
+    font_scale: float = 1.1
+) -> plt.Figure
+```
+
+Plot observed treated path against augmented/SC synthetic paths.
+
+###### `outcome_panel_plot`
+
+**Functions:**
+
+- [**outcome_panel_plot**](#causalis.scenarios.synthetic_control.refutation.outcome_panel_plot.outcome_panel_plot) – Plot SCM panel outcomes over time.
+
+####### `outcome_panel_plot`
+
+```python
+outcome_panel_plot(
+    paneldata: PanelDataSCM,
+    *,
+    show_donor_units: bool = True,
+    donor_max_lines: Optional[int] = 20,
+    show_donor_mean: bool = True,
+    donor_alpha: float = 0.35,
+    donor_linewidth: float = 1.2,
+    shade_post_period: bool = True,
+    figsize: Tuple[float, float] = (10.0, 5.5),
+    dpi: int = 220,
+    font_scale: float = 1.1,
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False
+) -> plt.Figure
+```
+
+Plot SCM panel outcomes over time.
+
+The figure shows treated-unit outcomes over time, optional donor-unit paths,
+optional donor mean, and the intervention boundary.
+
+**Parameters:**
+
+- **paneldata** (<code>[PanelDataSCM](#causalis.data_contracts.panel_data_scm.PanelDataSCM)</code>) – Validated long-format panel contract.
+- **show_donor_units** (<code>[bool](#bool)</code>) – If True, draw donor trajectories.
+- **donor_max_lines** (<code>[int](#int) or None</code>) – Maximum number of donor-unit lines to draw. `None` draws all donors.
+- **show_donor_mean** (<code>[bool](#bool)</code>) – If True, draw the donor-pool mean outcome path.
+- **donor_alpha** (<code>[float](#float)</code>) – Opacity for donor-unit lines.
+- **donor_linewidth** (<code>[float](#float)</code>) – Line width for donor-unit lines.
+- **shade_post_period** (<code>[bool](#bool)</code>) – If True, lightly shade the post-treatment region.
+- **figsize** (<code>[tuple](#tuple)</code>) – Figure size in inches.
+- **dpi** (<code>[int](#int)</code>) – Dots per inch.
+- **font_scale** (<code>[float](#float)</code>) – Font scaling factor.
+- **save** (<code>[str](#str)</code>) – Optional path to save the figure.
+- **save_dpi** (<code>[int](#int)</code>) – DPI for saved raster outputs.
+- **transparent** (<code>[bool](#bool)</code>) – Whether to save with a transparent background.
+
+**Returns:**
+
+- <code>[Figure](#matplotlib.figure.Figure)</code> – The generated figure.
+
+###### `placebo_att_histogram_plot`
+
+```python
+placebo_att_histogram_plot(
+    estimate: PanelEstimate,
+    *,
+    source: Literal["augmented", "sc"] = "augmented",
+    bins: Optional[int] = None,
+    figsize: Tuple[float, float] = (10.0, 5.5),
+    dpi: int = 220,
+    font_scale: float = 1.1
+) -> plt.Figure
+```
+
+Plot placebo ATT histogram with treated ATT line.
+
+###### `run_scm_diagnostics`
+
+```python
+run_scm_diagnostics(
+    estimate: PanelEstimate,
+    paneldata: PanelDataSCM,
+    *,
+    output_dir: str | Path | None = None,
+    filename_prefix: str = "scm_diagnostics",
+    pre_tail_k: int = 3,
+    dpi: int = 220
+) -> Dict[str, Any]
+```
+
+Run compact SCM diagnostics and save the three v1 diagnostic plots.
+
+###### `scm_diagnostics`
+
+**Functions:**
+
+- [**run_scm_diagnostics**](#causalis.scenarios.synthetic_control.refutation.scm_diagnostics.run_scm_diagnostics) – Run compact SCM diagnostics and save the three v1 diagnostic plots.
+
+####### `run_scm_diagnostics`
+
+```python
+run_scm_diagnostics(
+    estimate: PanelEstimate,
+    paneldata: PanelDataSCM,
+    *,
+    output_dir: str | Path | None = None,
+    filename_prefix: str = "scm_diagnostics",
+    pre_tail_k: int = 3,
+    dpi: int = 220
+) -> Dict[str, Any]
+```
+
+Run compact SCM diagnostics and save the three v1 diagnostic plots.
+
+##### `run_scm_diagnostics`
+
+```python
+run_scm_diagnostics(
+    estimate: PanelEstimate,
+    paneldata: PanelDataSCM,
+    *,
+    output_dir: str | Path | None = None,
+    filename_prefix: str = "scm_diagnostics",
+    pre_tail_k: int = 3,
+    dpi: int = 220
+) -> Dict[str, Any]
+```
+
+Run compact SCM diagnostics and save the three v1 diagnostic plots.
 
 #### `unconfoundedness`
 
@@ -9467,7 +14418,20 @@ Convenience wrapper returning the balance block only.
 ##### `IRM`
 
 ```python
-IRM(data: Optional[CausalData] = None, ml_g: Any = None, ml_m: Any = None, *, n_folds: int = 5, n_rep: int = 1, normalize_ipw: bool = False, trimming_rule: str = 'truncate', trimming_threshold: float = 0.01, weights: Optional[np.ndarray | Dict[str, Any]] = None, relative_baseline_min: float = 1e-08, random_state: Optional[int] = None) -> None
+IRM(
+    data: Optional[CausalData] = None,
+    ml_g: Any = None,
+    ml_m: Any = None,
+    *,
+    n_folds: int = 5,
+    n_rep: int = 1,
+    normalize_ipw: bool = False,
+    trimming_rule: str = "truncate",
+    trimming_threshold: float = 0.01,
+    weights: Optional[np.ndarray | Dict[str, Any]] = None,
+    relative_baseline_min: float = 1e-08,
+    random_state: Optional[int] = None
+) -> None
 ```
 
 Bases: <code>[BaseEstimator](#sklearn.base.BaseEstimator)</code>
@@ -9551,7 +14515,9 @@ Return diagnostic data.
 ###### `estimate`
 
 ```python
-estimate(score: str = 'ATE', alpha: float = 0.05, diagnostic_data: bool = True) -> CausalEstimate
+estimate(
+    score: str = "ATE", alpha: float = 0.05, diagnostic_data: bool = True
+) -> CausalEstimate
 ```
 
 Compute treatment effects using stored nuisance predictions.
@@ -9695,7 +14661,13 @@ Return the standard error of the estimate.
 ###### `sensitivity_analysis`
 
 ```python
-sensitivity_analysis(r2_y: float, r2_d: float, rho: float = 1.0, H0: float = 0.0, alpha: float = 0.05) -> 'IRM'
+sensitivity_analysis(
+    r2_y: float,
+    r2_d: float,
+    rho: float = 1.0,
+    H0: float = 0.0,
+    alpha: float = 0.05,
+) -> "IRM"
 ```
 
 Compute a sensitivity analysis following Chernozhukov et al. (2022).
@@ -9763,7 +14735,15 @@ signals (an estimate of the conditional average treatment effect for each unit).
 ####### `cate_esimand`
 
 ```python
-cate_esimand(data: CausalData, ml_g: Optional[Any] = None, ml_m: Optional[Any] = None, n_folds: int = 5, n_rep: int = 1, use_blp: bool = False, X_new: Optional[pd.DataFrame] = None) -> pd.DataFrame
+cate_esimand(
+    data: CausalData,
+    ml_g: Optional[Any] = None,
+    ml_m: Optional[Any] = None,
+    n_folds: int = 5,
+    n_rep: int = 1,
+    use_blp: bool = False,
+    X_new: Optional[pd.DataFrame] = None,
+) -> pd.DataFrame
 ```
 
 Estimate per-observation CATEs using IRM and return a DataFrame with a new 'cate' column.
@@ -9803,7 +14783,12 @@ Estimate per-observation CATEs using IRM and return a DataFrame with a new 'cate
 ###### `generate_obs_hte_26`
 
 ```python
-generate_obs_hte_26(n: int = 10000, seed: int = 42, include_oracle: bool = True, return_causal_data: bool = True) -> Union[pd.DataFrame, CausalData]
+generate_obs_hte_26(
+    n: int = 10000,
+    seed: int = 42,
+    include_oracle: bool = True,
+    return_causal_data: bool = True,
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Observational dataset with nonlinear outcome model, nonlinear treatment assignment,
@@ -9820,7 +14805,12 @@ Based on the scenario in notebooks/cases/dml_atte.ipynb.
 ###### `generate_obs_hte_26_rich`
 
 ```python
-generate_obs_hte_26_rich(n: int = 100000, seed: int = 42, include_oracle: bool = True, return_causal_data: bool = True) -> Union[pd.DataFrame, CausalData]
+generate_obs_hte_26_rich(
+    n: int = 100000,
+    seed: int = 42,
+    include_oracle: bool = True,
+    return_causal_data: bool = True,
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Observational dataset with richer confounding, nonlinear outcome model,
@@ -9837,7 +14827,12 @@ Adds additional realistic covariates and dependencies to mimic real data.
 ###### `generate_obs_hte_binary_26`
 
 ```python
-generate_obs_hte_binary_26(n: int = 100000, seed: int = 42, include_oracle: bool = True, return_causal_data: bool = True) -> Union[pd.DataFrame, CausalData]
+generate_obs_hte_binary_26(
+    n: int = 100000,
+    seed: int = 42,
+    include_oracle: bool = True,
+    return_causal_data: bool = True,
+) -> Union[pd.DataFrame, CausalData]
 ```
 
 Observational binary-outcome dataset with nonlinear confounding and
@@ -9856,7 +14851,12 @@ a binary outcome model and a modified confounder set.
 ###### `obs_linear_26_dataset`
 
 ```python
-obs_linear_26_dataset(n: int = 10000, seed: int = 42, include_oracle: bool = True, return_causal_data: bool = True)
+obs_linear_26_dataset(
+    n: int = 10000,
+    seed: int = 42,
+    include_oracle: bool = True,
+    return_causal_data: bool = True,
+)
 ```
 
 A pre-configured observational linear dataset with 5 standard confounders.
@@ -9890,7 +14890,16 @@ Group Average Treatment Effect (GATE) estimation using local DML IRM and BLP.
 ####### `gate_esimand`
 
 ```python
-gate_esimand(data: CausalData, groups: Optional[Union[pd.Series, pd.DataFrame]] = None, n_groups: int = 5, ml_g: Optional[Any] = None, ml_m: Optional[Any] = None, n_folds: int = 5, n_rep: int = 1, alpha: float = 0.05) -> pd.DataFrame
+gate_esimand(
+    data: CausalData,
+    groups: Optional[Union[pd.Series, pd.DataFrame]] = None,
+    n_groups: int = 5,
+    ml_g: Optional[Any] = None,
+    ml_m: Optional[Any] = None,
+    n_folds: int = 5,
+    n_rep: int = 1,
+    alpha: float = 0.05,
+) -> pd.DataFrame
 ```
 
 Estimate Group Average Treatment Effects (GATEs).
@@ -9917,7 +14926,20 @@ HAS_CATBOOST = True
 ###### `IRM`
 
 ```python
-IRM(data: Optional[CausalData] = None, ml_g: Any = None, ml_m: Any = None, *, n_folds: int = 5, n_rep: int = 1, normalize_ipw: bool = False, trimming_rule: str = 'truncate', trimming_threshold: float = 0.01, weights: Optional[np.ndarray | Dict[str, Any]] = None, relative_baseline_min: float = 1e-08, random_state: Optional[int] = None) -> None
+IRM(
+    data: Optional[CausalData] = None,
+    ml_g: Any = None,
+    ml_m: Any = None,
+    *,
+    n_folds: int = 5,
+    n_rep: int = 1,
+    normalize_ipw: bool = False,
+    trimming_rule: str = "truncate",
+    trimming_threshold: float = 0.01,
+    weights: Optional[np.ndarray | Dict[str, Any]] = None,
+    relative_baseline_min: float = 1e-08,
+    random_state: Optional[int] = None
+) -> None
 ```
 
 Bases: <code>[BaseEstimator](#sklearn.base.BaseEstimator)</code>
@@ -10001,7 +15023,9 @@ Return diagnostic data.
 ####### `estimate`
 
 ```python
-estimate(score: str = 'ATE', alpha: float = 0.05, diagnostic_data: bool = True) -> CausalEstimate
+estimate(
+    score: str = "ATE", alpha: float = 0.05, diagnostic_data: bool = True
+) -> CausalEstimate
 ```
 
 Compute treatment effects using stored nuisance predictions.
@@ -10145,7 +15169,13 @@ Return the standard error of the estimate.
 ####### `sensitivity_analysis`
 
 ```python
-sensitivity_analysis(r2_y: float, r2_d: float, rho: float = 1.0, H0: float = 0.0, alpha: float = 0.05) -> 'IRM'
+sensitivity_analysis(
+    r2_y: float,
+    r2_d: float,
+    rho: float = 1.0,
+    H0: float = 0.0,
+    alpha: float = 0.05,
+) -> "IRM"
 ```
 
 Compute a sensitivity analysis following Chernozhukov et al. (2022).
@@ -10219,7 +15249,9 @@ commonly used helpers directly via `causalis.refutation`.
 ###### `get_sensitivity_summary`
 
 ```python
-get_sensitivity_summary(effect_estimation: Dict[str, Any] | Any, *, label: Optional[str] = None) -> Optional[str]
+get_sensitivity_summary(
+    effect_estimation: Dict[str, Any] | Any, *, label: Optional[str] = None
+) -> Optional[str]
 ```
 
 Render a single, unified bias-aware summary string.
@@ -10239,7 +15271,16 @@ and then formats via `format_bias_aware_summary` for consistency.
 ###### `interpret_sensitivity_analysis`
 
 ```python
-interpret_sensitivity_analysis(effect_estimation: Dict[str, Any] | Any, *, r2_y: float, r2_d: float, rho: float = 1.0, H0: float = 0.0, alpha: float = 0.05, use_signed_rr: bool = False) -> Dict[str, Any]
+interpret_sensitivity_analysis(
+    effect_estimation: Dict[str, Any] | Any,
+    *,
+    r2_y: float,
+    r2_d: float,
+    rho: float = 1.0,
+    H0: float = 0.0,
+    alpha: float = 0.05,
+    use_signed_rr: bool = False
+) -> Dict[str, Any]
 ```
 
 Run sensitivity analysis and return a structured interpretation.
@@ -10284,7 +15325,22 @@ Run sensitivity analysis and return a structured interpretation.
 ######## `plot_m_overlap`
 
 ```python
-plot_m_overlap(diag: Union[UnconfoundednessDiagnosticData, CausalEstimate, dict], clip: Tuple[float, float] = (0.01, 0.99), bins: Any = 'fd', kde: bool = True, shade_overlap: bool = True, ax: Optional[plt.Axes] = None, figsize: Tuple[float, float] = (9, 5.5), dpi: int = 220, font_scale: float = 1.15, save: Optional[str] = None, save_dpi: Optional[int] = None, transparent: bool = False, color_t: Optional[Any] = None, color_c: Optional[Any] = None) -> plt.Figure
+plot_m_overlap(
+    diag: Union[UnconfoundednessDiagnosticData, CausalEstimate, dict],
+    clip: Tuple[float, float] = (0.01, 0.99),
+    bins: Any = "fd",
+    kde: bool = True,
+    shade_overlap: bool = True,
+    ax: Optional[plt.Axes] = None,
+    figsize: Tuple[float, float] = (9, 5.5),
+    dpi: int = 220,
+    font_scale: float = 1.15,
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False,
+    color_t: Optional[Any] = None,
+    color_c: Optional[Any] = None,
+) -> plt.Figure
 ```
 
 Overlap plot for m(x)=P(D=1|X) with high-res rendering.
@@ -10325,7 +15381,16 @@ Overlap diagnostics focused on positivity and propensity calibration.
 ######## `run_overlap_diagnostics`
 
 ```python
-run_overlap_diagnostics(data: CausalData, estimate: CausalEstimate, *, thresholds: Optional[Dict[str, float]] = None, n_bins: int = 10, use_hajek: Optional[bool] = None, return_summary: bool = True, auc_flip_margin: float = 0.05) -> Dict[str, Any]
+run_overlap_diagnostics(
+    data: CausalData,
+    estimate: CausalEstimate,
+    *,
+    thresholds: Optional[Dict[str, float]] = None,
+    n_bins: int = 10,
+    use_hajek: Optional[bool] = None,
+    return_summary: bool = True,
+    auc_flip_margin: float = 0.05
+) -> Dict[str, Any]
 ```
 
 Run overlap diagnostics from `CausalData` and `CausalEstimate`.
@@ -10333,7 +15398,22 @@ Run overlap diagnostics from `CausalData` and `CausalEstimate`.
 ####### `plot_m_overlap`
 
 ```python
-plot_m_overlap(diag: Union[UnconfoundednessDiagnosticData, CausalEstimate, dict], clip: Tuple[float, float] = (0.01, 0.99), bins: Any = 'fd', kde: bool = True, shade_overlap: bool = True, ax: Optional[plt.Axes] = None, figsize: Tuple[float, float] = (9, 5.5), dpi: int = 220, font_scale: float = 1.15, save: Optional[str] = None, save_dpi: Optional[int] = None, transparent: bool = False, color_t: Optional[Any] = None, color_c: Optional[Any] = None) -> plt.Figure
+plot_m_overlap(
+    diag: Union[UnconfoundednessDiagnosticData, CausalEstimate, dict],
+    clip: Tuple[float, float] = (0.01, 0.99),
+    bins: Any = "fd",
+    kde: bool = True,
+    shade_overlap: bool = True,
+    ax: Optional[plt.Axes] = None,
+    figsize: Tuple[float, float] = (9, 5.5),
+    dpi: int = 220,
+    font_scale: float = 1.15,
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False,
+    color_t: Optional[Any] = None,
+    color_c: Optional[Any] = None,
+) -> plt.Figure
 ```
 
 Overlap plot for m(x)=P(D=1|X) with high-res rendering.
@@ -10366,7 +15446,26 @@ Overlap plot for m(x)=P(D=1|X) with high-res rendering.
 ####### `plot_propensity_reliability`
 
 ```python
-plot_propensity_reliability(estimate: CausalEstimate, data: Optional[CausalData] = None, *, n_bins: int = 10, show_recalibration: bool = True, annotate_metrics: bool = True, ax: Optional[plt.Axes] = None, figsize: Tuple[float, float] = (7.2, 6.2), dpi: int = 220, font_scale: float = 1.1, point_color: Optional[Any] = None, diagonal_color: Any = '0.35', recalibration_color: Any = 'C1', min_marker_size: float = 35.0, marker_size_scale: float = 250.0, save: Optional[str] = None, save_dpi: Optional[int] = None, transparent: bool = False) -> plt.Figure
+plot_propensity_reliability(
+    estimate: CausalEstimate,
+    data: Optional[CausalData] = None,
+    *,
+    n_bins: int = 10,
+    show_recalibration: bool = True,
+    annotate_metrics: bool = True,
+    ax: Optional[plt.Axes] = None,
+    figsize: Tuple[float, float] = (7.2, 6.2),
+    dpi: int = 220,
+    font_scale: float = 1.1,
+    point_color: Optional[Any] = None,
+    diagonal_color: Any = "0.35",
+    recalibration_color: Any = "C1",
+    min_marker_size: float = 35.0,
+    marker_size_scale: float = 250.0,
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False
+) -> plt.Figure
 ```
 
 Plot a propensity calibration reliability diagram.
@@ -10407,7 +15506,26 @@ Reliability diagram for propensity calibration diagnostics.
 ######## `plot_propensity_reliability`
 
 ```python
-plot_propensity_reliability(estimate: CausalEstimate, data: Optional[CausalData] = None, *, n_bins: int = 10, show_recalibration: bool = True, annotate_metrics: bool = True, ax: Optional[plt.Axes] = None, figsize: Tuple[float, float] = (7.2, 6.2), dpi: int = 220, font_scale: float = 1.1, point_color: Optional[Any] = None, diagonal_color: Any = '0.35', recalibration_color: Any = 'C1', min_marker_size: float = 35.0, marker_size_scale: float = 250.0, save: Optional[str] = None, save_dpi: Optional[int] = None, transparent: bool = False) -> plt.Figure
+plot_propensity_reliability(
+    estimate: CausalEstimate,
+    data: Optional[CausalData] = None,
+    *,
+    n_bins: int = 10,
+    show_recalibration: bool = True,
+    annotate_metrics: bool = True,
+    ax: Optional[plt.Axes] = None,
+    figsize: Tuple[float, float] = (7.2, 6.2),
+    dpi: int = 220,
+    font_scale: float = 1.1,
+    point_color: Optional[Any] = None,
+    diagonal_color: Any = "0.35",
+    recalibration_color: Any = "C1",
+    min_marker_size: float = 35.0,
+    marker_size_scale: float = 250.0,
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False
+) -> plt.Figure
 ```
 
 Plot a propensity calibration reliability diagram.
@@ -10440,7 +15558,16 @@ Plot a propensity calibration reliability diagram.
 ####### `run_overlap_diagnostics`
 
 ```python
-run_overlap_diagnostics(data: CausalData, estimate: CausalEstimate, *, thresholds: Optional[Dict[str, float]] = None, n_bins: int = 10, use_hajek: Optional[bool] = None, return_summary: bool = True, auc_flip_margin: float = 0.05) -> Dict[str, Any]
+run_overlap_diagnostics(
+    data: CausalData,
+    estimate: CausalEstimate,
+    *,
+    thresholds: Optional[Dict[str, float]] = None,
+    n_bins: int = 10,
+    use_hajek: Optional[bool] = None,
+    return_summary: bool = True,
+    auc_flip_margin: float = 0.05
+) -> Dict[str, Any]
 ```
 
 Run overlap diagnostics from `CausalData` and `CausalEstimate`.
@@ -10448,7 +15575,24 @@ Run overlap diagnostics from `CausalData` and `CausalEstimate`.
 ###### `plot_influence_instability`
 
 ```python
-plot_influence_instability(estimate: CausalEstimate, data: Optional[CausalData] = None, *, trimming_threshold: Optional[float] = None, use_estimator_psi: bool = True, include_ipw: bool = True, bins: Any = 'fd', log_hist: bool = False, scatter_log_y: bool = True, top_k: int = 10, figsize: Optional[Tuple[float, float]] = None, dpi: int = 220, font_scale: float = 1.1, save: Optional[str] = None, save_dpi: Optional[int] = None, transparent: bool = False) -> plt.Figure
+plot_influence_instability(
+    estimate: CausalEstimate,
+    data: Optional[CausalData] = None,
+    *,
+    trimming_threshold: Optional[float] = None,
+    use_estimator_psi: bool = True,
+    include_ipw: bool = True,
+    bins: Any = "fd",
+    log_hist: bool = False,
+    scatter_log_y: bool = True,
+    top_k: int = 10,
+    figsize: Optional[Tuple[float, float]] = None,
+    dpi: int = 220,
+    font_scale: float = 1.1,
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False
+) -> plt.Figure
 ```
 
 Plot instability diagnostics for per-unit score (EIF moment).
@@ -10488,7 +15632,22 @@ Plot instability diagnostics for per-unit score (EIF moment).
 ###### `plot_m_overlap`
 
 ```python
-plot_m_overlap(diag: Union[UnconfoundednessDiagnosticData, CausalEstimate, dict], clip: Tuple[float, float] = (0.01, 0.99), bins: Any = 'fd', kde: bool = True, shade_overlap: bool = True, ax: Optional[plt.Axes] = None, figsize: Tuple[float, float] = (9, 5.5), dpi: int = 220, font_scale: float = 1.15, save: Optional[str] = None, save_dpi: Optional[int] = None, transparent: bool = False, color_t: Optional[Any] = None, color_c: Optional[Any] = None) -> plt.Figure
+plot_m_overlap(
+    diag: Union[UnconfoundednessDiagnosticData, CausalEstimate, dict],
+    clip: Tuple[float, float] = (0.01, 0.99),
+    bins: Any = "fd",
+    kde: bool = True,
+    shade_overlap: bool = True,
+    ax: Optional[plt.Axes] = None,
+    figsize: Tuple[float, float] = (9, 5.5),
+    dpi: int = 220,
+    font_scale: float = 1.15,
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False,
+    color_t: Optional[Any] = None,
+    color_c: Optional[Any] = None,
+) -> plt.Figure
 ```
 
 Overlap plot for m(x)=P(D=1|X) with high-res rendering.
@@ -10521,7 +15680,26 @@ Overlap plot for m(x)=P(D=1|X) with high-res rendering.
 ###### `plot_propensity_reliability`
 
 ```python
-plot_propensity_reliability(estimate: CausalEstimate, data: Optional[CausalData] = None, *, n_bins: int = 10, show_recalibration: bool = True, annotate_metrics: bool = True, ax: Optional[plt.Axes] = None, figsize: Tuple[float, float] = (7.2, 6.2), dpi: int = 220, font_scale: float = 1.1, point_color: Optional[Any] = None, diagonal_color: Any = '0.35', recalibration_color: Any = 'C1', min_marker_size: float = 35.0, marker_size_scale: float = 250.0, save: Optional[str] = None, save_dpi: Optional[int] = None, transparent: bool = False) -> plt.Figure
+plot_propensity_reliability(
+    estimate: CausalEstimate,
+    data: Optional[CausalData] = None,
+    *,
+    n_bins: int = 10,
+    show_recalibration: bool = True,
+    annotate_metrics: bool = True,
+    ax: Optional[plt.Axes] = None,
+    figsize: Tuple[float, float] = (7.2, 6.2),
+    dpi: int = 220,
+    font_scale: float = 1.1,
+    point_color: Optional[Any] = None,
+    diagonal_color: Any = "0.35",
+    recalibration_color: Any = "C1",
+    min_marker_size: float = 35.0,
+    marker_size_scale: float = 250.0,
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False
+) -> plt.Figure
 ```
 
 Plot a propensity calibration reliability diagram.
@@ -10554,7 +15732,21 @@ Plot a propensity calibration reliability diagram.
 ###### `plot_residual_diagnostics`
 
 ```python
-plot_residual_diagnostics(estimate: CausalEstimate, data: Optional[CausalData] = None, *, clip_propensity: float = 1e-06, n_bins: int = 20, marker_size: float = 12.0, alpha: float = 0.35, figsize: Tuple[float, float] = (14.0, 4.8), dpi: int = 220, font_scale: float = 1.1, save: Optional[str] = None, save_dpi: Optional[int] = None, transparent: bool = False) -> plt.Figure
+plot_residual_diagnostics(
+    estimate: CausalEstimate,
+    data: Optional[CausalData] = None,
+    *,
+    clip_propensity: float = 1e-06,
+    n_bins: int = 20,
+    marker_size: float = 12.0,
+    alpha: float = 0.35,
+    figsize: Tuple[float, float] = (14.0, 4.8),
+    dpi: int = 220,
+    font_scale: float = 1.1,
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False
+) -> plt.Figure
 ```
 
 Plot residual diagnostics for nuisance models.
@@ -10590,7 +15782,16 @@ Plot residual diagnostics for nuisance models.
 ###### `run_overlap_diagnostics`
 
 ```python
-run_overlap_diagnostics(data: CausalData, estimate: CausalEstimate, *, thresholds: Optional[Dict[str, float]] = None, n_bins: int = 10, use_hajek: Optional[bool] = None, return_summary: bool = True, auc_flip_margin: float = 0.05) -> Dict[str, Any]
+run_overlap_diagnostics(
+    data: CausalData,
+    estimate: CausalEstimate,
+    *,
+    thresholds: Optional[Dict[str, float]] = None,
+    n_bins: int = 10,
+    use_hajek: Optional[bool] = None,
+    return_summary: bool = True,
+    auc_flip_margin: float = 0.05
+) -> Dict[str, Any]
 ```
 
 Run overlap diagnostics from `CausalData` and `CausalEstimate`.
@@ -10598,7 +15799,14 @@ Run overlap diagnostics from `CausalData` and `CausalEstimate`.
 ###### `run_score_diagnostics`
 
 ```python
-run_score_diagnostics(data: CausalData, estimate: CausalEstimate, *, trimming_threshold: Optional[float] = None, n_basis_funcs: Optional[int] = None, return_summary: bool = True) -> Dict[str, Any]
+run_score_diagnostics(
+    data: CausalData,
+    estimate: CausalEstimate,
+    *,
+    trimming_threshold: Optional[float] = None,
+    n_basis_funcs: Optional[int] = None,
+    return_summary: bool = True
+) -> Dict[str, Any]
 ```
 
 Run score diagnostics from `CausalData` and `CausalEstimate`.
@@ -10606,7 +15814,14 @@ Run score diagnostics from `CausalData` and `CausalEstimate`.
 ###### `run_unconfoundedness_diagnostics`
 
 ```python
-run_unconfoundedness_diagnostics(data: CausalData, estimate: CausalEstimate, *, threshold: float = 0.1, normalize: Optional[bool] = None, return_summary: bool = True) -> Dict[str, Any]
+run_unconfoundedness_diagnostics(
+    data: CausalData,
+    estimate: CausalEstimate,
+    *,
+    threshold: float = 0.1,
+    normalize: Optional[bool] = None,
+    return_summary: bool = True
+) -> Dict[str, Any]
 ```
 
 Run unconfoundedness diagnostics from `CausalData` and `CausalEstimate`.
@@ -10636,7 +15851,24 @@ Influence/instability plots for score-based diagnostics.
 ######## `plot_influence_instability`
 
 ```python
-plot_influence_instability(estimate: CausalEstimate, data: Optional[CausalData] = None, *, trimming_threshold: Optional[float] = None, use_estimator_psi: bool = True, include_ipw: bool = True, bins: Any = 'fd', log_hist: bool = False, scatter_log_y: bool = True, top_k: int = 10, figsize: Optional[Tuple[float, float]] = None, dpi: int = 220, font_scale: float = 1.1, save: Optional[str] = None, save_dpi: Optional[int] = None, transparent: bool = False) -> plt.Figure
+plot_influence_instability(
+    estimate: CausalEstimate,
+    data: Optional[CausalData] = None,
+    *,
+    trimming_threshold: Optional[float] = None,
+    use_estimator_psi: bool = True,
+    include_ipw: bool = True,
+    bins: Any = "fd",
+    log_hist: bool = False,
+    scatter_log_y: bool = True,
+    top_k: int = 10,
+    figsize: Optional[Tuple[float, float]] = None,
+    dpi: int = 220,
+    font_scale: float = 1.1,
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False
+) -> plt.Figure
 ```
 
 Plot instability diagnostics for per-unit score (EIF moment).
@@ -10676,7 +15908,24 @@ Plot instability diagnostics for per-unit score (EIF moment).
 ####### `plot_influence_instability`
 
 ```python
-plot_influence_instability(estimate: CausalEstimate, data: Optional[CausalData] = None, *, trimming_threshold: Optional[float] = None, use_estimator_psi: bool = True, include_ipw: bool = True, bins: Any = 'fd', log_hist: bool = False, scatter_log_y: bool = True, top_k: int = 10, figsize: Optional[Tuple[float, float]] = None, dpi: int = 220, font_scale: float = 1.1, save: Optional[str] = None, save_dpi: Optional[int] = None, transparent: bool = False) -> plt.Figure
+plot_influence_instability(
+    estimate: CausalEstimate,
+    data: Optional[CausalData] = None,
+    *,
+    trimming_threshold: Optional[float] = None,
+    use_estimator_psi: bool = True,
+    include_ipw: bool = True,
+    bins: Any = "fd",
+    log_hist: bool = False,
+    scatter_log_y: bool = True,
+    top_k: int = 10,
+    figsize: Optional[Tuple[float, float]] = None,
+    dpi: int = 220,
+    font_scale: float = 1.1,
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False
+) -> plt.Figure
 ```
 
 Plot instability diagnostics for per-unit score (EIF moment).
@@ -10716,7 +15965,21 @@ Plot instability diagnostics for per-unit score (EIF moment).
 ####### `plot_residual_diagnostics`
 
 ```python
-plot_residual_diagnostics(estimate: CausalEstimate, data: Optional[CausalData] = None, *, clip_propensity: float = 1e-06, n_bins: int = 20, marker_size: float = 12.0, alpha: float = 0.35, figsize: Tuple[float, float] = (14.0, 4.8), dpi: int = 220, font_scale: float = 1.1, save: Optional[str] = None, save_dpi: Optional[int] = None, transparent: bool = False) -> plt.Figure
+plot_residual_diagnostics(
+    estimate: CausalEstimate,
+    data: Optional[CausalData] = None,
+    *,
+    clip_propensity: float = 1e-06,
+    n_bins: int = 20,
+    marker_size: float = 12.0,
+    alpha: float = 0.35,
+    figsize: Tuple[float, float] = (14.0, 4.8),
+    dpi: int = 220,
+    font_scale: float = 1.1,
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False
+) -> plt.Figure
 ```
 
 Plot residual diagnostics for nuisance models.
@@ -10760,7 +16023,21 @@ Residual diagnostic plots for nuisance models g0/g1 and m.
 ######## `plot_residual_diagnostics`
 
 ```python
-plot_residual_diagnostics(estimate: CausalEstimate, data: Optional[CausalData] = None, *, clip_propensity: float = 1e-06, n_bins: int = 20, marker_size: float = 12.0, alpha: float = 0.35, figsize: Tuple[float, float] = (14.0, 4.8), dpi: int = 220, font_scale: float = 1.1, save: Optional[str] = None, save_dpi: Optional[int] = None, transparent: bool = False) -> plt.Figure
+plot_residual_diagnostics(
+    estimate: CausalEstimate,
+    data: Optional[CausalData] = None,
+    *,
+    clip_propensity: float = 1e-06,
+    n_bins: int = 20,
+    marker_size: float = 12.0,
+    alpha: float = 0.35,
+    figsize: Tuple[float, float] = (14.0, 4.8),
+    dpi: int = 220,
+    font_scale: float = 1.1,
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False
+) -> plt.Figure
 ```
 
 Plot residual diagnostics for nuisance models.
@@ -10796,7 +16073,14 @@ Plot residual diagnostics for nuisance models.
 ####### `run_score_diagnostics`
 
 ```python
-run_score_diagnostics(data: CausalData, estimate: CausalEstimate, *, trimming_threshold: Optional[float] = None, n_basis_funcs: Optional[int] = None, return_summary: bool = True) -> Dict[str, Any]
+run_score_diagnostics(
+    data: CausalData,
+    estimate: CausalEstimate,
+    *,
+    trimming_threshold: Optional[float] = None,
+    n_basis_funcs: Optional[int] = None,
+    return_summary: bool = True
+) -> Dict[str, Any]
 ```
 
 Run score diagnostics from `CausalData` and `CausalEstimate`.
@@ -10812,7 +16096,14 @@ Score diagnostics focused on orthogonality and EIF stability.
 ######## `run_score_diagnostics`
 
 ```python
-run_score_diagnostics(data: CausalData, estimate: CausalEstimate, *, trimming_threshold: Optional[float] = None, n_basis_funcs: Optional[int] = None, return_summary: bool = True) -> Dict[str, Any]
+run_score_diagnostics(
+    data: CausalData,
+    estimate: CausalEstimate,
+    *,
+    trimming_threshold: Optional[float] = None,
+    n_basis_funcs: Optional[int] = None,
+    return_summary: bool = True
+) -> Dict[str, Any]
 ```
 
 Run score diagnostics from `CausalData` and `CausalEstimate`.
@@ -10820,7 +16111,16 @@ Run score diagnostics from `CausalData` and `CausalEstimate`.
 ###### `sensitivity_analysis`
 
 ```python
-sensitivity_analysis(effect_estimation: Dict[str, Any] | Any, *, r2_y: float, r2_d: float, rho: float = 1.0, H0: float = 0.0, alpha: float = 0.05, use_signed_rr: bool = False) -> Dict[str, Any]
+sensitivity_analysis(
+    effect_estimation: Dict[str, Any] | Any,
+    *,
+    r2_y: float,
+    r2_d: float,
+    rho: float = 1.0,
+    H0: float = 0.0,
+    alpha: float = 0.05,
+    use_signed_rr: bool = False
+) -> Dict[str, Any]
 ```
 
 Compute bias-aware components and cache them.
@@ -10850,7 +16150,11 @@ Compute bias-aware components and cache them.
 ###### `sensitivity_benchmark`
 
 ```python
-sensitivity_benchmark(effect_estimation: Dict[str, Any], benchmarking_set: List[str], fit_args: Optional[Dict[str, Any]] = None) -> pd.DataFrame
+sensitivity_benchmark(
+    effect_estimation: Dict[str, Any],
+    benchmarking_set: List[str],
+    fit_args: Optional[Dict[str, Any]] = None,
+) -> pd.DataFrame
 ```
 
 Computes a benchmark for a given set of features by refitting a short IRM model
@@ -10888,7 +16192,16 @@ Returns a DataFrame containing r2_y, r2_d, rho and the change in estimates.
 ####### `compute_bias_aware_ci`
 
 ```python
-compute_bias_aware_ci(effect_estimation: Dict[str, Any] | Any, *, r2_y: float, r2_d: float, rho: float = 1.0, H0: float = 0.0, alpha: float = 0.05, use_signed_rr: bool = False) -> Dict[str, Any]
+compute_bias_aware_ci(
+    effect_estimation: Dict[str, Any] | Any,
+    *,
+    r2_y: float,
+    r2_d: float,
+    rho: float = 1.0,
+    H0: float = 0.0,
+    alpha: float = 0.05,
+    use_signed_rr: bool = False
+) -> Dict[str, Any]
 ```
 
 Compute bias-aware confidence intervals.
@@ -10920,7 +16233,9 @@ Returns a dict with:
 ####### `get_sensitivity_summary`
 
 ```python
-get_sensitivity_summary(effect_estimation: Dict[str, Any] | Any, *, label: Optional[str] = None) -> Optional[str]
+get_sensitivity_summary(
+    effect_estimation: Dict[str, Any] | Any, *, label: Optional[str] = None
+) -> Optional[str]
 ```
 
 Render a single, unified bias-aware summary string.
@@ -10940,7 +16255,14 @@ and then formats via `format_bias_aware_summary` for consistency.
 ####### `run_unconfoundedness_diagnostics`
 
 ```python
-run_unconfoundedness_diagnostics(data: CausalData, estimate: CausalEstimate, *, threshold: float = 0.1, normalize: Optional[bool] = None, return_summary: bool = True) -> Dict[str, Any]
+run_unconfoundedness_diagnostics(
+    data: CausalData,
+    estimate: CausalEstimate,
+    *,
+    threshold: float = 0.1,
+    normalize: Optional[bool] = None,
+    return_summary: bool = True
+) -> Dict[str, Any]
 ```
 
 Run unconfoundedness diagnostics from `CausalData` and `CausalEstimate`.
@@ -10962,7 +16284,9 @@ entry points used by refutation utilities for unconfoundedness.
 ######## `get_sensitivity_summary`
 
 ```python
-get_sensitivity_summary(effect_estimation: Dict[str, Any] | Any, *, label: Optional[str] = None) -> Optional[str]
+get_sensitivity_summary(
+    effect_estimation: Dict[str, Any] | Any, *, label: Optional[str] = None
+) -> Optional[str]
 ```
 
 Render a single, unified bias-aware summary string.
@@ -10982,7 +16306,16 @@ and then formats via `format_bias_aware_summary` for consistency.
 ######## `interpret_sensitivity_analysis`
 
 ```python
-interpret_sensitivity_analysis(effect_estimation: Dict[str, Any] | Any, *, r2_y: float, r2_d: float, rho: float = 1.0, H0: float = 0.0, alpha: float = 0.05, use_signed_rr: bool = False) -> Dict[str, Any]
+interpret_sensitivity_analysis(
+    effect_estimation: Dict[str, Any] | Any,
+    *,
+    r2_y: float,
+    r2_d: float,
+    rho: float = 1.0,
+    H0: float = 0.0,
+    alpha: float = 0.05,
+    use_signed_rr: bool = False
+) -> Dict[str, Any]
 ```
 
 Run sensitivity analysis and return a structured interpretation.
@@ -11007,7 +16340,16 @@ Run sensitivity analysis and return a structured interpretation.
 ######## `sensitivity_analysis`
 
 ```python
-sensitivity_analysis(effect_estimation: Dict[str, Any] | Any, *, r2_y: float, r2_d: float, rho: float = 1.0, H0: float = 0.0, alpha: float = 0.05, use_signed_rr: bool = False) -> Dict[str, Any]
+sensitivity_analysis(
+    effect_estimation: Dict[str, Any] | Any,
+    *,
+    r2_y: float,
+    r2_d: float,
+    rho: float = 1.0,
+    H0: float = 0.0,
+    alpha: float = 0.05,
+    use_signed_rr: bool = False
+) -> Dict[str, Any]
 ```
 
 Compute bias-aware components and cache them.
@@ -11037,7 +16379,11 @@ Compute bias-aware components and cache them.
 ######## `sensitivity_benchmark`
 
 ```python
-sensitivity_benchmark(effect_estimation: Dict[str, Any], benchmarking_set: List[str], fit_args: Optional[Dict[str, Any]] = None) -> pd.DataFrame
+sensitivity_benchmark(
+    effect_estimation: Dict[str, Any],
+    benchmarking_set: List[str],
+    fit_args: Optional[Dict[str, Any]] = None,
+) -> pd.DataFrame
 ```
 
 Computes a benchmark for a given set of features by refitting a short IRM model
@@ -11060,7 +16406,16 @@ Returns a DataFrame containing r2_y, r2_d, rho and the change in estimates.
 ####### `sensitivity_analysis`
 
 ```python
-sensitivity_analysis(effect_estimation: Dict[str, Any] | Any, *, r2_y: float, r2_d: float, rho: float = 1.0, H0: float = 0.0, alpha: float = 0.05, use_signed_rr: bool = False) -> Dict[str, Any]
+sensitivity_analysis(
+    effect_estimation: Dict[str, Any] | Any,
+    *,
+    r2_y: float,
+    r2_d: float,
+    rho: float = 1.0,
+    H0: float = 0.0,
+    alpha: float = 0.05,
+    use_signed_rr: bool = False
+) -> Dict[str, Any]
 ```
 
 Compute bias-aware components and cache them.
@@ -11090,7 +16445,11 @@ Compute bias-aware components and cache them.
 ####### `sensitivity_benchmark`
 
 ```python
-sensitivity_benchmark(effect_estimation: Dict[str, Any], benchmarking_set: List[str], fit_args: Optional[Dict[str, Any]] = None) -> pd.DataFrame
+sensitivity_benchmark(
+    effect_estimation: Dict[str, Any],
+    benchmarking_set: List[str],
+    fit_args: Optional[Dict[str, Any]] = None,
+) -> pd.DataFrame
 ```
 
 Computes a benchmark for a given set of features by refitting a short IRM model
@@ -11121,7 +16480,14 @@ Unconfoundedness diagnostics focused on covariate balance (SMD).
 ######## `run_unconfoundedness_diagnostics`
 
 ```python
-run_unconfoundedness_diagnostics(data: CausalData, estimate: CausalEstimate, *, threshold: float = 0.1, normalize: Optional[bool] = None, return_summary: bool = True) -> Dict[str, Any]
+run_unconfoundedness_diagnostics(
+    data: CausalData,
+    estimate: CausalEstimate,
+    *,
+    threshold: float = 0.1,
+    normalize: Optional[bool] = None,
+    return_summary: bool = True
+) -> Dict[str, Any]
 ```
 
 Run unconfoundedness diagnostics from `CausalData` and `CausalEstimate`.
@@ -11152,13 +16518,27 @@ Run unconfoundedness diagnostics from `CausalData` and `CausalEstimate`.
 #### `QUESTIONS`
 
 ```python
-QUESTIONS: Iterable[str] = ('1.) Are your clients independent (i). Outcome of ones do not depend on others?', '2.) Are all clients have full window to measure metrics?', '3.) Do you measure confounders before treatment and outcome after?', '4.) Do you have a consistent label of treatment, such as if a person does not receive a treatment, he has a label 0?')
+QUESTIONS: Iterable[str] = (
+    "1.) Are your clients independent (i). Outcome of ones do not depend on others?",
+    "2.) Are all clients have full window to measure metrics?",
+    "3.) Do you measure confounders before treatment and outcome after?",
+    "4.) Do you have a consistent label of treatment, such as if a person does not receive a treatment, he has a label 0?",
+)
+
 ```
 
 #### `SRMResult`
 
 ```python
-SRMResult(chi2: float, p_value: float, expected: Dict[Hashable, float], observed: Dict[Hashable, int], alpha: float, is_srm: bool, warning: str | None = None) -> None
+SRMResult(
+    chi2: float,
+    p_value: float,
+    expected: Dict[Hashable, float],
+    observed: Dict[Hashable, int],
+    alpha: float,
+    is_srm: bool,
+    warning: str | None = None,
+) -> None
 ```
 
 Result of a Sample Ratio Mismatch (SRM) check.
@@ -11218,7 +16598,15 @@ warning: str | None = None
 #### `check_srm`
 
 ```python
-check_srm(assignments: Union[Iterable[Hashable], pd.Series, CausalData, Mapping[Hashable, Number]], target_allocation: Dict[Hashable, Number], alpha: float = 0.001, min_expected: float = 5.0, strict_variants: bool = True) -> SRMResult
+check_srm(
+    assignments: Union[
+        Iterable[Hashable], pd.Series, CausalData, Mapping[Hashable, Number]
+    ],
+    target_allocation: Dict[Hashable, Number],
+    alpha: float = 0.001,
+    min_expected: float = 5.0,
+    strict_variants: bool = True,
+) -> SRMResult
 ```
 
 Check Sample Ratio Mismatch (SRM) for an RCT via a chi-square goodness-of-fit test.
@@ -11278,7 +16666,11 @@ SRMResult(status=SRM DETECTED, p_value=0.00006, chi2=16.0000)
 ##### `confounders_balance`
 
 ```python
-confounders_balance(data: CausalData | MultiCausalData, treatment_d_0: Optional[str] = None, treatment_d_1: Optional[str] = None) -> pd.DataFrame
+confounders_balance(
+    data: CausalData | MultiCausalData,
+    treatment_d_0: Optional[str] = None,
+    treatment_d_1: Optional[str] = None,
+) -> pd.DataFrame
 ```
 
 Compute balance diagnostics for confounders between two treatment groups.
@@ -11314,7 +16706,17 @@ encoding categorical variables if present) with:
 ##### `outcome_outliers`
 
 ```python
-outcome_outliers(data: CausalData | MultiCausalData, treatment: Optional[str] = None, outcome: Optional[str] = None, *, method: Literal['iqr', 'zscore'] = 'iqr', iqr_k: float = 1.5, z_thresh: float = 3.0, tail: Literal['both', 'lower', 'upper'] = 'both', return_rows: bool = False) -> pd.DataFrame | tuple[pd.DataFrame, pd.DataFrame]
+outcome_outliers(
+    data: CausalData | MultiCausalData,
+    treatment: Optional[str] = None,
+    outcome: Optional[str] = None,
+    *,
+    method: Literal["iqr", "zscore"] = "iqr",
+    iqr_k: float = 1.5,
+    z_thresh: float = 3.0,
+    tail: Literal["both", "lower", "upper"] = "both",
+    return_rows: bool = False
+) -> pd.DataFrame | tuple[pd.DataFrame, pd.DataFrame]
 ```
 
 Detect outcome outliers per treatment group using IQR or z-score rules.
@@ -11347,7 +16749,20 @@ Bounds are computed within each treatment group.
 #### `outcome_plot_boxplot`
 
 ```python
-outcome_plot_boxplot(data: Union[CausalData, MultiCausalData], treatment: Optional[str] = None, outcome: Optional[str] = None, figsize: Tuple[float, float] = (9, 5.5), dpi: int = 220, font_scale: float = 1.15, showfliers: bool = True, patch_artist: bool = True, palette: Optional[Union[list, dict]] = None, save: Optional[str] = None, save_dpi: Optional[int] = None, transparent: bool = False) -> plt.Figure
+outcome_plot_boxplot(
+    data: Union[CausalData, MultiCausalData],
+    treatment: Optional[str] = None,
+    outcome: Optional[str] = None,
+    figsize: Tuple[float, float] = (9, 5.5),
+    dpi: int = 220,
+    font_scale: float = 1.15,
+    showfliers: bool = True,
+    patch_artist: bool = True,
+    palette: Optional[Union[list, dict]] = None,
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False,
+) -> plt.Figure
 ```
 
 Prettified boxplot of the outcome by treatment.
@@ -11385,7 +16800,24 @@ Prettified boxplot of the outcome by treatment.
 #### `outcome_plot_dist`
 
 ```python
-outcome_plot_dist(data: Union[CausalData, MultiCausalData], treatment: Optional[str] = None, outcome: Optional[str] = None, bins: Union[str, int] = 'fd', density: bool = True, alpha: float = 0.45, sharex: bool = True, kde: bool = True, clip: Optional[Tuple[float, float]] = (0.01, 0.99), figsize: Tuple[float, float] = (9, 5.5), dpi: int = 220, font_scale: float = 1.15, palette: Optional[Union[list, dict]] = None, save: Optional[str] = None, save_dpi: Optional[int] = None, transparent: bool = False) -> plt.Figure
+outcome_plot_dist(
+    data: Union[CausalData, MultiCausalData],
+    treatment: Optional[str] = None,
+    outcome: Optional[str] = None,
+    bins: Union[str, int] = "fd",
+    density: bool = True,
+    alpha: float = 0.45,
+    sharex: bool = True,
+    kde: bool = True,
+    clip: Optional[Tuple[float, float]] = (0.01, 0.99),
+    figsize: Tuple[float, float] = (9, 5.5),
+    dpi: int = 220,
+    font_scale: float = 1.15,
+    palette: Optional[Union[list, dict]] = None,
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False,
+) -> plt.Figure
 ```
 
 Plot the distribution of the outcome for each treatment on a single, pretty plot.
@@ -11437,7 +16869,20 @@ Plot the distribution of the outcome for each treatment on a single, pretty plot
 ##### `outcome_plot_boxplot`
 
 ```python
-outcome_plot_boxplot(data: Union[CausalData, MultiCausalData], treatment: Optional[str] = None, outcome: Optional[str] = None, figsize: Tuple[float, float] = (9, 5.5), dpi: int = 220, font_scale: float = 1.15, showfliers: bool = True, patch_artist: bool = True, palette: Optional[Union[list, dict]] = None, save: Optional[str] = None, save_dpi: Optional[int] = None, transparent: bool = False) -> plt.Figure
+outcome_plot_boxplot(
+    data: Union[CausalData, MultiCausalData],
+    treatment: Optional[str] = None,
+    outcome: Optional[str] = None,
+    figsize: Tuple[float, float] = (9, 5.5),
+    dpi: int = 220,
+    font_scale: float = 1.15,
+    showfliers: bool = True,
+    patch_artist: bool = True,
+    palette: Optional[Union[list, dict]] = None,
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False,
+) -> plt.Figure
 ```
 
 Prettified boxplot of the outcome by treatment.
@@ -11475,7 +16920,24 @@ Prettified boxplot of the outcome by treatment.
 ##### `outcome_plot_dist`
 
 ```python
-outcome_plot_dist(data: Union[CausalData, MultiCausalData], treatment: Optional[str] = None, outcome: Optional[str] = None, bins: Union[str, int] = 'fd', density: bool = True, alpha: float = 0.45, sharex: bool = True, kde: bool = True, clip: Optional[Tuple[float, float]] = (0.01, 0.99), figsize: Tuple[float, float] = (9, 5.5), dpi: int = 220, font_scale: float = 1.15, palette: Optional[Union[list, dict]] = None, save: Optional[str] = None, save_dpi: Optional[int] = None, transparent: bool = False) -> plt.Figure
+outcome_plot_dist(
+    data: Union[CausalData, MultiCausalData],
+    treatment: Optional[str] = None,
+    outcome: Optional[str] = None,
+    bins: Union[str, int] = "fd",
+    density: bool = True,
+    alpha: float = 0.45,
+    sharex: bool = True,
+    kde: bool = True,
+    clip: Optional[Tuple[float, float]] = (0.01, 0.99),
+    figsize: Tuple[float, float] = (9, 5.5),
+    dpi: int = 220,
+    font_scale: float = 1.15,
+    palette: Optional[Union[list, dict]] = None,
+    save: Optional[str] = None,
+    save_dpi: Optional[int] = None,
+    transparent: bool = False,
+) -> plt.Figure
 ```
 
 Plot the distribution of the outcome for each treatment on a single, pretty plot.
@@ -11519,7 +16981,17 @@ Plot the distribution of the outcome for each treatment on a single, pretty plot
 ##### `outcome_plots`
 
 ```python
-outcome_plots(data: Union[CausalData, MultiCausalData], treatment: Optional[str] = None, outcome: Optional[str] = None, bins: int = 30, density: bool = True, alpha: float = 0.5, figsize: Tuple[float, float] = (7, 4), sharex: bool = True, palette: Optional[Union[list, dict]] = None) -> Tuple[plt.Figure, plt.Figure]
+outcome_plots(
+    data: Union[CausalData, MultiCausalData],
+    treatment: Optional[str] = None,
+    outcome: Optional[str] = None,
+    bins: int = 30,
+    density: bool = True,
+    alpha: float = 0.5,
+    figsize: Tuple[float, float] = (7, 4),
+    sharex: bool = True,
+    palette: Optional[Union[list, dict]] = None,
+) -> Tuple[plt.Figure, plt.Figure]
 ```
 
 Plot the distribution of the outcome for every treatment on one plot,
@@ -11622,7 +17094,15 @@ Design module for experimental rct_design utilities.
 ##### `SRMResult`
 
 ```python
-SRMResult(chi2: float, p_value: float, expected: Dict[Hashable, float], observed: Dict[Hashable, int], alpha: float, is_srm: bool, warning: str | None = None) -> None
+SRMResult(
+    chi2: float,
+    p_value: float,
+    expected: Dict[Hashable, float],
+    observed: Dict[Hashable, int],
+    alpha: float,
+    is_srm: bool,
+    warning: str | None = None,
+) -> None
 ```
 
 Result of a Sample Ratio Mismatch (SRM) check.
@@ -11682,7 +17162,16 @@ warning: str | None = None
 ##### `assign_variants_df`
 
 ```python
-assign_variants_df(df: pd.DataFrame, id_col: str, experiment_id: str, variants: Dict[str, float], *, salt: str = 'global_ab_salt', layer_id: str = 'default', variant_col: str = 'variant') -> pd.DataFrame
+assign_variants_df(
+    df: pd.DataFrame,
+    id_col: str,
+    experiment_id: str,
+    variants: Dict[str, float],
+    *,
+    salt: str = "global_ab_salt",
+    layer_id: str = "default",
+    variant_col: str = "variant"
+) -> pd.DataFrame
 ```
 
 Deterministically assign variants for each row in df based on id_col.
@@ -11709,7 +17198,15 @@ Deterministically assign variants for each row in df based on id_col.
 ##### `calculate_mde`
 
 ```python
-calculate_mde(sample_size: Union[int, Tuple[int, int]], baseline_rate: Optional[float] = None, variance: Optional[Union[float, Tuple[float, float]]] = None, alpha: float = 0.05, power: float = 0.8, data_type: str = 'conversion', ratio: float = 0.5) -> Dict[str, Any]
+calculate_mde(
+    sample_size: Union[int, Tuple[int, int]],
+    baseline_rate: Optional[float] = None,
+    variance: Optional[Union[float, Tuple[float, float]]] = None,
+    alpha: float = 0.05,
+    power: float = 0.8,
+    data_type: str = "conversion",
+    ratio: float = 0.5,
+) -> Dict[str, Any]
 ```
 
 Calculate the Minimum Detectable Effect (MDE) for conversion or continuous data_contracts.
@@ -11771,7 +17268,15 @@ where:
 ##### `check_srm`
 
 ```python
-check_srm(assignments: Union[Iterable[Hashable], pd.Series, CausalData, Mapping[Hashable, Number]], target_allocation: Dict[Hashable, Number], alpha: float = 0.001, min_expected: float = 5.0, strict_variants: bool = True) -> SRMResult
+check_srm(
+    assignments: Union[
+        Iterable[Hashable], pd.Series, CausalData, Mapping[Hashable, Number]
+    ],
+    target_allocation: Dict[Hashable, Number],
+    alpha: float = 0.001,
+    min_expected: float = 5.0,
+    strict_variants: bool = True,
+) -> SRMResult
 ```
 
 Check Sample Ratio Mismatch (SRM) for an RCT via a chi-square goodness-of-fit test.
@@ -11833,7 +17338,15 @@ Utility functions for calculating Minimum Detectable Effect (MDE) for experiment
 ###### `calculate_mde`
 
 ```python
-calculate_mde(sample_size: Union[int, Tuple[int, int]], baseline_rate: Optional[float] = None, variance: Optional[Union[float, Tuple[float, float]]] = None, alpha: float = 0.05, power: float = 0.8, data_type: str = 'conversion', ratio: float = 0.5) -> Dict[str, Any]
+calculate_mde(
+    sample_size: Union[int, Tuple[int, int]],
+    baseline_rate: Optional[float] = None,
+    variance: Optional[Union[float, Tuple[float, float]]] = None,
+    alpha: float = 0.05,
+    power: float = 0.8,
+    data_type: str = "conversion",
+    ratio: float = 0.5,
+) -> Dict[str, Any]
 ```
 
 Calculate the Minimum Detectable Effect (MDE) for conversion or continuous data_contracts.
@@ -11909,7 +17422,16 @@ The implementation mirrors the reference notebook in docs/cases/rct_design.ipynb
 ###### `assign_variants_df`
 
 ```python
-assign_variants_df(df: pd.DataFrame, id_col: str, experiment_id: str, variants: Dict[str, float], *, salt: str = 'global_ab_salt', layer_id: str = 'default', variant_col: str = 'variant') -> pd.DataFrame
+assign_variants_df(
+    df: pd.DataFrame,
+    id_col: str,
+    experiment_id: str,
+    variants: Dict[str, float],
+    *,
+    salt: str = "global_ab_salt",
+    layer_id: str = "default",
+    variant_col: str = "variant"
+) -> pd.DataFrame
 ```
 
 Deterministically assign variants for each row in df based on id_col.
@@ -11952,7 +17474,15 @@ and returns a compact result object with diagnostics.
 ##### `SRMResult`
 
 ```python
-SRMResult(chi2: float, p_value: float, expected: Dict[Hashable, float], observed: Dict[Hashable, int], alpha: float, is_srm: bool, warning: str | None = None) -> None
+SRMResult(
+    chi2: float,
+    p_value: float,
+    expected: Dict[Hashable, float],
+    observed: Dict[Hashable, int],
+    alpha: float,
+    is_srm: bool,
+    warning: str | None = None,
+) -> None
 ```
 
 Result of a Sample Ratio Mismatch (SRM) check.
@@ -12012,7 +17542,15 @@ warning: str | None = None
 ##### `check_srm`
 
 ```python
-check_srm(assignments: Union[Iterable[Hashable], pd.Series, CausalData, Mapping[Hashable, Number]], target_allocation: Dict[Hashable, Number], alpha: float = 0.001, min_expected: float = 5.0, strict_variants: bool = True) -> SRMResult
+check_srm(
+    assignments: Union[
+        Iterable[Hashable], pd.Series, CausalData, Mapping[Hashable, Number]
+    ],
+    target_allocation: Dict[Hashable, Number],
+    alpha: float = 0.001,
+    min_expected: float = 5.0,
+    strict_variants: bool = True,
+) -> SRMResult
 ```
 
 Check Sample Ratio Mismatch (SRM) for an RCT via a chi-square goodness-of-fit test.
@@ -12077,7 +17615,13 @@ questions for the user to consider. It has no side effects on import.
 ##### `QUESTIONS`
 
 ```python
-QUESTIONS: Iterable[str] = ('1.) Are your clients independent (i). Outcome of ones do not depend on others?', '2.) Are all clients have full window to measure metrics?', '3.) Do you measure confounders before treatment and outcome after?', '4.) Do you have a consistent label of treatment, such as if a person does not receive a treatment, he has a label 0?')
+QUESTIONS: Iterable[str] = (
+    "1.) Are your clients independent (i). Outcome of ones do not depend on others?",
+    "2.) Are all clients have full window to measure metrics?",
+    "3.) Do you measure confounders before treatment and outcome after?",
+    "4.) Do you have a consistent label of treatment, such as if a person does not receive a treatment, he has a label 0?",
+)
+
 ```
 
 ##### `print_sutva_questions`
