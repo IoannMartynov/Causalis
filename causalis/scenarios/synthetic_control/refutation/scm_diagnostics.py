@@ -12,6 +12,18 @@ from causalis.data_contracts.panel_data_scm import PanelDataSCM
 from causalis.data_contracts.panel_estimate import PanelEstimate
 
 
+def _to_plot_time(value: object) -> object:
+    if isinstance(value, pd.Period):
+        return value.to_timestamp()
+    return value
+
+
+def _to_plot_index(index: pd.Index) -> pd.Index:
+    if isinstance(index, pd.PeriodIndex):
+        return index.to_timestamp()
+    return index
+
+
 def _as_finite_float(value: Any) -> float | None:
     if value is None:
         return None
@@ -49,9 +61,9 @@ def _missing_cell_fraction(paneldata: PanelDataSCM) -> float:
 
     if paneldata.observed_col is not None and paneldata.observed_col in df.columns:
         observed = df[paneldata.observed_col].astype("boolean")
-        missing = (observed != True) | df[paneldata.outcome_col].isna()
+        missing = (observed != True) | df[paneldata.y].isna()
     else:
-        missing = df[paneldata.outcome_col].isna()
+        missing = df[paneldata.y].isna()
     return float(missing.mean())
 
 
@@ -60,7 +72,7 @@ def _save_observed_vs_synthetic(
     observed: pd.Series,
     synthetic_aug: pd.Series,
     synthetic_sc: pd.Series,
-    intervention_time: Any,
+    treatment_start: Any,
     save_path: Path,
     dpi: int,
 ) -> None:
@@ -75,9 +87,12 @@ def _save_observed_vs_synthetic(
     with mpl.rc_context(rc):
         fig, ax = plt.subplots(figsize=(10.0, 5.5), dpi=dpi)
         cycle = mpl.rcParams["axes.prop_cycle"].by_key().get("color", ["C0", "C1", "C2"])
+        observed_x = _to_plot_index(observed.index)
+        synthetic_aug_x = _to_plot_index(synthetic_aug.index)
+        synthetic_sc_x = _to_plot_index(synthetic_sc.index)
 
         ax.plot(
-            observed.index,
+            observed_x,
             observed.values,
             color=cycle[0],
             linewidth=2.6,
@@ -85,7 +100,7 @@ def _save_observed_vs_synthetic(
             zorder=3,
         )
         ax.plot(
-            synthetic_aug.index,
+            synthetic_aug_x,
             synthetic_aug.values,
             color=cycle[1 % len(cycle)],
             linewidth=2.2,
@@ -93,7 +108,7 @@ def _save_observed_vs_synthetic(
             zorder=2,
         )
         ax.plot(
-            synthetic_sc.index,
+            synthetic_sc_x,
             synthetic_sc.values,
             color=cycle[2 % len(cycle)],
             linewidth=1.8,
@@ -102,7 +117,7 @@ def _save_observed_vs_synthetic(
             zorder=1,
         )
         ax.axvline(
-            intervention_time,
+            _to_plot_time(treatment_start),
             linestyle="--",
             linewidth=1.7,
             color="0.25",
@@ -126,7 +141,7 @@ def _save_gap_over_time(
     *,
     gap_aug: pd.Series,
     gap_sc: pd.Series,
-    intervention_time: Any,
+    treatment_start: Any,
     save_path: Path,
     dpi: int,
 ) -> None:
@@ -141,16 +156,18 @@ def _save_gap_over_time(
     with mpl.rc_context(rc):
         fig, ax = plt.subplots(figsize=(10.0, 5.5), dpi=dpi)
         cycle = mpl.rcParams["axes.prop_cycle"].by_key().get("color", ["C0", "C1", "C2"])
+        gap_aug_x = _to_plot_index(gap_aug.index)
+        gap_sc_x = _to_plot_index(gap_sc.index)
 
         ax.plot(
-            gap_aug.index,
+            gap_aug_x,
             gap_aug.values,
             color=cycle[0],
             linewidth=2.3,
             label="Gap (augmented)",
         )
         ax.plot(
-            gap_sc.index,
+            gap_sc_x,
             gap_sc.values,
             color=cycle[1 % len(cycle)],
             linewidth=1.9,
@@ -159,7 +176,7 @@ def _save_gap_over_time(
         )
         ax.axhline(0.0, color="0.35", linewidth=1.2, linestyle=":")
         ax.axvline(
-            intervention_time,
+            _to_plot_time(treatment_start),
             linestyle="--",
             linewidth=1.7,
             color="0.25",
@@ -257,10 +274,10 @@ def run_scm_diagnostics(
             "estimate.treated_unit must match paneldata.treated_unit "
             f"({estimate.treated_unit!r} != {paneldata.treated_unit!r})."
         )
-    if estimate.intervention_time != paneldata.intervention_time:
+    if estimate.treatment_start != paneldata.treatment_start:
         raise ValueError(
-            "estimate.intervention_time must match paneldata.intervention_time "
-            f"({estimate.intervention_time!r} != {paneldata.intervention_time!r})."
+            "estimate.treatment_start must match paneldata.treatment_start "
+            f"({estimate.treatment_start!r} != {paneldata.treatment_start!r})."
         )
 
     diagnostics = dict(estimate.diagnostics or {})
@@ -353,14 +370,14 @@ def run_scm_diagnostics(
         observed=observed,
         synthetic_aug=synthetic_aug,
         synthetic_sc=synthetic_sc,
-        intervention_time=estimate.intervention_time,
+        treatment_start=estimate.treatment_start,
         save_path=observed_vs_synth_path,
         dpi=int(dpi),
     )
     _save_gap_over_time(
         gap_aug=gap_aug,
         gap_sc=gap_sc,
-        intervention_time=estimate.intervention_time,
+        treatment_start=estimate.treatment_start,
         save_path=gap_path,
         dpi=int(dpi),
     )
@@ -397,14 +414,7 @@ def run_scm_diagnostics(
         "pre_tail_k_used": int(k_eff),
     }
 
-    return {
-        "metrics": metrics,
-        "plots": {
-            "observed_vs_synthetic": str(observed_vs_synth_path),
-            "gap_over_time": str(gap_path),
-            "placebo_att_histogram": str(placebo_hist_path),
-        },
-    }
+    return {"metrics": metrics}
 
 
 __all__ = ["run_scm_diagnostics"]

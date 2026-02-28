@@ -1,10 +1,15 @@
 import numpy as np
 import pandas as pd
+import pytest
 
 from causalis.data_contracts import PanelDataSCM
 from causalis.dgp import generate_scm_data
 from causalis.dgp.panel_data_scm import generate_scm_gamma_data, generate_scm_poisson_data
-from causalis.scenarios.synthetic_control import AugmentedSyntheticControl
+from causalis.scenarios.synthetic_control import (
+    AugmentedSyntheticControl,
+    generate_scm_gamma_26,
+    generate_scm_poisson_26,
+)
 
 
 def test_generate_scm_data_returns_panel_contract_by_default():
@@ -22,7 +27,7 @@ def test_generate_scm_data_can_return_dataframe():
     df = generate_scm_data(return_panel_data=False, random_state=123)
 
     assert isinstance(df, pd.DataFrame)
-    assert {"unit_id", "time_id", "y", "y_cf", "tau_realized_true", "observed"}.issubset(df.columns)
+    assert {"unit_id", "calendar_time", "y", "y_cf", "tau_realized_true", "observed"}.issubset(df.columns)
 
 
 def test_generated_data_is_usable_by_ascm():
@@ -108,9 +113,9 @@ def test_generate_scm_data_multiplicative_effect_mode_tracks_tau_realized_true()
     )
 
     treated = df[df["unit_id"] == "treated"].copy()
-    intervention_time = time_start + n_pre
-    pre = treated[treated["time_id"] < intervention_time]
-    post = treated[treated["time_id"] >= intervention_time]
+    intervention_time = sorted(pd.Index(df["calendar_time"].unique()).tolist())[n_pre]
+    pre = treated[treated["calendar_time"] < intervention_time]
+    post = treated[treated["calendar_time"] >= intervention_time]
 
     assert np.allclose(df["tau_realized_true"].to_numpy(), (df["y"] - df["y_cf"]).to_numpy())
     assert np.allclose(pre["tau_realized_true"].to_numpy(), 0.0)
@@ -133,8 +138,8 @@ def test_generate_scm_data_can_protect_treated_post_outcomes():
         random_state=101,
     )
 
-    intervention_time = time_start + n_pre
-    treated_post = df[(df["unit_id"] == "treated") & (df["time_id"] >= intervention_time)]
+    intervention_time = sorted(pd.Index(df["calendar_time"].unique()).tolist())[n_pre]
+    treated_post = df[(df["unit_id"] == "treated") & (df["calendar_time"] >= intervention_time)]
     assert not treated_post["y"].isna().any()
 
 
@@ -177,23 +182,237 @@ def test_generate_scm_poisson_data_coupled_outcomes_and_mean_oracles():
     assert np.allclose(df["tau_realized_true"].to_numpy(), (df["y"] - df["y_cf"]).to_numpy())
     assert np.allclose(df["tau_mean_true"].to_numpy(), (df["mu_treated"] - df["mu_cf"]).to_numpy())
 
-    intervention_time = time_start + n_pre
+    intervention_time = sorted(pd.Index(df["calendar_time"].unique()).tolist())[n_pre]
     treated = df[df["unit_id"] == "treated"].copy()
-    pre = treated[treated["time_id"] < intervention_time]
-    post = treated[treated["time_id"] >= intervention_time]
+    pre = treated[treated["calendar_time"] < intervention_time]
+    post = treated[treated["calendar_time"] >= intervention_time]
     assert np.allclose(pre["tau_realized_true"].to_numpy(), 0.0)
     assert (post["tau_realized_true"] >= 0.0).all()
 
 
-def test_generate_scm_poisson_data_ignores_base_missing_overrides_on_treated():
-    df = generate_scm_poisson_data(
-        n=360,
-        seed=77,
-        n_donors=6,
+def test_generate_scm_poisson_data_rejects_base_missing_overrides():
+    with pytest.raises(ValueError, match="does not allow overriding"):
+        generate_scm_poisson_data(
+            n=360,
+            seed=77,
+            n_donors=6,
+            return_panel_data=False,
+            missing_outcome_frac=0.50,
+            missing_cell_frac=0.40,
+            missing_block_frac=0.30,
+        )
+
+
+def test_generate_scm_gamma_26_updates_covariate_cols_after_drop():
+    panel = generate_scm_gamma_26(return_panel_data=True, include_oracles=False, seed=123)
+    assert isinstance(panel, PanelDataSCM)
+    assert tuple(panel.covariate_cols) == ()
+    assert not {"exposure", "macro_index", "seasonality_index"}.intersection(panel.df.columns)
+
+
+def test_generate_scm_poisson_26_updates_covariate_cols_after_drop():
+    panel = generate_scm_poisson_26(return_panel_data=True, include_oracles=False, seed=123)
+    assert isinstance(panel, PanelDataSCM)
+    assert tuple(panel.covariate_cols) == ()
+    assert not {"exposure", "macro_index", "seasonality_index"}.intersection(panel.df.columns)
+
+
+def test_generate_scm_gamma_data_rejects_conflicting_locked_advanced_params():
+    with pytest.raises(ValueError, match="does not allow overriding"):
+        generate_scm_gamma_data(seed=42, random_state=999)
+    with pytest.raises(ValueError, match="does not allow overriding"):
+        generate_scm_gamma_data(outcome_distribution="poisson")
+
+
+def test_generate_scm_poisson_data_rejects_conflicting_locked_advanced_params():
+    with pytest.raises(ValueError, match="does not allow overriding"):
+        generate_scm_poisson_data(seed=42, random_state=999)
+    with pytest.raises(ValueError, match="does not allow overriding"):
+        generate_scm_poisson_data(outcome_distribution="gamma")
+    with pytest.raises(ValueError, match="does not allow overriding"):
+        generate_scm_poisson_data(missing_outcome_frac=0.5)
+
+
+def test_generate_scm_gamma_data_first_post_rate_is_ramped():
+    n_pre = 12
+    df = generate_scm_gamma_data(
+        n_pre_periods=n_pre,
+        n_post_periods=5,
+        treatment_effect_rate=0.12,
+        treatment_effect_slope=0.0,
+        seed=321,
         return_panel_data=False,
-        missing_outcome_frac=0.50,
-        missing_cell_frac=0.40,
-        missing_block_frac=0.30,
     )
-    treated = df[df["unit_id"] == "treated"]
-    assert not treated["y"].isna().any()
+    treated = df[df["unit_id"] == "treated"].sort_values("calendar_time")
+    first_post_time = sorted(pd.Index(treated["calendar_time"].unique()).tolist())[n_pre]
+    first_post = treated[treated["calendar_time"] == first_post_time].iloc[0]
+    observed_rate = float(first_post["tau_mean_true"] / first_post["mu_cf"])
+    expected_rate = 0.12 * (1.0 - np.exp(-1.0 / 2.5))
+    assert np.isclose(observed_rate, expected_rate)
+
+
+def test_generate_scm_poisson_data_first_post_rate_is_ramped():
+    n_pre = 10
+    df = generate_scm_poisson_data(
+        n_pre_periods=n_pre,
+        n_post_periods=4,
+        treatment_effect_rate=0.10,
+        treatment_effect_slope=0.0,
+        donor_missing_block_frac=0.0,
+        seed=456,
+        return_panel_data=False,
+    )
+    treated = df[df["unit_id"] == "treated"].sort_values("calendar_time")
+    first_post_time = sorted(pd.Index(treated["calendar_time"].unique()).tolist())[n_pre]
+    first_post = treated[treated["calendar_time"] == first_post_time].iloc[0]
+    observed_rate = float(first_post["tau_mean_true"] / first_post["mu_cf"])
+    expected_rate = 0.10 * (1.0 - np.exp(-1.0 / 2.5))
+    assert np.isclose(observed_rate, expected_rate)
+
+
+def test_generate_scm_gamma_data_exposure_varies_over_time():
+    df = generate_scm_gamma_data(
+        n_pre_periods=16,
+        n_post_periods=6,
+        n_donors=6,
+        seed=91,
+        return_panel_data=False,
+    )
+    donor = df[df["unit_id"] == "donor_1"].sort_values("calendar_time")
+    treated = df[df["unit_id"] == "treated"].sort_values("calendar_time")
+    assert donor["exposure"].nunique() > 1
+    assert treated["exposure"].nunique() > 1
+
+
+def test_generate_scm_poisson_data_exposure_varies_over_time():
+    df = generate_scm_poisson_data(
+        n_pre_periods=16,
+        n_post_periods=6,
+        n_donors=6,
+        donor_missing_block_frac=0.0,
+        seed=92,
+        return_panel_data=False,
+    )
+    donor = df[df["unit_id"] == "donor_1"].sort_values("calendar_time")
+    treated = df[df["unit_id"] == "treated"].sort_values("calendar_time")
+    assert donor["exposure"].nunique() > 1
+    assert treated["exposure"].nunique() > 1
+
+
+def test_generate_scm_gamma_data_rejects_partial_pre_post_spec():
+    with pytest.raises(ValueError, match="Provide both n_pre_periods and n_post_periods"):
+        generate_scm_gamma_data(n_pre_periods=12)
+    with pytest.raises(ValueError, match="Provide both n_pre_periods and n_post_periods"):
+        generate_scm_gamma_data(n_post_periods=6)
+
+
+def test_generate_scm_poisson_data_rejects_partial_pre_post_spec():
+    with pytest.raises(ValueError, match="Provide both n_pre_periods and n_post_periods"):
+        generate_scm_poisson_data(n_pre_periods=12)
+    with pytest.raises(ValueError, match="Provide both n_pre_periods and n_post_periods"):
+        generate_scm_poisson_data(n_post_periods=6)
+
+
+def test_generate_scm_gamma_26_accepts_explicit_pre_post_periods():
+    n_pre = 15
+    n_post = 7
+    panel = generate_scm_gamma_26(
+        n_pre_periods=n_pre,
+        n_post_periods=n_post,
+        include_oracles=True,
+        return_panel_data=True,
+        seed=42,
+    )
+    assert len(panel.pre_times()) == n_pre
+    assert len(panel.post_times()) == n_post
+
+
+def test_generate_scm_poisson_26_accepts_explicit_pre_post_periods():
+    n_pre = 14
+    n_post = 5
+    panel = generate_scm_poisson_26(
+        n_pre_periods=n_pre,
+        n_post_periods=n_post,
+        include_oracles=True,
+        return_panel_data=True,
+        donor_missing_block_frac=0.0,
+        seed=42,
+    )
+    assert len(panel.pre_times()) == n_pre
+    assert len(panel.post_times()) == n_post
+
+
+def test_generate_scm_gamma_26_uses_default_pre_post_not_n():
+    panel = generate_scm_gamma_26(n=999, return_panel_data=True, include_oracles=True, seed=42)
+    assert len(panel.pre_times()) == 24
+    assert len(panel.post_times()) == 3
+
+
+def test_generate_scm_poisson_26_uses_default_pre_post_not_n():
+    panel = generate_scm_poisson_26(
+        n=999,
+        return_panel_data=True,
+        include_oracles=True,
+        donor_missing_block_frac=0.0,
+        seed=42,
+    )
+    assert len(panel.pre_times()) == 24
+    assert len(panel.post_times()) == 3
+
+
+def test_generate_scm_gamma_26_rows_per_unit_include_intervention_anchor():
+    n_pre = 5
+    n_post = 3
+    n_donors = 2
+    expected_rows_per_unit = n_pre + 1 + n_post
+    df = generate_scm_gamma_26(
+        n_donors=n_donors,
+        n_pre_periods=n_pre,
+        n_post_periods=n_post,
+        include_oracles=True,
+        return_panel_data=False,
+        seed=123,
+    )
+    donor = df[df["unit_id"] == "donor_1"]
+    assert len(donor) == expected_rows_per_unit
+
+    panel = generate_scm_gamma_26(
+        n_donors=n_donors,
+        n_pre_periods=n_pre,
+        n_post_periods=n_post,
+        include_oracles=True,
+        return_panel_data=True,
+        seed=123,
+    )
+    assert len(panel.pre_times()) == n_pre
+    assert len(panel.post_times()) == n_post
+
+
+def test_generate_scm_poisson_26_rows_per_unit_include_intervention_anchor():
+    n_pre = 6
+    n_post = 2
+    n_donors = 2
+    expected_rows_per_unit = n_pre + 1 + n_post
+    df = generate_scm_poisson_26(
+        n_donors=n_donors,
+        n_pre_periods=n_pre,
+        n_post_periods=n_post,
+        include_oracles=True,
+        return_panel_data=False,
+        donor_missing_block_frac=0.0,
+        seed=123,
+    )
+    donor = df[df["unit_id"] == "donor_1"]
+    assert len(donor) == expected_rows_per_unit
+
+    panel = generate_scm_poisson_26(
+        n_donors=n_donors,
+        n_pre_periods=n_pre,
+        n_post_periods=n_post,
+        include_oracles=True,
+        return_panel_data=True,
+        donor_missing_block_frac=0.0,
+        seed=123,
+    )
+    assert len(panel.pre_times()) == n_pre
+    assert len(panel.post_times()) == n_post

@@ -10,6 +10,18 @@ import pandas as pd
 from causalis.data_contracts.panel_estimate import PanelEstimate
 
 
+def _to_plot_time(value: object) -> object:
+    if isinstance(value, pd.Period):
+        return value.to_timestamp()
+    return value
+
+
+def _to_plot_index(index: pd.Index) -> pd.Index:
+    if isinstance(index, pd.PeriodIndex):
+        return index.to_timestamp()
+    return index
+
+
 def _ensure_panel_estimate(estimate: PanelEstimate) -> None:
     if not isinstance(estimate, PanelEstimate):
         raise TypeError("estimate must be a PanelEstimate instance.")
@@ -60,9 +72,12 @@ def observed_vs_synthetic_plot(
     with mpl.rc_context(rc):
         fig, ax = plt.subplots(figsize=figsize, dpi=dpi)
         cycle = mpl.rcParams["axes.prop_cycle"].by_key().get("color", ["C0", "C1", "C2"])
+        observed_x = _to_plot_index(observed.index)
+        synthetic_aug_x = _to_plot_index(synthetic_aug.index)
+        synthetic_sc_x = _to_plot_index(synthetic_sc.index)
 
         ax.plot(
-            observed.index,
+            observed_x,
             observed.values,
             color=cycle[0],
             linewidth=2.6,
@@ -70,7 +85,7 @@ def observed_vs_synthetic_plot(
             zorder=3,
         )
         ax.plot(
-            synthetic_aug.index,
+            synthetic_aug_x,
             synthetic_aug.values,
             color=cycle[1 % len(cycle)],
             linewidth=2.2,
@@ -79,7 +94,7 @@ def observed_vs_synthetic_plot(
         )
         if show_sc:
             ax.plot(
-                synthetic_sc.index,
+                synthetic_sc_x,
                 synthetic_sc.values,
                 color=cycle[2 % len(cycle)],
                 linewidth=1.8,
@@ -89,7 +104,7 @@ def observed_vs_synthetic_plot(
             )
 
         ax.axvline(
-            estimate.intervention_time,
+            _to_plot_time(estimate.treatment_start),
             linestyle="--",
             linewidth=1.7,
             color="0.25",
@@ -135,9 +150,11 @@ def gap_over_time_plot(
     with mpl.rc_context(rc):
         fig, ax = plt.subplots(figsize=figsize, dpi=dpi)
         cycle = mpl.rcParams["axes.prop_cycle"].by_key().get("color", ["C0", "C1", "C2"])
+        gap_aug_x = _to_plot_index(gap_aug.index)
+        gap_sc_x = _to_plot_index(gap_sc.index)
 
         ax.plot(
-            gap_aug.index,
+            gap_aug_x,
             gap_aug.values,
             color=cycle[0],
             linewidth=2.3,
@@ -145,7 +162,7 @@ def gap_over_time_plot(
         )
         if show_sc:
             ax.plot(
-                gap_sc.index,
+                gap_sc_x,
                 gap_sc.values,
                 color=cycle[1 % len(cycle)],
                 linewidth=1.9,
@@ -154,7 +171,7 @@ def gap_over_time_plot(
             )
         ax.axhline(0.0, color="0.35", linewidth=1.2, linestyle=":")
         ax.axvline(
-            estimate.intervention_time,
+            _to_plot_time(estimate.treatment_start),
             linestyle="--",
             linewidth=1.7,
             color="0.25",

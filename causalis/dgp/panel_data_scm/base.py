@@ -80,7 +80,7 @@ def _drop_block_missing_cells(
     protected_set = set() if protected_index is None else set(protected_index)
 
     by_unit = {
-        unit: grp.sort_values("time_id").index.to_numpy(dtype=int)
+        unit: grp.sort_values("calendar_time").index.to_numpy(dtype=int)
         for unit, grp in df.groupby("unit_id", sort=False)
     }
     units = list(by_unit.keys())
@@ -130,6 +130,8 @@ class PanelSCMGeneratorConfig:
     n_pre_periods: int = 20
     n_post_periods: int = 10
     time_start: int = 1
+    time_freq: str = "M"
+    calendar_start: str = "2000-01"
     treated_unit: Hashable = "treated"
     donor_prefix: str = "donor_"
     random_state: Optional[int] = 42
@@ -166,7 +168,7 @@ class PanelSCMGeneratorConfig:
     prefit_mismatch_std: float = 0.0
     treatment_effect_mode: Literal["additive", "multiplicative"] = "additive"
 
-    # Gamma-mode parameters
+    # Gamma/Poisson effect parameter (long-run scale; first post period ramps in).
     treatment_effect_rate: float = 0.12
     gamma_shape: float = 6.0
     donor_noise_std_log: float = 0.15
@@ -190,6 +192,15 @@ class PanelSCMGenerator:
             raise ValueError("n_pre_periods must be >= 1.")
         if c.n_post_periods < 1:
             raise ValueError("n_post_periods must be >= 1.")
+        if c.time_start < 1:
+            raise ValueError("time_start must be >= 1.")
+        if not str(c.time_freq).strip():
+            raise ValueError("time_freq must be a non-empty pandas period frequency alias.")
+        try:
+            start_period = pd.Period(c.calendar_start, freq=c.time_freq)
+            _ = pd.period_range(start=start_period, periods=1, freq=c.time_freq)
+        except Exception as exc:
+            raise ValueError("calendar_start/time_freq must define a valid pandas period axis.") from exc
         if c.dirichlet_alpha <= 0.0:
             raise ValueError("dirichlet_alpha must be > 0.")
         if c.n_latent_factors < 0:
@@ -260,6 +271,14 @@ class PanelSCMGenerator:
             if c.prefit_mismatch_std_log < 0.0:
                 raise ValueError("prefit_mismatch_std_log must be >= 0.")
 
+    def _calendar_axis(self, *, n_total: int) -> tuple[list[pd.Period], pd.Period]:
+        c = self.config
+        base = pd.Period(c.calendar_start, freq=c.time_freq)
+        start = base + (int(c.time_start) - 1)
+        calendar_times = list(pd.period_range(start=start, periods=int(n_total), freq=c.time_freq))
+        treatment_start = calendar_times[int(c.n_pre_periods)]
+        return calendar_times, treatment_start
+
     def _sample_latent_factors(
         self,
         *,
@@ -291,12 +310,11 @@ class PanelSCMGenerator:
         self,
         *,
         rng: np.random.Generator,
-    ) -> tuple[pd.DataFrame, list[Hashable], int, tuple[str, ...]]:
+    ) -> tuple[pd.DataFrame, list[Hashable], tuple[str, ...]]:
         c = self.config
         n_total = int(c.n_pre_periods + c.n_post_periods)
         t_rel = np.arange(n_total, dtype=float)
-        times = np.arange(c.time_start, c.time_start + n_total, dtype=int)
-        intervention_time = int(c.time_start + c.n_pre_periods)
+        calendar_times, _ = self._calendar_axis(n_total=n_total)
 
         common_shock = _draw_ar1_series(
             rng=rng,
@@ -372,11 +390,11 @@ class PanelSCMGenerator:
             effect[post_idx] = treated_observed[post_idx] - treated_counterfactual[post_idx]
 
         rows = []
-        for i, t in enumerate(times.tolist()):
+        for i, t_cal in enumerate(calendar_times):
             rows.append(
                 {
                     "unit_id": c.treated_unit,
-                    "time_id": t,
+                    "calendar_time": t_cal,
                     "y": float(treated_observed[i]),
                     "y_cf": float(treated_counterfactual[i]),
                     "tau_realized_true": float(effect[i]),
@@ -387,7 +405,7 @@ class PanelSCMGenerator:
                 rows.append(
                     {
                         "unit_id": unit,
-                        "time_id": t,
+                        "calendar_time": t_cal,
                         "y": float(donor_matrix[i, j]),
                         "y_cf": float(donor_matrix[i, j]),
                         "tau_realized_true": 0.0,
@@ -395,18 +413,17 @@ class PanelSCMGenerator:
                     }
                 )
 
-        return pd.DataFrame(rows), donor_names, intervention_time, ()
+        return pd.DataFrame(rows), donor_names, ()
 
     def _generate_gamma_panel(
         self,
         *,
         rng: np.random.Generator,
-    ) -> tuple[pd.DataFrame, list[Hashable], int, tuple[str, ...]]:
+    ) -> tuple[pd.DataFrame, list[Hashable], tuple[str, ...]]:
         c = self.config
         n_total = int(c.n_pre_periods + c.n_post_periods)
         t_rel = np.arange(n_total, dtype=float)
-        times = np.arange(c.time_start, c.time_start + n_total, dtype=int)
-        intervention_time = int(c.time_start + c.n_pre_periods)
+        calendar_times, _ = self._calendar_axis(n_total=n_total)
         post_idx = np.arange(c.n_pre_periods, n_total, dtype=int)
 
         season = np.sin(2.0 * np.pi * t_rel / 12.0) + 0.5 * np.cos(2.0 * np.pi * t_rel / 6.0)
@@ -424,14 +441,31 @@ class PanelSCMGenerator:
         )
 
         donor_names = [f"{c.donor_prefix}{j + 1}" for j in range(c.n_donors)]
-        donor_exposure = np.exp(rng.normal(np.log(800.0), 0.35, size=c.n_donors))
+        donor_exposure = np.empty((n_total, c.n_donors), dtype=float)
+        donor_eta = np.empty((n_total, c.n_donors), dtype=float)
         donor_mu = np.empty((n_total, c.n_donors), dtype=float)
 
         centered_t = t_rel - t_rel.mean()
-        exposure_anchor = float(np.median(donor_exposure))
+        exposure_time_log = _draw_ar1_series(
+            rng=rng,
+            n_periods=n_total,
+            rho=c.rho_common,
+            innovation_std=0.08,
+        )
         for j in range(c.n_donors):
-            intercept = float(rng.normal(np.log(18.0), 0.30))
-            growth = float(rng.normal(0.010, 0.004))
+            exposure_level = float(rng.normal(np.log(800.0), 0.30))
+            exposure_growth = float(rng.normal(0.004, 0.002))
+            exposure_noise = _draw_ar1_series(
+                rng=rng,
+                n_periods=n_total,
+                rho=c.rho_donor,
+                innovation_std=0.10,
+            )
+            log_exposure = exposure_level + exposure_growth * centered_t + exposure_time_log + exposure_noise
+            donor_exposure[:, j] = np.exp(np.clip(log_exposure, np.log(20.0), np.log(50_000.0)))
+
+            eta_intercept = float(rng.normal(np.log(0.025), 0.30))
+            eta_growth = float(rng.normal(0.005, 0.003))
             season_loading = float(rng.normal(0.14, 0.05))
             donor_noise = _draw_ar1_series(
                 rng=rng,
@@ -444,27 +478,37 @@ class PanelSCMGenerator:
                 if c.n_latent_factors > 0
                 else np.zeros(n_total, dtype=float)
             )
-            log_mu = (
-                intercept
-                + 0.35 * np.log(donor_exposure[j] / exposure_anchor)
-                + growth * centered_t
+            eta = (
+                eta_intercept
+                + eta_growth * centered_t
                 + season_loading * season
                 + macro_log
                 + latent_term
                 + donor_noise
             )
+            donor_eta[:, j] = eta
+            log_mu = np.log(donor_exposure[:, j]) + eta
             donor_mu[:, j] = np.exp(np.clip(log_mu, -6.0, 10.0))
 
         true_weights = rng.dirichlet(np.full(c.n_donors, fill_value=c.dirichlet_alpha, dtype=float))
-        prefit_mismatch = _draw_ar1_series(
+        prefit_mismatch_eta = _draw_ar1_series(
             rng=rng,
             n_periods=n_total,
             rho=c.rho_prefit_mismatch,
             innovation_std=c.prefit_mismatch_std_log,
         )
-        treated_mu_cf = (donor_mu @ true_weights) * np.exp(prefit_mismatch)
+        prefit_mismatch_exposure = _draw_ar1_series(
+            rng=rng,
+            n_periods=n_total,
+            rho=c.rho_prefit_mismatch,
+            innovation_std=0.5 * c.prefit_mismatch_std_log,
+        )
+        treated_exposure_cf = (donor_exposure @ true_weights) * np.exp(prefit_mismatch_exposure)
+        treated_exposure_cf = np.clip(treated_exposure_cf, 1.0, None)
+        treated_eta_cf = (donor_eta @ true_weights) + prefit_mismatch_eta
+        treated_log_mu_cf = np.log(treated_exposure_cf) + treated_eta_cf
+        treated_mu_cf = np.exp(np.clip(treated_log_mu_cf, -6.0, 10.0))
         treated_mu_cf = np.clip(treated_mu_cf, 1e-6, None)
-        treated_exposure = float((donor_exposure @ true_weights) * np.exp(rng.normal(0.0, 0.08)))
 
         donor_y = rng.gamma(shape=c.gamma_shape, scale=np.clip(donor_mu, 1e-6, None) / c.gamma_shape)
         treated_y_cf = rng.gamma(
@@ -495,11 +539,11 @@ class PanelSCMGenerator:
         seasonality_index = 1.0 + 0.15 * season
 
         rows = []
-        for i, t in enumerate(times.tolist()):
+        for i, t_cal in enumerate(calendar_times):
             rows.append(
                 {
                     "unit_id": c.treated_unit,
-                    "time_id": t,
+                    "calendar_time": t_cal,
                     "y": float(treated_y[i]),
                     "y_cf": float(treated_y_cf[i]),
                     "tau_realized_true": float(tau_realized_true[i]),
@@ -508,7 +552,7 @@ class PanelSCMGenerator:
                     "tau_mean_true": float(tau_mean_true[i]),
                     "tau_rate_true": float(effect_rate[i]),
                     "is_treated_unit": 1,
-                    "exposure": treated_exposure,
+                    "exposure": float(treated_exposure_cf[i]),
                     "macro_index": float(macro_index[i]),
                     "seasonality_index": float(seasonality_index[i]),
                 }
@@ -517,7 +561,7 @@ class PanelSCMGenerator:
                 rows.append(
                     {
                         "unit_id": unit,
-                        "time_id": t,
+                        "calendar_time": t_cal,
                         "y": float(donor_y[i, j]),
                         "y_cf": float(donor_y[i, j]),
                         "tau_realized_true": 0.0,
@@ -526,7 +570,7 @@ class PanelSCMGenerator:
                         "tau_mean_true": 0.0,
                         "tau_rate_true": 0.0,
                         "is_treated_unit": 0,
-                        "exposure": float(donor_exposure[j]),
+                        "exposure": float(donor_exposure[i, j]),
                         "macro_index": float(macro_index[i]),
                         "seasonality_index": float(seasonality_index[i]),
                     }
@@ -535,7 +579,6 @@ class PanelSCMGenerator:
         return (
             pd.DataFrame(rows),
             donor_names,
-            intervention_time,
             ("exposure", "macro_index", "seasonality_index"),
         )
 
@@ -543,12 +586,11 @@ class PanelSCMGenerator:
         self,
         *,
         rng: np.random.Generator,
-    ) -> tuple[pd.DataFrame, list[Hashable], int, tuple[str, ...]]:
+    ) -> tuple[pd.DataFrame, list[Hashable], tuple[str, ...]]:
         c = self.config
         n_total = int(c.n_pre_periods + c.n_post_periods)
         t_rel = np.arange(n_total, dtype=float)
-        times = np.arange(c.time_start, c.time_start + n_total, dtype=int)
-        intervention_time = int(c.time_start + c.n_pre_periods)
+        calendar_times, _ = self._calendar_axis(n_total=n_total)
         post_idx = np.arange(c.n_pre_periods, n_total, dtype=int)
 
         season = np.sin(2.0 * np.pi * t_rel / 12.0) + 0.5 * np.cos(2.0 * np.pi * t_rel / 6.0)
@@ -566,14 +608,31 @@ class PanelSCMGenerator:
         )
 
         donor_names = [f"{c.donor_prefix}{j + 1}" for j in range(c.n_donors)]
-        donor_exposure = np.exp(rng.normal(np.log(700.0), 0.35, size=c.n_donors))
+        donor_exposure = np.empty((n_total, c.n_donors), dtype=float)
+        donor_eta = np.empty((n_total, c.n_donors), dtype=float)
         donor_mu = np.empty((n_total, c.n_donors), dtype=float)
 
         centered_t = t_rel - t_rel.mean()
-        exposure_anchor = float(np.median(donor_exposure))
+        exposure_time_log = _draw_ar1_series(
+            rng=rng,
+            n_periods=n_total,
+            rho=c.rho_common,
+            innovation_std=0.08,
+        )
         for j in range(c.n_donors):
-            intercept = float(rng.normal(np.log(12.0), 0.25))
-            growth = float(rng.normal(0.010, 0.004))
+            exposure_level = float(rng.normal(np.log(700.0), 0.30))
+            exposure_growth = float(rng.normal(0.004, 0.002))
+            exposure_noise = _draw_ar1_series(
+                rng=rng,
+                n_periods=n_total,
+                rho=c.rho_donor,
+                innovation_std=0.10,
+            )
+            log_exposure = exposure_level + exposure_growth * centered_t + exposure_time_log + exposure_noise
+            donor_exposure[:, j] = np.exp(np.clip(log_exposure, np.log(15.0), np.log(45_000.0)))
+
+            eta_intercept = float(rng.normal(np.log(0.018), 0.25))
+            eta_growth = float(rng.normal(0.005, 0.003))
             season_loading = float(rng.normal(0.16, 0.06))
             donor_noise = _draw_ar1_series(
                 rng=rng,
@@ -586,27 +645,37 @@ class PanelSCMGenerator:
                 if c.n_latent_factors > 0
                 else np.zeros(n_total, dtype=float)
             )
-            log_mu = (
-                intercept
-                + 0.35 * np.log(donor_exposure[j] / exposure_anchor)
-                + growth * centered_t
+            eta = (
+                eta_intercept
+                + eta_growth * centered_t
                 + season_loading * season
                 + macro_log
                 + latent_term
                 + donor_noise
             )
+            donor_eta[:, j] = eta
+            log_mu = np.log(donor_exposure[:, j]) + eta
             donor_mu[:, j] = np.exp(np.clip(log_mu, -6.0, 10.0))
 
         true_weights = rng.dirichlet(np.full(c.n_donors, fill_value=c.dirichlet_alpha, dtype=float))
-        prefit_mismatch = _draw_ar1_series(
+        prefit_mismatch_eta = _draw_ar1_series(
             rng=rng,
             n_periods=n_total,
             rho=c.rho_prefit_mismatch,
             innovation_std=c.prefit_mismatch_std_log,
         )
-        treated_mu_cf = (donor_mu @ true_weights) * np.exp(prefit_mismatch)
+        prefit_mismatch_exposure = _draw_ar1_series(
+            rng=rng,
+            n_periods=n_total,
+            rho=c.rho_prefit_mismatch,
+            innovation_std=0.5 * c.prefit_mismatch_std_log,
+        )
+        treated_exposure_cf = (donor_exposure @ true_weights) * np.exp(prefit_mismatch_exposure)
+        treated_exposure_cf = np.clip(treated_exposure_cf, 1.0, None)
+        treated_eta_cf = (donor_eta @ true_weights) + prefit_mismatch_eta
+        treated_log_mu_cf = np.log(treated_exposure_cf) + treated_eta_cf
+        treated_mu_cf = np.exp(np.clip(treated_log_mu_cf, -6.0, 10.0))
         treated_mu_cf = np.clip(treated_mu_cf, 1e-6, None)
-        treated_exposure = float((donor_exposure @ true_weights) * np.exp(rng.normal(0.0, 0.08)))
 
         effect_rate = np.zeros(n_total, dtype=float)
         post_steps = np.arange(c.n_post_periods, dtype=float)
@@ -635,11 +704,11 @@ class PanelSCMGenerator:
         seasonality_index = 1.0 + 0.15 * season
 
         rows = []
-        for i, t in enumerate(times.tolist()):
+        for i, t_cal in enumerate(calendar_times):
             rows.append(
                 {
                     "unit_id": c.treated_unit,
-                    "time_id": t,
+                    "calendar_time": t_cal,
                     "y": float(treated_y[i]),
                     "y_cf": float(treated_y_cf[i]),
                     "tau_realized_true": float(tau_realized_true[i]),
@@ -648,7 +717,7 @@ class PanelSCMGenerator:
                     "tau_mean_true": float(tau_mean_true[i]),
                     "tau_rate_true": float(effect_rate[i]),
                     "is_treated_unit": 1,
-                    "exposure": treated_exposure,
+                    "exposure": float(treated_exposure_cf[i]),
                     "macro_index": float(macro_index[i]),
                     "seasonality_index": float(seasonality_index[i]),
                 }
@@ -657,7 +726,7 @@ class PanelSCMGenerator:
                 rows.append(
                     {
                         "unit_id": unit,
-                        "time_id": t,
+                        "calendar_time": t_cal,
                         "y": float(donor_y[i, j]),
                         "y_cf": float(donor_y[i, j]),
                         "tau_realized_true": 0.0,
@@ -666,7 +735,7 @@ class PanelSCMGenerator:
                         "tau_mean_true": 0.0,
                         "tau_rate_true": 0.0,
                         "is_treated_unit": 0,
-                        "exposure": float(donor_exposure[j]),
+                        "exposure": float(donor_exposure[i, j]),
                         "macro_index": float(macro_index[i]),
                         "seasonality_index": float(seasonality_index[i]),
                     }
@@ -675,24 +744,23 @@ class PanelSCMGenerator:
         return (
             pd.DataFrame(rows),
             donor_names,
-            intervention_time,
             ("exposure", "macro_index", "seasonality_index"),
         )
 
     def _apply_missingness(self, *, df: pd.DataFrame, rng: np.random.Generator) -> pd.DataFrame:
         c = self.config
         out = df.copy()
-        intervention_time = int(c.time_start + c.n_pre_periods)
+        _, treatment_start = self._calendar_axis(n_total=int(c.n_pre_periods + c.n_post_periods))
 
         treated_mask = out["unit_id"] == c.treated_unit
         protected_treated_idx: set[int] = set()
         if c.protect_treated_pre:
             protected_treated_idx.update(
-                out.index[(treated_mask) & (out["time_id"] < intervention_time)].to_numpy(dtype=int).tolist()
+                out.index[(treated_mask) & (out["calendar_time"] < treatment_start)].to_numpy(dtype=int).tolist()
             )
         if c.protect_treated_post:
             protected_treated_idx.update(
-                out.index[(treated_mask) & (out["time_id"] >= intervention_time)].to_numpy(dtype=int).tolist()
+                out.index[(treated_mask) & (out["calendar_time"] >= treatment_start)].to_numpy(dtype=int).tolist()
             )
 
         protected_structured_idx: set[int] = set(
@@ -744,14 +812,15 @@ class PanelSCMGenerator:
         rng = np.random.default_rng(c.random_state)
 
         if c.outcome_distribution == "gaussian":
-            df, donor_names, intervention_time, covariate_cols = self._generate_gaussian_panel(rng=rng)
+            df, donor_names, covariate_cols = self._generate_gaussian_panel(rng=rng)
         elif c.outcome_distribution == "gamma":
-            df, donor_names, intervention_time, covariate_cols = self._generate_gamma_panel(rng=rng)
+            df, donor_names, covariate_cols = self._generate_gamma_panel(rng=rng)
         else:
-            df, donor_names, intervention_time, covariate_cols = self._generate_poisson_panel(rng=rng)
+            df, donor_names, covariate_cols = self._generate_poisson_panel(rng=rng)
 
+        _, treatment_start = self._calendar_axis(n_total=int(c.n_pre_periods + c.n_post_periods))
         df = self._apply_missingness(df=df, rng=rng)
-        df = df.sort_values(["unit_id", "time_id"]).reset_index(drop=True)
+        df = df.sort_values(["unit_id", "calendar_time"]).reset_index(drop=True)
         df["observed"] = (~df["y"].isna()).astype(int)
 
         if not return_panel_data_flag:
@@ -762,12 +831,18 @@ class PanelSCMGenerator:
             or c.missing_cell_frac > 0.0
             or c.missing_block_frac > 0.0
         )
-        return PanelDataSCM(unit_id="unit_id", time_id="time_id", y="y", 
+        panel = PanelDataSCM(
             df=df,
+            unit_col="unit_id",
+            time_col="calendar_time",
+            time_freq=c.time_freq,
+            y="y",
             treated_unit=c.treated_unit,
-            intervention_time=intervention_time,
+            treatment_start=treatment_start,
             donor_units=donor_names,
             covariate_cols=covariate_cols,
             observed_col="observed",
             allow_missing_outcome=allow_missing,
         )
+        # Restore generator-facing columns (oracle and helper columns) after validation.
+        return panel.model_copy(update={"df": df})

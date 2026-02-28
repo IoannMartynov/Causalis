@@ -8,11 +8,14 @@ from causalis.scenarios.synthetic_control import ASCM, RSCM, SCM, SyntheticContr
 
 def _make_panel_with_effect(effect: float = 2.5) -> pd.DataFrame:
     rows = []
-    for t in [1, 2, 3, 4, 5, 6]:
-        y_c1 = 10.0 + 0.5 * t
-        y_c2 = 12.0 + 0.2 * t
+    for idx, t in enumerate(
+        ["2020-01-01", "2020-02-01", "2020-03-01", "2020-04-01", "2020-05-01", "2020-06-01"],
+        start=1,
+    ):
+        y_c1 = 10.0 + 0.5 * idx
+        y_c2 = 12.0 + 0.2 * idx
         y_treat = 0.65 * y_c1 + 0.35 * y_c2
-        if t >= 4:
+        if idx >= 4:
             y_treat += effect
 
         rows.extend(
@@ -27,7 +30,14 @@ def _make_panel_with_effect(effect: float = 2.5) -> pd.DataFrame:
 
 def test_scm_defaults_to_ascm_when_fully_observed():
     df = _make_panel_with_effect(effect=2.0)
-    data = PanelDataSCM(unit_id="unit_id", time_id="time_id", y="y", df=df, treated_unit="T", intervention_time=4)
+    data = PanelDataSCM(
+        unit_col="unit_id",
+        time_col="time_id",
+        y="y",
+        df=df,
+        treated_unit="T",
+        treatment_start="2020-04-01",
+    )
 
     estimate_auto = SyntheticControl(lambda_aug=0.5).fit(data).estimate()
     estimate_ascm = ASCM(lambda_aug=0.5).fit(data).estimate()
@@ -41,9 +51,17 @@ def test_scm_defaults_to_ascm_when_fully_observed():
 
 def test_scm_forces_rscm_when_missing_outcomes_present():
     df = _make_panel_with_effect(effect=3.0)
-    df = df[~((df["unit_id"] == "C2") & (df["time_id"] == 2))].copy()
-    df.loc[(df["unit_id"] == "C1") & (df["time_id"] == 3), "y"] = np.nan
-    data = PanelDataSCM(unit_id="unit_id", time_id="time_id", y="y", df=df, treated_unit="T", intervention_time=4, allow_missing_outcome=True)
+    df = df[~((df["unit_id"] == "C2") & (df["time_id"] == "2020-02-01"))].copy()
+    df.loc[(df["unit_id"] == "C1") & (df["time_id"] == "2020-03-01"), "y"] = np.nan
+    data = PanelDataSCM(
+        unit_col="unit_id",
+        time_col="time_id",
+        y="y",
+        df=df,
+        treated_unit="T",
+        treatment_start="2020-04-01",
+        allow_missing_outcome=True,
+    )
 
     estimate_auto = SyntheticControl(lambda_aug=0.5, completion_max_iter=250).fit(data).estimate()
     estimate_rscm = RSCM(lambda_aug=0.5, completion_max_iter=250).fit(data).estimate()
@@ -62,37 +80,46 @@ def test_scm_alias_and_not_fitted_guard():
 
 def test_scm_contract_rejects_missing_treated_post_outcomes():
     df = _make_panel_with_effect(effect=2.0)
-    df.loc[(df["unit_id"] == "T") & (df["time_id"] == 6), "y"] = np.nan
-    with pytest.raises(ValueError, match="treated_unit must have observed outcomes"):
+    df.loc[(df["unit_id"] == "T") & (df["time_id"] == "2020-06-01"), "y"] = np.nan
+    with pytest.raises(ValueError, match="treated_unit must have observed y"):
         PanelDataSCM(
-            unit_id="unit_id",
-            time_id="time_id",
+            unit_col="unit_id",
+            time_col="time_id",
             y="y",
             df=df,
             treated_unit="T",
-            intervention_time=4,
+            treatment_start="2020-04-01",
             allow_missing_outcome=True,
         )
 
 
 def test_scm_failed_refit_does_not_return_stale_estimate():
     valid_df = _make_panel_with_effect(effect=2.0)
-    valid_data = PanelDataSCM(unit_id="unit_id", time_id="time_id", y="y", df=valid_df, treated_unit="T", intervention_time=4)
+    valid_data = PanelDataSCM(
+        unit_col="unit_id",
+        time_col="time_id",
+        y="y",
+        df=valid_df,
+        treated_unit="T",
+        treatment_start="2020-04-01",
+    )
 
-    model = SyntheticControl(lambda_aug=0.5).fit(valid_data)
+    model = SyntheticControl(lambda_aug=0.5, min_pre_observed=4).fit(valid_data)
     assert model.estimate().model == "AugmentedSyntheticControl"
 
     invalid_df = _make_panel_with_effect(effect=2.0)
+    invalid_df.loc[(invalid_df["unit_id"] == "T") & (invalid_df["time_id"] == "2020-01-01"), "y"] = np.nan
     invalid_data = PanelDataSCM(
-        unit_id="unit_id",
-        time_id="time_id",
+        unit_col="unit_id",
+        time_col="time_id",
         y="y",
         df=invalid_df,
         treated_unit="T",
-        intervention_time=10,
+        treatment_start="2020-04-01",
+        allow_missing_outcome=True,
     )
 
-    with pytest.raises(ValueError, match="post-treatment"):
+    with pytest.raises(ValueError, match="observed treated pre-treatment outcomes"):
         model.fit(invalid_data)
 
     with pytest.raises(RuntimeError, match="fit"):

@@ -9,6 +9,18 @@ import pandas as pd
 from causalis.data_contracts.panel_data_scm import PanelDataSCM
 
 
+def _to_plot_time(value: object) -> object:
+    if isinstance(value, pd.Period):
+        return value.to_timestamp()
+    return value
+
+
+def _to_plot_index(index: pd.Index) -> pd.Index:
+    if isinstance(index, pd.PeriodIndex):
+        return index.to_timestamp()
+    return index
+
+
 def outcome_panel_plot(
     paneldata: PanelDataSCM,
     *,
@@ -72,7 +84,7 @@ def outcome_panel_plot(
 
     unit_col = paneldata.unit_col
     time_col = paneldata.time_col
-    outcome_col = paneldata.outcome_col
+    outcome_col = paneldata.y
 
     df = paneldata.df_analysis().copy()
     df[outcome_col] = pd.to_numeric(df[outcome_col], errors="coerce")
@@ -96,6 +108,8 @@ def outcome_panel_plot(
 
     treated_series = pivot[paneldata.treated_unit]
     donor_mean = pivot[donors_all].mean(axis=1, skipna=True) if donors_all else None
+    x_index_plot = _to_plot_index(pivot.index)
+    treatment_start_plot = _to_plot_time(paneldata.treatment_start)
 
     rc = {
         "font.size": 11 * font_scale,
@@ -110,10 +124,10 @@ def outcome_panel_plot(
         cycle = mpl.rcParams["axes.prop_cycle"].by_key().get("color", ["C0", "C1", "C2"])
 
         if shade_post_period and len(pivot.index) > 0:
-            x_max = pivot.index.max()
-            if paneldata.intervention_time <= x_max:
+            x_max = x_index_plot.max()
+            if treatment_start_plot <= x_max:
                 ax.axvspan(
-                    paneldata.intervention_time,
+                    treatment_start_plot,
                     x_max,
                     color="0.75",
                     alpha=0.15,
@@ -126,7 +140,7 @@ def outcome_panel_plot(
             for idx, donor in enumerate(donors_shown):
                 donor_series = pivot[donor]
                 ax.plot(
-                    donor_series.index,
+                    x_index_plot,
                     donor_series.values,
                     color="0.60",
                     linewidth=donor_linewidth,
@@ -137,7 +151,7 @@ def outcome_panel_plot(
 
         if show_donor_mean and donor_mean is not None:
             ax.plot(
-                donor_mean.index,
+                x_index_plot,
                 donor_mean.values,
                 color=cycle[1 % len(cycle)],
                 linewidth=2.2,
@@ -146,7 +160,7 @@ def outcome_panel_plot(
             )
 
         ax.plot(
-            treated_series.index,
+            x_index_plot,
             treated_series.values,
             color=cycle[0],
             linewidth=2.6,
@@ -154,7 +168,7 @@ def outcome_panel_plot(
             zorder=3,
         )
         ax.axvline(
-            paneldata.intervention_time,
+            treatment_start_plot,
             linestyle="--",
             linewidth=1.7,
             color="0.25",
