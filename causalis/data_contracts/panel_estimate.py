@@ -19,7 +19,7 @@ class PanelEstimate(BaseModel):
         Name of the fitted estimator or pipeline.
     treated_unit : Hashable
         Identifier of the treated unit.
-    intervention_time : TimeLike
+    treatment_start : TimeLike
         Treatment boundary used to split pre/post periods.
     pre_times : list[TimeLike]
         Sorted, strictly pre-treatment periods.
@@ -42,7 +42,7 @@ class PanelEstimate(BaseModel):
     model: str
 
     treated_unit: Hashable
-    intervention_time: TimeLike
+    treatment_start: TimeLike
     pre_times: List[TimeLike]
     post_times: List[TimeLike]
 
@@ -68,10 +68,6 @@ class PanelEstimate(BaseModel):
 
     diagnostics: Dict[str, Any] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    time: Optional[str] = Field(
-        default=None,
-        description="Deprecated legacy timestamp field. Prefer created_at.",
-    )
 
     @model_validator(mode="after")
     def _validate_dimensions(self) -> "PanelEstimate":
@@ -80,7 +76,7 @@ class PanelEstimate(BaseModel):
         Returns
         -------
         PanelEstimate
-            Validated instance with legacy ``time`` backfilled when missing.
+            Validated instance.
         """
         n_pre = len(self.pre_times)
         n_post = len(self.post_times)
@@ -214,9 +210,6 @@ class PanelEstimate(BaseModel):
         enforce_sum_to_one_augmented = self.diagnostics.get("enforce_sum_to_one_augmented")
         if enforce_sum_to_one_augmented is True and abs(float(w_aug.sum()) - 1.0) > 1e-6:
             raise ValueError("donor_weights_augmented must sum to 1 (within tolerance).")
-
-        if self.time is None:
-            object.__setattr__(self, "time", self.created_at.isoformat())
 
         return self
 

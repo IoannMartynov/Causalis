@@ -62,6 +62,73 @@ class AugmentedSyntheticControl:
         return float(np.sqrt(np.mean(np.square(x))))
 
     @staticmethod
+    def _project_to_simplex(v: np.ndarray) -> np.ndarray:
+        """Project a vector onto the probability simplex {w >= 0, sum(w)=1}."""
+        vec = np.asarray(v, dtype=float).reshape(-1)
+        if vec.size < 1:
+            raise ValueError("Simplex projection requires at least one coefficient.")
+        if not np.isfinite(vec).all():
+            raise ValueError("Simplex projection input must be finite.")
+
+        sorted_vec = np.sort(vec)[::-1]
+        cssv = np.cumsum(sorted_vec) - 1.0
+        idx = np.arange(1, vec.size + 1, dtype=float)
+        positive = sorted_vec - (cssv / idx) > 0.0
+        if not bool(np.any(positive)):
+            return np.full(vec.size, 1.0 / float(vec.size), dtype=float)
+
+        rho = int(np.nonzero(positive)[0][-1])
+        theta = float(cssv[rho] / float(rho + 1))
+        projected = np.maximum(vec - theta, 0.0)
+        proj_sum = float(np.sum(projected))
+        if not np.isfinite(proj_sum) or proj_sum <= 0.0:
+            return np.full(vec.size, 1.0 / float(vec.size), dtype=float)
+        return projected / proj_sum
+
+    def _fit_simplex_weights_projected_gradient(
+        self,
+        *,
+        gram: np.ndarray,
+        rhs: np.ndarray,
+        w_init: np.ndarray,
+    ) -> np.ndarray:
+        """Convex fallback solver for simplex-constrained SC weights."""
+        gram_arr = np.asarray(gram, dtype=float)
+        rhs_arr = np.asarray(rhs, dtype=float)
+        w = self._project_to_simplex(np.asarray(w_init, dtype=float))
+
+        if gram_arr.shape[0] != gram_arr.shape[1]:
+            raise ValueError("gram must be square in simplex fallback.")
+        if rhs_arr.shape != (gram_arr.shape[0],):
+            raise ValueError("rhs must have shape (n_donors,) in simplex fallback.")
+        if not np.isfinite(gram_arr).all() or not np.isfinite(rhs_arr).all():
+            raise RuntimeError("SC simplex fallback received non-finite optimization terms.")
+
+        try:
+            eigvals = np.linalg.eigvalsh(gram_arr)
+            lmax = float(np.max(eigvals)) if eigvals.size > 0 else 0.0
+        except np.linalg.LinAlgError:
+            lmax = float(np.linalg.norm(gram_arr, ord=2))
+        lipschitz = float(max(2.0 * lmax, 1e-12))
+        step = 1.0 / lipschitz
+
+        tol_eff = float(max(self.tol, 1e-10))
+        max_iter_pg = int(max(2_000, 5 * self.max_iter))
+        for _ in range(max_iter_pg):
+            grad = 2.0 * (gram_arr @ w - rhs_arr)
+            if not np.isfinite(grad).all():
+                break
+            w_next = self._project_to_simplex(w - step * grad)
+            if float(np.max(np.abs(w_next - w))) <= tol_eff:
+                return w_next
+            w = w_next
+
+        w = self._project_to_simplex(w)
+        if not np.isfinite(w).all():
+            raise RuntimeError("SC simplex fallback returned non-finite donor weights.")
+        return w
+
+    @staticmethod
     def _solve_linear(a: np.ndarray, b: np.ndarray) -> np.ndarray:
         try:
             return np.linalg.solve(a, b)
@@ -465,12 +532,32 @@ class AugmentedSyntheticControl:
         )
 
     def _fit_simplex_weights(self, x0_pre: np.ndarray, y1_pre: np.ndarray) -> np.ndarray:
-        n_donors = x0_pre.shape[1]
+        x0_pre_arr = np.asarray(x0_pre, dtype=float)
+        y1_pre_arr = np.asarray(y1_pre, dtype=float)
+
+        if x0_pre_arr.ndim != 2:
+            raise ValueError("x0_pre must be a 2D array with shape (n_pre, n_donors).")
+        if y1_pre_arr.ndim != 1:
+            raise ValueError("y1_pre must be a 1D array with shape (n_pre,).")
+        if x0_pre_arr.shape[0] != y1_pre_arr.shape[0]:
+            raise ValueError(
+                "x0_pre and y1_pre must share the same pre-treatment length."
+            )
+        if not np.isfinite(x0_pre_arr).all() or not np.isfinite(y1_pre_arr).all():
+            raise ValueError("SC pre-treatment arrays must contain only finite values.")
+
+        n_donors = x0_pre_arr.shape[1]
+        if n_donors < 1:
+            raise ValueError("SC weight optimization requires at least one donor.")
         w0 = np.full(n_donors, 1.0 / n_donors, dtype=float)
+        gram = x0_pre_arr.T @ x0_pre_arr + self.lambda_sc * np.eye(n_donors, dtype=float)
+        rhs = x0_pre_arr.T @ y1_pre_arr
 
         def objective(w: np.ndarray) -> float:
-            resid = y1_pre - x0_pre @ w
-            return float(resid @ resid + self.lambda_sc * (w @ w))
+            return float((w @ gram @ w) - 2.0 * (rhs @ w))
+
+        def gradient(w: np.ndarray) -> np.ndarray:
+            return 2.0 * (gram @ w - rhs)
 
         constraints = [{"type": "eq", "fun": lambda w: np.sum(w) - 1.0}]
         bounds = [(0.0, 1.0) for _ in range(n_donors)]
@@ -478,19 +565,29 @@ class AugmentedSyntheticControl:
         result = minimize(
             objective,
             w0,
+            jac=gradient,
             method="SLSQP",
             bounds=bounds,
             constraints=constraints,
             options={"maxiter": self.max_iter, "ftol": self.tol},
         )
-        if not result.success:
-            raise RuntimeError(f"SC weight optimization failed: {result.message}")
 
-        w = np.clip(np.asarray(result.x, dtype=float), 0.0, None)
-        w_sum = float(np.sum(w))
-        if w_sum <= 0.0:
-            raise RuntimeError("SC weight optimization returned a zero-sum donor vector.")
-        return w / w_sum
+        if bool(result.success) and result.x is not None and np.isfinite(result.x).all():
+            w = self._project_to_simplex(np.asarray(result.x, dtype=float))
+            if np.isfinite(w).all():
+                return w
+
+        try:
+            w = self._fit_simplex_weights_projected_gradient(
+                gram=gram,
+                rhs=rhs,
+                w_init=w0,
+            )
+        except Exception as exc:  # pragma: no cover - defensive fallback path.
+            raise RuntimeError(
+                f"SC weight optimization failed: {result.message}"
+            ) from exc
+        return w
 
     def _augment_weights(self, x0_pre: np.ndarray, y1_pre: np.ndarray, w_sc: np.ndarray) -> np.ndarray:
         n_donors = x0_pre.shape[1]
@@ -539,7 +636,7 @@ class AugmentedSyntheticControl:
         df = data.df_analysis()
         unit_col = data.unit_col
         time_col = data.time_col
-        outcome_col = data.outcome_col
+        outcome_col = data.y
 
         donors = list(data.donor_pool())
         if len(donors) < 1:
@@ -785,7 +882,7 @@ class AugmentedSyntheticControl:
             estimand="ATTE",
             model=self.__class__.__name__,
             treated_unit=self._data.treated_unit,
-            intervention_time=self._data.intervention_time,
+            treatment_start=self._data.treatment_start,
             pre_times=list(self._pre_times),
             post_times=list(self._post_times),
             att=float(self._att_aug),
@@ -898,7 +995,7 @@ class RobustSyntheticControl(AugmentedSyntheticControl):
         df = data.df_analysis()
         unit_col = data.unit_col
         time_col = data.time_col
-        outcome_col = data.outcome_col
+        outcome_col = data.y
 
         donors = list(data.donor_pool())
         if len(donors) < 1:

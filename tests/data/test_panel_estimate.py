@@ -8,13 +8,13 @@ from causalis.data_contracts import PanelEstimate
 
 
 def _base_estimate_kwargs() -> dict:
-    pre = [1, 2, 3]
-    post = [4, 5]
+    pre = ["2020-01", "2020-02", "2020-03"]
+    post = ["2020-04", "2020-05"]
     all_times = pre + post
     return {
         "model": "AugmentedSyntheticControl",
         "treated_unit": "T",
-        "intervention_time": 4,
+        "treatment_start": "2020-04",
         "pre_times": pre,
         "post_times": post,
         "att": 1.25,
@@ -45,7 +45,7 @@ def test_panel_estimate_valid_contract_and_summary():
     assert est.estimand == "ATTE"
     assert isinstance(est.created_at, datetime)
     assert est.created_at.tzinfo is not None
-    assert isinstance(est.time, str)
+    assert str(est.treatment_start) == "2020-04"
     assert est.ci_lower_absolute <= est.ci_upper_absolute
     assert est.ci_lower_relative <= est.ci_upper_relative
     assert est.alpha == 0.05
@@ -69,7 +69,7 @@ def test_panel_estimate_valid_contract_and_summary():
 
 def test_att_by_time_index_must_match_post_times():
     kwargs = _base_estimate_kwargs()
-    kwargs["att_by_time"] = pd.Series([1.2, 1.3], index=[5, 4])
+    kwargs["att_by_time"] = pd.Series([1.2, 1.3], index=["2020-05", "2020-04"])
 
     with pytest.raises(ValueError, match="att_by_time index must exactly equal post_times"):
         PanelEstimate(**kwargs)
@@ -77,7 +77,9 @@ def test_att_by_time_index_must_match_post_times():
 
 def test_outcome_path_index_must_match_pre_plus_post():
     kwargs = _base_estimate_kwargs()
-    kwargs["observed_outcome"] = pd.Series([10, 11, 12, 13, 14], index=[1, 2, 3, 5, 4])
+    kwargs["observed_outcome"] = pd.Series(
+        [10, 11, 12, 13, 14], index=["2020-01", "2020-02", "2020-03", "2020-05", "2020-04"]
+    )
 
     with pytest.raises(ValueError, match="observed_outcome index must exactly equal"):
         PanelEstimate(**kwargs)
@@ -85,21 +87,33 @@ def test_outcome_path_index_must_match_pre_plus_post():
 
 def test_pre_post_must_be_disjoint_and_ordered_and_sorted():
     kwargs_overlap = _base_estimate_kwargs()
-    kwargs_overlap["post_times"] = [3, 4]
-    kwargs_overlap["att_by_time"] = pd.Series([1.2, 1.3], index=[3, 4])
-    kwargs_overlap["att_by_time_sc"] = pd.Series([1.1, 1.2], index=[3, 4])
-    kwargs_overlap["observed_outcome"] = pd.Series([10, 11, 12, 13, 14], index=[1, 2, 3, 3, 4])
-    kwargs_overlap["synthetic_outcome"] = pd.Series([9, 10, 11, 12, 13], index=[1, 2, 3, 3, 4])
-    kwargs_overlap["synthetic_outcome_sc"] = pd.Series([9, 10, 11, 12, 13], index=[1, 2, 3, 3, 4])
+    kwargs_overlap["post_times"] = ["2020-03", "2020-04"]
+    kwargs_overlap["att_by_time"] = pd.Series([1.2, 1.3], index=["2020-03", "2020-04"])
+    kwargs_overlap["att_by_time_sc"] = pd.Series([1.1, 1.2], index=["2020-03", "2020-04"])
+    kwargs_overlap["observed_outcome"] = pd.Series(
+        [10, 11, 12, 13, 14], index=["2020-01", "2020-02", "2020-03", "2020-03", "2020-04"]
+    )
+    kwargs_overlap["synthetic_outcome"] = pd.Series(
+        [9, 10, 11, 12, 13], index=["2020-01", "2020-02", "2020-03", "2020-03", "2020-04"]
+    )
+    kwargs_overlap["synthetic_outcome_sc"] = pd.Series(
+        [9, 10, 11, 12, 13], index=["2020-01", "2020-02", "2020-03", "2020-03", "2020-04"]
+    )
 
     with pytest.raises(ValueError, match="must be disjoint"):
         PanelEstimate(**kwargs_overlap)
 
     kwargs_unsorted = _base_estimate_kwargs()
-    kwargs_unsorted["pre_times"] = [2, 1, 3]
-    kwargs_unsorted["observed_outcome"] = pd.Series([10, 11, 12, 13, 14], index=[2, 1, 3, 4, 5])
-    kwargs_unsorted["synthetic_outcome"] = pd.Series([9, 10, 11, 12, 13], index=[2, 1, 3, 4, 5])
-    kwargs_unsorted["synthetic_outcome_sc"] = pd.Series([9, 10, 11, 12, 13], index=[2, 1, 3, 4, 5])
+    kwargs_unsorted["pre_times"] = ["2020-02", "2020-01", "2020-03"]
+    kwargs_unsorted["observed_outcome"] = pd.Series(
+        [10, 11, 12, 13, 14], index=["2020-02", "2020-01", "2020-03", "2020-04", "2020-05"]
+    )
+    kwargs_unsorted["synthetic_outcome"] = pd.Series(
+        [9, 10, 11, 12, 13], index=["2020-02", "2020-01", "2020-03", "2020-04", "2020-05"]
+    )
+    kwargs_unsorted["synthetic_outcome_sc"] = pd.Series(
+        [9, 10, 11, 12, 13], index=["2020-02", "2020-01", "2020-03", "2020-04", "2020-05"]
+    )
 
     with pytest.raises(ValueError, match="must be sorted ascending"):
         PanelEstimate(**kwargs_unsorted)
@@ -112,7 +126,7 @@ def test_numeric_finite_checks():
         PanelEstimate(**kwargs_att)
 
     kwargs_series = _base_estimate_kwargs()
-    kwargs_series["att_by_time"] = pd.Series([1.2, "bad"], index=[4, 5])
+    kwargs_series["att_by_time"] = pd.Series([1.2, "bad"], index=["2020-04", "2020-05"])
     with pytest.raises(ValueError, match="att_by_time must contain only numeric values"):
         PanelEstimate(**kwargs_series)
 
@@ -173,11 +187,12 @@ def test_augmented_weight_sum_enforced_only_when_configured():
     assert isinstance(est, PanelEstimate)
 
 
-def test_legacy_time_is_still_accepted():
+def test_legacy_fields_are_rejected():
     kwargs = _base_estimate_kwargs()
+    kwargs["intervention_time"] = 4
     kwargs["time"] = "2026-02-22"
-    est = PanelEstimate(**kwargs)
-    assert est.time == "2026-02-22"
+    with pytest.raises(ValueError, match="Extra inputs are not permitted"):
+        PanelEstimate(**kwargs)
 
 
 def test_created_at_must_be_timezone_aware():

@@ -17,12 +17,15 @@ from causalis.scenarios.synthetic_control import (
 
 def _make_panel_with_effect(effect: float = 2.5) -> pd.DataFrame:
     rows = []
-    for t in [1, 2, 3, 4, 5, 6]:
-        y_c1 = 10.0 + 0.5 * t
-        y_c2 = 12.0 + 0.2 * t
-        y_c3 = 9.0 + 0.3 * t
+    for idx, t in enumerate(
+        ["2020-01-01", "2020-02-01", "2020-03-01", "2020-04-01", "2020-05-01", "2020-06-01"],
+        start=1,
+    ):
+        y_c1 = 10.0 + 0.5 * idx
+        y_c2 = 12.0 + 0.2 * idx
+        y_c3 = 9.0 + 0.3 * idx
         y_treat = 0.5 * y_c1 + 0.3 * y_c2 + 0.2 * y_c3
-        if t >= 4:
+        if idx >= 4:
             y_treat += effect
 
         rows.extend(
@@ -39,12 +42,12 @@ def _make_panel_with_effect(effect: float = 2.5) -> pd.DataFrame:
 def _fit_estimate():
     df = _make_panel_with_effect(effect=3.0)
     data = PanelDataSCM(
-        unit_id="unit_id",
-        time_id="time_id",
+        unit_col="unit_id",
+        time_col="time_id",
         y="y",
         df=df,
         treated_unit="T",
-        intervention_time=4,
+        treatment_start="2020-04-01",
     )
     return ASCM(lambda_aug=0.5).fit(data).estimate()
 

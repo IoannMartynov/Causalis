@@ -15,18 +15,27 @@ def _panel_with_structured_missingness() -> PanelDataSCM:
     df = pd.DataFrame(
         {
             "unit_id": ["T", "T", "T", "C1", "C1", "C1", "C2", "C2"],
-            "time_id": [1, 2, 3, 1, 2, 3, 1, 3],  # C2 at t=2 is absent.
+            "time_id": [
+                "2020-01-01",
+                "2020-02-01",
+                "2020-03-01",
+                "2020-01-01",
+                "2020-02-01",
+                "2020-03-01",
+                "2020-01-01",
+                "2020-03-01",
+            ],  # C2 at 2020-02-01 is absent.
             "y": [10.0, 11.0, 12.0, np.nan, 9.0, 10.0, 8.0, 8.5],
             "observed": [1, 1, 1, 0, 1, 1, 1, 1],
         }
     )
     return PanelDataSCM(
-        unit_id="unit_id",
-        time_id="time_id",
+        unit_col="unit_id",
+        time_col="time_id",
         y="y",
         df=df,
         treated_unit="T",
-        intervention_time=3,
+        treatment_start="2020-03-01",
         donor_units=["C1", "C2"],
         observed_col="observed",
         allow_missing_outcome=True,

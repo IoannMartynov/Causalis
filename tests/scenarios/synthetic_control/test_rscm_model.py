@@ -8,11 +8,14 @@ from causalis.scenarios.synthetic_control import ASCM, RSCM, RobustSyntheticCont
 
 def _make_panel_with_effect(effect: float = 2.5) -> pd.DataFrame:
     rows = []
-    for t in [1, 2, 3, 4, 5, 6]:
-        y_c1 = 10.0 + 0.5 * t
-        y_c2 = 12.0 + 0.2 * t
+    for idx, t in enumerate(
+        ["2020-01-01", "2020-02-01", "2020-03-01", "2020-04-01", "2020-05-01", "2020-06-01"],
+        start=1,
+    ):
+        y_c1 = 10.0 + 0.5 * idx
+        y_c2 = 12.0 + 0.2 * idx
         y_treat = 0.65 * y_c1 + 0.35 * y_c2
-        if t >= 4:
+        if idx >= 4:
             y_treat += effect
 
         rows.extend(
@@ -27,14 +30,17 @@ def _make_panel_with_effect(effect: float = 2.5) -> pd.DataFrame:
 
 def test_rscm_fit_and_estimate_handles_missing_cells_and_outcomes():
     df = _make_panel_with_effect(effect=3.0)
-    df = df[~((df["unit_id"] == "C2") & (df["time_id"] == 2))].copy()
-    df.loc[(df["unit_id"] == "C1") & (df["time_id"] == 3), "y"] = np.nan
+    df = df[~((df["unit_id"] == "C2") & (df["time_id"] == "2020-02-01"))].copy()
+    df.loc[(df["unit_id"] == "C1") & (df["time_id"] == "2020-03-01"), "y"] = np.nan
     df["observed"] = (~df["y"].isna()).astype(int)
 
-    data = PanelDataSCM(unit_id="unit_id", time_id="time_id", y="y", 
+    data = PanelDataSCM(
+        unit_col="unit_id",
+        time_col="time_id",
+        y="y",
         df=df,
         treated_unit="T",
-        intervention_time=4,
+        treatment_start="2020-04-01",
         observed_col="observed",
         allow_missing_outcome=True,
     )
@@ -72,15 +78,15 @@ def test_rscm_fit_and_estimate_handles_missing_cells_and_outcomes():
 
 def test_rscm_contract_requires_observed_treated_post_for_att():
     df = _make_panel_with_effect(effect=3.0)
-    df.loc[(df["unit_id"] == "T") & (df["time_id"] == 6), "y"] = np.nan
-    with pytest.raises(ValueError, match="treated_unit must have observed outcomes"):
+    df.loc[(df["unit_id"] == "T") & (df["time_id"] == "2020-06-01"), "y"] = np.nan
+    with pytest.raises(ValueError, match="treated_unit must have observed y"):
         PanelDataSCM(
-            unit_id="unit_id",
-            time_id="time_id",
+            unit_col="unit_id",
+            time_col="time_id",
             y="y",
             df=df,
             treated_unit="T",
-            intervention_time=4,
+            treatment_start="2020-04-01",
             allow_missing_outcome=True,
         )
 
@@ -90,12 +96,12 @@ def test_rscm_contract_requires_at_least_two_donors():
     df = df[df["unit_id"].isin(["T", "C1"])].copy()
     with pytest.raises(ValueError, match="Need at least 2 donor units"):
         PanelDataSCM(
-            unit_id="unit_id",
-            time_id="time_id",
+            unit_col="unit_id",
+            time_col="time_id",
             y="y",
             df=df,
             treated_unit="T",
-            intervention_time=4,
+            treatment_start="2020-04-01",
             allow_missing_outcome=True,
         )
 
@@ -108,7 +114,14 @@ def test_rscm_alias_and_not_fitted_guard():
 
 def test_rscm_matches_ascm_on_fully_observed_panel():
     df = _make_panel_with_effect(effect=2.0)
-    data = PanelDataSCM(unit_id="unit_id", time_id="time_id", y="y", df=df, treated_unit="T", intervention_time=4)
+    data = PanelDataSCM(
+        unit_col="unit_id",
+        time_col="time_id",
+        y="y",
+        df=df,
+        treated_unit="T",
+        treatment_start="2020-04-01",
+    )
 
     ascm = ASCM(lambda_aug=0.5).fit(data).estimate()
     rscm = RSCM(lambda_aug=0.5).fit(data).estimate()
@@ -119,11 +132,17 @@ def test_rscm_matches_ascm_on_fully_observed_panel():
 
 def test_rscm_requires_enough_observed_treated_pre_periods():
     df = _make_panel_with_effect(effect=2.0)
-    df.loc[(df["unit_id"] == "T") & (df["time_id"].isin([1, 2, 3])), "y"] = np.nan
-    data = PanelDataSCM(unit_id="unit_id", time_id="time_id", y="y", 
+    df.loc[
+        (df["unit_id"] == "T") & (df["time_id"].isin(["2020-01-01", "2020-02-01", "2020-03-01"])),
+        "y",
+    ] = np.nan
+    data = PanelDataSCM(
+        unit_col="unit_id",
+        time_col="time_id",
+        y="y",
         df=df,
         treated_unit="T",
-        intervention_time=4,
+        treatment_start="2020-04-01",
         allow_missing_outcome=True,
     )
 
@@ -133,11 +152,14 @@ def test_rscm_requires_enough_observed_treated_pre_periods():
 
 def test_rscm_inference_uses_only_observed_treated_pre_residuals():
     df = _make_panel_with_effect(effect=2.0)
-    df.loc[(df["unit_id"] == "T") & (df["time_id"] == 2), "y"] = np.nan
-    data = PanelDataSCM(unit_id="unit_id", time_id="time_id", y="y",
+    df.loc[(df["unit_id"] == "T") & (df["time_id"] == "2020-02-01"), "y"] = np.nan
+    data = PanelDataSCM(
+        unit_col="unit_id",
+        time_col="time_id",
+        y="y",
         df=df,
         treated_unit="T",
-        intervention_time=4,
+        treatment_start="2020-04-01",
         allow_missing_outcome=True,
     )
 
@@ -149,7 +171,14 @@ def test_rscm_inference_uses_only_observed_treated_pre_residuals():
 
 def test_rscm_masks_treated_post_during_completion(monkeypatch):
     df = _make_panel_with_effect(effect=2.0)
-    data = PanelDataSCM(unit_id="unit_id", time_id="time_id", y="y", df=df, treated_unit="T", intervention_time=4)
+    data = PanelDataSCM(
+        unit_col="unit_id",
+        time_col="time_id",
+        y="y",
+        df=df,
+        treated_unit="T",
+        treatment_start="2020-04-01",
+    )
 
     captured: dict[str, np.ndarray] = {}
     original_complete = RobustSyntheticControl._complete_low_rank_matrix

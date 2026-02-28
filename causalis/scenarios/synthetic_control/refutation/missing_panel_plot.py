@@ -69,7 +69,7 @@ def missing_panel_plot(
 
     unit_col = paneldata.unit_col
     time_col = paneldata.time_col
-    outcome_col = paneldata.outcome_col
+    outcome_col = paneldata.y
 
     df = paneldata.df_analysis().copy()
     df = df.dropna(subset=[time_col])
@@ -123,7 +123,7 @@ def missing_panel_plot(
         )
 
         if show_intervention:
-            boundary = float(pd.Index(times).searchsorted(paneldata.intervention_time, side="left")) - 0.5
+            boundary = float(pd.Index(times).searchsorted(paneldata.treatment_start, side="left")) - 0.5
             if -0.5 <= boundary <= (len(times) - 0.5):
                 ax.axvline(
                     boundary,

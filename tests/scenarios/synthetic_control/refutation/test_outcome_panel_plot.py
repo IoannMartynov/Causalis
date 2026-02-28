@@ -24,8 +24,8 @@ def test_outcome_panel_plot_basic_timeseries_view():
     assert isinstance(fig, mpl_figure.Figure)
     assert not plt.fignum_exists(fig.number)
     assert ax.get_title() == "Outcome Time Series by Unit"
-    assert ax.get_xlabel() == "time_id"
-    assert ax.get_ylabel() == "y"
+    assert ax.get_xlabel() == panel.time_col
+    assert ax.get_ylabel() == panel.y
     assert any(str(label).startswith("Treated: ") for label in labels)
     assert "Donor mean" in labels
     assert "Intervention" in labels
