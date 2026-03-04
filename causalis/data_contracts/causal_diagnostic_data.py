@@ -5,7 +5,10 @@ from typing import Any, Dict, List, Optional, Union
 import numpy as np
 from pydantic import BaseModel, ConfigDict
 
-from tests.data.regression_checks import RegressionChecks
+# NOTE:
+# `RegressionChecks` currently exists under `tests/` upstream and is not packaged in wheels.
+# Keep this as a runtime-safe alias until the type is moved into the public package.
+RegressionChecks = Any
 
 
 class DiagnosticData(BaseModel):
