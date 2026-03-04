@@ -8,6 +8,40 @@ import pandas as pd
 from causalis.data_contracts.panel_data_scm import PanelDataSCM
 from .base import PanelSCMGenerator, PanelSCMGeneratorConfig
 
+PanelOutput = Union[pd.DataFrame, PanelDataSCM]
+
+_SCM26_ORACLE_COLS = (
+    "is_treated_unit",
+    "y_cf",
+    "tau_realized_true",
+    "mu_cf",
+    "mu_treated",
+    "tau_mean_true",
+)
+_SCM26_COVARIATE_COLS = ("exposure", "macro_index", "seasonality_index")
+_DEFAULT_SCM26_PRE_PERIODS = 36
+_DEFAULT_SCM26_POST_PERIODS = 12
+
+
+def _build_panel_from_output_df(df: pd.DataFrame) -> PanelDataSCM:
+    return PanelDataSCM(
+        df=df,
+        y="y",
+        unit_col="unit_id",
+        time_col="calendar_time",
+        treated_time="treated_time",
+    )
+
+
+def _rebuild_panel_with_df(panel: PanelDataSCM, df: pd.DataFrame) -> PanelDataSCM:
+    return PanelDataSCM(
+        df=df,
+        y=panel.y,
+        unit_col=panel.unit_col,
+        time_col=panel.time_col,
+        treated_time=panel.treated_time,
+    )
+
 
 def _infer_pre_post_periods(
     *,
@@ -132,6 +166,7 @@ def _reorder_output_columns(df: pd.DataFrame) -> pd.DataFrame:
     lead = [
         "unit_id",
         "is_treated_unit",
+        "treated_time",
         "calendar_time",
         "observed",
         "y",
@@ -146,6 +181,30 @@ def _reorder_output_columns(df: pd.DataFrame) -> pd.DataFrame:
 def _finalize_output_df(df: pd.DataFrame) -> pd.DataFrame:
     """Hide internal diagnostics and enforce public column ordering."""
     return _reorder_output_columns(_hide_internal_oracle_columns(df))
+
+
+def _finalize_output(out: PanelOutput) -> PanelOutput:
+    """Finalize outputs uniformly across DataFrame and PanelDataSCM return types."""
+    if isinstance(out, pd.DataFrame):
+        return _finalize_output_df(out)
+    return _rebuild_panel_with_df(out, _finalize_output_df(out.df))
+
+
+def _panel_from_dataframe(
+    *,
+    df: pd.DataFrame,
+    config: PanelSCMGeneratorConfig,
+) -> PanelDataSCM:
+    out_df = df.copy()
+    if "treated_time" not in out_df.columns:
+        treatment_start = (
+            pd.Period(config.calendar_start, freq=config.time_freq)
+            + (int(config.time_start) - 1 + int(config.n_pre_periods))
+        )
+        out_df["treated_time"] = (
+            (out_df["unit_id"] == config.treated_unit) & (out_df["calendar_time"] >= treatment_start)
+        ).astype(int)
+    return _build_panel_from_output_df(out_df)
 
 
 def _merge_config_with_locked_params(
@@ -202,7 +261,7 @@ def generate_scm_data(
     protect_treated_pre: bool = False,
     protect_treated_post: bool = False,
     treatment_effect_mode: Literal["additive", "multiplicative"] = "additive",
-) -> Union[pd.DataFrame, PanelDataSCM]:
+) -> PanelOutput:
     """Medium-level wrapper for Gaussian SCM panel generation."""
     config = PanelSCMGeneratorConfig(
         outcome_distribution="gaussian",
@@ -238,9 +297,7 @@ def generate_scm_data(
         treatment_effect_mode=treatment_effect_mode,
     )
     out = PanelSCMGenerator(config).generate()
-    if isinstance(out, pd.DataFrame):
-        return _finalize_output_df(out)
-    return out.model_copy(update={"df": _finalize_output_df(out.df)})
+    return _finalize_output(out)
 
 
 def generate_scm_gamma_data(
@@ -254,7 +311,7 @@ def generate_scm_gamma_data(
     n_pre_periods: Optional[int] = None,
     n_post_periods: Optional[int] = None,
     **advanced_params,
-) -> Union[pd.DataFrame, PanelDataSCM]:
+) -> PanelOutput:
     """
     Medium-level wrapper for realistic Gamma SCM panel generation.
 
@@ -291,9 +348,7 @@ def generate_scm_gamma_data(
 
     config = PanelSCMGeneratorConfig(**config_params)
     out = PanelSCMGenerator(config).generate()
-    if isinstance(out, pd.DataFrame):
-        return _finalize_output_df(out)
-    return out.model_copy(update={"df": _finalize_output_df(out.df)})
+    return _finalize_output(out)
 
 
 def generate_scm_poisson_data(
@@ -309,7 +364,7 @@ def generate_scm_poisson_data(
     n_pre_periods: Optional[int] = None,
     n_post_periods: Optional[int] = None,
     **advanced_params,
-) -> Union[pd.DataFrame, PanelDataSCM]:
+) -> PanelOutput:
     """
     Medium-level wrapper for realistic Poisson SCM panel generation.
 
@@ -368,22 +423,246 @@ def generate_scm_poisson_data(
     if not return_panel_data:
         return df
 
-    donor_names = [f"{config.donor_prefix}{j + 1}" for j in range(config.n_donors)]
-    treatment_start = (
-        pd.Period(config.calendar_start, freq=config.time_freq)
-        + (int(config.time_start) - 1 + int(config.n_pre_periods))
-    )
-    panel = PanelDataSCM(
+    return _panel_from_dataframe(
         df=df,
-        unit_col="unit_id",
-        time_col="calendar_time",
-        time_freq=config.time_freq,
-        y="y",
-        treated_unit=config.treated_unit,
-        treatment_start=treatment_start,
-        donor_units=donor_names,
-        covariate_cols=("exposure", "macro_index", "seasonality_index"),
-        observed_col="observed",
-        allow_missing_outcome=True,
+        config=config,
     )
-    return panel.model_copy(update={"df": df})
+
+
+def _resolve_scm26_periods(
+    *,
+    n_pre_periods: Optional[int],
+    n_post_periods: Optional[int],
+) -> tuple[int, int]:
+    if n_pre_periods is None and n_post_periods is None:
+        return _DEFAULT_SCM26_PRE_PERIODS, _DEFAULT_SCM26_POST_PERIODS
+    if n_pre_periods is None or n_post_periods is None:
+        raise ValueError(
+            "Provide both n_pre_periods and n_post_periods, or omit both to use scenario defaults."
+        )
+    return int(n_pre_periods), int(n_post_periods)
+
+
+def _expand_scm26_periods_with_anchor(
+    *,
+    n_pre_periods: int,
+    n_post_periods: int,
+) -> tuple[int, int]:
+    # Scenario wrappers include one explicit intervention-anchor period.
+    return int(n_pre_periods) + 1, int(n_post_periods)
+
+
+def _apply_scm26_anchor_period_windows(
+    out: PanelOutput,
+    *,
+    n_pre_periods: int,
+    n_post_periods: int,
+) -> PanelOutput:
+    if isinstance(out, pd.DataFrame):
+        return out
+
+    intervention_anchor = out.treatment_start - 1
+    time_values = sorted(pd.Index(out.df[out.time_col].unique()).tolist())
+    pre_periods = [t for t in time_values if t < intervention_anchor]
+    post_periods = [t for t in time_values if t > intervention_anchor]
+    if len(pre_periods) != int(n_pre_periods) or len(post_periods) != int(n_post_periods):
+        raise RuntimeError(
+            "Internal period mapping error: expected "
+            f"{n_pre_periods} pre and {n_post_periods} post periods, got "
+            f"{len(pre_periods)} pre and {len(post_periods)} post."
+        )
+    return out
+
+
+def _derive_scm26_treatment_start(
+    out: PanelOutput,
+    *,
+    n_pre_periods: int,
+) -> Any:
+    out_df = out if isinstance(out, pd.DataFrame) else out.df
+
+    if "calendar_time" not in out_df.columns:
+        raise RuntimeError("Expected 'calendar_time' column to derive treatment_start.")
+
+    time_values = sorted(pd.Index(out_df["calendar_time"].unique()).tolist())
+    post_start_idx = int(n_pre_periods) + 1
+    if post_start_idx >= len(time_values):
+        raise RuntimeError(
+            "Internal period mapping error: cannot derive treatment_start from calendar_time."
+        )
+    return time_values[post_start_idx]
+
+
+def _with_scm26_treated_time(
+    out: PanelOutput,
+    *,
+    n_pre_periods: int,
+) -> PanelOutput:
+    treatment_start = _derive_scm26_treatment_start(out, n_pre_periods=n_pre_periods)
+
+    if isinstance(out, pd.DataFrame):
+        if "calendar_time" not in out.columns:
+            raise RuntimeError("Expected 'calendar_time' column to derive treated_time.")
+        if "is_treated_unit" in out.columns:
+            treated_rows = out[out["is_treated_unit"].astype(int) == 1]
+            treated_units = pd.Index(treated_rows["unit_id"].unique()).tolist()
+            if len(treated_units) != 1:
+                raise RuntimeError(
+                    "Expected exactly one treated unit in 'is_treated_unit' when deriving treated_time."
+                )
+            treated_unit = treated_units[0]
+            treated_unit_mask = out["unit_id"] == treated_unit
+        else:
+            raise RuntimeError("Expected 'is_treated_unit' column to derive treated_time.")
+
+        out_df = out.copy()
+        out_df["treated_time"] = (
+            treated_unit_mask & (out_df["calendar_time"] >= treatment_start)
+        ).astype(int)
+        return out_df
+
+    df = out.df.copy()
+    df["treated_time"] = (
+        (df[out.unit_col] == out.treated_unit) & (df[out.time_col] >= treatment_start)
+    ).astype(int)
+    return _rebuild_panel_with_df(out, df)
+
+
+def _apply_scm26_include_oracles(
+    out: PanelOutput,
+    *,
+    include_oracles: bool,
+) -> PanelOutput:
+    drop_cols = list(_SCM26_COVARIATE_COLS)
+    if not include_oracles:
+        drop_cols.extend(_SCM26_ORACLE_COLS)
+    if isinstance(out, pd.DataFrame):
+        return out.drop(columns=drop_cols, errors="ignore")
+    df = out.df.drop(columns=drop_cols, errors="ignore")
+    return _rebuild_panel_with_df(out, df)
+
+
+def _format_scm26_output_columns(out: PanelOutput) -> PanelOutput:
+    ordered = [
+        "unit_id",
+        "calendar_time",
+        "treated_time",
+        "observed",
+        "y",
+        "y_cf",
+        "tau_realized_true",
+        "mu_cf",
+        "mu_treated",
+        "tau_mean_true",
+    ]
+    if isinstance(out, pd.DataFrame):
+        df = out.drop(columns=["is_treated_unit"], errors="ignore")
+        columns = [col for col in ordered if col in df.columns]
+        columns.extend(col for col in df.columns if col not in columns)
+        return df.loc[:, columns]
+
+    df = out.df.drop(columns=["is_treated_unit"], errors="ignore")
+    columns = [col for col in ordered if col in df.columns]
+    columns.extend(col for col in df.columns if col not in columns)
+    return _rebuild_panel_with_df(out, df.loc[:, columns])
+
+
+def _postprocess_scm26_output(
+    out: PanelOutput,
+    *,
+    n_pre_periods: int,
+    n_post_periods: int,
+    include_oracles: bool,
+) -> PanelOutput:
+    out = _apply_scm26_anchor_period_windows(
+        out,
+        n_pre_periods=n_pre_periods,
+        n_post_periods=n_post_periods,
+    )
+    out = _with_scm26_treated_time(out, n_pre_periods=n_pre_periods)
+    out = _apply_scm26_include_oracles(out, include_oracles=include_oracles)
+    return _format_scm26_output_columns(out)
+
+
+def generate_scm_gamma_26_data(
+    *,
+    seed: int,
+    return_panel_data: bool,
+    include_oracles: bool,
+    n_donors: int,
+    n_pre_periods: Optional[int],
+    n_post_periods: Optional[int],
+    treatment_effect_rate: float,
+    treatment_effect_slope: float,
+    missing_outcome_frac: float,
+    advanced_params: dict[str, Any],
+) -> PanelOutput:
+    n_pre_periods_resolved, n_post_periods_resolved = _resolve_scm26_periods(
+        n_pre_periods=n_pre_periods,
+        n_post_periods=n_post_periods,
+    )
+    n_pre_effective, n_post_effective = _expand_scm26_periods_with_anchor(
+        n_pre_periods=n_pre_periods_resolved,
+        n_post_periods=n_post_periods_resolved,
+    )
+    n_total_target = int((n_donors + 1) * (n_pre_effective + n_post_effective))
+    out = generate_scm_gamma_data(
+        n=n_total_target,
+        seed=seed,
+        return_panel_data=return_panel_data,
+        n_donors=n_donors,
+        n_pre_periods=n_pre_effective,
+        n_post_periods=n_post_effective,
+        treatment_effect_rate=treatment_effect_rate,
+        treatment_effect_slope=treatment_effect_slope,
+        missing_outcome_frac=missing_outcome_frac,
+        **advanced_params,
+    )
+    return _postprocess_scm26_output(
+        out,
+        n_pre_periods=n_pre_periods_resolved,
+        n_post_periods=n_post_periods_resolved,
+        include_oracles=include_oracles,
+    )
+
+
+def generate_scm_poisson_26_data(
+    *,
+    seed: int,
+    return_panel_data: bool,
+    include_oracles: bool,
+    n_donors: int,
+    n_pre_periods: Optional[int],
+    n_post_periods: Optional[int],
+    treatment_effect_rate: float,
+    treatment_effect_slope: float,
+    donor_missing_block_frac: float,
+    advanced_params: dict[str, Any],
+) -> PanelOutput:
+    n_pre_periods_resolved, n_post_periods_resolved = _resolve_scm26_periods(
+        n_pre_periods=n_pre_periods,
+        n_post_periods=n_post_periods,
+    )
+    n_pre_effective, n_post_effective = _expand_scm26_periods_with_anchor(
+        n_pre_periods=n_pre_periods_resolved,
+        n_post_periods=n_post_periods_resolved,
+    )
+    n_total_target = int((n_donors + 1) * (n_pre_effective + n_post_effective))
+    out = generate_scm_poisson_data(
+        n=n_total_target,
+        seed=seed,
+        return_panel_data=return_panel_data,
+        n_donors=n_donors,
+        n_pre_periods=n_pre_effective,
+        n_post_periods=n_post_effective,
+        treatment_effect_rate=treatment_effect_rate,
+        treatment_effect_slope=treatment_effect_slope,
+        donor_missing_block_frac=donor_missing_block_frac,
+        **advanced_params,
+    )
+    return _postprocess_scm26_output(
+        out,
+        n_pre_periods=n_pre_periods_resolved,
+        n_post_periods=n_post_periods_resolved,
+        include_oracles=include_oracles,
+    )

@@ -793,6 +793,7 @@ def sensitivity_benchmark(
     fit_args : dict, optional
         Legacy name for additional keyword arguments passed to `IRM.estimate(...)`
         on the short model. If `score` is omitted, the long-model score is reused.
+        If `diagnostic_data` is omitted, it defaults to `False` for faster benchmarking.
 
     Returns
     -------
@@ -887,6 +888,7 @@ def sensitivity_benchmark(
         trimming_threshold=getattr(model, 'trimming_threshold', 1e-2),
         weights=getattr(model, 'weights', None),
         random_state=getattr(model, 'random_state', None),
+        n_jobs=getattr(model, 'n_jobs', 1),
     )
 
     # Fit short model (IRM.fit does not accept kwargs).
@@ -896,6 +898,9 @@ def sensitivity_benchmark(
     estimate_args: Dict[str, Any] = dict(fit_args or {})
     if "score" not in estimate_args:
         estimate_args["score"] = getattr(model, 'score', 'ATE')
+    if "diagnostic_data" not in estimate_args:
+        # Benchmarking only needs the point estimate from the short model.
+        estimate_args["diagnostic_data"] = False
     irm_short.estimate(**estimate_args)
 
     # Long model stats
@@ -905,9 +910,8 @@ def sensitivity_benchmark(
     theta_short = float(irm_short.coef_[0])
 
     # Compute residual-based strengths on the long model
-    df = model.data.get_df()
-    y = df[outcome_name].to_numpy(dtype=float)
-    d = df[treatment_name].to_numpy(dtype=float)
+    y = np.asarray(getattr(model, "_y", df_long[outcome_name].to_numpy(dtype=float)), dtype=float)
+    d = np.asarray(getattr(model, "_d", df_long[treatment_name].to_numpy(dtype=float)), dtype=float)
     m_hat = np.asarray(model.m_hat_, dtype=float)
     g0 = np.asarray(model.g0_hat_, dtype=float)
     g1 = np.asarray(model.g1_hat_, dtype=float)
@@ -991,7 +995,7 @@ def sensitivity_benchmark(
             r2 = float(np.clip(num / denom, 0.0, 1.0))
             return r2, yhat
 
-    Z = df[benchmarking_set].to_numpy(dtype=float)
+    Z = df_long[benchmarking_set].to_numpy(dtype=float)
     # ATT weighting if applicable
     p = float(np.mean(d)) if (np.isfinite(np.mean(d)) and np.mean(d) > 0.0) else 1.0
     w_att = np.where(d > 0.5, 1.0 / max(p, 1e-12), 0.0)

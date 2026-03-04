@@ -177,6 +177,37 @@ class PanelSCMGeneratorConfig:
     prefit_mismatch_std_log: float = 0.08
 
 
+_POSITIVE_MODE_COVARIATES: tuple[str, ...] = ("exposure", "macro_index", "seasonality_index")
+
+
+@dataclass(frozen=True)
+class _PositiveModePriors:
+    exposure_level_log_mean: float
+    exposure_level_log_std: float
+    exposure_min: float
+    exposure_max: float
+    eta_intercept_log_mean: float
+    eta_intercept_log_std: float
+    season_loading_mean: float
+    season_loading_std: float
+
+
+@dataclass(frozen=True)
+class _PositiveModeComponents:
+    calendar_times: list[pd.Period]
+    donor_names: list[Hashable]
+    post_idx: np.ndarray
+    donor_exposure: np.ndarray
+    donor_mu: np.ndarray
+    treated_exposure_cf: np.ndarray
+    treated_mu_cf: np.ndarray
+    treated_mu: np.ndarray
+    tau_mean_true: np.ndarray
+    effect_rate: np.ndarray
+    macro_index: np.ndarray
+    seasonality_index: np.ndarray
+
+
 class PanelSCMGenerator:
     """Low-level panel SCM generator supporting Gaussian, Gamma, and Poisson outcomes."""
 
@@ -306,13 +337,207 @@ class PanelSCMGenerator:
         loadings = rng.normal(0.0, c.latent_loading_std, size=(c.n_donors, c.n_latent_factors))
         return latent_factors, loadings
 
+    def _n_total_periods(self) -> int:
+        c = self.config
+        return int(c.n_pre_periods + c.n_post_periods)
+
+    def _donor_names(self) -> list[Hashable]:
+        c = self.config
+        return [f"{c.donor_prefix}{j + 1}" for j in range(c.n_donors)]
+
+    def _post_effect_rate(
+        self,
+        *,
+        n_total: int,
+        post_idx: np.ndarray,
+    ) -> np.ndarray:
+        c = self.config
+        effect_rate = np.zeros(n_total, dtype=float)
+        post_steps = np.arange(c.n_post_periods, dtype=float)
+        ramp = 1.0 - np.exp(-(post_steps + 1.0) / 2.5)
+        post_rate = (c.treatment_effect_rate + c.treatment_effect_slope * post_steps) * ramp
+        if np.any(1.0 + post_rate <= 0.0):
+            raise ValueError(
+                "treatment_effect_rate/slope imply non-positive post multipliers; "
+                "ensure treatment_effect_rate + slope*k > -1 for all post periods."
+            )
+        effect_rate[post_idx] = post_rate
+        return effect_rate
+
+    def _build_positive_mode_components(
+        self,
+        *,
+        rng: np.random.Generator,
+        priors: _PositiveModePriors,
+    ) -> _PositiveModeComponents:
+        c = self.config
+        n_total = self._n_total_periods()
+        t_rel = np.arange(n_total, dtype=float)
+        calendar_times, _ = self._calendar_axis(n_total=n_total)
+        post_idx = np.arange(c.n_pre_periods, n_total, dtype=int)
+
+        season = np.sin(2.0 * np.pi * t_rel / 12.0) + 0.5 * np.cos(2.0 * np.pi * t_rel / 6.0)
+        macro_log = _draw_ar1_series(
+            rng=rng,
+            n_periods=n_total,
+            rho=c.rho_common,
+            innovation_std=c.common_factor_std_log,
+        )
+        latent_factors, donor_factor_loadings = self._sample_latent_factors(
+            rng=rng,
+            n_total=n_total,
+            innovation_std=c.latent_factor_std_log,
+        )
+
+        donor_names = self._donor_names()
+        donor_exposure = np.empty((n_total, c.n_donors), dtype=float)
+        donor_eta = np.empty((n_total, c.n_donors), dtype=float)
+        donor_mu = np.empty((n_total, c.n_donors), dtype=float)
+
+        centered_t = t_rel - t_rel.mean()
+        exposure_time_log = _draw_ar1_series(
+            rng=rng,
+            n_periods=n_total,
+            rho=c.rho_common,
+            innovation_std=0.08,
+        )
+
+        for j in range(c.n_donors):
+            exposure_level = float(rng.normal(priors.exposure_level_log_mean, priors.exposure_level_log_std))
+            exposure_growth = float(rng.normal(0.004, 0.002))
+            exposure_noise = _draw_ar1_series(
+                rng=rng,
+                n_periods=n_total,
+                rho=c.rho_donor,
+                innovation_std=0.10,
+            )
+            log_exposure = exposure_level + exposure_growth * centered_t + exposure_time_log + exposure_noise
+            donor_exposure[:, j] = np.exp(
+                np.clip(log_exposure, np.log(priors.exposure_min), np.log(priors.exposure_max))
+            )
+
+            eta_intercept = float(
+                rng.normal(priors.eta_intercept_log_mean, priors.eta_intercept_log_std)
+            )
+            eta_growth = float(rng.normal(0.005, 0.003))
+            season_loading = float(rng.normal(priors.season_loading_mean, priors.season_loading_std))
+            donor_noise = _draw_ar1_series(
+                rng=rng,
+                n_periods=n_total,
+                rho=c.rho_donor,
+                innovation_std=c.donor_noise_std_log,
+            )
+            latent_term = (
+                latent_factors @ donor_factor_loadings[j]
+                if c.n_latent_factors > 0
+                else np.zeros(n_total, dtype=float)
+            )
+            eta = (
+                eta_intercept
+                + eta_growth * centered_t
+                + season_loading * season
+                + macro_log
+                + latent_term
+                + donor_noise
+            )
+            donor_eta[:, j] = eta
+            donor_mu[:, j] = np.exp(np.clip(np.log(donor_exposure[:, j]) + eta, -6.0, 10.0))
+
+        true_weights = rng.dirichlet(np.full(c.n_donors, fill_value=c.dirichlet_alpha, dtype=float))
+        prefit_mismatch_eta = _draw_ar1_series(
+            rng=rng,
+            n_periods=n_total,
+            rho=c.rho_prefit_mismatch,
+            innovation_std=c.prefit_mismatch_std_log,
+        )
+        prefit_mismatch_exposure = _draw_ar1_series(
+            rng=rng,
+            n_periods=n_total,
+            rho=c.rho_prefit_mismatch,
+            innovation_std=0.5 * c.prefit_mismatch_std_log,
+        )
+        treated_exposure_cf = (donor_exposure @ true_weights) * np.exp(prefit_mismatch_exposure)
+        treated_exposure_cf = np.clip(treated_exposure_cf, 1.0, None)
+        treated_eta_cf = (donor_eta @ true_weights) + prefit_mismatch_eta
+        treated_mu_cf = np.exp(np.clip(np.log(treated_exposure_cf) + treated_eta_cf, -6.0, 10.0))
+        treated_mu_cf = np.clip(treated_mu_cf, 1e-6, None)
+
+        effect_rate = self._post_effect_rate(n_total=n_total, post_idx=post_idx)
+        treated_mu = treated_mu_cf.copy()
+        treated_mu[post_idx] = treated_mu_cf[post_idx] * (1.0 + effect_rate[post_idx])
+        tau_mean_true = treated_mu - treated_mu_cf
+
+        return _PositiveModeComponents(
+            calendar_times=calendar_times,
+            donor_names=donor_names,
+            post_idx=post_idx,
+            donor_exposure=donor_exposure,
+            donor_mu=donor_mu,
+            treated_exposure_cf=treated_exposure_cf,
+            treated_mu_cf=treated_mu_cf,
+            treated_mu=treated_mu,
+            tau_mean_true=tau_mean_true,
+            effect_rate=effect_rate,
+            macro_index=np.exp(macro_log),
+            seasonality_index=1.0 + 0.15 * season,
+        )
+
+    def _assemble_positive_mode_rows(
+        self,
+        *,
+        components: _PositiveModeComponents,
+        donor_y: np.ndarray,
+        treated_y: np.ndarray,
+        treated_y_cf: np.ndarray,
+        tau_realized_true: np.ndarray,
+    ) -> pd.DataFrame:
+        c = self.config
+        rows = []
+        for i, t_cal in enumerate(components.calendar_times):
+            rows.append(
+                {
+                    "unit_id": c.treated_unit,
+                    "calendar_time": t_cal,
+                    "y": float(treated_y[i]),
+                    "y_cf": float(treated_y_cf[i]),
+                    "tau_realized_true": float(tau_realized_true[i]),
+                    "mu_cf": float(components.treated_mu_cf[i]),
+                    "mu_treated": float(components.treated_mu[i]),
+                    "tau_mean_true": float(components.tau_mean_true[i]),
+                    "tau_rate_true": float(components.effect_rate[i]),
+                    "is_treated_unit": 1,
+                    "exposure": float(components.treated_exposure_cf[i]),
+                    "macro_index": float(components.macro_index[i]),
+                    "seasonality_index": float(components.seasonality_index[i]),
+                }
+            )
+            for j, unit in enumerate(components.donor_names):
+                rows.append(
+                    {
+                        "unit_id": unit,
+                        "calendar_time": t_cal,
+                        "y": float(donor_y[i, j]),
+                        "y_cf": float(donor_y[i, j]),
+                        "tau_realized_true": 0.0,
+                        "mu_cf": float(components.donor_mu[i, j]),
+                        "mu_treated": float(components.donor_mu[i, j]),
+                        "tau_mean_true": 0.0,
+                        "tau_rate_true": 0.0,
+                        "is_treated_unit": 0,
+                        "exposure": float(components.donor_exposure[i, j]),
+                        "macro_index": float(components.macro_index[i]),
+                        "seasonality_index": float(components.seasonality_index[i]),
+                    }
+                )
+        return pd.DataFrame(rows)
+
     def _generate_gaussian_panel(
         self,
         *,
         rng: np.random.Generator,
     ) -> tuple[pd.DataFrame, list[Hashable], tuple[str, ...]]:
         c = self.config
-        n_total = int(c.n_pre_periods + c.n_post_periods)
+        n_total = self._n_total_periods()
         t_rel = np.arange(n_total, dtype=float)
         calendar_times, _ = self._calendar_axis(n_total=n_total)
 
@@ -324,7 +549,7 @@ class PanelSCMGenerator:
         )
         season = np.sin(2.0 * np.pi * t_rel / max(4, n_total))
 
-        donor_names = [f"{c.donor_prefix}{j + 1}" for j in range(c.n_donors)]
+        donor_names = self._donor_names()
         donor_matrix = np.empty((n_total, c.n_donors), dtype=float)
 
         latent_factors, donor_factor_loadings = self._sample_latent_factors(
@@ -421,336 +646,79 @@ class PanelSCMGenerator:
         rng: np.random.Generator,
     ) -> tuple[pd.DataFrame, list[Hashable], tuple[str, ...]]:
         c = self.config
-        n_total = int(c.n_pre_periods + c.n_post_periods)
-        t_rel = np.arange(n_total, dtype=float)
-        calendar_times, _ = self._calendar_axis(n_total=n_total)
-        post_idx = np.arange(c.n_pre_periods, n_total, dtype=int)
-
-        season = np.sin(2.0 * np.pi * t_rel / 12.0) + 0.5 * np.cos(2.0 * np.pi * t_rel / 6.0)
-        macro_log = _draw_ar1_series(
+        components = self._build_positive_mode_components(
             rng=rng,
-            n_periods=n_total,
-            rho=c.rho_common,
-            innovation_std=c.common_factor_std_log,
+            priors=_PositiveModePriors(
+                exposure_level_log_mean=np.log(800.0),
+                exposure_level_log_std=0.30,
+                exposure_min=20.0,
+                exposure_max=50_000.0,
+                eta_intercept_log_mean=np.log(0.025),
+                eta_intercept_log_std=0.30,
+                season_loading_mean=0.14,
+                season_loading_std=0.05,
+            ),
         )
 
-        latent_factors, donor_factor_loadings = self._sample_latent_factors(
-            rng=rng,
-            n_total=n_total,
-            innovation_std=c.latent_factor_std_log,
-        )
-
-        donor_names = [f"{c.donor_prefix}{j + 1}" for j in range(c.n_donors)]
-        donor_exposure = np.empty((n_total, c.n_donors), dtype=float)
-        donor_eta = np.empty((n_total, c.n_donors), dtype=float)
-        donor_mu = np.empty((n_total, c.n_donors), dtype=float)
-
-        centered_t = t_rel - t_rel.mean()
-        exposure_time_log = _draw_ar1_series(
-            rng=rng,
-            n_periods=n_total,
-            rho=c.rho_common,
-            innovation_std=0.08,
-        )
-        for j in range(c.n_donors):
-            exposure_level = float(rng.normal(np.log(800.0), 0.30))
-            exposure_growth = float(rng.normal(0.004, 0.002))
-            exposure_noise = _draw_ar1_series(
-                rng=rng,
-                n_periods=n_total,
-                rho=c.rho_donor,
-                innovation_std=0.10,
-            )
-            log_exposure = exposure_level + exposure_growth * centered_t + exposure_time_log + exposure_noise
-            donor_exposure[:, j] = np.exp(np.clip(log_exposure, np.log(20.0), np.log(50_000.0)))
-
-            eta_intercept = float(rng.normal(np.log(0.025), 0.30))
-            eta_growth = float(rng.normal(0.005, 0.003))
-            season_loading = float(rng.normal(0.14, 0.05))
-            donor_noise = _draw_ar1_series(
-                rng=rng,
-                n_periods=n_total,
-                rho=c.rho_donor,
-                innovation_std=c.donor_noise_std_log,
-            )
-            latent_term = (
-                latent_factors @ donor_factor_loadings[j]
-                if c.n_latent_factors > 0
-                else np.zeros(n_total, dtype=float)
-            )
-            eta = (
-                eta_intercept
-                + eta_growth * centered_t
-                + season_loading * season
-                + macro_log
-                + latent_term
-                + donor_noise
-            )
-            donor_eta[:, j] = eta
-            log_mu = np.log(donor_exposure[:, j]) + eta
-            donor_mu[:, j] = np.exp(np.clip(log_mu, -6.0, 10.0))
-
-        true_weights = rng.dirichlet(np.full(c.n_donors, fill_value=c.dirichlet_alpha, dtype=float))
-        prefit_mismatch_eta = _draw_ar1_series(
-            rng=rng,
-            n_periods=n_total,
-            rho=c.rho_prefit_mismatch,
-            innovation_std=c.prefit_mismatch_std_log,
-        )
-        prefit_mismatch_exposure = _draw_ar1_series(
-            rng=rng,
-            n_periods=n_total,
-            rho=c.rho_prefit_mismatch,
-            innovation_std=0.5 * c.prefit_mismatch_std_log,
-        )
-        treated_exposure_cf = (donor_exposure @ true_weights) * np.exp(prefit_mismatch_exposure)
-        treated_exposure_cf = np.clip(treated_exposure_cf, 1.0, None)
-        treated_eta_cf = (donor_eta @ true_weights) + prefit_mismatch_eta
-        treated_log_mu_cf = np.log(treated_exposure_cf) + treated_eta_cf
-        treated_mu_cf = np.exp(np.clip(treated_log_mu_cf, -6.0, 10.0))
-        treated_mu_cf = np.clip(treated_mu_cf, 1e-6, None)
-
-        donor_y = rng.gamma(shape=c.gamma_shape, scale=np.clip(donor_mu, 1e-6, None) / c.gamma_shape)
+        donor_y = rng.gamma(shape=c.gamma_shape, scale=np.clip(components.donor_mu, 1e-6, None) / c.gamma_shape)
         treated_y_cf = rng.gamma(
             shape=c.gamma_shape,
-            scale=np.clip(treated_mu_cf, 1e-6, None) / c.gamma_shape,
+            scale=np.clip(components.treated_mu_cf, 1e-6, None) / c.gamma_shape,
         )
-
-        effect_rate = np.zeros(n_total, dtype=float)
-        post_steps = np.arange(c.n_post_periods, dtype=float)
-        ramp = 1.0 - np.exp(-(post_steps + 1.0) / 2.5)
-        post_rate = (c.treatment_effect_rate + c.treatment_effect_slope * post_steps) * ramp
-        if np.any(1.0 + post_rate <= 0.0):
-            raise ValueError(
-                "treatment_effect_rate/slope imply non-positive post multipliers; "
-                "ensure treatment_effect_rate + slope*k > -1 for all post periods."
-            )
-        effect_rate[post_idx] = post_rate
-
-        treated_mu = treated_mu_cf.copy()
-        treated_mu[post_idx] = treated_mu_cf[post_idx] * (1.0 + effect_rate[post_idx])
-        tau_mean_true = treated_mu - treated_mu_cf
-
         treated_y = treated_y_cf.copy()
-        treated_y[post_idx] = treated_y_cf[post_idx] * (1.0 + effect_rate[post_idx])
+        treated_y[components.post_idx] = (
+            treated_y_cf[components.post_idx] * (1.0 + components.effect_rate[components.post_idx])
+        )
         tau_realized_true = treated_y - treated_y_cf
 
-        macro_index = np.exp(macro_log)
-        seasonality_index = 1.0 + 0.15 * season
-
-        rows = []
-        for i, t_cal in enumerate(calendar_times):
-            rows.append(
-                {
-                    "unit_id": c.treated_unit,
-                    "calendar_time": t_cal,
-                    "y": float(treated_y[i]),
-                    "y_cf": float(treated_y_cf[i]),
-                    "tau_realized_true": float(tau_realized_true[i]),
-                    "mu_cf": float(treated_mu_cf[i]),
-                    "mu_treated": float(treated_mu[i]),
-                    "tau_mean_true": float(tau_mean_true[i]),
-                    "tau_rate_true": float(effect_rate[i]),
-                    "is_treated_unit": 1,
-                    "exposure": float(treated_exposure_cf[i]),
-                    "macro_index": float(macro_index[i]),
-                    "seasonality_index": float(seasonality_index[i]),
-                }
-            )
-            for j, unit in enumerate(donor_names):
-                rows.append(
-                    {
-                        "unit_id": unit,
-                        "calendar_time": t_cal,
-                        "y": float(donor_y[i, j]),
-                        "y_cf": float(donor_y[i, j]),
-                        "tau_realized_true": 0.0,
-                        "mu_cf": float(donor_mu[i, j]),
-                        "mu_treated": float(donor_mu[i, j]),
-                        "tau_mean_true": 0.0,
-                        "tau_rate_true": 0.0,
-                        "is_treated_unit": 0,
-                        "exposure": float(donor_exposure[i, j]),
-                        "macro_index": float(macro_index[i]),
-                        "seasonality_index": float(seasonality_index[i]),
-                    }
-                )
-
-        return (
-            pd.DataFrame(rows),
-            donor_names,
-            ("exposure", "macro_index", "seasonality_index"),
+        df = self._assemble_positive_mode_rows(
+            components=components,
+            donor_y=donor_y,
+            treated_y=treated_y,
+            treated_y_cf=treated_y_cf,
+            tau_realized_true=tau_realized_true,
         )
+        return df, components.donor_names, _POSITIVE_MODE_COVARIATES
 
     def _generate_poisson_panel(
         self,
         *,
         rng: np.random.Generator,
     ) -> tuple[pd.DataFrame, list[Hashable], tuple[str, ...]]:
-        c = self.config
-        n_total = int(c.n_pre_periods + c.n_post_periods)
-        t_rel = np.arange(n_total, dtype=float)
-        calendar_times, _ = self._calendar_axis(n_total=n_total)
-        post_idx = np.arange(c.n_pre_periods, n_total, dtype=int)
-
-        season = np.sin(2.0 * np.pi * t_rel / 12.0) + 0.5 * np.cos(2.0 * np.pi * t_rel / 6.0)
-        macro_log = _draw_ar1_series(
+        components = self._build_positive_mode_components(
             rng=rng,
-            n_periods=n_total,
-            rho=c.rho_common,
-            innovation_std=c.common_factor_std_log,
+            priors=_PositiveModePriors(
+                exposure_level_log_mean=np.log(700.0),
+                exposure_level_log_std=0.30,
+                exposure_min=15.0,
+                exposure_max=45_000.0,
+                eta_intercept_log_mean=np.log(0.018),
+                eta_intercept_log_std=0.25,
+                season_loading_mean=0.16,
+                season_loading_std=0.06,
+            ),
         )
-
-        latent_factors, donor_factor_loadings = self._sample_latent_factors(
-            rng=rng,
-            n_total=n_total,
-            innovation_std=c.latent_factor_std_log,
-        )
-
-        donor_names = [f"{c.donor_prefix}{j + 1}" for j in range(c.n_donors)]
-        donor_exposure = np.empty((n_total, c.n_donors), dtype=float)
-        donor_eta = np.empty((n_total, c.n_donors), dtype=float)
-        donor_mu = np.empty((n_total, c.n_donors), dtype=float)
-
-        centered_t = t_rel - t_rel.mean()
-        exposure_time_log = _draw_ar1_series(
-            rng=rng,
-            n_periods=n_total,
-            rho=c.rho_common,
-            innovation_std=0.08,
-        )
-        for j in range(c.n_donors):
-            exposure_level = float(rng.normal(np.log(700.0), 0.30))
-            exposure_growth = float(rng.normal(0.004, 0.002))
-            exposure_noise = _draw_ar1_series(
-                rng=rng,
-                n_periods=n_total,
-                rho=c.rho_donor,
-                innovation_std=0.10,
-            )
-            log_exposure = exposure_level + exposure_growth * centered_t + exposure_time_log + exposure_noise
-            donor_exposure[:, j] = np.exp(np.clip(log_exposure, np.log(15.0), np.log(45_000.0)))
-
-            eta_intercept = float(rng.normal(np.log(0.018), 0.25))
-            eta_growth = float(rng.normal(0.005, 0.003))
-            season_loading = float(rng.normal(0.16, 0.06))
-            donor_noise = _draw_ar1_series(
-                rng=rng,
-                n_periods=n_total,
-                rho=c.rho_donor,
-                innovation_std=c.donor_noise_std_log,
-            )
-            latent_term = (
-                latent_factors @ donor_factor_loadings[j]
-                if c.n_latent_factors > 0
-                else np.zeros(n_total, dtype=float)
-            )
-            eta = (
-                eta_intercept
-                + eta_growth * centered_t
-                + season_loading * season
-                + macro_log
-                + latent_term
-                + donor_noise
-            )
-            donor_eta[:, j] = eta
-            log_mu = np.log(donor_exposure[:, j]) + eta
-            donor_mu[:, j] = np.exp(np.clip(log_mu, -6.0, 10.0))
-
-        true_weights = rng.dirichlet(np.full(c.n_donors, fill_value=c.dirichlet_alpha, dtype=float))
-        prefit_mismatch_eta = _draw_ar1_series(
-            rng=rng,
-            n_periods=n_total,
-            rho=c.rho_prefit_mismatch,
-            innovation_std=c.prefit_mismatch_std_log,
-        )
-        prefit_mismatch_exposure = _draw_ar1_series(
-            rng=rng,
-            n_periods=n_total,
-            rho=c.rho_prefit_mismatch,
-            innovation_std=0.5 * c.prefit_mismatch_std_log,
-        )
-        treated_exposure_cf = (donor_exposure @ true_weights) * np.exp(prefit_mismatch_exposure)
-        treated_exposure_cf = np.clip(treated_exposure_cf, 1.0, None)
-        treated_eta_cf = (donor_eta @ true_weights) + prefit_mismatch_eta
-        treated_log_mu_cf = np.log(treated_exposure_cf) + treated_eta_cf
-        treated_mu_cf = np.exp(np.clip(treated_log_mu_cf, -6.0, 10.0))
-        treated_mu_cf = np.clip(treated_mu_cf, 1e-6, None)
-
-        effect_rate = np.zeros(n_total, dtype=float)
-        post_steps = np.arange(c.n_post_periods, dtype=float)
-        ramp = 1.0 - np.exp(-(post_steps + 1.0) / 2.5)
-        post_rate = (c.treatment_effect_rate + c.treatment_effect_slope * post_steps) * ramp
-        if np.any(1.0 + post_rate <= 0.0):
-            raise ValueError(
-                "treatment_effect_rate/slope imply non-positive post multipliers; "
-                "ensure treatment_effect_rate + slope*k > -1 for all post periods."
-            )
-        effect_rate[post_idx] = post_rate
-
-        treated_mu = treated_mu_cf.copy()
-        treated_mu[post_idx] = treated_mu_cf[post_idx] * (1.0 + effect_rate[post_idx])
-        tau_mean_true = treated_mu - treated_mu_cf
-
-        donor_y = rng.poisson(np.clip(donor_mu, 1e-6, None)).astype(float)
+        donor_y = rng.poisson(np.clip(components.donor_mu, 1e-6, None)).astype(float)
         treated_y_cf, treated_y = _sample_coupled_poisson_pair(
             rng=rng,
-            mu_cf=np.clip(treated_mu_cf, 1e-6, None),
-            mu_treated=np.clip(treated_mu, 1e-6, None),
+            mu_cf=np.clip(components.treated_mu_cf, 1e-6, None),
+            mu_treated=np.clip(components.treated_mu, 1e-6, None),
         )
         tau_realized_true = treated_y - treated_y_cf
 
-        macro_index = np.exp(macro_log)
-        seasonality_index = 1.0 + 0.15 * season
-
-        rows = []
-        for i, t_cal in enumerate(calendar_times):
-            rows.append(
-                {
-                    "unit_id": c.treated_unit,
-                    "calendar_time": t_cal,
-                    "y": float(treated_y[i]),
-                    "y_cf": float(treated_y_cf[i]),
-                    "tau_realized_true": float(tau_realized_true[i]),
-                    "mu_cf": float(treated_mu_cf[i]),
-                    "mu_treated": float(treated_mu[i]),
-                    "tau_mean_true": float(tau_mean_true[i]),
-                    "tau_rate_true": float(effect_rate[i]),
-                    "is_treated_unit": 1,
-                    "exposure": float(treated_exposure_cf[i]),
-                    "macro_index": float(macro_index[i]),
-                    "seasonality_index": float(seasonality_index[i]),
-                }
-            )
-            for j, unit in enumerate(donor_names):
-                rows.append(
-                    {
-                        "unit_id": unit,
-                        "calendar_time": t_cal,
-                        "y": float(donor_y[i, j]),
-                        "y_cf": float(donor_y[i, j]),
-                        "tau_realized_true": 0.0,
-                        "mu_cf": float(donor_mu[i, j]),
-                        "mu_treated": float(donor_mu[i, j]),
-                        "tau_mean_true": 0.0,
-                        "tau_rate_true": 0.0,
-                        "is_treated_unit": 0,
-                        "exposure": float(donor_exposure[i, j]),
-                        "macro_index": float(macro_index[i]),
-                        "seasonality_index": float(seasonality_index[i]),
-                    }
-                )
-
-        return (
-            pd.DataFrame(rows),
-            donor_names,
-            ("exposure", "macro_index", "seasonality_index"),
+        df = self._assemble_positive_mode_rows(
+            components=components,
+            donor_y=donor_y,
+            treated_y=treated_y,
+            treated_y_cf=treated_y_cf,
+            tau_realized_true=tau_realized_true,
         )
+        return df, components.donor_names, _POSITIVE_MODE_COVARIATES
 
     def _apply_missingness(self, *, df: pd.DataFrame, rng: np.random.Generator) -> pd.DataFrame:
         c = self.config
         out = df.copy()
-        _, treatment_start = self._calendar_axis(n_total=int(c.n_pre_periods + c.n_post_periods))
+        _, treatment_start = self._calendar_axis(n_total=self._n_total_periods())
 
         treated_mask = out["unit_id"] == c.treated_unit
         protected_treated_idx: set[int] = set()
@@ -818,31 +786,22 @@ class PanelSCMGenerator:
         else:
             df, donor_names, covariate_cols = self._generate_poisson_panel(rng=rng)
 
-        _, treatment_start = self._calendar_axis(n_total=int(c.n_pre_periods + c.n_post_periods))
+        _, treatment_start = self._calendar_axis(n_total=self._n_total_periods())
         df = self._apply_missingness(df=df, rng=rng)
         df = df.sort_values(["unit_id", "calendar_time"]).reset_index(drop=True)
+        df["treated_time"] = (
+            (df["unit_id"] == c.treated_unit) & (df["calendar_time"] >= treatment_start)
+        ).astype(int)
         df["observed"] = (~df["y"].isna()).astype(int)
 
         if not return_panel_data_flag:
             return df
 
-        allow_missing = bool(
-            c.missing_outcome_frac > 0.0
-            or c.missing_cell_frac > 0.0
-            or c.missing_block_frac > 0.0
-        )
         panel = PanelDataSCM(
             df=df,
+            y="y",
             unit_col="unit_id",
             time_col="calendar_time",
-            time_freq=c.time_freq,
-            y="y",
-            treated_unit=c.treated_unit,
-            treatment_start=treatment_start,
-            donor_units=donor_names,
-            covariate_cols=covariate_cols,
-            observed_col="observed",
-            allow_missing_outcome=allow_missing,
+            treated_time="treated_time",
         )
-        # Restore generator-facing columns (oracle and helper columns) after validation.
-        return panel.model_copy(update={"df": df})
+        return panel

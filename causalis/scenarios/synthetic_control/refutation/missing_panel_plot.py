@@ -33,8 +33,7 @@ def missing_panel_plot(
     Plot panel missingness as a unit-by-time heatmap.
 
     A cell value of 0 means observed and 1 means missing. Missingness is
-    inferred from ``observed_col`` when available (plus outcome NaNs),
-    otherwise directly from outcome NaNs.
+    inferred from outcome NaNs.
 
     Parameters
     ----------
@@ -76,11 +75,7 @@ def missing_panel_plot(
     if df.empty:
         raise ValueError("No analysis rows available for plotting.")
 
-    if paneldata.observed_col is not None and paneldata.observed_col in df.columns:
-        observed = df[paneldata.observed_col].astype("boolean")
-        missing = (observed != True) | df[outcome_col].isna()
-    else:
-        missing = df[outcome_col].isna()
+    missing = df[outcome_col].isna()
     df["_missing"] = missing.astype(float)
 
     collapsed = df.groupby([unit_col, time_col], as_index=False, sort=True)["_missing"].mean()

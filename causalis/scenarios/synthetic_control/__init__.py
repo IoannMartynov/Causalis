@@ -1,5 +1,5 @@
 from . import refutation
-from .model import ASCM, RSCM, SCM, AugmentedSyntheticControl, RobustSyntheticControl, SyntheticControl
+from .model import ASCM, AugmentedSyntheticControl
 from .dgp import generate_scm_gamma_26, generate_scm_poisson_26
 from .refutation import (
     gap_over_time_plot,
@@ -13,10 +13,6 @@ from .refutation import (
 __all__ = [
     "AugmentedSyntheticControl",
     "ASCM",
-    "RobustSyntheticControl",
-    "RSCM",
-    "SyntheticControl",
-    "SCM",
     "generate_scm_gamma_26",
     "generate_scm_poisson_26",
     "refutation",

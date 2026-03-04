@@ -59,11 +59,7 @@ def _missing_cell_fraction(paneldata: PanelDataSCM) -> float:
     if df.empty:
         return 0.0
 
-    if paneldata.observed_col is not None and paneldata.observed_col in df.columns:
-        observed = df[paneldata.observed_col].astype("boolean")
-        missing = (observed != True) | df[paneldata.y].isna()
-    else:
-        missing = df[paneldata.y].isna()
+    missing = df[paneldata.y].isna()
     return float(missing.mean())
 
 

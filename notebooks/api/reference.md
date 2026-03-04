@@ -31,7 +31,7 @@ Causalis: A Python package for causal inference.
 - [**DiagnosticData**](#causalis.data_contracts.DiagnosticData) – Base class for all diagnostic data_contracts.
 - [**MultiCausalData**](#causalis.data_contracts.MultiCausalData) – Data contract for cross-sectional causal data with multi-class one-hot treatments.
 - [**PanelDataSCM**](#causalis.data_contracts.PanelDataSCM) – Validated long-format panel contract for Synthetic Control estimators.
-- [**PanelEstimate**](#causalis.data_contracts.PanelEstimate) – Result contract for panel estimators such as Synthetic Control.
+- [**PanelEstimate**](#causalis.data_contracts.PanelEstimate) – Result contract for dynamic synthetic-control effect-path estimates.
 - [**RegressionChecks**](#causalis.data_contracts.RegressionChecks) – Lightweight OLS/regression health checks for CUPED diagnostics.
 - [**UnconfoundednessDiagnosticData**](#causalis.data_contracts.UnconfoundednessDiagnosticData) – Fields common to all models assuming unconfoundedness.
 
@@ -1065,99 +1065,53 @@ Bases: <code>[BaseModel](#pydantic.BaseModel)</code>
 
 Validated long-format panel contract for Synthetic Control estimators.
 
-**Parameters:**
+<details class="required-fields" open markdown="1">
+<summary>Required fields</summary>
 
-- **df** (<code>[DataFrame](#pandas.DataFrame)</code>) – Long-format panel data, one row per observed `(unit, time)` cell.
-- **unit_col** (<code>[str](#str)</code>) – Column name that identifies observational units.
-- **time_col** (<code>[str](#str)</code>) – Column name containing explicit calendar time values.
-- **time_freq** (<code>[str](#str)</code>) – Regular panel frequency alias understood by pandas Period, for example
-  `"D"`, `"W"`, `"M"`, `"Q"`, or `"Y"`.
-- **y** (<code>[str](#str)</code>) – Outcome column name.
-- **treated_unit** (<code>[Hashable](#typing.Hashable)</code>) – Identifier of the treated unit.
-- **treatment_start** (<code>[TimeLike](#causalis.data_contracts.panel_data_scm.TimeLike)</code>) – First treated period (inclusive): pre periods satisfy
-  `t < treatment_start` and post periods satisfy
-  `t >= treatment_start`.
-- **donor_units** (<code>sequence of Hashable</code>) – Explicit donor pool. If `None`, all non-treated units are donors.
-- **time_window** (<code>[tuple](#tuple)([TimeLike](#causalis.data_contracts.panel_data_scm.TimeLike) or None, [TimeLike](#causalis.data_contracts.panel_data_scm.TimeLike) or None)</code>) – Inclusive analysis window `(t_min, t_max)` after time coercion.
-- **pre_periods** (<code>sequence of TimeLike</code>) – Explicit pre-treatment periods. If provided, they override inferred pre periods.
-- **post_periods** (<code>sequence of TimeLike</code>) – Explicit post-treatment periods. If provided, they override inferred post periods.
-- **covariate_cols** (<code>sequence of str</code>) – Additional covariate columns.
-- **observed_col** (<code>[str](#str)</code>) – Optional boolean/0-1 column indicating whether outcome is observed.
-- **weights_col** (<code>[str](#str)</code>) – Optional non-negative row weights.
-- **allow_missing_outcome** (<code>[bool](#bool)</code>) – If `False`, requires fully observed numeric outcomes.
-- **allow_duplicate_unit_time** (<code>[bool](#bool)</code>) – If `False`, requires unique `(unit_col, time_col)` after coercion.
-- **strict_observed_mask** (<code>[bool](#bool)</code>) – If `True`, requires observed mask to match outcome missingness exactly
-  and forbids null values in `observed_col`.
-- **allow_gapped_time_axis** (<code>[bool](#bool)</code>) – If `False`, requires contiguous analysis periods at `time_freq`.
+df : pandas.DataFrame
+Long-format panel data.
+y : str
+Outcome column name in `df`.
+unit_col : str
+Unit identifier column name in `df`.
+time_col : str
+Calendar time column name in `df`.
+Preferred input format is `pandas.Period` values with a regular
+frequency (for example monthly `Period['M']`). Datetime/string values
+are accepted only when a regular frequency can be inferred.
+treated_time : str
+Binary treatment-assignment column in `df` (0/1 or False/True).
+
+</details>
 
 <details class="note" open markdown="1">
 <summary>Notes</summary>
 
-All time-like fields are normalized to `pandas.Period` at `time_freq`.
-Timezone-aware datetimes are rejected; normalize to naive or UTC timestamps
-before constructing this contract.
+There are no optional contract fields. Extra keyword arguments are rejected.
+The contract derives `treated_unit`, `treatment_start`, and `time_freq`
+from the input data.
+The model stores a validated internal dataframe snapshot used by all contract
+methods; mutating the public `df` attribute after construction does not
+affect validated contract behavior.
+For fiscal quarter/year semantics, pass `time_col` explicitly as
+`pandas.Period` with the desired fiscal frequency.
 
 </details>
 
 **Functions:**
 
-- [**analysis_times**](#causalis.data_contracts.PanelDataSCM.analysis_times) – Return sorted unique time axis of analysis data.
-- [**df_analysis**](#causalis.data_contracts.PanelDataSCM.df_analysis) – Build the estimator-facing analysis dataframe.
-- [**donor_pool**](#causalis.data_contracts.PanelDataSCM.donor_pool) – Return donor units used in analysis.
-- [**post_times**](#causalis.data_contracts.PanelDataSCM.post_times) – Return post-treatment periods used by estimators.
-- [**pre_times**](#causalis.data_contracts.PanelDataSCM.pre_times) – Return pre-treatment periods used by estimators.
-- [**time_to_index**](#causalis.data_contracts.PanelDataSCM.time_to_index) – Build dense integer mapping for matrix estimators.
-- [**treatment_start_idx**](#causalis.data_contracts.PanelDataSCM.treatment_start_idx) – Return index position of treatment start on analysis time axis.
-
-##### `allow_duplicate_unit_time`
-
-```python
-allow_duplicate_unit_time: bool = Field(
-    default=False,
-    description="If False, requires uniqueness of (unit_col, time_col).",
-)
-
-```
-
-##### `allow_gapped_time_axis`
-
-```python
-allow_gapped_time_axis: bool = Field(
-    default=False,
-    description="If False, requires contiguous analysis periods at time_freq (no gaps between min and max analysis times).",
-)
-
-```
-
-##### `allow_missing_outcome`
-
-```python
-allow_missing_outcome: bool = Field(
-    default=True,
-    description="If False, requires y to be numeric and fully observed.",
-)
-
-```
+- [**analysis_times**](#causalis.data_contracts.PanelDataSCM.analysis_times) –
+- [**df_analysis**](#causalis.data_contracts.PanelDataSCM.df_analysis) –
+- [**donor_pool**](#causalis.data_contracts.PanelDataSCM.donor_pool) –
+- [**post_times**](#causalis.data_contracts.PanelDataSCM.post_times) –
+- [**pre_times**](#causalis.data_contracts.PanelDataSCM.pre_times) –
+- [**time_to_index**](#causalis.data_contracts.PanelDataSCM.time_to_index) –
+- [**treatment_start_idx**](#causalis.data_contracts.PanelDataSCM.treatment_start_idx) –
 
 ##### `analysis_times`
 
 ```python
 analysis_times() -> Sequence[pd.Period]
-```
-
-Return sorted unique time axis of analysis data.
-
-**Returns:**
-
-- <code>sequence of pandas.Period</code> – Sorted analysis periods.
-
-##### `covariate_cols`
-
-```python
-covariate_cols: Sequence[str] = Field(
-    default_factory=tuple, description="Optional covariate columns."
-)
-
 ```
 
 ##### `df`
@@ -1172,32 +1126,10 @@ df: pd.DataFrame = Field(..., description='Long-format panel data.')
 df_analysis() -> pd.DataFrame
 ```
 
-Build the estimator-facing analysis dataframe.
-
-**Returns:**
-
-- <code>[DataFrame](#pandas.DataFrame)</code> – Data restricted to treated plus donor units and filtered by time window.
-
 ##### `donor_pool`
 
 ```python
 donor_pool() -> Sequence[Hashable]
-```
-
-Return donor units used in analysis.
-
-**Returns:**
-
-- <code>sequence of Hashable</code> – Explicit donor pool if provided, otherwise all non-treated units.
-
-##### `donor_units`
-
-```python
-donor_units: Optional[Sequence[Hashable]] = Field(
-    default=None,
-    description="Optional explicit donor pool. If None, all non-treated units are donors.",
-)
-
 ```
 
 ##### `model_config`
@@ -1209,23 +1141,16 @@ model_config = ConfigDict(
 
 ```
 
-##### `observed_col`
+##### `n_post_periods`
 
 ```python
-observed_col: Optional[str] = Field(
-    default=None,
-    description="Optional boolean/0-1 column indicating whether outcome is observed.",
-)
-
+n_post_periods: int
 ```
 
-##### `post_periods`
+##### `n_pre_periods`
 
 ```python
-post_periods: Optional[Sequence[TimeLike]] = Field(
-    default=None, description="Optional explicit post-treatment periods."
-)
-
+n_pre_periods: int
 ```
 
 ##### `post_times`
@@ -1234,43 +1159,10 @@ post_periods: Optional[Sequence[TimeLike]] = Field(
 post_times() -> Sequence[pd.Period]
 ```
 
-Return post-treatment periods used by estimators.
-
-**Returns:**
-
-- <code>sequence of pandas.Period</code> – Explicit `post_periods` when provided, else inferred periods with
-  `t >= treatment_start`.
-
-##### `pre_periods`
-
-```python
-pre_periods: Optional[Sequence[TimeLike]] = Field(
-    default=None, description="Optional explicit pre-treatment periods."
-)
-
-```
-
 ##### `pre_times`
 
 ```python
 pre_times() -> Sequence[pd.Period]
-```
-
-Return pre-treatment periods used by estimators.
-
-**Returns:**
-
-- <code>sequence of pandas.Period</code> – Explicit `pre_periods` when provided, else inferred periods with
-  `t < treatment_start`.
-
-##### `strict_observed_mask`
-
-```python
-strict_observed_mask: bool = Field(
-    default=True,
-    description="If True, observed_col must match y missingness exactly.",
-)
-
 ```
 
 ##### `time_col`
@@ -1282,11 +1174,7 @@ time_col: str = Field(..., description='Calendar time column in df.')
 ##### `time_freq`
 
 ```python
-time_freq: str = Field(
-    default="M",
-    description="Regular panel frequency, e.g. 'D', 'W', 'M', 'Q', 'Y'.",
-)
-
+time_freq: str
 ```
 
 ##### `time_to_index`
@@ -1295,18 +1183,11 @@ time_freq: str = Field(
 time_to_index() -> dict[pd.Period, int]
 ```
 
-Build dense integer mapping for matrix estimators.
-
-**Returns:**
-
-- <code>dict of pandas.Period to int</code> – Mapping from analysis period to zero-based integer index.
-
-##### `time_window`
+##### `treated_time`
 
 ```python
-time_window: Optional[Tuple[Optional[TimeLike], Optional[TimeLike]]] = Field(
-    default=None,
-    description="Inclusive analysis period window: (t_min, t_max). Use None for open ends.",
+treated_time: str = Field(
+    ..., description="Binary treatment-assignment column in df."
 )
 
 ```
@@ -1314,17 +1195,13 @@ time_window: Optional[Tuple[Optional[TimeLike], Optional[TimeLike]]] = Field(
 ##### `treated_unit`
 
 ```python
-treated_unit: Hashable = Field(..., description='ID of the treated unit.')
+treated_unit: Hashable
 ```
 
 ##### `treatment_start`
 
 ```python
-treatment_start: TimeLike = Field(
-    ...,
-    description="First treated period (inclusive). Pre: t < treatment_start, Post: t >= treatment_start.",
-)
-
+treatment_start: pd.Period
 ```
 
 ##### `treatment_start_idx`
@@ -1333,29 +1210,10 @@ treatment_start: TimeLike = Field(
 treatment_start_idx() -> int
 ```
 
-Return index position of treatment start on analysis time axis.
-
-**Returns:**
-
-- <code>[int](#int)</code> – Zero-based index corresponding to `treatment_start`.
-
-**Raises:**
-
-- <code>[ValueError](#ValueError)</code> – If `treatment_start` is outside the analysis time axis.
-
 ##### `unit_col`
 
 ```python
 unit_col: str = Field(..., description='Unit identifier column in df.')
-```
-
-##### `weights_col`
-
-```python
-weights_col: Optional[str] = Field(
-    default=None, description="Optional non-negative row weights."
-)
-
 ```
 
 ##### `y`
@@ -1368,80 +1226,34 @@ y: str = Field(..., description='Outcome column in df.')
 
 Bases: <code>[BaseModel](#pydantic.BaseModel)</code>
 
-Result contract for panel estimators such as Synthetic Control.
-
-**Parameters:**
-
-- **model** (<code>[str](#str)</code>) – Name of the fitted estimator or pipeline.
-- **treated_unit** (<code>[Hashable](#typing.Hashable)</code>) – Identifier of the treated unit.
-- **treatment_start** (<code>[TimeLike](#causalis.data_contracts.panel_data_scm.TimeLike)</code>) – Treatment boundary used to split pre/post periods.
-- **pre_times** (<code>[list](#list)\[[TimeLike](#causalis.data_contracts.panel_data_scm.TimeLike)\]</code>) – Sorted, strictly pre-treatment periods.
-- **post_times** (<code>[list](#list)\[[TimeLike](#causalis.data_contracts.panel_data_scm.TimeLike)\]</code>) – Sorted, strictly post-treatment periods.
-
-<details class="note" open markdown="1">
-<summary>Notes</summary>
-
-The contract stores aggregate ATTE metrics, full time paths, donor weights,
-and basic diagnostics needed for reporting or downstream checks.
-
-</details>
+Result contract for dynamic synthetic-control effect-path estimates.
 
 **Functions:**
 
-- [**summary**](#causalis.data_contracts.PanelEstimate.summary) – Return a compact tabular summary of key estimate metadata.
+- [**summary**](#causalis.data_contracts.PanelEstimate.summary) – Return a dynamic-path summary with pointwise inference details.
 
 ##### `alpha`
 
 ```python
-alpha: Optional[float] = None
+alpha: float
 ```
 
-##### `att`
+##### `ci_lower_by_time`
 
 ```python
-att: float
+ci_lower_by_time: pd.Series
 ```
 
-##### `att_by_time`
+##### `ci_upper_by_time`
 
 ```python
-att_by_time: pd.Series
+ci_upper_by_time: pd.Series
 ```
 
-##### `att_by_time_sc`
+##### `confidence_set_by_time`
 
 ```python
-att_by_time_sc: pd.Series
-```
-
-##### `att_sc`
-
-```python
-att_sc: float
-```
-
-##### `ci_lower_absolute`
-
-```python
-ci_lower_absolute: Optional[float] = None
-```
-
-##### `ci_lower_relative`
-
-```python
-ci_lower_relative: Optional[float] = None
-```
-
-##### `ci_upper_absolute`
-
-```python
-ci_upper_absolute: Optional[float] = None
-```
-
-##### `ci_upper_relative`
-
-```python
-ci_upper_relative: Optional[float] = None
+confidence_set_by_time: Dict[TimeLike, list[tuple[float, float]]]
 ```
 
 ##### `created_at`
@@ -1465,22 +1277,22 @@ diagnostics: Dict[str, Any] = Field(default_factory=dict)
 donor_weights_augmented: Dict[Hashable, float]
 ```
 
-##### `donor_weights_sc`
+##### `effect_by_time`
 
 ```python
-donor_weights_sc: Dict[Hashable, float]
+effect_by_time: pd.Series
 ```
 
 ##### `estimand`
 
 ```python
-estimand: str = 'ATTE'
+estimand: Literal['dynamic_effect_path'] = 'dynamic_effect_path'
 ```
 
-##### `is_significant`
+##### `is_significant_by_time`
 
 ```python
-is_significant: Optional[bool] = None
+is_significant_by_time: pd.Series
 ```
 
 ##### `model`
@@ -1504,10 +1316,10 @@ model_config = ConfigDict(
 observed_outcome: pd.Series
 ```
 
-##### `p_value`
+##### `p_value_by_time`
 
 ```python
-p_value: Optional[float] = None
+p_value_by_time: pd.Series
 ```
 
 ##### `post_times`
@@ -1525,25 +1337,15 @@ pre_times: List[TimeLike]
 ##### `summary`
 
 ```python
-summary() -> pd.DataFrame
+summary() -> Dict[str, Any]
 ```
 
-Return a compact tabular summary of key estimate metadata.
-
-**Returns:**
-
-- <code>[DataFrame](#pandas.DataFrame)</code> – Two-column dataframe indexed by field name.
+Return a dynamic-path summary with pointwise inference details.
 
 ##### `synthetic_outcome`
 
 ```python
 synthetic_outcome: pd.Series
-```
-
-##### `synthetic_outcome_sc`
-
-```python
-synthetic_outcome_sc: pd.Series
 ```
 
 ##### `treated_unit`
@@ -1556,12 +1358,6 @@ treated_unit: Hashable
 
 ```python
 treatment_start: TimeLike
-```
-
-##### `value_relative`
-
-```python
-value_relative: Optional[float] = None
 ```
 
 #### `RegressionChecks`
@@ -3539,99 +3335,53 @@ Bases: <code>[BaseModel](#pydantic.BaseModel)</code>
 
 Validated long-format panel contract for Synthetic Control estimators.
 
-**Parameters:**
+<details class="required-fields" open markdown="1">
+<summary>Required fields</summary>
 
-- **df** (<code>[DataFrame](#pandas.DataFrame)</code>) – Long-format panel data, one row per observed `(unit, time)` cell.
-- **unit_col** (<code>[str](#str)</code>) – Column name that identifies observational units.
-- **time_col** (<code>[str](#str)</code>) – Column name containing explicit calendar time values.
-- **time_freq** (<code>[str](#str)</code>) – Regular panel frequency alias understood by pandas Period, for example
-  `"D"`, `"W"`, `"M"`, `"Q"`, or `"Y"`.
-- **y** (<code>[str](#str)</code>) – Outcome column name.
-- **treated_unit** (<code>[Hashable](#typing.Hashable)</code>) – Identifier of the treated unit.
-- **treatment_start** (<code>[TimeLike](#causalis.data_contracts.panel_data_scm.TimeLike)</code>) – First treated period (inclusive): pre periods satisfy
-  `t < treatment_start` and post periods satisfy
-  `t >= treatment_start`.
-- **donor_units** (<code>sequence of Hashable</code>) – Explicit donor pool. If `None`, all non-treated units are donors.
-- **time_window** (<code>[tuple](#tuple)([TimeLike](#causalis.data_contracts.panel_data_scm.TimeLike) or None, [TimeLike](#causalis.data_contracts.panel_data_scm.TimeLike) or None)</code>) – Inclusive analysis window `(t_min, t_max)` after time coercion.
-- **pre_periods** (<code>sequence of TimeLike</code>) – Explicit pre-treatment periods. If provided, they override inferred pre periods.
-- **post_periods** (<code>sequence of TimeLike</code>) – Explicit post-treatment periods. If provided, they override inferred post periods.
-- **covariate_cols** (<code>sequence of str</code>) – Additional covariate columns.
-- **observed_col** (<code>[str](#str)</code>) – Optional boolean/0-1 column indicating whether outcome is observed.
-- **weights_col** (<code>[str](#str)</code>) – Optional non-negative row weights.
-- **allow_missing_outcome** (<code>[bool](#bool)</code>) – If `False`, requires fully observed numeric outcomes.
-- **allow_duplicate_unit_time** (<code>[bool](#bool)</code>) – If `False`, requires unique `(unit_col, time_col)` after coercion.
-- **strict_observed_mask** (<code>[bool](#bool)</code>) – If `True`, requires observed mask to match outcome missingness exactly
-  and forbids null values in `observed_col`.
-- **allow_gapped_time_axis** (<code>[bool](#bool)</code>) – If `False`, requires contiguous analysis periods at `time_freq`.
+df : pandas.DataFrame
+Long-format panel data.
+y : str
+Outcome column name in `df`.
+unit_col : str
+Unit identifier column name in `df`.
+time_col : str
+Calendar time column name in `df`.
+Preferred input format is `pandas.Period` values with a regular
+frequency (for example monthly `Period['M']`). Datetime/string values
+are accepted only when a regular frequency can be inferred.
+treated_time : str
+Binary treatment-assignment column in `df` (0/1 or False/True).
+
+</details>
 
 <details class="note" open markdown="1">
 <summary>Notes</summary>
 
-All time-like fields are normalized to `pandas.Period` at `time_freq`.
-Timezone-aware datetimes are rejected; normalize to naive or UTC timestamps
-before constructing this contract.
+There are no optional contract fields. Extra keyword arguments are rejected.
+The contract derives `treated_unit`, `treatment_start`, and `time_freq`
+from the input data.
+The model stores a validated internal dataframe snapshot used by all contract
+methods; mutating the public `df` attribute after construction does not
+affect validated contract behavior.
+For fiscal quarter/year semantics, pass `time_col` explicitly as
+`pandas.Period` with the desired fiscal frequency.
 
 </details>
 
 **Functions:**
 
-- [**analysis_times**](#causalis.data_contracts.panel_data_scm.PanelDataSCM.analysis_times) – Return sorted unique time axis of analysis data.
-- [**df_analysis**](#causalis.data_contracts.panel_data_scm.PanelDataSCM.df_analysis) – Build the estimator-facing analysis dataframe.
-- [**donor_pool**](#causalis.data_contracts.panel_data_scm.PanelDataSCM.donor_pool) – Return donor units used in analysis.
-- [**post_times**](#causalis.data_contracts.panel_data_scm.PanelDataSCM.post_times) – Return post-treatment periods used by estimators.
-- [**pre_times**](#causalis.data_contracts.panel_data_scm.PanelDataSCM.pre_times) – Return pre-treatment periods used by estimators.
-- [**time_to_index**](#causalis.data_contracts.panel_data_scm.PanelDataSCM.time_to_index) – Build dense integer mapping for matrix estimators.
-- [**treatment_start_idx**](#causalis.data_contracts.panel_data_scm.PanelDataSCM.treatment_start_idx) – Return index position of treatment start on analysis time axis.
-
-###### `allow_duplicate_unit_time`
-
-```python
-allow_duplicate_unit_time: bool = Field(
-    default=False,
-    description="If False, requires uniqueness of (unit_col, time_col).",
-)
-
-```
-
-###### `allow_gapped_time_axis`
-
-```python
-allow_gapped_time_axis: bool = Field(
-    default=False,
-    description="If False, requires contiguous analysis periods at time_freq (no gaps between min and max analysis times).",
-)
-
-```
-
-###### `allow_missing_outcome`
-
-```python
-allow_missing_outcome: bool = Field(
-    default=True,
-    description="If False, requires y to be numeric and fully observed.",
-)
-
-```
+- [**analysis_times**](#causalis.data_contracts.panel_data_scm.PanelDataSCM.analysis_times) –
+- [**df_analysis**](#causalis.data_contracts.panel_data_scm.PanelDataSCM.df_analysis) –
+- [**donor_pool**](#causalis.data_contracts.panel_data_scm.PanelDataSCM.donor_pool) –
+- [**post_times**](#causalis.data_contracts.panel_data_scm.PanelDataSCM.post_times) –
+- [**pre_times**](#causalis.data_contracts.panel_data_scm.PanelDataSCM.pre_times) –
+- [**time_to_index**](#causalis.data_contracts.panel_data_scm.PanelDataSCM.time_to_index) –
+- [**treatment_start_idx**](#causalis.data_contracts.panel_data_scm.PanelDataSCM.treatment_start_idx) –
 
 ###### `analysis_times`
 
 ```python
 analysis_times() -> Sequence[pd.Period]
-```
-
-Return sorted unique time axis of analysis data.
-
-**Returns:**
-
-- <code>sequence of pandas.Period</code> – Sorted analysis periods.
-
-###### `covariate_cols`
-
-```python
-covariate_cols: Sequence[str] = Field(
-    default_factory=tuple, description="Optional covariate columns."
-)
-
 ```
 
 ###### `df`
@@ -3646,32 +3396,10 @@ df: pd.DataFrame = Field(..., description='Long-format panel data.')
 df_analysis() -> pd.DataFrame
 ```
 
-Build the estimator-facing analysis dataframe.
-
-**Returns:**
-
-- <code>[DataFrame](#pandas.DataFrame)</code> – Data restricted to treated plus donor units and filtered by time window.
-
 ###### `donor_pool`
 
 ```python
 donor_pool() -> Sequence[Hashable]
-```
-
-Return donor units used in analysis.
-
-**Returns:**
-
-- <code>sequence of Hashable</code> – Explicit donor pool if provided, otherwise all non-treated units.
-
-###### `donor_units`
-
-```python
-donor_units: Optional[Sequence[Hashable]] = Field(
-    default=None,
-    description="Optional explicit donor pool. If None, all non-treated units are donors.",
-)
-
 ```
 
 ###### `model_config`
@@ -3683,23 +3411,16 @@ model_config = ConfigDict(
 
 ```
 
-###### `observed_col`
+###### `n_post_periods`
 
 ```python
-observed_col: Optional[str] = Field(
-    default=None,
-    description="Optional boolean/0-1 column indicating whether outcome is observed.",
-)
-
+n_post_periods: int
 ```
 
-###### `post_periods`
+###### `n_pre_periods`
 
 ```python
-post_periods: Optional[Sequence[TimeLike]] = Field(
-    default=None, description="Optional explicit post-treatment periods."
-)
-
+n_pre_periods: int
 ```
 
 ###### `post_times`
@@ -3708,43 +3429,10 @@ post_periods: Optional[Sequence[TimeLike]] = Field(
 post_times() -> Sequence[pd.Period]
 ```
 
-Return post-treatment periods used by estimators.
-
-**Returns:**
-
-- <code>sequence of pandas.Period</code> – Explicit `post_periods` when provided, else inferred periods with
-  `t >= treatment_start`.
-
-###### `pre_periods`
-
-```python
-pre_periods: Optional[Sequence[TimeLike]] = Field(
-    default=None, description="Optional explicit pre-treatment periods."
-)
-
-```
-
 ###### `pre_times`
 
 ```python
 pre_times() -> Sequence[pd.Period]
-```
-
-Return pre-treatment periods used by estimators.
-
-**Returns:**
-
-- <code>sequence of pandas.Period</code> – Explicit `pre_periods` when provided, else inferred periods with
-  `t < treatment_start`.
-
-###### `strict_observed_mask`
-
-```python
-strict_observed_mask: bool = Field(
-    default=True,
-    description="If True, observed_col must match y missingness exactly.",
-)
-
 ```
 
 ###### `time_col`
@@ -3756,11 +3444,7 @@ time_col: str = Field(..., description='Calendar time column in df.')
 ###### `time_freq`
 
 ```python
-time_freq: str = Field(
-    default="M",
-    description="Regular panel frequency, e.g. 'D', 'W', 'M', 'Q', 'Y'.",
-)
-
+time_freq: str
 ```
 
 ###### `time_to_index`
@@ -3769,18 +3453,11 @@ time_freq: str = Field(
 time_to_index() -> dict[pd.Period, int]
 ```
 
-Build dense integer mapping for matrix estimators.
-
-**Returns:**
-
-- <code>dict of pandas.Period to int</code> – Mapping from analysis period to zero-based integer index.
-
-###### `time_window`
+###### `treated_time`
 
 ```python
-time_window: Optional[Tuple[Optional[TimeLike], Optional[TimeLike]]] = Field(
-    default=None,
-    description="Inclusive analysis period window: (t_min, t_max). Use None for open ends.",
+treated_time: str = Field(
+    ..., description="Binary treatment-assignment column in df."
 )
 
 ```
@@ -3788,17 +3465,13 @@ time_window: Optional[Tuple[Optional[TimeLike], Optional[TimeLike]]] = Field(
 ###### `treated_unit`
 
 ```python
-treated_unit: Hashable = Field(..., description='ID of the treated unit.')
+treated_unit: Hashable
 ```
 
 ###### `treatment_start`
 
 ```python
-treatment_start: TimeLike = Field(
-    ...,
-    description="First treated period (inclusive). Pre: t < treatment_start, Post: t >= treatment_start.",
-)
-
+treatment_start: pd.Period
 ```
 
 ###### `treatment_start_idx`
@@ -3807,29 +3480,10 @@ treatment_start: TimeLike = Field(
 treatment_start_idx() -> int
 ```
 
-Return index position of treatment start on analysis time axis.
-
-**Returns:**
-
-- <code>[int](#int)</code> – Zero-based index corresponding to `treatment_start`.
-
-**Raises:**
-
-- <code>[ValueError](#ValueError)</code> – If `treatment_start` is outside the analysis time axis.
-
 ###### `unit_col`
 
 ```python
 unit_col: str = Field(..., description='Unit identifier column in df.')
-```
-
-###### `weights_col`
-
-```python
-weights_col: Optional[str] = Field(
-    default=None, description="Optional non-negative row weights."
-)
-
 ```
 
 ###### `y`
@@ -3848,86 +3502,40 @@ TimeLike = Union[str, date, datetime, pd.Timestamp, pd.Period]
 
 **Classes:**
 
-- [**PanelEstimate**](#causalis.data_contracts.panel_estimate.PanelEstimate) – Result contract for panel estimators such as Synthetic Control.
+- [**PanelEstimate**](#causalis.data_contracts.panel_estimate.PanelEstimate) – Result contract for dynamic synthetic-control effect-path estimates.
 
 ##### `PanelEstimate`
 
 Bases: <code>[BaseModel](#pydantic.BaseModel)</code>
 
-Result contract for panel estimators such as Synthetic Control.
-
-**Parameters:**
-
-- **model** (<code>[str](#str)</code>) – Name of the fitted estimator or pipeline.
-- **treated_unit** (<code>[Hashable](#typing.Hashable)</code>) – Identifier of the treated unit.
-- **treatment_start** (<code>[TimeLike](#causalis.data_contracts.panel_data_scm.TimeLike)</code>) – Treatment boundary used to split pre/post periods.
-- **pre_times** (<code>[list](#list)\[[TimeLike](#causalis.data_contracts.panel_data_scm.TimeLike)\]</code>) – Sorted, strictly pre-treatment periods.
-- **post_times** (<code>[list](#list)\[[TimeLike](#causalis.data_contracts.panel_data_scm.TimeLike)\]</code>) – Sorted, strictly post-treatment periods.
-
-<details class="note" open markdown="1">
-<summary>Notes</summary>
-
-The contract stores aggregate ATTE metrics, full time paths, donor weights,
-and basic diagnostics needed for reporting or downstream checks.
-
-</details>
+Result contract for dynamic synthetic-control effect-path estimates.
 
 **Functions:**
 
-- [**summary**](#causalis.data_contracts.panel_estimate.PanelEstimate.summary) – Return a compact tabular summary of key estimate metadata.
+- [**summary**](#causalis.data_contracts.panel_estimate.PanelEstimate.summary) – Return a dynamic-path summary with pointwise inference details.
 
 ###### `alpha`
 
 ```python
-alpha: Optional[float] = None
+alpha: float
 ```
 
-###### `att`
+###### `ci_lower_by_time`
 
 ```python
-att: float
+ci_lower_by_time: pd.Series
 ```
 
-###### `att_by_time`
+###### `ci_upper_by_time`
 
 ```python
-att_by_time: pd.Series
+ci_upper_by_time: pd.Series
 ```
 
-###### `att_by_time_sc`
+###### `confidence_set_by_time`
 
 ```python
-att_by_time_sc: pd.Series
-```
-
-###### `att_sc`
-
-```python
-att_sc: float
-```
-
-###### `ci_lower_absolute`
-
-```python
-ci_lower_absolute: Optional[float] = None
-```
-
-###### `ci_lower_relative`
-
-```python
-ci_lower_relative: Optional[float] = None
-```
-
-###### `ci_upper_absolute`
-
-```python
-ci_upper_absolute: Optional[float] = None
-```
-
-###### `ci_upper_relative`
-
-```python
-ci_upper_relative: Optional[float] = None
+confidence_set_by_time: Dict[TimeLike, list[tuple[float, float]]]
 ```
 
 ###### `created_at`
@@ -3951,22 +3559,22 @@ diagnostics: Dict[str, Any] = Field(default_factory=dict)
 donor_weights_augmented: Dict[Hashable, float]
 ```
 
-###### `donor_weights_sc`
+###### `effect_by_time`
 
 ```python
-donor_weights_sc: Dict[Hashable, float]
+effect_by_time: pd.Series
 ```
 
 ###### `estimand`
 
 ```python
-estimand: str = 'ATTE'
+estimand: Literal['dynamic_effect_path'] = 'dynamic_effect_path'
 ```
 
-###### `is_significant`
+###### `is_significant_by_time`
 
 ```python
-is_significant: Optional[bool] = None
+is_significant_by_time: pd.Series
 ```
 
 ###### `model`
@@ -3990,10 +3598,10 @@ model_config = ConfigDict(
 observed_outcome: pd.Series
 ```
 
-###### `p_value`
+###### `p_value_by_time`
 
 ```python
-p_value: Optional[float] = None
+p_value_by_time: pd.Series
 ```
 
 ###### `post_times`
@@ -4011,25 +3619,15 @@ pre_times: List[TimeLike]
 ###### `summary`
 
 ```python
-summary() -> pd.DataFrame
+summary() -> Dict[str, Any]
 ```
 
-Return a compact tabular summary of key estimate metadata.
-
-**Returns:**
-
-- <code>[DataFrame](#pandas.DataFrame)</code> – Two-column dataframe indexed by field name.
+Return a dynamic-path summary with pointwise inference details.
 
 ###### `synthetic_outcome`
 
 ```python
 synthetic_outcome: pd.Series
-```
-
-###### `synthetic_outcome_sc`
-
-```python
-synthetic_outcome_sc: pd.Series
 ```
 
 ###### `treated_unit`
@@ -4042,12 +3640,6 @@ treated_unit: Hashable
 
 ```python
 treatment_start: TimeLike
-```
-
-###### `value_relative`
-
-```python
-value_relative: Optional[float] = None
 ```
 
 ### `causalis.dgp`
@@ -6872,7 +6464,7 @@ generate_scm_data(
     protect_treated_pre: bool = False,
     protect_treated_post: bool = False,
     treatment_effect_mode: Literal["additive", "multiplicative"] = "additive",
-) -> Union[pd.DataFrame, PanelDataSCM]
+) -> PanelOutput
 ```
 
 Medium-level wrapper for Gaussian SCM panel generation.
@@ -8583,8 +8175,16 @@ treatment_effect_slope: float = 0.0
 **Functions:**
 
 - [**generate_scm_data**](#causalis.dgp.panel_data_scm.functional.generate_scm_data) – Medium-level wrapper for Gaussian SCM panel generation.
+- [**generate_scm_gamma_26_data**](#causalis.dgp.panel_data_scm.functional.generate_scm_gamma_26_data) –
 - [**generate_scm_gamma_data**](#causalis.dgp.panel_data_scm.functional.generate_scm_gamma_data) – Medium-level wrapper for realistic Gamma SCM panel generation.
+- [**generate_scm_poisson_26_data**](#causalis.dgp.panel_data_scm.functional.generate_scm_poisson_26_data) –
 - [**generate_scm_poisson_data**](#causalis.dgp.panel_data_scm.functional.generate_scm_poisson_data) – Medium-level wrapper for realistic Poisson SCM panel generation.
+
+###### `PanelOutput`
+
+```python
+PanelOutput = Union[pd.DataFrame, PanelDataSCM]
+```
 
 ###### `generate_scm_data`
 
@@ -8620,10 +8220,28 @@ generate_scm_data(
     protect_treated_pre: bool = False,
     protect_treated_post: bool = False,
     treatment_effect_mode: Literal["additive", "multiplicative"] = "additive",
-) -> Union[pd.DataFrame, PanelDataSCM]
+) -> PanelOutput
 ```
 
 Medium-level wrapper for Gaussian SCM panel generation.
+
+###### `generate_scm_gamma_26_data`
+
+```python
+generate_scm_gamma_26_data(
+    *,
+    seed: int,
+    return_panel_data: bool,
+    include_oracles: bool,
+    n_donors: int,
+    n_pre_periods: Optional[int],
+    n_post_periods: Optional[int],
+    treatment_effect_rate: float,
+    treatment_effect_slope: float,
+    missing_outcome_frac: float,
+    advanced_params: dict[str, Any]
+) -> PanelOutput
+```
 
 ###### `generate_scm_gamma_data`
 
@@ -8639,7 +8257,7 @@ generate_scm_gamma_data(
     n_pre_periods: Optional[int] = None,
     n_post_periods: Optional[int] = None,
     **advanced_params: Optional[int]
-) -> Union[pd.DataFrame, PanelDataSCM]
+) -> PanelOutput
 ```
 
 Medium-level wrapper for realistic Gamma SCM panel generation.
@@ -8650,6 +8268,24 @@ The post-treatment effect path uses a ramp-in: at the first post period, the
 effective relative lift is
 `treatment_effect_rate * (1 - exp(-1 / 2.5))` (about 0.33x of the parameter
 when slope is zero).
+
+###### `generate_scm_poisson_26_data`
+
+```python
+generate_scm_poisson_26_data(
+    *,
+    seed: int,
+    return_panel_data: bool,
+    include_oracles: bool,
+    n_donors: int,
+    n_pre_periods: Optional[int],
+    n_post_periods: Optional[int],
+    treatment_effect_rate: float,
+    treatment_effect_slope: float,
+    donor_missing_block_frac: float,
+    advanced_params: dict[str, Any]
+) -> PanelOutput
+```
 
 ###### `generate_scm_poisson_data`
 
@@ -8667,7 +8303,7 @@ generate_scm_poisson_data(
     n_pre_periods: Optional[int] = None,
     n_post_periods: Optional[int] = None,
     **advanced_params: Optional[int]
-) -> Union[pd.DataFrame, PanelDataSCM]
+) -> PanelOutput
 ```
 
 Medium-level wrapper for realistic Poisson SCM panel generation.
@@ -8715,7 +8351,7 @@ generate_scm_data(
     protect_treated_pre: bool = False,
     protect_treated_post: bool = False,
     treatment_effect_mode: Literal["additive", "multiplicative"] = "additive",
-) -> Union[pd.DataFrame, PanelDataSCM]
+) -> PanelOutput
 ```
 
 Medium-level wrapper for Gaussian SCM panel generation.
@@ -8734,7 +8370,7 @@ generate_scm_gamma_data(
     n_pre_periods: Optional[int] = None,
     n_post_periods: Optional[int] = None,
     **advanced_params: Optional[int]
-) -> Union[pd.DataFrame, PanelDataSCM]
+) -> PanelOutput
 ```
 
 Medium-level wrapper for realistic Gamma SCM panel generation.
@@ -8762,7 +8398,7 @@ generate_scm_poisson_data(
     n_pre_periods: Optional[int] = None,
     n_post_periods: Optional[int] = None,
     **advanced_params: Optional[int]
-) -> Union[pd.DataFrame, PanelDataSCM]
+) -> PanelOutput
 ```
 
 Medium-level wrapper for realistic Poisson SCM panel generation.
@@ -11627,7 +11263,8 @@ MultiTreatmentIRM(
     normalize_ipw: bool = False,
     trimming_rule: str = "truncate",
     trimming_threshold: float = 0.01,
-    random_state: Optional[int] = None
+    random_state: Optional[int] = None,
+    n_jobs: int = 1
 )
 ```
 
@@ -11663,6 +11300,15 @@ trimming_threshold : float, default 1e-2
     Threshold for trimming if rule is "truncate".
 random_state : Optional[int], default None
     Random seed for fold creation.
+n_jobs : int, default 1
+    Number of parallel jobs for fold-level cross-fitting.
+    Use `-1` to use all available CPUs.
+    Practical guidance:
+    - Start with `n_jobs=1` for stable, low-contention defaults.
+    - Increase to `n_jobs=2/4/-1` when cross-fitting is the bottleneck.
+    - If nuisance learners are already multithreaded (e.g. CatBoost with
+      `thread_count=-1`), keep `n_jobs=1` or set learner threads to `1`
+      to avoid CPU oversubscription.
 ```
 
 </details>
@@ -11740,6 +11386,12 @@ ml_m = ml_m
 
 ```python
 n_folds = int(n_folds)
+```
+
+###### `n_jobs`
+
+```python
+n_jobs = int(n_jobs)
 ```
 
 ###### `n_rep`
@@ -11920,7 +11572,8 @@ MultiTreatmentIRM(
     normalize_ipw: bool = False,
     trimming_rule: str = "truncate",
     trimming_threshold: float = 0.01,
-    random_state: Optional[int] = None
+    random_state: Optional[int] = None,
+    n_jobs: int = 1
 )
 ```
 
@@ -11956,6 +11609,15 @@ trimming_threshold : float, default 1e-2
     Threshold for trimming if rule is "truncate".
 random_state : Optional[int], default None
     Random seed for fold creation.
+n_jobs : int, default 1
+    Number of parallel jobs for fold-level cross-fitting.
+    Use `-1` to use all available CPUs.
+    Practical guidance:
+    - Start with `n_jobs=1` for stable, low-contention defaults.
+    - Increase to `n_jobs=2/4/-1` when cross-fitting is the bottleneck.
+    - If nuisance learners are already multithreaded (e.g. CatBoost with
+      `thread_count=-1`), keep `n_jobs=1` or set learner threads to `1`
+      to avoid CPU oversubscription.
 ```
 
 </details>
@@ -12033,6 +11695,12 @@ ml_m = ml_m
 
 ```python
 n_folds = int(n_folds)
+```
+
+####### `n_jobs`
+
+```python
+n_jobs = int(n_jobs)
 ```
 
 ####### `n_rep`
@@ -12927,9 +12595,7 @@ Convenience wrapper returning the balance block only.
 
 **Classes:**
 
-- [**AugmentedSyntheticControl**](#causalis.scenarios.synthetic_control.AugmentedSyntheticControl) – Augmented Synthetic Control Method (ASCM) for a single treated unit.
-- [**RobustSyntheticControl**](#causalis.scenarios.synthetic_control.RobustSyntheticControl) – Robust Synthetic Control for missing panel outcomes.
-- [**SyntheticControl**](#causalis.scenarios.synthetic_control.SyntheticControl) – Auto-selecting Synthetic Control estimator.
+- [**AugmentedSyntheticControl**](#causalis.scenarios.synthetic_control.AugmentedSyntheticControl) – Augmented Synthetic Control with CWZ pointwise conformal inference only.
 
 **Functions:**
 
@@ -12956,25 +12622,98 @@ AugmentedSyntheticControl(
     max_iter: int = 2000,
     tol: float = 1e-09,
     enforce_sum_to_one_augmented: bool = True,
-    inference_policy: Literal["placebo"] = "placebo"
+    alpha: float = 0.05,
+    conformal_grid_size: int = 401,
+    conformal_grid_min: float | None = None,
+    conformal_grid_max: float | None = None,
+    conformal_grid_scale_mult: float = 6.0
 ) -> None
 ```
 
-Augmented Synthetic Control Method (ASCM) for a single treated unit.
+Augmented Synthetic Control with CWZ pointwise conformal inference only.
 
-This implementation uses a ridge-augmented donor-weight formulation:
-it first fits simplex-constrained SCM weights, then computes an augmented
-ridge solution (optionally constrained to sum to one).
+Breaking changes:
 
-Interface:
+- only one model path (balanced panel, no robust/matrix-completion route)
+- only one inference path (CWZ moving-block permutation conformal pointwise inversion)
+- only one estimand output shape: dynamic effect path
 
-- fit(data: PanelDataSCM) -> self
-- estimate() -> PanelEstimate
+<details class="estimand" open markdown="1">
+<summary>Estimand</summary>
+
+Dynamic post-treatment effect path theta_t for each post-treatment period t.
+
+</details>
+
+<details class="point-estimate" open markdown="1">
+<summary>Point estimate</summary>
+
+Plug-in post-period gap path from pre-period-fitted augmented SC weights.
+
+</details>
+
+<details class="inference" open markdown="1">
+<summary>Inference</summary>
+
+For each post-treatment period t and candidate theta_t^0 on a grid:
+
+1. Build reduced sample: [all pre periods] + [target post period t].
+1. Impose sharp null on only target post outcome.
+1. Refit ASCM under the null on reduced sample.
+1. Compute residuals and permutation p-value.
+1. Invert test to obtain pointwise CI for theta_t.
+
+</details>
+
+<details class="note" open markdown="1">
+<summary>Notes</summary>
+
+- Inference is based on circular moving-block permutations, so validity is
+  approximate under weak dependence rather than exact finite-sample.
+- Returned confidence sets are grid-approximated contiguous accepted segments.
+
+</details>
 
 **Functions:**
 
-- [**estimate**](#causalis.scenarios.synthetic_control.AugmentedSyntheticControl.estimate) – Return fitted ASCM estimate as a PanelEstimate contract.
-- [**fit**](#causalis.scenarios.synthetic_control.AugmentedSyntheticControl.fit) – Fit ASCM on a balanced pre/post block extracted from PanelDataSCM.
+- [**estimate**](#causalis.scenarios.synthetic_control.AugmentedSyntheticControl.estimate) –
+- [**fit**](#causalis.scenarios.synthetic_control.AugmentedSyntheticControl.fit) –
+
+###### `alpha`
+
+```python
+alpha = float(alpha)
+```
+
+###### `conformal_grid_max`
+
+```python
+conformal_grid_max = (
+    None if conformal_grid_max is None else float(conformal_grid_max)
+)
+
+```
+
+###### `conformal_grid_min`
+
+```python
+conformal_grid_min = (
+    None if conformal_grid_min is None else float(conformal_grid_min)
+)
+
+```
+
+###### `conformal_grid_scale_mult`
+
+```python
+conformal_grid_scale_mult = float(conformal_grid_scale_mult)
+```
+
+###### `conformal_grid_size`
+
+```python
+conformal_grid_size = int(conformal_grid_size)
+```
 
 ###### `enforce_sum_to_one_augmented`
 
@@ -12987,8 +12726,6 @@ enforce_sum_to_one_augmented = bool(enforce_sum_to_one_augmented)
 ```python
 estimate() -> PanelEstimate
 ```
-
-Return fitted ASCM estimate as a PanelEstimate contract.
 
 ###### `fit`
 
@@ -12996,19 +12733,6 @@ Return fitted ASCM estimate as a PanelEstimate contract.
 fit(data: PanelDataSCM) -> 'AugmentedSyntheticControl'
 ```
 
-Fit ASCM on a balanced pre/post block extracted from PanelDataSCM.
-
-Fit-time ASCM checks enforced here:
-
-- balanced unit-time block for treated + donor units
-- no missing outcomes in pre/post periods
-
-###### `inference_policy`
-
-```python
-inference_policy = str(inference_policy)
-```
-
 ###### `lambda_aug`
 
 ```python
@@ -13025,285 +12749,6 @@ lambda_sc = float(lambda_sc)
 
 ```python
 max_iter = int(max_iter)
-```
-
-###### `tol`
-
-```python
-tol = float(tol)
-```
-
-##### `RSCM`
-
-```python
-RSCM = RobustSyntheticControl
-```
-
-##### `RobustSyntheticControl`
-
-```python
-RobustSyntheticControl(
-    *,
-    lambda_aug: float = 1.0,
-    lambda_sc: float = 1e-06,
-    max_iter: int = 2000,
-    tol: float = 1e-09,
-    enforce_sum_to_one_augmented: bool = True,
-    inference_policy: Literal["placebo"] = "placebo",
-    completion_max_iter: int = 500,
-    completion_tol: float = 1e-06,
-    sv_threshold: float | None = None,
-    sv_threshold_ratio: float = 0.5,
-    max_rank: int | None = None,
-    min_pre_observed: int = 1
-) -> None
-```
-
-Bases: <code>[AugmentedSyntheticControl](#causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl)</code>
-
-Robust Synthetic Control for missing panel outcomes.
-
-This model supports unit-time gaps and missing outcomes by first applying
-low-rank matrix completion (soft-impute style) on the treated + donor panel,
-then fitting standard simplex SC and ridge-augmented weights on the completed
-pre-treatment block.
-
-**Functions:**
-
-- [**fit**](#causalis.scenarios.synthetic_control.RobustSyntheticControl.fit) – Fit robust SC on PanelDataSCM with optional missing outcomes/cells.
-
-###### `completion_max_iter`
-
-```python
-completion_max_iter = int(completion_max_iter)
-```
-
-###### `completion_tol`
-
-```python
-completion_tol = float(completion_tol)
-```
-
-###### `fit`
-
-```python
-fit(data: PanelDataSCM) -> 'RobustSyntheticControl'
-```
-
-Fit robust SC on PanelDataSCM with optional missing outcomes/cells.
-
-Workflow:
-
-1. Build treated + donor panel over pre/post windows.
-1. Complete missing cells by low-rank soft-impute iterations.
-1. Fit simplex SC and ridge-augmented weights on completed pre-period.
-
-###### `inference_policy`
-
-```python
-inference_policy = str(inference_policy)
-```
-
-###### `max_rank`
-
-```python
-max_rank = None if max_rank is None else int(max_rank)
-```
-
-###### `min_pre_observed`
-
-```python
-min_pre_observed = int(min_pre_observed)
-```
-
-###### `sv_threshold`
-
-```python
-sv_threshold = None if sv_threshold is None else float(sv_threshold)
-```
-
-###### `sv_threshold_ratio`
-
-```python
-sv_threshold_ratio = float(sv_threshold_ratio)
-```
-
-##### `SCM`
-
-```python
-SCM = SyntheticControl
-```
-
-##### `SyntheticControl`
-
-```python
-SyntheticControl(
-    *,
-    lambda_aug: float = 1.0,
-    lambda_sc: float = 1e-06,
-    max_iter: int = 2000,
-    tol: float = 1e-09,
-    enforce_sum_to_one_augmented: bool = True,
-    completion_max_iter: int = 500,
-    completion_tol: float = 1e-06,
-    sv_threshold: float | None = None,
-    sv_threshold_ratio: float = 0.5,
-    max_rank: int | None = None,
-    min_pre_observed: int = 1,
-    inference_policy: Literal["placebo"] = "placebo"
-) -> None
-```
-
-Auto-selecting Synthetic Control estimator.
-
-**Parameters:**
-
-- **lambda_aug** (<code>[float](#float)</code>) – Ridge penalty used by the augmented donor-weight step.
-- **lambda_sc** (<code>[float](#float)</code>) – L2 regularization used in simplex-constrained SC weight optimization.
-- **max_iter** (<code>[int](#int)</code>) – Maximum optimizer iterations for simplex-constrained SC weights.
-- **tol** (<code>[float](#float)</code>) – Numerical tolerance used by the SC optimizer.
-- **enforce_sum_to_one_augmented** (<code>[bool](#bool)</code>) – If `True`, project augmented donor weights to sum to one.
-- **completion_max_iter** (<code>[int](#int)</code>) – Maximum matrix-completion iterations used by robust SC.
-- **completion_tol** (<code>[float](#float)</code>) – Relative convergence tolerance for robust SC matrix completion.
-- **sv_threshold** (<code>[float](#float) or None</code>) – Absolute singular-value shrinkage threshold for robust completion.
-  If `None`, `sv_threshold_ratio` times the leading singular value
-  of the initialized matrix is used.
-- **sv_threshold_ratio** (<code>[float](#float)</code>) – Relative threshold used when `sv_threshold` is `None`.
-- **max_rank** (<code>[int](#int) or None</code>) – Optional cap on effective rank in robust matrix completion.
-- **min_pre_observed** (<code>[int](#int)</code>) – Minimum number of observed pre-treatment outcomes required for the
-  treated unit and each retained donor in robust SC.
-
-<details class="note" open markdown="1">
-<summary>Notes</summary>
-
-Model selection is performed during :meth:`fit`. If any treated/donor
-analysis-block cell is missing or marked unobserved, robust SC is used;
-otherwise augmented SC is used.
-
-</details>
-
-**Functions:**
-
-- [**estimate**](#causalis.scenarios.synthetic_control.SyntheticControl.estimate) – Return estimate from the selected synthetic-control delegate model.
-- [**fit**](#causalis.scenarios.synthetic_control.SyntheticControl.fit) – Fit by selecting augmented SC or robust SC from observed missingness.
-
-**Parameters:**
-
-- **lambda_aug** (<code>[float](#float)</code>) – Ridge penalty used by the augmented donor-weight step.
-- **lambda_sc** (<code>[float](#float)</code>) – L2 regularization used in simplex-constrained SC weight optimization.
-- **max_iter** (<code>[int](#int)</code>) – Maximum optimizer iterations for simplex-constrained SC weights.
-- **tol** (<code>[float](#float)</code>) – Numerical tolerance used by the SC optimizer.
-- **enforce_sum_to_one_augmented** (<code>[bool](#bool)</code>) – If `True`, project augmented donor weights to sum to one.
-- **completion_max_iter** (<code>[int](#int)</code>) – Maximum matrix-completion iterations used by robust SC.
-- **completion_tol** (<code>[float](#float)</code>) – Relative convergence tolerance for robust SC matrix completion.
-- **sv_threshold** (<code>[float](#float) or None</code>) – Absolute singular-value shrinkage threshold for robust completion.
-- **sv_threshold_ratio** (<code>[float](#float)</code>) – Relative threshold used when `sv_threshold` is `None`.
-- **max_rank** (<code>[int](#int) or None</code>) – Optional cap on effective rank in robust matrix completion.
-- **min_pre_observed** (<code>[int](#int)</code>) – Minimum observed treated/donor pre-period outcomes for robust SC.
-
-###### `completion_max_iter`
-
-```python
-completion_max_iter = int(completion_max_iter)
-```
-
-###### `completion_tol`
-
-```python
-completion_tol = float(completion_tol)
-```
-
-###### `enforce_sum_to_one_augmented`
-
-```python
-enforce_sum_to_one_augmented = bool(enforce_sum_to_one_augmented)
-```
-
-###### `estimate`
-
-```python
-estimate() -> PanelEstimate
-```
-
-Return estimate from the selected synthetic-control delegate model.
-
-**Returns:**
-
-- <code>[PanelEstimate](#causalis.data_contracts.panel_estimate.PanelEstimate)</code> – Delegate estimate with selection diagnostics appended:
-  `selected_model` and `selection_reason`.
-
-**Raises:**
-
-- <code>[RuntimeError](#RuntimeError)</code> – If the estimator has not been successfully fitted.
-
-###### `fit`
-
-```python
-fit(data: PanelDataSCM) -> 'SyntheticControl'
-```
-
-Fit by selecting augmented SC or robust SC from observed missingness.
-
-**Parameters:**
-
-- **data** (<code>[PanelDataSCM](#causalis.data_contracts.panel_data_scm.PanelDataSCM)</code>) – Panel data contract containing treated unit, donors, and pre/post
-  time windows.
-
-**Returns:**
-
-- <code>[SyntheticControl](#causalis.scenarios.synthetic_control.model.SyntheticControl)</code> – Fitted estimator with an internally selected delegate model.
-
-**Raises:**
-
-- <code>[ValueError](#ValueError)</code> – If `data` is not a `PanelDataSCM` object or delegate fit-time
-  validation fails.
-
-###### `inference_policy`
-
-```python
-inference_policy = str(inference_policy)
-```
-
-###### `lambda_aug`
-
-```python
-lambda_aug = float(lambda_aug)
-```
-
-###### `lambda_sc`
-
-```python
-lambda_sc = float(lambda_sc)
-```
-
-###### `max_iter`
-
-```python
-max_iter = int(max_iter)
-```
-
-###### `max_rank`
-
-```python
-max_rank = None if max_rank is None else int(max_rank)
-```
-
-###### `min_pre_observed`
-
-```python
-min_pre_observed = int(min_pre_observed)
-```
-
-###### `sv_threshold`
-
-```python
-sv_threshold = None if sv_threshold is None else float(sv_threshold)
-```
-
-###### `sv_threshold_ratio`
-
-```python
-sv_threshold_ratio = float(sv_threshold_ratio)
 ```
 
 ###### `tol`
@@ -13319,31 +12764,33 @@ tol = float(tol)
 - [**generate_scm_gamma_26**](#causalis.scenarios.synthetic_control.dgp.generate_scm_gamma_26) – Generate realistic Gamma synthetic-control panel data.
 - [**generate_scm_poisson_26**](#causalis.scenarios.synthetic_control.dgp.generate_scm_poisson_26) – Generate realistic Poisson synthetic-control panel data.
 
+###### `PanelOutput`
+
+```python
+PanelOutput = Union[pd.DataFrame, PanelDataSCM]
+```
+
 ###### `generate_scm_gamma_26`
 
 ```python
 generate_scm_gamma_26(
-    n: Optional[int] = None,
     seed: int = 42,
     return_panel_data: bool = True,
     include_oracles: bool = False,
-    n_donors: int = 10,
-    n_pre_periods: Optional[int] = 24,
-    n_post_periods: Optional[int] = 3,
+    n_donors: int = 30,
+    n_pre_periods: Optional[int] = None,
+    n_post_periods: Optional[int] = None,
     treatment_effect_rate: float = 0.12,
     treatment_effect_slope: float = 0.01,
     missing_outcome_frac: float = 0.0,
     **advanced_params: float
-) -> Union[pd.DataFrame, PanelDataSCM]
+) -> PanelOutput
 ```
 
 Generate realistic Gamma synthetic-control panel data.
 
 **Parameters:**
 
-- **n** (<code>[int](#int) or None</code>) – Legacy compatibility argument. Scenario defaults no longer infer periods
-  from `n`; default horizon is controlled by `n_pre_periods` and
-  `n_post_periods`.
 - **seed** (<code>[int](#int)</code>) – Random seed.
 - **return_panel_data** (<code>[bool](#bool)</code>) – If True, return a :class:`~causalis.data_contracts.panel_data_scm.PanelDataSCM`
   object. If False, return a pandas DataFrame.
@@ -13366,8 +12813,8 @@ Generate realistic Gamma synthetic-control panel data.
 - **treatment_effect_slope** (<code>[float](#float)</code>) – Linear slope of the post-treatment relative effect path.
 - **missing_outcome_frac** (<code>[float](#float)</code>) – Fraction of outcomes to mask as missing in the base generator.
 - \*\***advanced_params** – Forwarded to :func:`causalis.dgp.panel_data_scm.generate_scm_gamma_data`.
-  Common advanced knobs include `n_pre_periods`, `n_post_periods`,
-  and `time_start`.
+  Common advanced knobs include `time_start`, `calendar_start`,
+  and latent/missingness configuration.
 
 **Returns:**
 
@@ -13383,12 +12830,19 @@ Time-axis semantics:
 - `n_post_periods`: number of periods strictly after the intervention anchor.
 - `time_start`: offset for the first `calendar_time` period relative to
   `calendar_start` (default `calendar_start="2000-01"` and `time_start=1`).
-- `treatment_start`: first treated/post period in the returned panel
-  (the intervention anchor is one period earlier).
+- `treated_time`: explicit 0/1 treatment-assignment indicator in returned
+  data (`1` only for treated-unit rows at/after the first treated period;
+  `0` otherwise).
+- `PanelDataSCM` is built with required fields only:
+  `df`, `y`, `unit_col`, `time_col`, `treated_time`.
+- When `return_panel_data=True`, all contract metadata is derived from the
+  final `treated_time` path. Because this scenario keeps one explicit anchor
+  period in the panel, contract-level pre periods are
+  `n_pre_periods + 1` and post periods are `n_post_periods`.
 - With this function's default arguments, the explicit values are:
-  `n_pre_periods=24`, `n_post_periods=3`, `calendar_start='2000-01'`,
-  `time_start=1`, `treatment_start=Period('2002-02', 'M')`,
-  intervention anchor at `Period('2002-01', 'M')`.
+  `n_pre_periods=36`, `n_post_periods=12`, `calendar_start='2000-01'`,
+  `time_start=1`, first treated period at `Period('2003-02', 'M')`,
+  and intervention anchor at `Period('2003-01', 'M')`.
 
 </details>
 
@@ -13396,27 +12850,23 @@ Time-axis semantics:
 
 ```python
 generate_scm_poisson_26(
-    n: Optional[int] = None,
     seed: int = 42,
     return_panel_data: bool = True,
     include_oracles: bool = False,
     n_donors: int = 10,
-    n_pre_periods: Optional[int] = 24,
-    n_post_periods: Optional[int] = 3,
+    n_pre_periods: Optional[int] = None,
+    n_post_periods: Optional[int] = None,
     treatment_effect_rate: float = 0.1,
     treatment_effect_slope: float = 0.005,
     donor_missing_block_frac: float = 0.08,
     **advanced_params: float
-) -> Union[pd.DataFrame, PanelDataSCM]
+) -> PanelOutput
 ```
 
 Generate realistic Poisson synthetic-control panel data.
 
 **Parameters:**
 
-- **n** (<code>[int](#int) or None</code>) – Legacy compatibility argument. Scenario defaults no longer infer periods
-  from `n`; default horizon is controlled by `n_pre_periods` and
-  `n_post_periods`.
 - **seed** (<code>[int](#int)</code>) – Random seed.
 - **return_panel_data** (<code>[bool](#bool)</code>) – If True, return a :class:`~causalis.data_contracts.panel_data_scm.PanelDataSCM`
   object. If False, return a pandas DataFrame.
@@ -13439,8 +12889,8 @@ Generate realistic Poisson synthetic-control panel data.
 - **treatment_effect_slope** (<code>[float](#float)</code>) – Linear slope of the post-treatment relative effect path.
 - **donor_missing_block_frac** (<code>[float](#float)</code>) – Fraction of donor-only rows to mask via contiguous missing-time blocks.
 - \*\***advanced_params** – Forwarded to :func:`causalis.dgp.panel_data_scm.generate_scm_poisson_data`.
-  Common advanced knobs include `n_pre_periods`, `n_post_periods`,
-  and `time_start`.
+  Common advanced knobs include `time_start`, `calendar_start`,
+  and latent/missingness configuration.
 
 **Returns:**
 
@@ -13456,12 +12906,19 @@ Time-axis semantics:
 - `n_post_periods`: number of periods strictly after the intervention anchor.
 - `time_start`: offset for the first `calendar_time` period relative to
   `calendar_start` (default `calendar_start="2000-01"` and `time_start=1`).
-- `treatment_start`: intervention boundary period, computed as
-  `calendar_start + (time_start - 1) + n_pre_periods`.
+- `treated_time`: explicit 0/1 treatment-assignment indicator in returned
+  data (`1` only for treated-unit rows at/after the first treated period;
+  `0` otherwise).
+- `PanelDataSCM` is built with required fields only:
+  `df`, `y`, `unit_col`, `time_col`, `treated_time`.
+- When `return_panel_data=True`, all contract metadata is derived from the
+  final `treated_time` path. Because this scenario keeps one explicit anchor
+  period in the panel, contract-level pre periods are
+  `n_pre_periods + 1` and post periods are `n_post_periods`.
 - With this function's default arguments, the explicit values are:
   `n_pre_periods=36`, `n_post_periods=12`, `calendar_start='2000-01'`,
-  `time_start=1`, `treatment_start=Period('2003-01', 'M')`,
-  first post period at `Period('2003-02', 'M')`.
+  `time_start=1`, first treated period at `Period('2003-02', 'M')`,
+  and intervention anchor at `Period('2003-01', 'M')`.
 
 </details>
 
@@ -13484,27 +12941,23 @@ Plot observed-minus-synthetic gap over time with intervention boundary.
 
 ```python
 generate_scm_gamma_26(
-    n: Optional[int] = None,
     seed: int = 42,
     return_panel_data: bool = True,
     include_oracles: bool = False,
-    n_donors: int = 10,
-    n_pre_periods: Optional[int] = 24,
-    n_post_periods: Optional[int] = 3,
+    n_donors: int = 30,
+    n_pre_periods: Optional[int] = None,
+    n_post_periods: Optional[int] = None,
     treatment_effect_rate: float = 0.12,
     treatment_effect_slope: float = 0.01,
     missing_outcome_frac: float = 0.0,
     **advanced_params: float
-) -> Union[pd.DataFrame, PanelDataSCM]
+) -> PanelOutput
 ```
 
 Generate realistic Gamma synthetic-control panel data.
 
 **Parameters:**
 
-- **n** (<code>[int](#int) or None</code>) – Legacy compatibility argument. Scenario defaults no longer infer periods
-  from `n`; default horizon is controlled by `n_pre_periods` and
-  `n_post_periods`.
 - **seed** (<code>[int](#int)</code>) – Random seed.
 - **return_panel_data** (<code>[bool](#bool)</code>) – If True, return a :class:`~causalis.data_contracts.panel_data_scm.PanelDataSCM`
   object. If False, return a pandas DataFrame.
@@ -13527,8 +12980,8 @@ Generate realistic Gamma synthetic-control panel data.
 - **treatment_effect_slope** (<code>[float](#float)</code>) – Linear slope of the post-treatment relative effect path.
 - **missing_outcome_frac** (<code>[float](#float)</code>) – Fraction of outcomes to mask as missing in the base generator.
 - \*\***advanced_params** – Forwarded to :func:`causalis.dgp.panel_data_scm.generate_scm_gamma_data`.
-  Common advanced knobs include `n_pre_periods`, `n_post_periods`,
-  and `time_start`.
+  Common advanced knobs include `time_start`, `calendar_start`,
+  and latent/missingness configuration.
 
 **Returns:**
 
@@ -13544,12 +12997,19 @@ Time-axis semantics:
 - `n_post_periods`: number of periods strictly after the intervention anchor.
 - `time_start`: offset for the first `calendar_time` period relative to
   `calendar_start` (default `calendar_start="2000-01"` and `time_start=1`).
-- `treatment_start`: first treated/post period in the returned panel
-  (the intervention anchor is one period earlier).
+- `treated_time`: explicit 0/1 treatment-assignment indicator in returned
+  data (`1` only for treated-unit rows at/after the first treated period;
+  `0` otherwise).
+- `PanelDataSCM` is built with required fields only:
+  `df`, `y`, `unit_col`, `time_col`, `treated_time`.
+- When `return_panel_data=True`, all contract metadata is derived from the
+  final `treated_time` path. Because this scenario keeps one explicit anchor
+  period in the panel, contract-level pre periods are
+  `n_pre_periods + 1` and post periods are `n_post_periods`.
 - With this function's default arguments, the explicit values are:
-  `n_pre_periods=24`, `n_post_periods=3`, `calendar_start='2000-01'`,
-  `time_start=1`, `treatment_start=Period('2002-02', 'M')`,
-  intervention anchor at `Period('2002-01', 'M')`.
+  `n_pre_periods=36`, `n_post_periods=12`, `calendar_start='2000-01'`,
+  `time_start=1`, first treated period at `Period('2003-02', 'M')`,
+  and intervention anchor at `Period('2003-01', 'M')`.
 
 </details>
 
@@ -13557,27 +13017,23 @@ Time-axis semantics:
 
 ```python
 generate_scm_poisson_26(
-    n: Optional[int] = None,
     seed: int = 42,
     return_panel_data: bool = True,
     include_oracles: bool = False,
     n_donors: int = 10,
-    n_pre_periods: Optional[int] = 24,
-    n_post_periods: Optional[int] = 3,
+    n_pre_periods: Optional[int] = None,
+    n_post_periods: Optional[int] = None,
     treatment_effect_rate: float = 0.1,
     treatment_effect_slope: float = 0.005,
     donor_missing_block_frac: float = 0.08,
     **advanced_params: float
-) -> Union[pd.DataFrame, PanelDataSCM]
+) -> PanelOutput
 ```
 
 Generate realistic Poisson synthetic-control panel data.
 
 **Parameters:**
 
-- **n** (<code>[int](#int) or None</code>) – Legacy compatibility argument. Scenario defaults no longer infer periods
-  from `n`; default horizon is controlled by `n_pre_periods` and
-  `n_post_periods`.
 - **seed** (<code>[int](#int)</code>) – Random seed.
 - **return_panel_data** (<code>[bool](#bool)</code>) – If True, return a :class:`~causalis.data_contracts.panel_data_scm.PanelDataSCM`
   object. If False, return a pandas DataFrame.
@@ -13600,8 +13056,8 @@ Generate realistic Poisson synthetic-control panel data.
 - **treatment_effect_slope** (<code>[float](#float)</code>) – Linear slope of the post-treatment relative effect path.
 - **donor_missing_block_frac** (<code>[float](#float)</code>) – Fraction of donor-only rows to mask via contiguous missing-time blocks.
 - \*\***advanced_params** – Forwarded to :func:`causalis.dgp.panel_data_scm.generate_scm_poisson_data`.
-  Common advanced knobs include `n_pre_periods`, `n_post_periods`,
-  and `time_start`.
+  Common advanced knobs include `time_start`, `calendar_start`,
+  and latent/missingness configuration.
 
 **Returns:**
 
@@ -13617,12 +13073,19 @@ Time-axis semantics:
 - `n_post_periods`: number of periods strictly after the intervention anchor.
 - `time_start`: offset for the first `calendar_time` period relative to
   `calendar_start` (default `calendar_start="2000-01"` and `time_start=1`).
-- `treatment_start`: intervention boundary period, computed as
-  `calendar_start + (time_start - 1) + n_pre_periods`.
+- `treated_time`: explicit 0/1 treatment-assignment indicator in returned
+  data (`1` only for treated-unit rows at/after the first treated period;
+  `0` otherwise).
+- `PanelDataSCM` is built with required fields only:
+  `df`, `y`, `unit_col`, `time_col`, `treated_time`.
+- When `return_panel_data=True`, all contract metadata is derived from the
+  final `treated_time` path. Because this scenario keeps one explicit anchor
+  period in the panel, contract-level pre periods are
+  `n_pre_periods + 1` and post periods are `n_post_periods`.
 - With this function's default arguments, the explicit values are:
   `n_pre_periods=36`, `n_post_periods=12`, `calendar_start='2000-01'`,
-  `time_start=1`, `treatment_start=Period('2003-01', 'M')`,
-  first post period at `Period('2003-02', 'M')`.
+  `time_start=1`, first treated period at `Period('2003-02', 'M')`,
+  and intervention anchor at `Period('2003-01', 'M')`.
 
 </details>
 
@@ -13652,8 +13115,7 @@ missing_panel_plot(
 Plot panel missingness as a unit-by-time heatmap.
 
 A cell value of 0 means observed and 1 means missing. Missingness is
-inferred from `observed_col` when available (plus outcome NaNs),
-otherwise directly from outcome NaNs.
+inferred from outcome NaNs.
 
 **Parameters:**
 
@@ -13675,9 +13137,7 @@ otherwise directly from outcome NaNs.
 
 **Classes:**
 
-- [**AugmentedSyntheticControl**](#causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl) – Augmented Synthetic Control Method (ASCM) for a single treated unit.
-- [**RobustSyntheticControl**](#causalis.scenarios.synthetic_control.model.RobustSyntheticControl) – Robust Synthetic Control for missing panel outcomes.
-- [**SyntheticControl**](#causalis.scenarios.synthetic_control.model.SyntheticControl) – Auto-selecting Synthetic Control estimator.
+- [**AugmentedSyntheticControl**](#causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl) – Augmented Synthetic Control with CWZ pointwise conformal inference only.
 
 ###### `ASCM`
 
@@ -13695,25 +13155,98 @@ AugmentedSyntheticControl(
     max_iter: int = 2000,
     tol: float = 1e-09,
     enforce_sum_to_one_augmented: bool = True,
-    inference_policy: Literal["placebo"] = "placebo"
+    alpha: float = 0.05,
+    conformal_grid_size: int = 401,
+    conformal_grid_min: float | None = None,
+    conformal_grid_max: float | None = None,
+    conformal_grid_scale_mult: float = 6.0
 ) -> None
 ```
 
-Augmented Synthetic Control Method (ASCM) for a single treated unit.
+Augmented Synthetic Control with CWZ pointwise conformal inference only.
 
-This implementation uses a ridge-augmented donor-weight formulation:
-it first fits simplex-constrained SCM weights, then computes an augmented
-ridge solution (optionally constrained to sum to one).
+Breaking changes:
 
-Interface:
+- only one model path (balanced panel, no robust/matrix-completion route)
+- only one inference path (CWZ moving-block permutation conformal pointwise inversion)
+- only one estimand output shape: dynamic effect path
 
-- fit(data: PanelDataSCM) -> self
-- estimate() -> PanelEstimate
+<details class="estimand" open markdown="1">
+<summary>Estimand</summary>
+
+Dynamic post-treatment effect path theta_t for each post-treatment period t.
+
+</details>
+
+<details class="point-estimate" open markdown="1">
+<summary>Point estimate</summary>
+
+Plug-in post-period gap path from pre-period-fitted augmented SC weights.
+
+</details>
+
+<details class="inference" open markdown="1">
+<summary>Inference</summary>
+
+For each post-treatment period t and candidate theta_t^0 on a grid:
+
+1. Build reduced sample: [all pre periods] + [target post period t].
+1. Impose sharp null on only target post outcome.
+1. Refit ASCM under the null on reduced sample.
+1. Compute residuals and permutation p-value.
+1. Invert test to obtain pointwise CI for theta_t.
+
+</details>
+
+<details class="note" open markdown="1">
+<summary>Notes</summary>
+
+- Inference is based on circular moving-block permutations, so validity is
+  approximate under weak dependence rather than exact finite-sample.
+- Returned confidence sets are grid-approximated contiguous accepted segments.
+
+</details>
 
 **Functions:**
 
-- [**estimate**](#causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl.estimate) – Return fitted ASCM estimate as a PanelEstimate contract.
-- [**fit**](#causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl.fit) – Fit ASCM on a balanced pre/post block extracted from PanelDataSCM.
+- [**estimate**](#causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl.estimate) –
+- [**fit**](#causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl.fit) –
+
+####### `alpha`
+
+```python
+alpha = float(alpha)
+```
+
+####### `conformal_grid_max`
+
+```python
+conformal_grid_max = (
+    None if conformal_grid_max is None else float(conformal_grid_max)
+)
+
+```
+
+####### `conformal_grid_min`
+
+```python
+conformal_grid_min = (
+    None if conformal_grid_min is None else float(conformal_grid_min)
+)
+
+```
+
+####### `conformal_grid_scale_mult`
+
+```python
+conformal_grid_scale_mult = float(conformal_grid_scale_mult)
+```
+
+####### `conformal_grid_size`
+
+```python
+conformal_grid_size = int(conformal_grid_size)
+```
 
 ####### `enforce_sum_to_one_augmented`
 
@@ -13726,8 +13259,6 @@ enforce_sum_to_one_augmented = bool(enforce_sum_to_one_augmented)
 ```python
 estimate() -> PanelEstimate
 ```
-
-Return fitted ASCM estimate as a PanelEstimate contract.
 
 ####### `fit`
 
@@ -13735,19 +13266,6 @@ Return fitted ASCM estimate as a PanelEstimate contract.
 fit(data: PanelDataSCM) -> 'AugmentedSyntheticControl'
 ```
 
-Fit ASCM on a balanced pre/post block extracted from PanelDataSCM.
-
-Fit-time ASCM checks enforced here:
-
-- balanced unit-time block for treated + donor units
-- no missing outcomes in pre/post periods
-
-####### `inference_policy`
-
-```python
-inference_policy = str(inference_policy)
-```
-
 ####### `lambda_aug`
 
 ```python
@@ -13764,285 +13282,6 @@ lambda_sc = float(lambda_sc)
 
 ```python
 max_iter = int(max_iter)
-```
-
-####### `tol`
-
-```python
-tol = float(tol)
-```
-
-###### `RSCM`
-
-```python
-RSCM = RobustSyntheticControl
-```
-
-###### `RobustSyntheticControl`
-
-```python
-RobustSyntheticControl(
-    *,
-    lambda_aug: float = 1.0,
-    lambda_sc: float = 1e-06,
-    max_iter: int = 2000,
-    tol: float = 1e-09,
-    enforce_sum_to_one_augmented: bool = True,
-    inference_policy: Literal["placebo"] = "placebo",
-    completion_max_iter: int = 500,
-    completion_tol: float = 1e-06,
-    sv_threshold: float | None = None,
-    sv_threshold_ratio: float = 0.5,
-    max_rank: int | None = None,
-    min_pre_observed: int = 1
-) -> None
-```
-
-Bases: <code>[AugmentedSyntheticControl](#causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl)</code>
-
-Robust Synthetic Control for missing panel outcomes.
-
-This model supports unit-time gaps and missing outcomes by first applying
-low-rank matrix completion (soft-impute style) on the treated + donor panel,
-then fitting standard simplex SC and ridge-augmented weights on the completed
-pre-treatment block.
-
-**Functions:**
-
-- [**fit**](#causalis.scenarios.synthetic_control.model.RobustSyntheticControl.fit) – Fit robust SC on PanelDataSCM with optional missing outcomes/cells.
-
-####### `completion_max_iter`
-
-```python
-completion_max_iter = int(completion_max_iter)
-```
-
-####### `completion_tol`
-
-```python
-completion_tol = float(completion_tol)
-```
-
-####### `fit`
-
-```python
-fit(data: PanelDataSCM) -> 'RobustSyntheticControl'
-```
-
-Fit robust SC on PanelDataSCM with optional missing outcomes/cells.
-
-Workflow:
-
-1. Build treated + donor panel over pre/post windows.
-1. Complete missing cells by low-rank soft-impute iterations.
-1. Fit simplex SC and ridge-augmented weights on completed pre-period.
-
-####### `inference_policy`
-
-```python
-inference_policy = str(inference_policy)
-```
-
-####### `max_rank`
-
-```python
-max_rank = None if max_rank is None else int(max_rank)
-```
-
-####### `min_pre_observed`
-
-```python
-min_pre_observed = int(min_pre_observed)
-```
-
-####### `sv_threshold`
-
-```python
-sv_threshold = None if sv_threshold is None else float(sv_threshold)
-```
-
-####### `sv_threshold_ratio`
-
-```python
-sv_threshold_ratio = float(sv_threshold_ratio)
-```
-
-###### `SCM`
-
-```python
-SCM = SyntheticControl
-```
-
-###### `SyntheticControl`
-
-```python
-SyntheticControl(
-    *,
-    lambda_aug: float = 1.0,
-    lambda_sc: float = 1e-06,
-    max_iter: int = 2000,
-    tol: float = 1e-09,
-    enforce_sum_to_one_augmented: bool = True,
-    completion_max_iter: int = 500,
-    completion_tol: float = 1e-06,
-    sv_threshold: float | None = None,
-    sv_threshold_ratio: float = 0.5,
-    max_rank: int | None = None,
-    min_pre_observed: int = 1,
-    inference_policy: Literal["placebo"] = "placebo"
-) -> None
-```
-
-Auto-selecting Synthetic Control estimator.
-
-**Parameters:**
-
-- **lambda_aug** (<code>[float](#float)</code>) – Ridge penalty used by the augmented donor-weight step.
-- **lambda_sc** (<code>[float](#float)</code>) – L2 regularization used in simplex-constrained SC weight optimization.
-- **max_iter** (<code>[int](#int)</code>) – Maximum optimizer iterations for simplex-constrained SC weights.
-- **tol** (<code>[float](#float)</code>) – Numerical tolerance used by the SC optimizer.
-- **enforce_sum_to_one_augmented** (<code>[bool](#bool)</code>) – If `True`, project augmented donor weights to sum to one.
-- **completion_max_iter** (<code>[int](#int)</code>) – Maximum matrix-completion iterations used by robust SC.
-- **completion_tol** (<code>[float](#float)</code>) – Relative convergence tolerance for robust SC matrix completion.
-- **sv_threshold** (<code>[float](#float) or None</code>) – Absolute singular-value shrinkage threshold for robust completion.
-  If `None`, `sv_threshold_ratio` times the leading singular value
-  of the initialized matrix is used.
-- **sv_threshold_ratio** (<code>[float](#float)</code>) – Relative threshold used when `sv_threshold` is `None`.
-- **max_rank** (<code>[int](#int) or None</code>) – Optional cap on effective rank in robust matrix completion.
-- **min_pre_observed** (<code>[int](#int)</code>) – Minimum number of observed pre-treatment outcomes required for the
-  treated unit and each retained donor in robust SC.
-
-<details class="note" open markdown="1">
-<summary>Notes</summary>
-
-Model selection is performed during :meth:`fit`. If any treated/donor
-analysis-block cell is missing or marked unobserved, robust SC is used;
-otherwise augmented SC is used.
-
-</details>
-
-**Functions:**
-
-- [**estimate**](#causalis.scenarios.synthetic_control.model.SyntheticControl.estimate) – Return estimate from the selected synthetic-control delegate model.
-- [**fit**](#causalis.scenarios.synthetic_control.model.SyntheticControl.fit) – Fit by selecting augmented SC or robust SC from observed missingness.
-
-**Parameters:**
-
-- **lambda_aug** (<code>[float](#float)</code>) – Ridge penalty used by the augmented donor-weight step.
-- **lambda_sc** (<code>[float](#float)</code>) – L2 regularization used in simplex-constrained SC weight optimization.
-- **max_iter** (<code>[int](#int)</code>) – Maximum optimizer iterations for simplex-constrained SC weights.
-- **tol** (<code>[float](#float)</code>) – Numerical tolerance used by the SC optimizer.
-- **enforce_sum_to_one_augmented** (<code>[bool](#bool)</code>) – If `True`, project augmented donor weights to sum to one.
-- **completion_max_iter** (<code>[int](#int)</code>) – Maximum matrix-completion iterations used by robust SC.
-- **completion_tol** (<code>[float](#float)</code>) – Relative convergence tolerance for robust SC matrix completion.
-- **sv_threshold** (<code>[float](#float) or None</code>) – Absolute singular-value shrinkage threshold for robust completion.
-- **sv_threshold_ratio** (<code>[float](#float)</code>) – Relative threshold used when `sv_threshold` is `None`.
-- **max_rank** (<code>[int](#int) or None</code>) – Optional cap on effective rank in robust matrix completion.
-- **min_pre_observed** (<code>[int](#int)</code>) – Minimum observed treated/donor pre-period outcomes for robust SC.
-
-####### `completion_max_iter`
-
-```python
-completion_max_iter = int(completion_max_iter)
-```
-
-####### `completion_tol`
-
-```python
-completion_tol = float(completion_tol)
-```
-
-####### `enforce_sum_to_one_augmented`
-
-```python
-enforce_sum_to_one_augmented = bool(enforce_sum_to_one_augmented)
-```
-
-####### `estimate`
-
-```python
-estimate() -> PanelEstimate
-```
-
-Return estimate from the selected synthetic-control delegate model.
-
-**Returns:**
-
-- <code>[PanelEstimate](#causalis.data_contracts.panel_estimate.PanelEstimate)</code> – Delegate estimate with selection diagnostics appended:
-  `selected_model` and `selection_reason`.
-
-**Raises:**
-
-- <code>[RuntimeError](#RuntimeError)</code> – If the estimator has not been successfully fitted.
-
-####### `fit`
-
-```python
-fit(data: PanelDataSCM) -> 'SyntheticControl'
-```
-
-Fit by selecting augmented SC or robust SC from observed missingness.
-
-**Parameters:**
-
-- **data** (<code>[PanelDataSCM](#causalis.data_contracts.panel_data_scm.PanelDataSCM)</code>) – Panel data contract containing treated unit, donors, and pre/post
-  time windows.
-
-**Returns:**
-
-- <code>[SyntheticControl](#causalis.scenarios.synthetic_control.model.SyntheticControl)</code> – Fitted estimator with an internally selected delegate model.
-
-**Raises:**
-
-- <code>[ValueError](#ValueError)</code> – If `data` is not a `PanelDataSCM` object or delegate fit-time
-  validation fails.
-
-####### `inference_policy`
-
-```python
-inference_policy = str(inference_policy)
-```
-
-####### `lambda_aug`
-
-```python
-lambda_aug = float(lambda_aug)
-```
-
-####### `lambda_sc`
-
-```python
-lambda_sc = float(lambda_sc)
-```
-
-####### `max_iter`
-
-```python
-max_iter = int(max_iter)
-```
-
-####### `max_rank`
-
-```python
-max_rank = None if max_rank is None else int(max_rank)
-```
-
-####### `min_pre_observed`
-
-```python
-min_pre_observed = int(min_pre_observed)
-```
-
-####### `sv_threshold`
-
-```python
-sv_threshold = None if sv_threshold is None else float(sv_threshold)
-```
-
-####### `sv_threshold_ratio`
-
-```python
-sv_threshold_ratio = float(sv_threshold_ratio)
 ```
 
 ####### `tol`
@@ -14245,8 +13484,7 @@ missing_panel_plot(
 Plot panel missingness as a unit-by-time heatmap.
 
 A cell value of 0 means observed and 1 means missing. Missingness is
-inferred from `observed_col` when available (plus outcome NaNs),
-otherwise directly from outcome NaNs.
+inferred from outcome NaNs.
 
 **Parameters:**
 
@@ -14430,7 +13668,8 @@ IRM(
     trimming_threshold: float = 0.01,
     weights: Optional[np.ndarray | Dict[str, Any]] = None,
     relative_baseline_min: float = 1e-08,
-    random_state: Optional[int] = None
+    random_state: Optional[int] = None,
+    n_jobs: int = 1
 ) -> None
 ```
 
@@ -14457,6 +13696,16 @@ Interactive Regression Model (IRM) with cross-fitting using CausalData.
 - **relative_baseline_min** (<code>[float](#float)</code>) – Minimum absolute baseline value used for relative effects. If |mu_c| is below this
   threshold, relative estimates are set to NaN with a warning.
 - **random_state** (<code>[Optional](#typing.Optional)\[[int](#int)\]</code>) – Random seed for fold creation.
+- **n_jobs** (<code>[int](#int)</code>) – Number of parallel jobs for fold-level cross-fitting.
+  Use `-1` to use all available CPUs.
+  Practical guidance:
+- Start with `n_jobs=1` for stable, low-contention defaults.
+- Increase to `n_jobs=2/4/-1` when cross-fitting is the bottleneck.
+- If nuisance learners are already multithreaded (e.g. CatBoost with
+  `thread_count=-1`), keep `n_jobs=1` or set learner threads to `1`
+  to avoid CPU oversubscription.
+- On shared machines, prefer a bounded value (for example `2` or `4`)
+  instead of `-1`.
 
 **Functions:**
 
@@ -14584,6 +13833,12 @@ ml_m = ml_m
 
 ```python
 n_folds = int(n_folds)
+```
+
+###### `n_jobs`
+
+```python
+n_jobs = int(n_jobs)
 ```
 
 ###### `n_rep`
@@ -14938,7 +14193,8 @@ IRM(
     trimming_threshold: float = 0.01,
     weights: Optional[np.ndarray | Dict[str, Any]] = None,
     relative_baseline_min: float = 1e-08,
-    random_state: Optional[int] = None
+    random_state: Optional[int] = None,
+    n_jobs: int = 1
 ) -> None
 ```
 
@@ -14965,6 +14221,16 @@ Interactive Regression Model (IRM) with cross-fitting using CausalData.
 - **relative_baseline_min** (<code>[float](#float)</code>) – Minimum absolute baseline value used for relative effects. If |mu_c| is below this
   threshold, relative estimates are set to NaN with a warning.
 - **random_state** (<code>[Optional](#typing.Optional)\[[int](#int)\]</code>) – Random seed for fold creation.
+- **n_jobs** (<code>[int](#int)</code>) – Number of parallel jobs for fold-level cross-fitting.
+  Use `-1` to use all available CPUs.
+  Practical guidance:
+- Start with `n_jobs=1` for stable, low-contention defaults.
+- Increase to `n_jobs=2/4/-1` when cross-fitting is the bottleneck.
+- If nuisance learners are already multithreaded (e.g. CatBoost with
+  `thread_count=-1`), keep `n_jobs=1` or set learner threads to `1`
+  to avoid CPU oversubscription.
+- On shared machines, prefer a bounded value (for example `2` or `4`)
+  instead of `-1`.
 
 **Functions:**
 
@@ -15092,6 +14358,12 @@ ml_m = ml_m
 
 ```python
 n_folds = int(n_folds)
+```
+
+####### `n_jobs`
+
+```python
+n_jobs = int(n_jobs)
 ```
 
 ####### `n_rep`
@@ -16167,6 +15439,7 @@ Returns a DataFrame containing r2_y, r2_d, rho and the change in estimates.
 - **benchmarking_set** (<code>[list](#list)\[[str](#str)\]</code>) – List of confounder names to be used for benchmarking (to be removed in the short model).
 - **fit_args** (<code>[dict](#dict)</code>) – Legacy name for additional keyword arguments passed to `IRM.estimate(...)`
   on the short model. If `score` is omitted, the long-model score is reused.
+  If `diagnostic_data` is omitted, it defaults to `False` for faster benchmarking.
 
 **Returns:**
 
@@ -16396,6 +15669,7 @@ Returns a DataFrame containing r2_y, r2_d, rho and the change in estimates.
 - **benchmarking_set** (<code>[list](#list)\[[str](#str)\]</code>) – List of confounder names to be used for benchmarking (to be removed in the short model).
 - **fit_args** (<code>[dict](#dict)</code>) – Legacy name for additional keyword arguments passed to `IRM.estimate(...)`
   on the short model. If `score` is omitted, the long-model score is reused.
+  If `diagnostic_data` is omitted, it defaults to `False` for faster benchmarking.
 
 **Returns:**
 
@@ -16462,6 +15736,7 @@ Returns a DataFrame containing r2_y, r2_d, rho and the change in estimates.
 - **benchmarking_set** (<code>[list](#list)\[[str](#str)\]</code>) – List of confounder names to be used for benchmarking (to be removed in the short model).
 - **fit_args** (<code>[dict](#dict)</code>) – Legacy name for additional keyword arguments passed to `IRM.estimate(...)`
   on the short model. If `score` is omitted, the long-model score is reused.
+  If `diagnostic_data` is omitted, it defaults to `False` for faster benchmarking.
 
 **Returns:**
 

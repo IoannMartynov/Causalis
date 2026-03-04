@@ -1042,12 +1042,16 @@ def sensitivity_benchmark(
         trimming_rule=str(getattr(model, "trimming_rule", "truncate")),
         trimming_threshold=float(getattr(model, "trimming_threshold", 1e-2)),
         random_state=getattr(model, "random_state", None),
+        n_jobs=int(getattr(model, "n_jobs", 1)),
     )
 
     irm_short.fit()
     estimate_args: Dict[str, Any] = dict(fit_args or {})
     if "score" not in estimate_args:
         estimate_args["score"] = getattr(model, "score", "ATE")
+    if "diagnostic_data" not in estimate_args:
+        # Benchmarking only needs short-model point estimates.
+        estimate_args["diagnostic_data"] = False
     irm_short.estimate(**estimate_args)
 
     theta_long = np.asarray(model.coef_, dtype=float).reshape(-1)

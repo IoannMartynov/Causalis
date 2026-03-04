@@ -11,6 +11,7 @@ import warnings
 from datetime import datetime
 from typing import Any, Dict, Optional, Tuple, List
 
+from joblib import Parallel, delayed
 from sklearn.base import clone, BaseEstimator
 from sklearn.model_selection import StratifiedKFold
 from sklearn.utils.validation import check_is_fitted
@@ -69,6 +70,17 @@ class IRM(BaseEstimator):
         threshold, relative estimates are set to NaN with a warning.
     random_state : Optional[int], default None
         Random seed for fold creation.
+    n_jobs : int, default 1
+        Number of parallel jobs for fold-level cross-fitting.
+        Use `-1` to use all available CPUs.
+        Practical guidance:
+        - Start with `n_jobs=1` for stable, low-contention defaults.
+        - Increase to `n_jobs=2/4/-1` when cross-fitting is the bottleneck.
+        - If nuisance learners are already multithreaded (e.g. CatBoost with
+          `thread_count=-1`), keep `n_jobs=1` or set learner threads to `1`
+          to avoid CPU oversubscription.
+        - On shared machines, prefer a bounded value (for example `2` or `4`)
+          instead of `-1`.
     """
 
     def __init__(
@@ -85,6 +97,7 @@ class IRM(BaseEstimator):
         weights: Optional[np.ndarray | Dict[str, Any]] = None,
         relative_baseline_min: float = 1e-8,
         random_state: Optional[int] = None,
+        n_jobs: int = 1,
     ) -> None:
         self.data = data
         self.ml_g = ml_g
@@ -98,6 +111,7 @@ class IRM(BaseEstimator):
         self.weights = weights
         self.relative_baseline_min = float(relative_baseline_min)
         self.random_state = random_state
+        self.n_jobs = int(n_jobs)
         self.normalize_ipw_effective_ = bool(normalize_ipw)
 
         # Initialize default learners if not provided
@@ -139,6 +153,8 @@ class IRM(BaseEstimator):
             raise ValueError("trimming_threshold must be finite and in [0, 0.5).")
         if self.relative_baseline_min < 0.0:
             raise ValueError("relative_baseline_min must be non-negative.")
+        if self.n_jobs == 0 or self.n_jobs < -1:
+            raise ValueError("n_jobs must be -1 or a positive integer.")
 
     # --------- Helpers ---------
     def _check_data(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray, bool]:
@@ -157,9 +173,9 @@ class IRM(BaseEstimator):
         y_is_binary : bool
             Whether the outcome is binary.
         """
-        df = self.data.get_df().copy()
-        y = df[self.data.outcome.name].to_numpy(dtype=float)
-        d = df[self.data.treatment.name].to_numpy()
+        df = self.data.get_df()
+        y = df[self.data.outcome.name].to_numpy(dtype=float, copy=False)
+        d = df[self.data.treatment.name].to_numpy(copy=False)
         # Ensure binary 0/1
         if df[self.data.treatment.name].dtype == bool:
             d = d.astype(int)
@@ -170,7 +186,7 @@ class IRM(BaseEstimator):
         x_cols = list(self.data.confounders)
         if len(x_cols) == 0:
             raise ValueError("CausalData must include non-empty confounders.")
-        X = df[x_cols].to_numpy(dtype=float)
+        X = df[x_cols].to_numpy(dtype=float, copy=False)
 
         y_is_binary = _is_binary(y)
         return X, y, d, y_is_binary
@@ -242,11 +258,65 @@ class IRM(BaseEstimator):
         if not np.any(mask):
             raise RuntimeError(empty_group_error)
         X_g, y_g = X_tr[mask], y_tr[mask]
+        if y_is_binary:
+            uniq_y = np.unique(y_g)
+            if uniq_y.size == 1:
+                # Single-class folds can skip fitting while preserving cross-fit independence.
+                return np.full(X_te.shape[0], float(uniq_y[0]), dtype=float)
         model_g.fit(X_g, y_g)
         pred = _predict_prob_or_value(model_g, X_te, is_propensity=False)
         if y_is_binary:
             pred = np.clip(pred, 1e-12, 1 - 1e-12)
         return pred
+
+    def _fit_nuisances_for_fold(
+        self,
+        *,
+        fold_id: int,
+        train_idx: np.ndarray,
+        test_idx: np.ndarray,
+        X: np.ndarray,
+        y: np.ndarray,
+        d: np.ndarray,
+        y_is_binary: bool,
+    ) -> Tuple[int, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        """Fit nuisance models for one fold and return held-out predictions."""
+        X_tr, y_tr, d_tr = X[train_idx], y[train_idx], d[train_idx]
+        X_te = X[test_idx]
+
+        g0_te = self._fit_outcome_nuisance_for_treatment(
+            treatment_value=0,
+            X_tr=X_tr,
+            y_tr=y_tr,
+            d_tr=d_tr,
+            X_te=X_te,
+            y_is_binary=y_is_binary,
+            empty_group_error=(
+                "IRM: A CV fold has no controls in the training split. "
+                "This violates the IRM nuisance definition. "
+                "Consider reducing n_folds or increasing sample size."
+            ),
+        )
+
+        g1_te = self._fit_outcome_nuisance_for_treatment(
+            treatment_value=1,
+            X_tr=X_tr,
+            y_tr=y_tr,
+            d_tr=d_tr,
+            X_te=X_te,
+            y_is_binary=y_is_binary,
+            empty_group_error=(
+                "IRM: A CV fold has no treated units in the training split. "
+                "This violates the IRM nuisance definition. "
+                "Consider reducing n_folds or increasing sample size."
+            ),
+        )
+
+        model_m = clone(self.ml_m)
+        model_m.fit(X_tr, d_tr)
+        m_te = _predict_prob_or_value(model_m, X_te, is_propensity=True)
+
+        return fold_id, test_idx, g0_te, g1_te, m_te
 
     def _cross_fit_nuisances(
         self,
@@ -263,42 +333,40 @@ class IRM(BaseEstimator):
         folds = np.full(n, -1, dtype=int)
 
         skf = StratifiedKFold(n_splits=self.n_folds, shuffle=True, random_state=self.random_state)
-        for i, (train_idx, test_idx) in enumerate(skf.split(X, d)):
-            folds[test_idx] = i
-            X_tr, y_tr, d_tr = X[train_idx], y[train_idx], d[train_idx]
-            X_te = X[test_idx]
+        splits = list(skf.split(X, d))
 
-            g0_hat[test_idx] = self._fit_outcome_nuisance_for_treatment(
-                treatment_value=0,
-                X_tr=X_tr,
-                y_tr=y_tr,
-                d_tr=d_tr,
-                X_te=X_te,
-                y_is_binary=y_is_binary,
-                empty_group_error=(
-                    "IRM: A CV fold has no controls in the training split. "
-                    "This violates the IRM nuisance definition. "
-                    "Consider reducing n_folds or increasing sample size."
-                ),
+        if self.n_jobs == 1:
+            fold_results = [
+                self._fit_nuisances_for_fold(
+                    fold_id=i,
+                    train_idx=train_idx,
+                    test_idx=test_idx,
+                    X=X,
+                    y=y,
+                    d=d,
+                    y_is_binary=y_is_binary,
+                )
+                for i, (train_idx, test_idx) in enumerate(splits)
+            ]
+        else:
+            fold_results = Parallel(n_jobs=self.n_jobs, prefer="threads")(
+                delayed(self._fit_nuisances_for_fold)(
+                    fold_id=i,
+                    train_idx=train_idx,
+                    test_idx=test_idx,
+                    X=X,
+                    y=y,
+                    d=d,
+                    y_is_binary=y_is_binary,
+                )
+                for i, (train_idx, test_idx) in enumerate(splits)
             )
 
-            g1_hat[test_idx] = self._fit_outcome_nuisance_for_treatment(
-                treatment_value=1,
-                X_tr=X_tr,
-                y_tr=y_tr,
-                d_tr=d_tr,
-                X_te=X_te,
-                y_is_binary=y_is_binary,
-                empty_group_error=(
-                    "IRM: A CV fold has no treated units in the training split. "
-                    "This violates the IRM nuisance definition. "
-                    "Consider reducing n_folds or increasing sample size."
-                ),
-            )
-
-            model_m = clone(self.ml_m)
-            model_m.fit(X_tr, d_tr)
-            m_hat[test_idx] = _predict_prob_or_value(model_m, X_te, is_propensity=True)
+        for fold_id, test_idx, g0_te, g1_te, m_te in fold_results:
+            folds[test_idx] = fold_id
+            g0_hat[test_idx] = g0_te
+            g1_hat[test_idx] = g1_te
+            m_hat[test_idx] = m_te
 
         return g0_hat, g1_hat, m_hat, folds
 
@@ -485,6 +553,7 @@ class IRM(BaseEstimator):
         self._ensure_learners_available()
 
         # Cache for sensitivity analysis and effect calculation
+        self._X = X.copy()
         self._y = y.copy()
         self._d = d.copy()
         self._validate_fit_config(y_is_binary=y_is_binary)
@@ -713,7 +782,14 @@ class IRM(BaseEstimator):
             m_hat_raw=getattr(self, "m_hat_raw_", None),
             d=d,
             y=y,
-            x=self.data.get_df()[list(self.data.confounders)].to_numpy(dtype=float),
+            x=np.asarray(
+                getattr(
+                    self,
+                    "_X",
+                    self.data.get_df()[list(self.data.confounders)].to_numpy(dtype=float, copy=False),
+                ),
+                dtype=float,
+            ),
             g0_hat=g0_hat,
             g1_hat=g1_hat,
             w=w,
@@ -817,6 +893,7 @@ class IRM(BaseEstimator):
                 "trimming_rule": self.trimming_rule,
                 "trimming_threshold": self.trimming_threshold,
                 "random_state": self.random_state,
+                "n_jobs": self.n_jobs,
                 "std_error": se,
                 "t_stat": t_stat,
                 "se_approx_hajek": bool(approx_flags.get("se_approx_hajek", False)),
