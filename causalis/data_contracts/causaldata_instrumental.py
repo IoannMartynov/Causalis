@@ -3,7 +3,7 @@ import pandas as pd
 import pandas.api.types as pdtypes
 from typing import Union, List, Optional, Any
 from pydantic import Field
-from causalis.dgp.causaldata import CausalData
+from .causaldata import CausalData
 
 
 class CausalDataInstrumental(CausalData):
