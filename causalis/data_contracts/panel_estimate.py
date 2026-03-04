@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Any, Dict, Hashable, List, Optional
+from typing import Any, Dict, Hashable, List, Literal
 
 import numpy as np
 import pandas as pd
@@ -11,26 +11,7 @@ from causalis.data_contracts.panel_data_scm import TimeLike
 
 
 class PanelEstimate(BaseModel):
-    """Result contract for panel estimators such as Synthetic Control.
-
-    Parameters
-    ----------
-    model : str
-        Name of the fitted estimator or pipeline.
-    treated_unit : Hashable
-        Identifier of the treated unit.
-    treatment_start : TimeLike
-        Treatment boundary used to split pre/post periods.
-    pre_times : list[TimeLike]
-        Sorted, strictly pre-treatment periods.
-    post_times : list[TimeLike]
-        Sorted, strictly post-treatment periods.
-
-    Notes
-    -----
-    The contract stores aggregate ATTE metrics, full time paths, donor weights,
-    and basic diagnostics needed for reporting or downstream checks.
-    """
+    """Result contract for dynamic synthetic-control effect-path estimates."""
 
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -38,7 +19,7 @@ class PanelEstimate(BaseModel):
         validate_assignment=True,
     )
 
-    estimand: str = "ATTE"
+    estimand: Literal["dynamic_effect_path"] = "dynamic_effect_path"
     model: str
 
     treated_unit: Hashable
@@ -46,38 +27,24 @@ class PanelEstimate(BaseModel):
     pre_times: List[TimeLike]
     post_times: List[TimeLike]
 
-    att: float
-    att_sc: float
-    ci_upper_absolute: Optional[float] = None
-    ci_lower_absolute: Optional[float] = None
-    value_relative: Optional[float] = None
-    ci_upper_relative: Optional[float] = None
-    ci_lower_relative: Optional[float] = None
-    alpha: Optional[float] = None
-    p_value: Optional[float] = None
-    is_significant: Optional[bool] = None
+    effect_by_time: pd.Series
+    ci_lower_by_time: pd.Series
+    ci_upper_by_time: pd.Series
+    p_value_by_time: pd.Series
+    is_significant_by_time: pd.Series
+    confidence_set_by_time: Dict[TimeLike, list[tuple[float, float]]]
 
-    att_by_time: pd.Series
-    att_by_time_sc: pd.Series
+    alpha: float
+
     observed_outcome: pd.Series
     synthetic_outcome: pd.Series
-    synthetic_outcome_sc: pd.Series
-
     donor_weights_augmented: Dict[Hashable, float]
-    donor_weights_sc: Dict[Hashable, float]
 
     diagnostics: Dict[str, Any] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     @model_validator(mode="after")
     def _validate_dimensions(self) -> "PanelEstimate":
-        """Validate shape, index alignment, and numeric sanity constraints.
-
-        Returns
-        -------
-        PanelEstimate
-            Validated instance.
-        """
         n_pre = len(self.pre_times)
         n_post = len(self.post_times)
         n_all = n_pre + n_post
@@ -87,7 +54,6 @@ class PanelEstimate(BaseModel):
         if n_post < 1:
             raise ValueError("post_times must contain at least one period.")
 
-        # Build canonical index objects once and reuse them for all alignment checks.
         pre_idx = pd.Index(list(self.pre_times))
         post_idx = pd.Index(list(self.post_times))
         all_idx = pre_idx.append(post_idx)
@@ -111,17 +77,39 @@ class PanelEstimate(BaseModel):
         if list(pre_idx) != pre_sorted or list(post_idx) != post_sorted:
             raise ValueError("pre_times and post_times must be sorted ascending.")
 
-        # Every post-only series must align exactly to post_times.
-        if len(self.att_by_time) != n_post:
-            raise ValueError("att_by_time length must equal len(post_times).")
-        if not self.att_by_time.index.equals(post_idx):
-            raise ValueError("att_by_time index must exactly equal post_times (same order).")
-        if len(self.att_by_time_sc) != n_post:
-            raise ValueError("att_by_time_sc length must equal len(post_times).")
-        if not self.att_by_time_sc.index.equals(post_idx):
-            raise ValueError("att_by_time_sc index must exactly equal post_times (same order).")
+        for series_name in (
+            "effect_by_time",
+            "ci_lower_by_time",
+            "ci_upper_by_time",
+            "p_value_by_time",
+            "is_significant_by_time",
+        ):
+            series = getattr(self, series_name)
+            if len(series) != n_post:
+                raise ValueError(f"{series_name} length must equal len(post_times).")
+            if not series.index.equals(post_idx):
+                raise ValueError(f"{series_name} index must exactly equal post_times (same order).")
 
-        # Full-path series must align exactly to pre_times followed by post_times.
+        if set(self.confidence_set_by_time.keys()) != set(post_idx.tolist()):
+            raise ValueError("confidence_set_by_time keys must exactly match post_times.")
+        for time_key in post_idx.tolist():
+            segments = self.confidence_set_by_time[time_key]
+            if not isinstance(segments, list):
+                raise ValueError("confidence_set_by_time values must be lists of (lower, upper).")
+            for seg in segments:
+                if not isinstance(seg, tuple) or len(seg) != 2:
+                    raise ValueError("Each confidence set segment must be a 2-tuple (lower, upper).")
+                low, high = seg
+                try:
+                    low_f = float(low)
+                    high_f = float(high)
+                except (TypeError, ValueError) as exc:
+                    raise ValueError("Confidence set segment bounds must be numeric.") from exc
+                if not (np.isfinite(low_f) and np.isfinite(high_f)):
+                    raise ValueError("Confidence set segment bounds must be finite.")
+                if low_f > high_f:
+                    raise ValueError("Confidence set segment lower bound must be <= upper bound.")
+
         if len(self.observed_outcome) != n_all:
             raise ValueError("observed_outcome length must equal len(pre_times)+len(post_times).")
         if not self.observed_outcome.index.equals(all_idx):
@@ -134,76 +122,66 @@ class PanelEstimate(BaseModel):
             raise ValueError(
                 "synthetic_outcome index must exactly equal pre_times+post_times (same order)."
             )
-        if len(self.synthetic_outcome_sc) != n_all:
-            raise ValueError("synthetic_outcome_sc length must equal len(pre_times)+len(post_times).")
-        if not self.synthetic_outcome_sc.index.equals(all_idx):
-            raise ValueError(
-                "synthetic_outcome_sc index must exactly equal pre_times+post_times (same order)."
-            )
 
-        if set(self.donor_weights_augmented.keys()) != set(self.donor_weights_sc.keys()):
-            raise ValueError("donor_weights_augmented and donor_weights_sc must use the same donor ids.")
-        if len(self.donor_weights_sc) < 1:
+        if len(self.donor_weights_augmented) < 1:
             raise ValueError("At least one donor weight is required.")
 
-        # Scalar and vector-valued estimates must be numeric and finite.
-        if not (np.isfinite(self.att) and np.isfinite(self.att_sc)):
-            raise ValueError("att and att_sc must be finite floats.")
-        for series_name in (
-            "att_by_time",
-            "att_by_time_sc",
-            "observed_outcome",
-            "synthetic_outcome",
-            "synthetic_outcome_sc",
-        ):
-            numeric = pd.to_numeric(getattr(self, series_name), errors="coerce")
-            if numeric.isna().any():
-                raise ValueError(
-                    f"{series_name} must contain only numeric values (no NaN/non-numeric)."
-                )
-            if not np.isfinite(numeric.to_numpy()).all():
-                raise ValueError(f"{series_name} must contain only finite values.")
+        effect_numeric = pd.to_numeric(self.effect_by_time, errors="coerce")
+        if effect_numeric.isna().any() or not np.isfinite(effect_numeric.to_numpy()).all():
+            raise ValueError("effect_by_time must contain only finite numeric values.")
 
-        for lower_name, upper_name in (
-            ("ci_lower_absolute", "ci_upper_absolute"),
-            ("ci_lower_relative", "ci_upper_relative"),
-        ):
-            lower = getattr(self, lower_name)
-            upper = getattr(self, upper_name)
-            if (lower is None) ^ (upper is None):
-                raise ValueError(f"{lower_name} and {upper_name} must be provided together.")
-            if lower is not None:
-                if not (np.isfinite(lower) and np.isfinite(upper)):
-                    raise ValueError(f"{lower_name} and {upper_name} must be finite when provided.")
-                if float(lower) > float(upper):
-                    raise ValueError(f"{lower_name} must be <= {upper_name}.")
+        p_numeric = pd.to_numeric(self.p_value_by_time, errors="coerce")
+        if p_numeric.isna().any() or not np.isfinite(p_numeric.to_numpy()).all():
+            raise ValueError("p_value_by_time must contain only finite numeric values.")
+        if ((p_numeric < 0.0) | (p_numeric > 1.0)).any():
+            raise ValueError("p_value_by_time values must be in [0, 1].")
 
-        if self.value_relative is not None and not np.isfinite(self.value_relative):
-            raise ValueError("value_relative must be finite when provided.")
-        if self.value_relative is None and self.ci_lower_relative is not None:
-            raise ValueError(
-                "value_relative must be provided when relative confidence interval bounds are set."
-            )
-        if self.alpha is not None:
-            if not np.isfinite(self.alpha) or not (0.0 < float(self.alpha) < 1.0):
-                raise ValueError("alpha must be in (0, 1) when provided.")
-        if self.p_value is not None:
-            if not np.isfinite(self.p_value) or not (0.0 <= float(self.p_value) <= 1.0):
-                raise ValueError("p_value must be in [0, 1] when provided.")
-        if self.is_significant is not None and not isinstance(self.is_significant, bool):
-            raise ValueError("is_significant must be a bool when provided.")
+        for val in self.is_significant_by_time.to_list():
+            if not isinstance(val, (bool, np.bool_)):
+                raise ValueError("is_significant_by_time must contain only boolean values.")
 
-        # Standard SC weights are a simplex: nonnegative and summing to one.
-        w_sc = np.asarray(list(self.donor_weights_sc.values()), dtype=float)
-        if not np.isfinite(w_sc).all():
-            raise ValueError("donor_weights_sc must be finite.")
-        if (w_sc < -1e-12).any():
-            raise ValueError("donor_weights_sc must be nonnegative.")
-        if abs(float(w_sc.sum()) - 1.0) > 1e-6:
-            raise ValueError("donor_weights_sc must sum to 1 (within tolerance).")
+        for name in ("observed_outcome", "synthetic_outcome"):
+            numeric = pd.to_numeric(getattr(self, name), errors="coerce")
+            if numeric.isna().any() or not np.isfinite(numeric.to_numpy()).all():
+                raise ValueError(f"{name} must contain only finite numeric values.")
 
-        # Augmented weights may be unconstrained in some estimators, so the
-        # sum-to-one check is optional and controlled by diagnostics.
+        lower_vals = self.ci_lower_by_time.to_list()
+        upper_vals = self.ci_upper_by_time.to_list()
+        for idx, time_key in enumerate(post_idx.tolist()):
+            low = lower_vals[idx]
+            high = upper_vals[idx]
+            low_missing = low is None or (isinstance(low, (float, np.floating)) and np.isnan(low))
+            high_missing = high is None or (isinstance(high, (float, np.floating)) and np.isnan(high))
+            if low_missing != high_missing:
+                raise ValueError("ci_lower_by_time and ci_upper_by_time must be paired per period.")
+            segments = self.confidence_set_by_time[time_key]
+            if len(segments) == 1:
+                seg_low, seg_high = segments[0]
+                if low_missing or high_missing:
+                    raise ValueError(
+                        "ci_lower_by_time/ci_upper_by_time must be finite when confidence set is a single interval."
+                    )
+                low_f = float(low)
+                high_f = float(high)
+                if not (np.isfinite(low_f) and np.isfinite(high_f)):
+                    raise ValueError("CI bounds must be finite when provided.")
+                if low_f > high_f:
+                    raise ValueError(
+                        f"ci_lower_by_time must be <= ci_upper_by_time at post index {idx}."
+                    )
+                if abs(low_f - float(seg_low)) > 1e-9 or abs(high_f - float(seg_high)) > 1e-9:
+                    raise ValueError(
+                        "Single-interval CI bounds must equal the confidence_set_by_time segment."
+                    )
+            else:
+                if not (low_missing and high_missing):
+                    raise ValueError(
+                        "ci_lower_by_time/ci_upper_by_time must be missing when confidence set is empty or disconnected."
+                    )
+
+        if not np.isfinite(self.alpha) or not (0.0 < float(self.alpha) < 1.0):
+            raise ValueError("alpha must be finite and in (0, 1).")
+
         w_aug = np.asarray(list(self.donor_weights_augmented.values()), dtype=float)
         if not np.isfinite(w_aug).all():
             raise ValueError("donor_weights_augmented must be finite.")
@@ -213,43 +191,74 @@ class PanelEstimate(BaseModel):
 
         return self
 
-    def summary(self) -> pd.DataFrame:
-        """Return a compact tabular summary of key estimate metadata.
+    def summary(self) -> Dict[str, Any]:
+        """Return a dynamic-path summary with pointwise inference details."""
 
-        Returns
-        -------
-        pd.DataFrame
-            Two-column dataframe indexed by field name.
-        """
-        def _fmt_float(val: Optional[float]) -> Optional[str]:
-            if val is None:
+        def _float_or_none(value: Any) -> float | None:
+            if value is None:
                 return None
-            return f"{val:.4f}"
+            try:
+                out = float(value)
+            except (TypeError, ValueError):
+                return None
+            if np.isnan(out):
+                return None
+            return out
 
-        value_abs = _fmt_float(self.att)
-        if self.ci_lower_absolute is not None and self.ci_upper_absolute is not None:
-            value_abs = (
-                f"{_fmt_float(self.att)} "
-                f"(ci_abs: {_fmt_float(self.ci_lower_absolute)}, {_fmt_float(self.ci_upper_absolute)})"
+        post_times = list(self.post_times)
+        n_post = int(len(post_times))
+        effect_vals = pd.to_numeric(self.effect_by_time, errors="coerce").to_numpy(dtype=float)
+        n_sig = int(np.sum(self.is_significant_by_time.astype(bool).to_numpy()))
+        avg_effect = float(np.mean(effect_vals))
+
+        period_results: list[dict[str, Any]] = []
+        for time_key in post_times:
+            period_results.append(
+                {
+                    "time": time_key,
+                    "effect": float(self.effect_by_time.loc[time_key]),
+                    "ci_lower": _float_or_none(self.ci_lower_by_time.loc[time_key]),
+                    "ci_upper": _float_or_none(self.ci_upper_by_time.loc[time_key]),
+                    "p_value": float(self.p_value_by_time.loc[time_key]),
+                    "is_significant": bool(self.is_significant_by_time.loc[time_key]),
+                    "confidence_set": [
+                        (float(lo), float(hi))
+                        for lo, hi in self.confidence_set_by_time[time_key]
+                    ],
+                }
             )
 
-        value_rel = None
-        if self.value_relative is not None:
-            if self.ci_lower_relative is not None and self.ci_upper_relative is not None:
-                value_rel = (
-                    f"{_fmt_float(self.value_relative)} "
-                    f"(ci_rel: {_fmt_float(self.ci_lower_relative)}, {_fmt_float(self.ci_upper_relative)})"
-                )
-            else:
-                value_rel = _fmt_float(self.value_relative)
+        optional_diag_keys = (
+            "n_donors",
+            "n_pre_periods",
+            "pre_rmse_augmented",
+            "sum_weights_augmented",
+            "max_abs_weight_augmented",
+            "cond_augmented_gram",
+        )
+        diagnostics_subset = {
+            key: self.diagnostics[key]
+            for key in optional_diag_keys
+            if key in self.diagnostics
+        }
 
-        summary = {
+        return {
             "estimand": self.estimand,
             "model": self.model,
-            "value": value_abs,
-            "value_relative": value_rel,
-            "alpha": _fmt_float(self.alpha),
-            "p_value": _fmt_float(self.p_value),
-            "is_significant": self.is_significant,
+            "inference": self.diagnostics.get(
+                "pointwise_ci_method",
+                "cwz_permutation_conformal_pointwise_moving_block_approximate",
+            ),
+            "alpha": float(self.alpha),
+            "n_post_periods": n_post,
+            "n_significant_periods": n_sig,
+            "avg_point_estimate_across_post_periods": avg_effect,
+            "ci_type": "pointwise",
+            "multiple_testing_adjusted": False,
+            "confidence_set_representation": self.diagnostics.get(
+                "pointwise_confidence_set_representation",
+                "grid_approximated_contiguous_segments",
+            ),
+            "period_results": period_results,
+            "diagnostics": diagnostics_subset,
         }
-        return pd.DataFrame({"field": list(summary.keys()), "value": list(summary.values())}).set_index("field")

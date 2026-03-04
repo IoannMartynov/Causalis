@@ -20,7 +20,6 @@ def test_generate_scm_data_returns_panel_contract_by_default():
     assert len(panel.donor_pool()) == 5
     assert len(panel.pre_times()) == 20
     assert len(panel.post_times()) == 10
-    assert tuple(panel.covariate_cols) == ()
 
 
 def test_generate_scm_data_can_return_dataframe():
@@ -58,8 +57,6 @@ def test_generate_scm_data_missingness_mode_returns_valid_contract():
     )
 
     assert isinstance(panel, PanelDataSCM)
-    assert panel.allow_missing_outcome is True
-    assert panel.observed_col == "observed"
     assert len(panel.donor_pool()) == 4
 
 
@@ -85,8 +82,6 @@ def test_generate_scm_data_reality_knobs_with_structured_missingness():
     )
 
     assert isinstance(panel, PanelDataSCM)
-    assert panel.allow_missing_outcome is True
-    assert panel.observed_col == "observed"
     assert set(panel.df["observed"].unique()).issubset({0, 1})
     n_full = (n_pre + n_post) * (n_donors + 1)
     assert len(panel.df) == n_full
@@ -206,15 +201,41 @@ def test_generate_scm_poisson_data_rejects_base_missing_overrides():
 def test_generate_scm_gamma_26_updates_covariate_cols_after_drop():
     panel = generate_scm_gamma_26(return_panel_data=True, include_oracles=False, seed=123)
     assert isinstance(panel, PanelDataSCM)
-    assert tuple(panel.covariate_cols) == ()
+    assert "treated_time" in panel.df.columns
+    assert "treatment_start" not in panel.df.columns
+    assert "is_anchor_period" not in panel.df.columns
     assert not {"exposure", "macro_index", "seasonality_index"}.intersection(panel.df.columns)
 
 
 def test_generate_scm_poisson_26_updates_covariate_cols_after_drop():
     panel = generate_scm_poisson_26(return_panel_data=True, include_oracles=False, seed=123)
     assert isinstance(panel, PanelDataSCM)
-    assert tuple(panel.covariate_cols) == ()
+    assert "treated_time" in panel.df.columns
+    assert "treatment_start" not in panel.df.columns
+    assert "is_anchor_period" not in panel.df.columns
     assert not {"exposure", "macro_index", "seasonality_index"}.intersection(panel.df.columns)
+
+
+@pytest.mark.parametrize(
+    ("generator", "kwargs"),
+    [
+        (generate_scm_gamma_26, {}),
+        (generate_scm_poisson_26, {"donor_missing_block_frac": 0.0}),
+    ],
+)
+def test_generate_scm26_dataframe_include_oracles_false_keeps_treated_time(generator, kwargs):
+    df = generator(
+        return_panel_data=False,
+        include_oracles=False,
+        seed=123,
+        **kwargs,
+    )
+    assert "treated_time" in df.columns
+    assert "is_treated_unit" not in df.columns
+    assert "treatment_start" not in df.columns
+    assert "is_anchor_period" not in df.columns
+    assert set(pd.Index(df["treated_time"].unique()).tolist()).issubset({0, 1})
+    assert int(df["treated_time"].sum()) > 0
 
 
 def test_generate_scm_gamma_data_rejects_conflicting_locked_advanced_params():
@@ -323,7 +344,7 @@ def test_generate_scm_gamma_26_accepts_explicit_pre_post_periods():
         return_panel_data=True,
         seed=42,
     )
-    assert len(panel.pre_times()) == n_pre
+    assert len(panel.pre_times()) == n_pre + 1  # includes anchor
     assert len(panel.post_times()) == n_post
 
 
@@ -338,26 +359,78 @@ def test_generate_scm_poisson_26_accepts_explicit_pre_post_periods():
         donor_missing_block_frac=0.0,
         seed=42,
     )
-    assert len(panel.pre_times()) == n_pre
+    assert len(panel.pre_times()) == n_pre + 1  # includes anchor
     assert len(panel.post_times()) == n_post
 
 
-def test_generate_scm_gamma_26_uses_default_pre_post_not_n():
-    panel = generate_scm_gamma_26(n=999, return_panel_data=True, include_oracles=True, seed=42)
-    assert len(panel.pre_times()) == 24
-    assert len(panel.post_times()) == 3
+def test_generate_scm_gamma_26_uses_default_pre_post():
+    panel = generate_scm_gamma_26(return_panel_data=True, include_oracles=True, seed=42)
+    assert len(panel.pre_times()) == 37  # default 36 + 1 anchor
+    assert len(panel.post_times()) == 12
 
 
-def test_generate_scm_poisson_26_uses_default_pre_post_not_n():
+def test_generate_scm_poisson_26_uses_default_pre_post():
     panel = generate_scm_poisson_26(
-        n=999,
         return_panel_data=True,
         include_oracles=True,
         donor_missing_block_frac=0.0,
         seed=42,
     )
-    assert len(panel.pre_times()) == 24
-    assert len(panel.post_times()) == 3
+    assert len(panel.pre_times()) == 37  # default 36 + 1 anchor
+    assert len(panel.post_times()) == 12
+
+
+def test_generate_scm_gamma_26_dataframe_marks_treated_time():
+    n_pre = 6
+    n_post = 3
+    df = generate_scm_gamma_26(
+        n_pre_periods=n_pre,
+        n_post_periods=n_post,
+        include_oracles=True,
+        return_panel_data=False,
+        seed=404,
+    )
+
+    assert "treated_time" in df.columns
+    assert "treatment_start" not in df.columns
+    assert "is_anchor_period" not in df.columns
+
+    treated_mask = df["unit_id"] == "treated"
+    time_values = sorted(pd.Index(df["calendar_time"].unique()).tolist())
+    treated_start = time_values[n_pre + 1]
+    expected = (treated_mask & (df["calendar_time"] >= treated_start)).astype(int)
+    assert np.array_equal(df["treated_time"].to_numpy(), expected.to_numpy())
+    assert int(df.loc[treated_mask, "treated_time"].sum()) == n_post
+    assert int(df.loc[~treated_mask, "treated_time"].sum()) == 0
+
+
+def test_generate_scm_poisson_26_panel_marks_treated_time_and_excludes_anchor_from_windows():
+    n_pre = 7
+    n_post = 4
+    panel = generate_scm_poisson_26(
+        n_pre_periods=n_pre,
+        n_post_periods=n_post,
+        include_oracles=True,
+        return_panel_data=True,
+        donor_missing_block_frac=0.0,
+        seed=505,
+    )
+
+    assert "treated_time" in panel.df.columns
+    assert "treatment_start" not in panel.df.columns
+    assert "is_anchor_period" not in panel.df.columns
+
+    time_values = sorted(pd.Index(panel.df[panel.time_col].unique()).tolist())
+    anchor = time_values[n_pre]
+    treated_start = time_values[n_pre + 1]
+    treated_mask = panel.df[panel.unit_col] == panel.treated_unit
+    expected = (treated_mask & (panel.df[panel.time_col] >= treated_start)).astype(int)
+    assert np.array_equal(panel.df["treated_time"].to_numpy(), expected.to_numpy())
+    assert int(panel.df.loc[~treated_mask, "treated_time"].sum()) == 0
+
+    assert anchor == panel.treatment_start - 1
+    assert anchor in panel.pre_times()
+    assert anchor not in panel.post_times()
 
 
 def test_generate_scm_gamma_26_rows_per_unit_include_intervention_anchor():
@@ -384,7 +457,7 @@ def test_generate_scm_gamma_26_rows_per_unit_include_intervention_anchor():
         return_panel_data=True,
         seed=123,
     )
-    assert len(panel.pre_times()) == n_pre
+    assert len(panel.pre_times()) == n_pre + 1  # includes anchor
     assert len(panel.post_times()) == n_post
 
 
@@ -414,5 +487,5 @@ def test_generate_scm_poisson_26_rows_per_unit_include_intervention_anchor():
         donor_missing_block_frac=0.0,
         seed=123,
     )
-    assert len(panel.pre_times()) == n_pre
+    assert len(panel.pre_times()) == n_pre + 1  # includes anchor
     assert len(panel.post_times()) == n_post

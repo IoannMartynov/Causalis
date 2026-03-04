@@ -20,9 +20,9 @@ def _make_panel_with_effect(effect: float = 2.5) -> pd.DataFrame:
 
         rows.extend(
             [
-                {"unit_id": "T", "time_id": t, "y": y_treat},
-                {"unit_id": "C1", "time_id": t, "y": y_c1},
-                {"unit_id": "C2", "time_id": t, "y": y_c2},
+                {"unit_id": "T", "time_id": t, "y": y_treat, "treated_time": int(idx >= 4)},
+                {"unit_id": "C1", "time_id": t, "y": y_c1, "treated_time": 0},
+                {"unit_id": "C2", "time_id": t, "y": y_c2, "treated_time": 0},
             ]
         )
     return pd.DataFrame(rows)
@@ -37,12 +37,9 @@ def test_rscm_fit_and_estimate_handles_missing_cells_and_outcomes():
     data = PanelDataSCM(
         unit_col="unit_id",
         time_col="time_id",
+        treated_time="treated_time",
         y="y",
         df=df,
-        treated_unit="T",
-        treatment_start="2020-04-01",
-        observed_col="observed",
-        allow_missing_outcome=True,
     )
 
     estimate = RobustSyntheticControl(lambda_aug=0.5, completion_max_iter=250).fit(data).estimate()
@@ -83,11 +80,9 @@ def test_rscm_contract_requires_observed_treated_post_for_att():
         PanelDataSCM(
             unit_col="unit_id",
             time_col="time_id",
+            treated_time="treated_time",
             y="y",
             df=df,
-            treated_unit="T",
-            treatment_start="2020-04-01",
-            allow_missing_outcome=True,
         )
 
 
@@ -98,11 +93,9 @@ def test_rscm_contract_requires_at_least_two_donors():
         PanelDataSCM(
             unit_col="unit_id",
             time_col="time_id",
+            treated_time="treated_time",
             y="y",
             df=df,
-            treated_unit="T",
-            treatment_start="2020-04-01",
-            allow_missing_outcome=True,
         )
 
 
@@ -117,13 +110,12 @@ def test_rscm_matches_ascm_on_fully_observed_panel():
     data = PanelDataSCM(
         unit_col="unit_id",
         time_col="time_id",
+        treated_time="treated_time",
         y="y",
         df=df,
-        treated_unit="T",
-        treatment_start="2020-04-01",
     )
 
-    ascm = ASCM(lambda_aug=0.5).fit(data).estimate()
+    ascm = ASCM(lambda_aug=0.5, inference_policy="placebo").fit(data).estimate()
     rscm = RSCM(lambda_aug=0.5).fit(data).estimate()
 
     assert abs(float(ascm.att) - float(rscm.att)) < 1e-9
@@ -139,11 +131,9 @@ def test_rscm_requires_enough_observed_treated_pre_periods():
     data = PanelDataSCM(
         unit_col="unit_id",
         time_col="time_id",
+        treated_time="treated_time",
         y="y",
         df=df,
-        treated_unit="T",
-        treatment_start="2020-04-01",
-        allow_missing_outcome=True,
     )
 
     with pytest.raises(ValueError, match="observed treated pre-treatment outcomes"):
@@ -156,11 +146,9 @@ def test_rscm_inference_uses_only_observed_treated_pre_residuals():
     data = PanelDataSCM(
         unit_col="unit_id",
         time_col="time_id",
+        treated_time="treated_time",
         y="y",
         df=df,
-        treated_unit="T",
-        treatment_start="2020-04-01",
-        allow_missing_outcome=True,
     )
 
     estimate = RSCM(lambda_aug=0.5, completion_max_iter=250).fit(data).estimate()
@@ -174,10 +162,9 @@ def test_rscm_masks_treated_post_during_completion(monkeypatch):
     data = PanelDataSCM(
         unit_col="unit_id",
         time_col="time_id",
+        treated_time="treated_time",
         y="y",
         df=df,
-        treated_unit="T",
-        treatment_start="2020-04-01",
     )
 
     captured: dict[str, np.ndarray] = {}
