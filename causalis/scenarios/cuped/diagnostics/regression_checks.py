@@ -96,7 +96,7 @@ def near_duplicate_corr_pairs(
 
 
 def vif_from_corr(x: pd.DataFrame) -> Optional[Dict[str, float]]:
-    """Approximate VIF from inverse correlation matrix of standardized covariates."""
+    """Approximate VIF from inverse correlation matrix of standardized covariates.."""
     if x.shape[1] < 2:
         return None
     arr = np.asarray(x, dtype=float)
