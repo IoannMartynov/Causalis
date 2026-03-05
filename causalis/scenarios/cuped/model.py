@@ -9,11 +9,11 @@ import pandas as pd
 from causalis.dgp.causaldata import CausalData
 from causalis.data_contracts.causal_estimate import CausalEstimate
 from causalis.data_contracts.causal_diagnostic_data import CUPEDDiagnosticData
-from tests.data.regression_checks import RegressionChecks
 from causalis.scenarios.cuped.diagnostics.regression_checks import (
     FLAG_GREEN,
     FLAG_RED,
     FLAG_YELLOW,
+    RegressionChecks,
     design_matrix_checks,
     regression_assumptions_table_from_checks,
     run_regression_checks,
