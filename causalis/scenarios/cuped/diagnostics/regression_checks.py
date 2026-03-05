@@ -2,13 +2,14 @@ from __future__ import annotations
 
 from statistics import NormalDist
 from typing import Any, Callable, Dict, Optional, Sequence
+
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
+from pydantic import BaseModel, Field
 
 from causalis.data_contracts.causal_diagnostic_data import CUPEDDiagnosticData
 from causalis.data_contracts.causal_estimate import CausalEstimate
-from tests.data.regression_checks import RegressionChecks
 from causalis.dgp.causaldata import CausalData
 
 FLAG_GREEN = "GREEN"
@@ -20,6 +21,43 @@ FLAG_COLOR = {
     FLAG_YELLOW: "#f9a825",
     FLAG_RED: "#c62828",
 }
+
+
+class RegressionChecks(BaseModel):
+    """Lightweight OLS/regression health checks for CUPED diagnostics."""
+
+    ate_naive: float
+    ate_adj: float
+    ate_gap: float
+    ate_gap_over_se_naive: Optional[float] = None
+
+    k: int
+    rank: int
+    full_rank: bool
+    condition_number: float
+    p_main_covariates: int
+    near_duplicate_pairs: list[tuple[str, str, float]] = Field(default_factory=list)
+    vif: Optional[Dict[str, float]] = None
+
+    resid_scale_mad: float
+    n_std_resid_gt_3: int
+    n_std_resid_gt_4: int
+    max_abs_std_resid: float
+
+    max_leverage: float
+    leverage_cutoff: float
+    n_high_leverage: int
+
+    max_cooks: float
+    cooks_cutoff: float
+    n_high_cooks: int
+
+    min_one_minus_h: float
+    n_tiny_one_minus_h: int
+
+    winsor_q: Optional[float] = None
+    ate_adj_winsor: Optional[float] = None
+    ate_adj_winsor_gap: Optional[float] = None
 
 
 def _normalize_flag(flag: Any) -> str:
@@ -58,7 +96,7 @@ def near_duplicate_corr_pairs(
 
 
 def vif_from_corr(x: pd.DataFrame) -> Optional[Dict[str, float]]:
-    """Approximate VIF from inverse correlation matrix of standardized covariates."""
+    """Approximate VIF from inverse correlation matrix of standardized covariates.."""
     if x.shape[1] < 2:
         return None
     arr = np.asarray(x, dtype=float)

@@ -1,4 +1,4 @@
-from tests.data.regression_checks import RegressionChecks
+from causalis.scenarios.cuped.diagnostics.regression_checks import RegressionChecks
 from causalis.scenarios.cuped.diagnostics import (
     assumption_cooks,
     assumption_leverage,
