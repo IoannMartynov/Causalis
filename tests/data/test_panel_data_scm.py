@@ -43,8 +43,7 @@ def _base_kwargs(df: Optional[pd.DataFrame] = None, **overrides) -> dict:
 def test_minimum_contract_and_helpers_work():
     panel = PanelDataSCM(**_base_kwargs())
 
-    assert panel.df.columns.tolist() == ["unit_id", "time_id", "treated_time", "observed", "y"]
-    assert set(panel.df["observed"].unique()) == {1}
+    assert panel.df.columns.tolist() == ["unit_id", "time_id", "treated_time", "y"]
     assert sorted(panel.donor_pool()) == ["C1", "C2"]
     assert [str(t) for t in panel.pre_times()] == ["2020-01"]
     assert [str(t) for t in panel.post_times()] == ["2020-02", "2020-03"]
@@ -183,11 +182,19 @@ def test_each_donor_must_have_pre_treatment_rows():
         PanelDataSCM(**_base_kwargs(df=df))
 
 
-def test_treated_post_outcomes_must_be_observed():
+def test_outcome_nulls_are_rejected():
     df = _base_panel_df().copy()
     df.loc[(df["unit_id"] == "T") & (df["time_id"] == "2020-03-01"), "y"] = np.nan
 
-    with pytest.raises(ValueError, match="treated_unit must have observed y"):
+    with pytest.raises(ValueError, match="contains nulls"):
+        PanelDataSCM(**_base_kwargs(df=df))
+
+
+def test_treated_post_period_rows_must_exist():
+    df = _base_panel_df().copy()
+    df = df[~((df["unit_id"] == "T") & (df["time_id"] == "2020-03-01"))].copy()
+
+    with pytest.raises(ValueError, match="treated_unit must have rows in all post-treatment periods"):
         PanelDataSCM(**_base_kwargs(df=df))
 
 
@@ -198,7 +205,7 @@ def test_df_is_projected_to_estimation_columns_only():
 
     panel = PanelDataSCM(**_base_kwargs(df=df))
 
-    assert panel.df.columns.tolist() == ["unit_id", "time_id", "treated_time", "observed", "y"]
+    assert panel.df.columns.tolist() == ["unit_id", "time_id", "treated_time", "y"]
     assert "x1" not in panel.df.columns
     assert "note" not in panel.df.columns
 
@@ -277,7 +284,7 @@ def test_panel_repr_is_compact_and_informative():
     panel = PanelDataSCM(**_base_kwargs())
 
     repr_str = repr(panel)
-    assert repr_str.startswith("PanelDataSCM(df=(9, 5),")
+    assert repr_str.startswith("PanelDataSCM(df=(9, 4),")
     assert "unit_col='unit_id'" in repr_str
     assert "time_col='time_id'" in repr_str
     assert "treated_time='treated_time'" in repr_str
@@ -285,6 +292,7 @@ def test_panel_repr_is_compact_and_informative():
     assert "y='y'" in repr_str
     assert "treated_unit='T'" in repr_str
     assert "treatment_start=Period('2020-02'" in repr_str
+    assert "last_post_period=Period('2020-03'" in repr_str
     assert "n_pre_periods=1" in repr_str
     assert "n_post_periods=2" in repr_str
     assert "donor_units=['C1', 'C2']" in repr_str

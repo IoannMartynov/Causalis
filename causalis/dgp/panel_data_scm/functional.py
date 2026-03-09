@@ -20,7 +20,7 @@ _SCM26_ORACLE_COLS = (
 )
 _SCM26_COVARIATE_COLS = ("exposure", "macro_index", "seasonality_index")
 _DEFAULT_SCM26_PRE_PERIODS = 36
-_DEFAULT_SCM26_POST_PERIODS = 12
+_DEFAULT_SCM26_POST_PERIODS = 6
 
 
 def _build_panel_from_output_df(df: pd.DataFrame) -> PanelDataSCM:
@@ -533,7 +533,7 @@ def _apply_scm26_include_oracles(
     *,
     include_oracles: bool,
 ) -> PanelOutput:
-    drop_cols = list(_SCM26_COVARIATE_COLS)
+    drop_cols = list(_SCM26_COVARIATE_COLS) + ["observed"]
     if not include_oracles:
         drop_cols.extend(_SCM26_ORACLE_COLS)
     if isinstance(out, pd.DataFrame):
@@ -547,7 +547,6 @@ def _format_scm26_output_columns(out: PanelOutput) -> PanelOutput:
         "unit_id",
         "calendar_time",
         "treated_time",
-        "observed",
         "y",
         "y_cf",
         "tau_realized_true",

@@ -191,74 +191,130 @@ class PanelEstimate(BaseModel):
 
         return self
 
-    def summary(self) -> Dict[str, Any]:
-        """Return a dynamic-path summary with pointwise inference details."""
+    @staticmethod
+    def _fmt_float(value: Any) -> str | None:
+        if value is None:
+            return None
+        try:
+            out = float(value)
+        except (TypeError, ValueError):
+            return None
+        if np.isnan(out):
+            return None
+        return f"{out:.4f}"
 
-        def _float_or_none(value: Any) -> float | None:
-            if value is None:
-                return None
-            try:
-                out = float(value)
-            except (TypeError, ValueError):
-                return None
-            if np.isnan(out):
-                return None
-            return out
+    @staticmethod
+    def _float_or_none(value: Any) -> float | None:
+        if value is None:
+            return None
+        try:
+            out = float(value)
+        except (TypeError, ValueError):
+            return None
+        if np.isnan(out):
+            return None
+        return out
 
-        post_times = list(self.post_times)
-        n_post = int(len(post_times))
-        effect_vals = pd.to_numeric(self.effect_by_time, errors="coerce").to_numpy(dtype=float)
+    def summary(self) -> pd.DataFrame:
+        """Return a compact CausalEstimate-style summary table."""
+
+        post_idx = pd.Index(list(self.post_times))
+        n_post = int(len(post_idx))
         n_sig = int(np.sum(self.is_significant_by_time.astype(bool).to_numpy()))
-        avg_effect = float(np.mean(effect_vals))
 
-        period_results: list[dict[str, Any]] = []
-        for time_key in post_times:
-            period_results.append(
-                {
-                    "time": time_key,
-                    "effect": float(self.effect_by_time.loc[time_key]),
-                    "ci_lower": _float_or_none(self.ci_lower_by_time.loc[time_key]),
-                    "ci_upper": _float_or_none(self.ci_upper_by_time.loc[time_key]),
-                    "p_value": float(self.p_value_by_time.loc[time_key]),
-                    "is_significant": bool(self.is_significant_by_time.loc[time_key]),
-                    "confidence_set": [
-                        (float(lo), float(hi))
-                        for lo, hi in self.confidence_set_by_time[time_key]
-                    ],
-                }
-            )
+        avg_effect = float(np.mean(pd.to_numeric(self.effect_by_time, errors="coerce").to_numpy(dtype=float)))
+        cumulative_effect = float(np.sum(pd.to_numeric(self.effect_by_time, errors="coerce").to_numpy(dtype=float)))
+        observed_post_mean = float(np.mean(pd.to_numeric(self.observed_outcome.loc[post_idx], errors="coerce")))
+        synthetic_post_mean = float(np.mean(pd.to_numeric(self.synthetic_outcome.loc[post_idx], errors="coerce")))
 
-        optional_diag_keys = (
-            "n_donors",
-            "n_pre_periods",
-            "pre_rmse_augmented",
-            "sum_weights_augmented",
-            "max_abs_weight_augmented",
-            "cond_augmented_gram",
-        )
-        diagnostics_subset = {
-            key: self.diagnostics[key]
-            for key in optional_diag_keys
-            if key in self.diagnostics
-        }
+        att_available = bool(self.diagnostics.get("average_att_ttest_available", False))
+        att_estimate = self._float_or_none(self.diagnostics.get("average_att_estimate"))
+        att_ci_low = self._float_or_none(self.diagnostics.get("average_att_ci_lower"))
+        att_ci_high = self._float_or_none(self.diagnostics.get("average_att_ci_upper"))
+        att_p_value = self._float_or_none(self.diagnostics.get("average_att_p_value"))
 
-        return {
-            "estimand": self.estimand,
+        estimand = self.estimand
+        value = f"{self._fmt_float(avg_effect)} (post_period_average)"
+        effect_for_relative = avg_effect
+        ci_low_for_relative = None
+        ci_high_for_relative = None
+        p_value = None
+        is_significant: bool | None = n_sig > 0
+        if att_available and att_estimate is not None:
+            estimand = "average_post_effect"
+            effect_for_relative = att_estimate
+            ci_low_for_relative = att_ci_low
+            ci_high_for_relative = att_ci_high
+            if att_ci_low is not None and att_ci_high is not None:
+                value = (
+                    f"{self._fmt_float(att_estimate)} "
+                    f"(ci_abs: {self._fmt_float(att_ci_low)}, {self._fmt_float(att_ci_high)})"
+                )
+            else:
+                value = self._fmt_float(att_estimate)
+            p_value = self._fmt_float(att_p_value)
+            is_significant = bool(att_p_value < float(self.alpha)) if att_p_value is not None else None
+
+        value_relative = None
+        control_eps = 1e-12 * max(1.0, abs(synthetic_post_mean))
+        if np.isfinite(synthetic_post_mean) and abs(synthetic_post_mean) >= control_eps:
+            rel = 100.0 * effect_for_relative / synthetic_post_mean
+            if ci_low_for_relative is not None and ci_high_for_relative is not None:
+                rel_low = 100.0 * ci_low_for_relative / synthetic_post_mean
+                rel_high = 100.0 * ci_high_for_relative / synthetic_post_mean
+                if rel_low > rel_high:
+                    rel_low, rel_high = rel_high, rel_low
+                value_relative = (
+                    f"{self._fmt_float(rel)} "
+                    f"(ci_rel: {self._fmt_float(rel_low)}, {self._fmt_float(rel_high)})"
+                )
+            else:
+                value_relative = self._fmt_float(rel)
+
+        summary = {
+            "estimand": estimand,
             "model": self.model,
             "inference": self.diagnostics.get(
                 "pointwise_ci_method",
-                "cwz_permutation_conformal_pointwise_moving_block_approximate",
+                "cwz_overlapping_moving_block",
             ),
-            "alpha": float(self.alpha),
-            "n_post_periods": n_post,
+            "value": value,
+            "value_relative": value_relative,
+            "alpha": self._fmt_float(self.alpha),
+            "p_value": p_value,
+            "is_significant": is_significant,
+            "post_outcome_d_mean": self._fmt_float(observed_post_mean),
+            "pointwise_post_period_average": self._fmt_float(avg_effect),
+            "effect_by_time": [
+                {
+                    "period": time_key,
+                    "estimate": float(self.effect_by_time.loc[time_key]),
+                }
+                for time_key in post_idx.tolist()
+            ],
+            "cumulative_effect": self._fmt_float(cumulative_effect),
             "n_significant_periods": n_sig,
-            "avg_point_estimate_across_post_periods": avg_effect,
-            "ci_type": "pointwise",
-            "multiple_testing_adjusted": False,
-            "confidence_set_representation": self.diagnostics.get(
-                "pointwise_confidence_set_representation",
-                "grid_approximated_contiguous_segments",
-            ),
-            "period_results": period_results,
-            "diagnostics": diagnostics_subset,
+            "n_donors": int(len(self.donor_weights_augmented)),
+            "n_pre_periods": int(len(self.pre_times)),
+            "n_post_periods": n_post,
+            "time": self.created_at.strftime("%Y-%m-%d")
         }
+        return pd.DataFrame({"field": list(summary.keys()), "value": list(summary.values())}).set_index("field")
+
+    def summary_poinwise(self) -> pd.DataFrame:
+        """Return pointwise post-period estimates as a flat DataFrame."""
+
+        post_times = list(self.post_times)
+        rows: list[dict[str, Any]] = []
+        for time_key in post_times:
+            rows.append(
+                {
+                    "time": time_key,
+                    "effect": float(self.effect_by_time.loc[time_key]),
+                    "ci_lower": self._float_or_none(self.ci_lower_by_time.loc[time_key]),
+                    "ci_upper": self._float_or_none(self.ci_upper_by_time.loc[time_key]),
+                    "p_value": float(self.p_value_by_time.loc[time_key]),
+                    "is_significant": bool(self.is_significant_by_time.loc[time_key]),
+                }
+            )
+        return pd.DataFrame(rows)

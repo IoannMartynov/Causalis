@@ -392,6 +392,7 @@ def test_generate_scm_gamma_26_dataframe_marks_treated_time():
     )
 
     assert "treated_time" in df.columns
+    assert "observed" not in df.columns
     assert "treatment_start" not in df.columns
     assert "is_anchor_period" not in df.columns
 
