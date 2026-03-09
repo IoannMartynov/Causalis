@@ -26,7 +26,6 @@ Causalis: A Python package for causal inference.
 
 - [**CausalData**](#causalis.data_contracts.CausalData) – Container for causal inference datasets.
 - [**CausalDataInstrumental**](#causalis.data_contracts.CausalDataInstrumental) – Container for causal inference datasets with causaldata_instrumental variables.
-- [**CausalDatasetGenerator**](#causalis.data_contracts.CausalDatasetGenerator) – Generate synthetic causal inference datasets with controllable confounding,
 - [**CausalEstimate**](#causalis.data_contracts.CausalEstimate) – Result container for causal effect estimates.
 - [**DiagnosticData**](#causalis.data_contracts.DiagnosticData) – Base class for all diagnostic data_contracts.
 - [**MultiCausalData**](#causalis.data_contracts.MultiCausalData) – Data contract for cross-sectional causal data with multi-class one-hot treatments.
@@ -34,19 +33,6 @@ Causalis: A Python package for causal inference.
 - [**PanelEstimate**](#causalis.data_contracts.PanelEstimate) – Result contract for dynamic synthetic-control effect-path estimates.
 - [**RegressionChecks**](#causalis.data_contracts.RegressionChecks) – Lightweight OLS/regression health checks for CUPED diagnostics.
 - [**UnconfoundednessDiagnosticData**](#causalis.data_contracts.UnconfoundednessDiagnosticData) – Fields common to all models assuming unconfoundedness.
-
-**Functions:**
-
-- [**classic_rct_gamma**](#causalis.data_contracts.classic_rct_gamma) – Generate a classic RCT dataset with three binary confounders and a gamma outcome.
-- [**classic_rct_gamma_26**](#causalis.data_contracts.classic_rct_gamma_26) – A pre-configured classic RCT dataset with a gamma outcome.
-- [**generate_classic_rct**](#causalis.data_contracts.generate_classic_rct) – Generate a classic RCT dataset with three binary confounders:
-- [**generate_classic_rct_26**](#causalis.data_contracts.generate_classic_rct_26) – A pre-configured classic RCT dataset with 3 binary confounders.
-- [**generate_cuped_binary**](#causalis.data_contracts.generate_cuped_binary) – Binary CUPED-oriented DGP with richer confounders and structured HTE.
-- [**generate_rct**](#causalis.data_contracts.generate_rct) – Generate an RCT dataset with randomized treatment assignment.
-- [**make_cuped_binary_26**](#causalis.data_contracts.make_cuped_binary_26) – Binary CUPED benchmark with richer confounders and structured HTE.
-- [**make_gold_linear**](#causalis.data_contracts.make_gold_linear) – A standard linear benchmark with moderate confounding.
-- [**obs_linear_26_dataset**](#causalis.data_contracts.obs_linear_26_dataset) – A pre-configured observational linear dataset with 5 standard confounders.
-- [**obs_linear_effect**](#causalis.data_contracts.obs_linear_effect) – Generate an observational dataset with linear effects of confounders and a constant treatment effect.
 
 #### `CausalData`
 
@@ -231,7 +217,7 @@ user_id_name: Optional[str] = Field(alias='user_id', default=None)
 
 #### `CausalDataInstrumental`
 
-Bases: <code>[CausalData](#causalis.dgp.causaldata.CausalData)</code>
+Bases: <code>[CausalData](#causalis.data_contracts.causaldata.CausalData)</code>
 
 Container for causal inference datasets with causaldata_instrumental variables.
 
@@ -322,353 +308,6 @@ instrument column as a Series.
 
 ```python
 instrument_name: str = Field(alias='instrument')
-```
-
-#### `CausalDatasetGenerator`
-
-```python
-CausalDatasetGenerator(
-    theta: float = 1.0,
-    tau: Optional[Callable[[np.ndarray], np.ndarray]] = None,
-    beta_y: Optional[np.ndarray] = None,
-    beta_d: Optional[np.ndarray] = None,
-    g_y: Optional[Callable[[np.ndarray], np.ndarray]] = None,
-    g_d: Optional[Callable[[np.ndarray], np.ndarray]] = None,
-    alpha_y: float = 0.0,
-    alpha_d: float = 0.0,
-    sigma_y: float = 1.0,
-    outcome_type: str = "continuous",
-    confounder_specs: Optional[List[Dict[str, Any]]] = None,
-    k: int = 5,
-    x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None,
-    use_copula: bool = False,
-    copula_corr: Optional[np.ndarray] = None,
-    target_d_rate: Optional[float] = None,
-    u_strength_d: float = 0.0,
-    u_strength_y: float = 0.0,
-    propensity_sharpness: float = 1.0,
-    score_bounding: Optional[float] = None,
-    alpha_zi: float = -1.0,
-    beta_zi: Optional[np.ndarray] = None,
-    g_zi: Optional[Callable[[np.ndarray], np.ndarray]] = None,
-    u_strength_zi: float = 0.0,
-    tau_zi: Optional[Callable[[np.ndarray], np.ndarray]] = None,
-    pos_dist: str = "gamma",
-    gamma_shape: float = 2.0,
-    lognormal_sigma: float = 1.0,
-    include_oracle: bool = True,
-    seed: Optional[int] = None,
-) -> None
-```
-
-Generate synthetic causal inference datasets with controllable confounding,
-treatment prevalence, noise, and (optionally) heterogeneous treatment effects.
-
-**Data model (high level)**
-
-- confounders X ∈ R^k are drawn from user-specified distributions.
-- Binary treatment D is assigned by a logistic model:
-  D ~ Bernoulli( sigmoid(alpha_d + f_d(X) + u_strength_d * U) ),
-  where f_d(X) = (X @ beta_d + g_d(X)) * propensity_sharpness, and U ~ N(0,1) is an optional unobserved confounder.
-- Outcome Y depends on treatment and confounders with link determined by `outcome_type`:
-  outcome_type = "continuous":
-  Y = alpha_y + f_y(X) + u_strength_y * U + T * tau(X) + ε, ε ~ N(0, sigma_y^2)
-  outcome_type = "binary":
-  logit P(Y=1|T,X,U) = alpha_y + f_y(X) + u_strength_y * U + T * tau(X)
-  outcome_type = "poisson":
-  log E[Y|T,X,U] = alpha_y + f_y(X) + u_strength_y * U + T * tau(X)
-  outcome_type = "gamma":
-  log E[Y|T,X,U] = alpha_y + f_y(X) + u_strength_y * U + T * tau(X)
-  where f_y(X) = X @ beta_y + g_y(X), and tau(X) is either constant `theta` or a user function.
-
-**Returned columns**
-
-- y: outcome
-- d: binary treatment (0/1)
-- x1..xk (or user-provided names)
-- m: true propensity P(T=1 | X) marginalized over U
-- m_obs: realized propensity P(T=1 | X, U)
-- tau_link: tau(X) on the structural (link) scale
-- g0: E[Y | X, T=0] on the natural outcome scale marginalized over U .,9
-- g1: E[Y | X, T=1] on the natural outcome scale marginalized over U
-- cate: g1 - g0 (conditional average treatment effect on the natural outcome scale)
-
-Notes on effect scale:
-
-- For "continuous", `theta` (or tau(X)) is an additive mean difference, so `tau_link == cate`.
-- For "binary", tau acts on the *log-odds* scale. `cate` is reported as a risk difference.
-- For "poisson" and "gamma", tau acts on the *log-mean* scale. `cate` is reported on the mean scale.
-
-**Parameters:**
-
-- **theta** (<code>[float](#float)</code>) – Constant treatment effect used if `tau` is None.
-- **tau** (<code>[callable](#callable)</code>) – Function tau(X) -> array-like shape (n,) for heterogeneous effects.
-- **beta_y** (<code>[array](#array) - [like](#like)</code>) – Linear coefficients of confounders in the outcome baseline f_y(X).
-- **beta_d** (<code>[array](#array) - [like](#like)</code>) – Linear coefficients of confounders in the treatment score f_d(X).
-- **g_y** (<code>[callable](#callable)</code>) – Nonlinear/additive function g_y(X) -> (n,) added to the outcome baseline.
-- **g_d** (<code>[callable](#callable)</code>) – Nonlinear/additive function g_d(X) -> (n,) added to the treatment score.
-- **alpha_y** (<code>[float](#float)</code>) – Outcome intercept (natural scale for continuous; log-odds for binary; log-mean for Poisson/Gamma).
-- **alpha_d** (<code>[float](#float)</code>) – Treatment intercept (log-odds). If `target_d_rate` is set, `alpha_d` is auto-calibrated.
-- **sigma_y** (<code>[float](#float)</code>) – Std. dev. of the Gaussian noise for continuous outcomes.
-- **outcome_type** (<code>('continuous', 'binary', 'poisson', 'gamma', 'tweedie')</code>) – Outcome family and link as defined above.
-- **confounder_specs** (<code>list of dict</code>) – Schema for generating confounders. See `_gaussian_copula` for details.
-- **k** (<code>[int](#int)</code>) – Number of confounders when `confounder_specs` is None. Defaults to independent N(0,1).
-- **x_sampler** (<code>[callable](#callable)</code>) – Custom sampler (n, k, seed) -> X ndarray of shape (n,k). Overrides `confounder_specs`.
-- **use_copula** (<code>[bool](#bool)</code>) – If True and `confounder_specs` provided, use Gaussian copula for X.
-- **copula_corr** (<code>[array](#array) - [like](#like)</code>) – Correlation matrix for copula.
-- **target_d_rate** (<code>[float](#float)</code>) – Target treatment prevalence (propensity mean). Calibrates `alpha_d`.
-- **u_strength_d** (<code>[float](#float)</code>) – Strength of the unobserved confounder U in treatment assignment.
-- **u_strength_y** (<code>[float](#float)</code>) – Strength of the unobserved confounder U in the outcome.
-- **propensity_sharpness** (<code>[float](#float)</code>) – Scales the X-driven treatment score to adjust positivity difficulty.
-- **seed** (<code>[int](#int)</code>) – Random seed for reproducibility.
-
-**Attributes:**
-
-- [**rng**](#causalis.data_contracts.CausalDatasetGenerator.rng) (<code>[Generator](#numpy.random.Generator)</code>) – Internal RNG seeded from `seed`.
-
-**Functions:**
-
-- [**generate**](#causalis.data_contracts.CausalDatasetGenerator.generate) – Draw a synthetic dataset of size `n`.
-- [**oracle_nuisance**](#causalis.data_contracts.CausalDatasetGenerator.oracle_nuisance) – Return nuisance functions (m(x), g0(x), g1(x)) compatible with IRM.
-- [**to_causal_data**](#causalis.data_contracts.CausalDatasetGenerator.to_causal_data) – Generate a dataset and convert it to a CausalData object.
-
-##### `alpha_d`
-
-```python
-alpha_d: float = 0.0
-```
-
-##### `alpha_y`
-
-```python
-alpha_y: float = 0.0
-```
-
-##### `alpha_zi`
-
-```python
-alpha_zi: float = -1.0
-```
-
-##### `beta_d`
-
-```python
-beta_d: Optional[np.ndarray] = None
-```
-
-##### `beta_y`
-
-```python
-beta_y: Optional[np.ndarray] = None
-```
-
-##### `beta_zi`
-
-```python
-beta_zi: Optional[np.ndarray] = None
-```
-
-##### `confounder_specs`
-
-```python
-confounder_specs: Optional[List[Dict[str, Any]]] = None
-```
-
-##### `copula_corr`
-
-```python
-copula_corr: Optional[np.ndarray] = None
-```
-
-##### `g_d`
-
-```python
-g_d: Optional[Callable[[np.ndarray], np.ndarray]] = None
-```
-
-##### `g_y`
-
-```python
-g_y: Optional[Callable[[np.ndarray], np.ndarray]] = None
-```
-
-##### `g_zi`
-
-```python
-g_zi: Optional[Callable[[np.ndarray], np.ndarray]] = None
-```
-
-##### `gamma_shape`
-
-```python
-gamma_shape: float = 2.0
-```
-
-##### `generate`
-
-```python
-generate(n: int, U: Optional[np.ndarray] = None) -> pd.DataFrame
-```
-
-Draw a synthetic dataset of size `n`.
-
-**Parameters:**
-
-- **n** (<code>[int](#int)</code>) – Number of samples to generate.
-- **U** (<code>[ndarray](#numpy.ndarray)</code>) – Unobserved confounder. If None, generated from N(0,1).
-
-**Returns:**
-
-- <code>[DataFrame](#pandas.DataFrame)</code> – The generated dataset with outcome 'y', treatment 'd', confounders,
-  and oracle ground-truth columns.
-
-##### `include_oracle`
-
-```python
-include_oracle: bool = True
-```
-
-##### `k`
-
-```python
-k: int = 5
-```
-
-##### `lognormal_sigma`
-
-```python
-lognormal_sigma: float = 1.0
-```
-
-##### `oracle_nuisance`
-
-```python
-oracle_nuisance(num_quad: int = 21)
-```
-
-Return nuisance functions (m(x), g0(x), g1(x)) compatible with IRM.
-
-**Parameters:**
-
-- **num_quad** (<code>[int](#int)</code>) – Number of quadrature points for marginalizing over U.
-
-**Returns:**
-
-- <code>[dict](#dict)</code> – Dictionary of callables mapping X to nuisance values.
-
-##### `outcome_type`
-
-```python
-outcome_type: str = 'continuous'
-```
-
-##### `pos_dist`
-
-```python
-pos_dist: str = 'gamma'
-```
-
-##### `propensity_sharpness`
-
-```python
-propensity_sharpness: float = 1.0
-```
-
-##### `rng`
-
-```python
-rng: np.random.Generator = field(init=False, repr=False)
-```
-
-##### `score_bounding`
-
-```python
-score_bounding: Optional[float] = None
-```
-
-##### `seed`
-
-```python
-seed: Optional[int] = None
-```
-
-##### `sigma_y`
-
-```python
-sigma_y: float = 1.0
-```
-
-##### `target_d_rate`
-
-```python
-target_d_rate: Optional[float] = None
-```
-
-##### `tau`
-
-```python
-tau: Optional[Callable[[np.ndarray], np.ndarray]] = None
-```
-
-##### `tau_zi`
-
-```python
-tau_zi: Optional[Callable[[np.ndarray], np.ndarray]] = None
-```
-
-##### `theta`
-
-```python
-theta: float = 1.0
-```
-
-##### `to_causal_data`
-
-```python
-to_causal_data(
-    n: int, confounders: Optional[Union[str, List[str]]] = None
-) -> CausalData
-```
-
-Generate a dataset and convert it to a CausalData object.
-
-**Parameters:**
-
-- **n** (<code>[int](#int)</code>) – Number of samples to generate.
-- **confounders** (<code>str or list of str</code>) – List of confounder column names to include. If None, automatically detects numeric confounders.
-
-**Returns:**
-
-- <code>[CausalData](#causalis.dgp.causaldata.CausalData)</code> – A CausalData object containing the generated dataset.
-
-##### `u_strength_d`
-
-```python
-u_strength_d: float = 0.0
-```
-
-##### `u_strength_y`
-
-```python
-u_strength_y: float = 0.0
-```
-
-##### `u_strength_zi`
-
-```python
-u_strength_zi: float = 0.0
-```
-
-##### `use_copula`
-
-```python
-use_copula: bool = False
-```
-
-##### `x_sampler`
-
-```python
-x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None
 ```
 
 #### `CausalEstimate`
@@ -1489,7 +1128,7 @@ n_tiny_one_minus_h: int
 ##### `near_duplicate_pairs`
 
 ```python
-near_duplicate_pairs: List[Tuple[str, str, float]] = Field(default_factory=list)
+near_duplicate_pairs: list[tuple[str, str, float]] = Field(default_factory=list)
 
 ```
 
@@ -2431,7 +2070,7 @@ user_id_name: Optional[str] = Field(alias='user_id', default=None)
 
 ##### `CausalDataInstrumental`
 
-Bases: <code>[CausalData](#causalis.dgp.causaldata.CausalData)</code>
+Bases: <code>[CausalData](#causalis.data_contracts.causaldata.CausalData)</code>
 
 Container for causal inference datasets with causaldata_instrumental variables.
 
@@ -2523,339 +2162,6 @@ instrument column as a Series.
 ```python
 instrument_name: str = Field(alias='instrument')
 ```
-
-#### `classic_rct_gamma`
-
-```python
-classic_rct_gamma(
-    n: int = 10000,
-    split: float = 0.5,
-    random_state: Optional[int] = 42,
-    outcome_params: Optional[Dict] = None,
-    add_pre: bool = False,
-    beta_y: Optional[Union[List[float], np.ndarray]] = None,
-    outcome_depends_on_x: bool = True,
-    prognostic_scale: float = 1.0,
-    pre_corr: float = 0.7,
-    add_ancillary: bool = True,
-    deterministic_ids: bool = False,
-    include_oracle: bool = True,
-    return_causal_data: bool = False,
-    **kwargs: bool
-) -> Union[pd.DataFrame, CausalData]
-```
-
-Generate a classic RCT dataset with three binary confounders and a gamma outcome.
-
-The gamma outcome uses a log-mean link, so treatment effects are multiplicative
-on the mean scale. The default parameters are chosen to resemble a skewed
-real-world metric (e.g., spend or revenue).
-
-**Parameters:**
-
-- **n** (<code>[int](#int)</code>) – Number of samples to generate.
-- **split** (<code>[float](#float)</code>) – Proportion of samples assigned to the treatment group.
-- **random_state** (<code>[int](#int)</code>) – Random seed for reproducibility.
-- **outcome_params** (<code>[dict](#dict)</code>) – Gamma parameters, e.g. {"shape": 2.0, "scale": {"A": 15.0, "B": 16.5}}.
-  Mean = shape * scale.
-- **add_pre** (<code>[bool](#bool)</code>) – Whether to generate a pre-period covariate (`y_pre`).
-- **beta_y** (<code>[array](#array) - [like](#like)</code>) – Linear coefficients for confounders in the log-mean outcome model.
-- **outcome_depends_on_x** (<code>[bool](#bool)</code>) – Whether to add default effects for confounders if beta_y is None.
-- **prognostic_scale** (<code>[float](#float)</code>) – Scale of nonlinear prognostic signal.
-- **pre_corr** (<code>[float](#float)</code>) – Target correlation for y_pre with post-outcome in control group.
-- **add_ancillary** (<code>[bool](#bool)</code>) – Whether to add standard ancillary columns (age, platform, etc.).
-- **deterministic_ids** (<code>[bool](#bool)</code>) – Whether to generate deterministic user IDs.
-- **include_oracle** (<code>[bool](#bool)</code>) – Whether to include oracle ground-truth columns like 'cate', 'propensity', etc.
-- **return_causal_data** (<code>[bool](#bool)</code>) – Whether to return a `CausalData` object instead of a `pandas.DataFrame`.
-- \*\***kwargs** – Additional arguments passed to `generate_rct` (e.g., pre_name, g_y, use_prognostic).
-
-**Returns:**
-
-- <code>[DataFrame](#pandas.DataFrame) or [CausalData](#causalis.dgp.causaldata.CausalData)</code> – Synthetic classic RCT dataset with gamma outcome.
-
-#### `classic_rct_gamma_26`
-
-```python
-classic_rct_gamma_26(
-    seed: int = 42,
-    add_pre: bool = False,
-    beta_y: Optional[Union[List[float], np.ndarray]] = None,
-    outcome_depends_on_x: bool = True,
-    include_oracle: bool = False,
-    return_causal_data: bool = True,
-    *,
-    n: int = 10000,
-    split: float = 0.5,
-    outcome_params: Optional[Dict] = None,
-    add_ancillary: bool = True,
-    deterministic_ids: bool = True,
-    **kwargs: bool
-)
-```
-
-A pre-configured classic RCT dataset with a gamma outcome.
-n=10000, split=0.5, mean uplift ~10%.
-Includes deterministic `user_id` and ancillary columns.
-
-**Parameters:**
-
-- **seed** (<code>[int](#int)</code>) – Random seed.
-- **add_pre** (<code>[bool](#bool)</code>) – Whether to generate a pre-period covariate ('y_pre').
-- **beta_y** (<code>[array](#array) - [like](#like)</code>) – Linear coefficients for confounders in the outcome model.
-- **outcome_depends_on_x** (<code>[bool](#bool)</code>) – Whether to add default effects for confounders if beta_y is None.
-- **include_oracle** (<code>[bool](#bool)</code>) – Whether to include oracle ground-truth columns like 'cate', 'propensity', etc.
-- **return_causal_data** (<code>[bool](#bool)</code>) – Whether to return a CausalData object.
-- **n** (<code>[int](#int)</code>) – Number of samples.
-- **split** (<code>[float](#float)</code>) – Proportion of samples assigned to the treatment group.
-- **outcome_params** (<code>[dict](#dict)</code>) – Gamma outcome parameters, e.g. {"shape": 2.0, "scale": {"A": 15.0, "B": 16.5}}.
-- **add_ancillary** (<code>[bool](#bool)</code>) – Whether to add standard ancillary columns (age, platform, etc.).
-- **deterministic_ids** (<code>[bool](#bool)</code>) – Whether to generate deterministic user IDs.
-- \*\***kwargs** – Additional arguments passed to `classic_rct_gamma`.
-
-**Returns:**
-
-- <code>[CausalData](#causalis.dgp.causaldata.CausalData) or [DataFrame](#pandas.DataFrame)</code> –
-
-#### `generate_classic_rct`
-
-```python
-generate_classic_rct(
-    n: int = 10000,
-    split: float = 0.5,
-    random_state: Optional[int] = 42,
-    outcome_params: Optional[Dict] = None,
-    add_pre: bool = False,
-    beta_y: Optional[Union[List[float], np.ndarray]] = None,
-    outcome_depends_on_x: bool = True,
-    prognostic_scale: float = 1.0,
-    pre_corr: float = 0.7,
-    return_causal_data: bool = False,
-    add_ancillary: bool = False,
-    deterministic_ids: bool = False,
-    include_oracle: bool = True,
-    **kwargs: bool
-) -> Union[pd.DataFrame, CausalData]
-```
-
-Generate a classic RCT dataset with three binary confounders:
-platform_ios, country_usa, and source_paid.
-
-**Parameters:**
-
-- **n** (<code>[int](#int)</code>) – Number of samples to generate.
-- **split** (<code>[float](#float)</code>) – Proportion of samples assigned to the treatment group.
-- **random_state** (<code>[int](#int)</code>) – Random seed for reproducibility.
-- **outcome_params** (<code>[dict](#dict)</code>) – Parameters defining baseline rates/means and treatment effects.
-  e.g., {"p": {"A": 0.1, "B": 0.15}} for binary.
-- **add_pre** (<code>[bool](#bool)</code>) – Whether to generate a pre-period covariate (`y_pre`).
-- **beta_y** (<code>[array](#array) - [like](#like)</code>) – Linear coefficients for confounders in the outcome model.
-- **outcome_depends_on_x** (<code>[bool](#bool)</code>) – Whether to add default effects for confounders if beta_y is None.
-- **prognostic_scale** (<code>[float](#float)</code>) – Scale of nonlinear prognostic signal (passed to generate_rct).
-- **pre_corr** (<code>[float](#float)</code>) – Target correlation for y_pre (passed to generate_rct).
-- **return_causal_data** (<code>[bool](#bool)</code>) – Whether to return a `CausalData` object instead of a `pandas.DataFrame`.
-- **add_ancillary** (<code>[bool](#bool)</code>) – Whether to add standard ancillary columns (age, platform, etc.).
-- **deterministic_ids** (<code>[bool](#bool)</code>) – Whether to generate deterministic user IDs.
-- **include_oracle** (<code>[bool](#bool)</code>) – Whether to include oracle ground-truth columns like 'cate', 'propensity', etc.
-- \*\***kwargs** – Additional arguments passed to `generate_rct`.
-
-**Returns:**
-
-- <code>[DataFrame](#pandas.DataFrame) or [CausalData](#causalis.dgp.causaldata.CausalData)</code> – Synthetic classic RCT dataset.
-
-#### `generate_classic_rct_26`
-
-```python
-generate_classic_rct_26(
-    seed: int = 42,
-    add_pre: bool = False,
-    beta_y: Optional[Union[List[float], np.ndarray]] = None,
-    outcome_depends_on_x: bool = True,
-    include_oracle: bool = False,
-    return_causal_data: bool = True,
-    *,
-    n: int = 10000,
-    split: float = 0.5,
-    outcome_params: Optional[Dict] = None,
-    add_ancillary: bool = False,
-    deterministic_ids: bool = True,
-    **kwargs: bool
-)
-```
-
-A pre-configured classic RCT dataset with 3 binary confounders.
-n=10000, split=0.5, outcome is conversion (binary). Baseline control p=0.10
-and treatment p=0.11 are set on the log-odds scale (X=0), so marginal rates
-and ATE can differ once covariate effects are included. Includes a
-deterministic `user_id` column.
-
-**Parameters:**
-
-- **seed** (<code>[int](#int)</code>) – Random seed.
-- **add_pre** (<code>[bool](#bool)</code>) – Whether to generate a pre-period covariate ('y_pre') and include prognostic signal from X.
-- **beta_y** (<code>[array](#array) - [like](#like)</code>) – Linear coefficients for confounders in the outcome model.
-- **outcome_depends_on_x** (<code>[bool](#bool)</code>) – Whether to add default effects for confounders if beta_y is None.
-- **include_oracle** (<code>[bool](#bool)</code>) – Whether to include oracle ground-truth columns like 'cate', 'propensity', etc.
-- **return_causal_data** (<code>[bool](#bool)</code>) – Whether to return a CausalData object.
-- **n** (<code>[int](#int)</code>) – Number of samples.
-- **split** (<code>[float](#float)</code>) – Proportion of samples assigned to the treatment group.
-- **outcome_params** (<code>[dict](#dict)</code>) – Binary outcome parameters, e.g. {"p": {"A": 0.10, "B": 0.11}}.
-- **add_ancillary** (<code>[bool](#bool)</code>) – Whether to add standard ancillary columns (age, platform, etc.).
-- **deterministic_ids** (<code>[bool](#bool)</code>) – Whether to generate deterministic user IDs.
-- \*\***kwargs** – Additional arguments passed to `generate_classic_rct`.
-
-**Returns:**
-
-- <code>[CausalData](#causalis.dgp.causaldata.CausalData) or [DataFrame](#pandas.DataFrame)</code> –
-
-#### `generate_cuped_binary`
-
-```python
-generate_cuped_binary(
-    n: int = 10000,
-    seed: int = 42,
-    add_pre: bool = True,
-    pre_name: str = "y_pre",
-    pre_target_corr: float = 0.65,
-    pre_spec: Optional[PreCorrSpec] = None,
-    include_oracle: bool = True,
-    return_causal_data: bool = True,
-    theta_logit: float = 0.38,
-) -> Union[pd.DataFrame, CausalData]
-```
-
-Binary CUPED-oriented DGP with richer confounders and structured HTE.
-
-Designed for CUPED benchmarking with randomized treatment and a calibrated
-pre-period covariate while preserving exact oracle cate under include_oracle.
-
-**Parameters:**
-
-- **n** (<code>[int](#int)</code>) – Number of samples to generate.
-- **seed** (<code>[int](#int)</code>) – Random seed.
-- **add_pre** (<code>[bool](#bool)</code>) – Whether to add a pre-period covariate.
-- **pre_name** (<code>[str](#str)</code>) – Name of the pre-period covariate column.
-- **pre_target_corr** (<code>[float](#float)</code>) – Target correlation between y_pre and post-outcome y in the control group.
-- **pre_spec** (<code>[PreCorrSpec](#causalis.dgp.causaldata.preperiod.PreCorrSpec)</code>) – Detailed specification for pre-period calibration.
-  If provided, `pre_target_corr` is ignored in favor of `pre_spec.target_corr`.
-- **include_oracle** (<code>[bool](#bool)</code>) – Whether to include oracle columns like m, g0, g1, cate.
-- **return_causal_data** (<code>[bool](#bool)</code>) – Whether to return a CausalData object.
-- **theta_logit** (<code>[float](#float)</code>) – Baseline log-odds uplift scale for heterogeneous treatment effects.
-
-**Returns:**
-
-- <code>[DataFrame](#pandas.DataFrame) or [CausalData](#causalis.dgp.causaldata.CausalData)</code> –
-
-#### `generate_rct`
-
-```python
-generate_rct(
-    n: int = 20000,
-    split: float = 0.5,
-    random_state: Optional[int] = 42,
-    outcome_type: str = "binary",
-    outcome_params: Optional[Dict] = None,
-    confounder_specs: Optional[List[Dict[str, Any]]] = None,
-    k: int = 0,
-    x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None,
-    add_ancillary: bool = True,
-    deterministic_ids: bool = False,
-    add_pre: bool = True,
-    pre_name: str = "y_pre",
-    pre_corr: float = 0.7,
-    prognostic_scale: float = 1.0,
-    beta_y: Optional[Union[List[float], np.ndarray]] = None,
-    g_y: Optional[Callable[[np.ndarray], np.ndarray]] = None,
-    use_prognostic: Optional[bool] = None,
-    include_oracle: bool = True,
-    return_causal_data: bool = False,
-) -> Union[pd.DataFrame, CausalData]
-```
-
-Generate an RCT dataset with randomized treatment assignment.
-
-Uses `CausalDatasetGenerator` internally, ensuring treatment is independent of X.
-Specifically designed for benchmarking variance reduction techniques like CUPED.
-
-**Notes on effect scale**
-
-How `outcome_params` maps into the structural effect:
-
-- outcome_type="normal": treatment shifts the mean by (mean["B"] - mean["A"]) on the outcome scale.
-- outcome_type="binary": treatment shifts the log-odds by (logit(p_B) - logit(p_A)).
-- outcome_type="poisson" or "gamma": treatment shifts the log-mean by log(lam_B / lam_A).
-
-Ancillary columns (if add_ancillary=True) are generated from baseline confounders X only,
-avoiding outcome leakage and post-treatment adjustment issues.
-
-**Parameters:**
-
-- **n** (<code>[int](#int)</code>) – Number of samples to generate.
-- **split** (<code>[float](#float)</code>) – Proportion of samples assigned to the treatment group.
-- **random_state** (<code>[int](#int)</code>) – Random seed for reproducibility.
-- **outcome_type** (<code>('binary', 'normal', 'poisson', 'gamma')</code>) – Distribution family of the outcome.
-- **outcome_params** (<code>[dict](#dict)</code>) – Parameters defining baseline rates/means and treatment effects.
-  e.g., {"p": {"A": 0.1, "B": 0.12}} for binary, or
-  {"shape": 2.0, "scale": {"A": 1.0, "B": 1.1}} for poisson/gamma.
-- **confounder_specs** (<code>list of dict</code>) – Schema for confounder distributions.
-- **k** (<code>[int](#int)</code>) – Number of confounders if specs not provided.
-- **x_sampler** (<code>[callable](#callable)</code>) – Custom sampler for confounders.
-- **add_ancillary** (<code>[bool](#bool)</code>) – Whether to add descriptive columns like 'age', 'platform', etc.
-- **deterministic_ids** (<code>[bool](#bool)</code>) – Whether to generate deterministic user IDs.
-- **add_pre** (<code>[bool](#bool)</code>) – Whether to generate a pre-period covariate (`y_pre`).
-- **pre_name** (<code>[str](#str)</code>) – Name of the pre-period covariate column.
-- **pre_corr** (<code>[float](#float)</code>) – Target correlation between `y_pre` and the outcome Y in the control group.
-- **prognostic_scale** (<code>[float](#float)</code>) – Scale of the prognostic signal derived from confounders.
-- **include_oracle** (<code>[bool](#bool)</code>) – Whether to include oracle ground-truth columns like 'cate', 'm', etc.
-- **return_causal_data** (<code>[bool](#bool)</code>) – Whether to return a `CausalData` object instead of a `pandas.DataFrame`.
-
-**Returns:**
-
-- <code>[DataFrame](#pandas.DataFrame) or [CausalData](#causalis.dgp.causaldata.CausalData)</code> – Synthetic RCT dataset.
-
-#### `make_cuped_binary_26`
-
-```python
-make_cuped_binary_26(
-    n: int = 10000,
-    seed: int = 42,
-    add_pre: bool = True,
-    pre_name: str = "y_pre",
-    pre_target_corr: float = 0.65,
-    pre_spec: Optional[PreCorrSpec] = None,
-    include_oracle: bool = True,
-    return_causal_data: bool = True,
-    theta_logit: float = 0.38,
-) -> Union[pd.DataFrame, CausalData]
-```
-
-Binary CUPED benchmark with richer confounders and structured HTE.
-Includes a calibrated pre-period covariate 'y_pre' by default.
-Wrapper for generate_cuped_binary().
-
-**Parameters:**
-
-- **n** (<code>[int](#int)</code>) – Number of samples to generate.
-- **seed** (<code>[int](#int)</code>) – Random seed.
-- **add_pre** (<code>[bool](#bool)</code>) – Whether to add a pre-period covariate 'y_pre'.
-- **pre_name** (<code>[str](#str)</code>) – Name of the pre-period covariate column.
-- **pre_target_corr** (<code>[float](#float)</code>) – Target correlation between y_pre and post-outcome y in the control group.
-- **pre_spec** (<code>[PreCorrSpec](#causalis.dgp.causaldata.preperiod.PreCorrSpec)</code>) – Detailed specification for pre-period calibration (transform, method, etc.).
-- **include_oracle** (<code>[bool](#bool)</code>) – Whether to include oracle columns like 'cate', 'g0', and 'g1'.
-- **return_causal_data** (<code>[bool](#bool)</code>) – Whether to return a CausalData object.
-- **theta_logit** (<code>[float](#float)</code>) – Baseline log-odds uplift scale for heterogeneous treatment effects.
-
-**Returns:**
-
-- <code>[DataFrame](#pandas.DataFrame) or [CausalData](#causalis.dgp.causaldata.CausalData)</code> –
-
-#### `make_gold_linear`
-
-```python
-make_gold_linear(n: int = 10000, seed: int = 42) -> CausalData
-```
-
-A standard linear benchmark with moderate confounding.
-Based on the benchmark scenario in docs/research/dgp_benchmarking.ipynb.
 
 #### `multicausal_estimate`
 
@@ -3257,71 +2563,6 @@ Return the treatment columns as a pandas DataFrame.
 ```python
 user_id: Optional[str] = None
 ```
-
-#### `obs_linear_26_dataset`
-
-```python
-obs_linear_26_dataset(
-    n: int = 10000,
-    seed: int = 42,
-    include_oracle: bool = True,
-    return_causal_data: bool = True,
-)
-```
-
-A pre-configured observational linear dataset with 5 standard confounders.
-Based on the scenario in docs/cases/dml_ate.ipynb.
-
-**Parameters:**
-
-- **n** (<code>[int](#int)</code>) – Number of samples.
-- **seed** (<code>[int](#int)</code>) – Random seed.
-- **include_oracle** (<code>[bool](#bool)</code>) – Whether to include oracle ground-truth columns like 'cate', 'propensity', etc.
-- **return_causal_data** (<code>[bool](#bool)</code>) – If True, returns a CausalData object. If False, returns a pandas DataFrame.
-
-#### `obs_linear_effect`
-
-```python
-obs_linear_effect(
-    n: int = 10000,
-    theta: float = 1.0,
-    outcome_type: str = "continuous",
-    sigma_y: float = 1.0,
-    target_d_rate: Optional[float] = None,
-    confounder_specs: Optional[List[Dict[str, Any]]] = None,
-    beta_y: Optional[np.ndarray] = None,
-    beta_d: Optional[np.ndarray] = None,
-    random_state: Optional[int] = 42,
-    k: int = 0,
-    x_sampler: Optional[Callable[[int, int, int], np.ndarray]] = None,
-    include_oracle: bool = True,
-    add_ancillary: bool = False,
-    deterministic_ids: bool = False,
-) -> pd.DataFrame
-```
-
-Generate an observational dataset with linear effects of confounders and a constant treatment effect.
-
-**Parameters:**
-
-- **n** (<code>[int](#int)</code>) – Number of samples to generate.
-- **theta** (<code>[float](#float)</code>) – Constant treatment effect.
-- **outcome_type** (<code>('continuous', 'binary', 'poisson', 'gamma')</code>) – Family of the outcome distribution.
-- **sigma_y** (<code>[float](#float)</code>) – Noise level for continuous outcomes.
-- **target_d_rate** (<code>[float](#float)</code>) – Target treatment prevalence (propensity mean).
-- **confounder_specs** (<code>list of dict</code>) – Schema for confounder distributions.
-- **beta_y** (<code>[array](#array) - [like](#like)</code>) – Linear coefficients for confounders in the outcome model.
-- **beta_d** (<code>[array](#array) - [like](#like)</code>) – Linear coefficients for confounders in the treatment model.
-- **random_state** (<code>[int](#int)</code>) – Random seed for reproducibility.
-- **k** (<code>[int](#int)</code>) – Number of confounders if specs not provided.
-- **x_sampler** (<code>[callable](#callable)</code>) – Custom sampler for confounders.
-- **include_oracle** (<code>[bool](#bool)</code>) – Whether to include oracle ground-truth columns like 'cate', 'm', etc.
-- **add_ancillary** (<code>[bool](#bool)</code>) – If True, adds standard ancillary columns (age, platform, etc.).
-- **deterministic_ids** (<code>[bool](#bool)</code>) – If True, generates deterministic user IDs.
-
-**Returns:**
-
-- <code>[DataFrame](#pandas.DataFrame)</code> – Synthetic observational dataset.
 
 #### `panel_data_scm`
 
@@ -10219,6 +9460,10 @@ Wrapper for generate_cuped_binary().
 - [**forest_plot**](#causalis.scenarios.cuped.diagnostics.forest_plot) –
 - [**regression_checks**](#causalis.scenarios.cuped.diagnostics.regression_checks) –
 
+**Classes:**
+
+- [**RegressionChecks**](#causalis.scenarios.cuped.diagnostics.RegressionChecks) – Lightweight OLS/regression health checks for CUPED diagnostics.
+
 **Functions:**
 
 - [**assumption_ate_gap**](#causalis.scenarios.cuped.diagnostics.assumption_ate_gap) – Check adjusted-vs-naive ATE gap relative to naive SE.
@@ -10258,6 +9503,169 @@ FLAG_RED = 'RED'
 
 ```python
 FLAG_YELLOW = 'YELLOW'
+```
+
+###### `RegressionChecks`
+
+Bases: <code>[BaseModel](#pydantic.BaseModel)</code>
+
+Lightweight OLS/regression health checks for CUPED diagnostics.
+
+####### `ate_adj`
+
+```python
+ate_adj: float
+```
+
+####### `ate_adj_winsor`
+
+```python
+ate_adj_winsor: Optional[float] = None
+```
+
+####### `ate_adj_winsor_gap`
+
+```python
+ate_adj_winsor_gap: Optional[float] = None
+```
+
+####### `ate_gap`
+
+```python
+ate_gap: float
+```
+
+####### `ate_gap_over_se_naive`
+
+```python
+ate_gap_over_se_naive: Optional[float] = None
+```
+
+####### `ate_naive`
+
+```python
+ate_naive: float
+```
+
+####### `condition_number`
+
+```python
+condition_number: float
+```
+
+####### `cooks_cutoff`
+
+```python
+cooks_cutoff: float
+```
+
+####### `full_rank`
+
+```python
+full_rank: bool
+```
+
+####### `k`
+
+```python
+k: int
+```
+
+####### `leverage_cutoff`
+
+```python
+leverage_cutoff: float
+```
+
+####### `max_abs_std_resid`
+
+```python
+max_abs_std_resid: float
+```
+
+####### `max_cooks`
+
+```python
+max_cooks: float
+```
+
+####### `max_leverage`
+
+```python
+max_leverage: float
+```
+
+####### `min_one_minus_h`
+
+```python
+min_one_minus_h: float
+```
+
+####### `n_high_cooks`
+
+```python
+n_high_cooks: int
+```
+
+####### `n_high_leverage`
+
+```python
+n_high_leverage: int
+```
+
+####### `n_std_resid_gt_3`
+
+```python
+n_std_resid_gt_3: int
+```
+
+####### `n_std_resid_gt_4`
+
+```python
+n_std_resid_gt_4: int
+```
+
+####### `n_tiny_one_minus_h`
+
+```python
+n_tiny_one_minus_h: int
+```
+
+####### `near_duplicate_pairs`
+
+```python
+near_duplicate_pairs: list[tuple[str, str, float]] = Field(default_factory=list)
+
+```
+
+####### `p_main_covariates`
+
+```python
+p_main_covariates: int
+```
+
+####### `rank`
+
+```python
+rank: int
+```
+
+####### `resid_scale_mad`
+
+```python
+resid_scale_mad: float
+```
+
+####### `vif`
+
+```python
+vif: Optional[Dict[str, float]] = None
+```
+
+####### `winsor_q`
+
+```python
+winsor_q: Optional[float] = None
 ```
 
 ###### `assumption_ate_gap`
@@ -10539,6 +9947,10 @@ Supports both call styles:
 
 ###### `regression_checks`
 
+**Classes:**
+
+- [**RegressionChecks**](#causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks) – Lightweight OLS/regression health checks for CUPED diagnostics.
+
 **Functions:**
 
 - [**assumption_ate_gap**](#causalis.scenarios.cuped.diagnostics.regression_checks.assumption_ate_gap) – Check adjusted-vs-naive ATE gap relative to naive SE.
@@ -10562,7 +9974,7 @@ Supports both call styles:
 - [**regression_assumptions_table_from_estimate**](#causalis.scenarios.cuped.diagnostics.regression_checks.regression_assumptions_table_from_estimate) – Build assumptions table from a CUPED estimate.
 - [**run_regression_checks**](#causalis.scenarios.cuped.diagnostics.regression_checks.run_regression_checks) – Build a compact payload with design, residual, and influence diagnostics.
 - [**style_regression_assumptions_table**](#causalis.scenarios.cuped.diagnostics.regression_checks.style_regression_assumptions_table) – Return pandas Styler with colored flag cells for notebook display.
-- [**vif_from_corr**](#causalis.scenarios.cuped.diagnostics.regression_checks.vif_from_corr) – Approximate VIF from inverse correlation matrix of standardized covariates.
+- [**vif_from_corr**](#causalis.scenarios.cuped.diagnostics.regression_checks.vif_from_corr) – Approximate VIF from inverse correlation matrix of standardized covariates..
 - [**winsor_fit_tau**](#causalis.scenarios.cuped.diagnostics.regression_checks.winsor_fit_tau) – Refit OLS on winsorized outcome and return treatment coefficient.
 
 ####### `FLAG_COLOR`
@@ -10598,6 +10010,169 @@ FLAG_RED = 'RED'
 
 ```python
 FLAG_YELLOW = 'YELLOW'
+```
+
+####### `RegressionChecks`
+
+Bases: <code>[BaseModel](#pydantic.BaseModel)</code>
+
+Lightweight OLS/regression health checks for CUPED diagnostics.
+
+######## `ate_adj`
+
+```python
+ate_adj: float
+```
+
+######## `ate_adj_winsor`
+
+```python
+ate_adj_winsor: Optional[float] = None
+```
+
+######## `ate_adj_winsor_gap`
+
+```python
+ate_adj_winsor_gap: Optional[float] = None
+```
+
+######## `ate_gap`
+
+```python
+ate_gap: float
+```
+
+######## `ate_gap_over_se_naive`
+
+```python
+ate_gap_over_se_naive: Optional[float] = None
+```
+
+######## `ate_naive`
+
+```python
+ate_naive: float
+```
+
+######## `condition_number`
+
+```python
+condition_number: float
+```
+
+######## `cooks_cutoff`
+
+```python
+cooks_cutoff: float
+```
+
+######## `full_rank`
+
+```python
+full_rank: bool
+```
+
+######## `k`
+
+```python
+k: int
+```
+
+######## `leverage_cutoff`
+
+```python
+leverage_cutoff: float
+```
+
+######## `max_abs_std_resid`
+
+```python
+max_abs_std_resid: float
+```
+
+######## `max_cooks`
+
+```python
+max_cooks: float
+```
+
+######## `max_leverage`
+
+```python
+max_leverage: float
+```
+
+######## `min_one_minus_h`
+
+```python
+min_one_minus_h: float
+```
+
+######## `n_high_cooks`
+
+```python
+n_high_cooks: int
+```
+
+######## `n_high_leverage`
+
+```python
+n_high_leverage: int
+```
+
+######## `n_std_resid_gt_3`
+
+```python
+n_std_resid_gt_3: int
+```
+
+######## `n_std_resid_gt_4`
+
+```python
+n_std_resid_gt_4: int
+```
+
+######## `n_tiny_one_minus_h`
+
+```python
+n_tiny_one_minus_h: int
+```
+
+######## `near_duplicate_pairs`
+
+```python
+near_duplicate_pairs: list[tuple[str, str, float]] = Field(default_factory=list)
+
+```
+
+######## `p_main_covariates`
+
+```python
+p_main_covariates: int
+```
+
+######## `rank`
+
+```python
+rank: int
+```
+
+######## `resid_scale_mad`
+
+```python
+resid_scale_mad: float
+```
+
+######## `vif`
+
+```python
+vif: Optional[Dict[str, float]] = None
+```
+
+######## `winsor_q`
+
+```python
+winsor_q: Optional[float] = None
 ```
 
 ####### `assumption_ate_gap`
@@ -10865,7 +10440,7 @@ Return pandas Styler with colored flag cells for notebook display.
 vif_from_corr(x: pd.DataFrame) -> Optional[Dict[str, float]]
 ```
 
-Approximate VIF from inverse correlation matrix of standardized covariates.
+Approximate VIF from inverse correlation matrix of standardized covariates..
 
 ####### `winsor_fit_tau`
 

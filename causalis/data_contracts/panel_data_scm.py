@@ -37,6 +37,8 @@ class PanelDataSCM(BaseModel):
     The model stores a validated internal dataframe snapshot used by all contract
     methods; mutating the public ``df`` attribute after construction does not
     affect validated contract behavior.
+    Outcome ``y`` must not contain null/NaN values. Represent missing panel
+    periods by omitting unit-time rows, not by keeping rows with ``NaN`` outcome.
     For fiscal quarter/year semantics, pass ``time_col`` explicitly as
     ``pandas.Period`` with the desired fiscal frequency.
     """
@@ -174,6 +176,10 @@ class PanelDataSCM(BaseModel):
             raise ValueError(f"{self.unit_col!r} contains nulls.")
         if df[self.time_col].isna().any():
             raise ValueError(f"{self.time_col!r} contains nulls.")
+        if df[self.y].isna().any():
+            raise ValueError(
+                f"{self.y!r} contains nulls. Represent missing periods by omitting rows, not NaN outcomes."
+            )
         if df[self.treated_time].isna().any():
             raise ValueError(f"{self.treated_time!r} contains nulls.")
 
@@ -254,8 +260,6 @@ class PanelDataSCM(BaseModel):
             raise ValueError("Need at least 2 donor units.")
 
         projected = df[[self.unit_col, self.time_col, self.treated_time, self.y]].copy()
-        projected["observed"] = projected[self.y].notna().astype(int)
-        projected = projected[[self.unit_col, self.time_col, self.treated_time, "observed", self.y]]
 
         object.__setattr__(self, "_df_validated", projected.copy(deep=True))
         object.__setattr__(self, "df", projected)
@@ -301,15 +305,10 @@ class PanelDataSCM(BaseModel):
 
         observed_post_times = set(pd.Index(treated_post[self.time_col].unique()).tolist())
         missing_post_times = sorted(set(post_times) - observed_post_times)
-        missing_y_times = sorted(
-            pd.Index(treated_post.loc[treated_post[self.y].isna(), self.time_col].unique()).tolist()
-        )
-
-        if missing_post_times or missing_y_times:
-            bad_times = sorted(set(missing_post_times) | set(missing_y_times))
+        if missing_post_times:
             raise ValueError(
-                "treated_unit must have observed y in all post-treatment periods. "
-                f"Missing/unobserved treated post periods: {bad_times}"
+                "treated_unit must have rows in all post-treatment periods. "
+                f"Missing treated post periods: {missing_post_times}"
             )
         object.__setattr__(self, "_n_pre_periods", len(pre_times))
         object.__setattr__(self, "_n_post_periods", len(post_times))
@@ -345,6 +344,13 @@ class PanelDataSCM(BaseModel):
         if self._n_post_periods is None:
             raise RuntimeError("n_post_periods metadata is not initialized.")
         return self._n_post_periods
+
+    @property
+    def last_post_period(self) -> pd.Period:
+        post_times = self.post_times()
+        if not post_times:
+            raise RuntimeError("last_post_period is not available because there are no post-treatment periods.")
+        return post_times[-1]
 
     def _validated_df(self) -> pd.DataFrame:
         if self._df_validated is None:
@@ -392,6 +398,7 @@ class PanelDataSCM(BaseModel):
             f"time_freq={self.time_freq!r}, "
             f"treated_unit={self.treated_unit!r}, "
             f"treatment_start={self.treatment_start!r}, "
+            f"last_post_period={self.last_post_period!r}, "
             f"n_pre_periods={self.n_pre_periods!r}, "
             f"n_post_periods={self.n_post_periods!r}, "
             f"donor_units={list(self.donor_pool())!r})"
