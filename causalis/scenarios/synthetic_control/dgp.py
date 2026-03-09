@@ -13,16 +13,55 @@ from causalis.dgp.panel_data_scm.functional import (
 PanelOutput = Union[pd.DataFrame, PanelDataSCM]
 
 
+def _generate_scm26(
+    *,
+    distribution: str,
+    seed: int,
+    return_panel_data: bool,
+    include_oracles: bool,
+    n_donors: int,
+    n_pre_periods: Optional[int],
+    n_post_periods: Optional[int],
+    treatment_effect_rate: float,
+    treatment_effect_slope: float,
+    advanced_params: dict,
+) -> PanelOutput:
+    if distribution == "gamma":
+        return generate_scm_gamma_26_data(
+            seed=seed,
+            return_panel_data=return_panel_data,
+            include_oracles=include_oracles,
+            n_donors=n_donors,
+            n_pre_periods=n_pre_periods,
+            n_post_periods=n_post_periods,
+            treatment_effect_rate=treatment_effect_rate,
+            treatment_effect_slope=treatment_effect_slope,
+            advanced_params=advanced_params,
+        )
+    if distribution == "poisson":
+        return generate_scm_poisson_26_data(
+            seed=seed,
+            return_panel_data=return_panel_data,
+            include_oracles=include_oracles,
+            n_donors=n_donors,
+            n_pre_periods=n_pre_periods,
+            n_post_periods=n_post_periods,
+            treatment_effect_rate=treatment_effect_rate,
+            treatment_effect_slope=treatment_effect_slope,
+            advanced_params=advanced_params,
+        )
+    raise ValueError(f"Unsupported SCM26 distribution: {distribution!r}.")
+
+
 def generate_scm_gamma_26(
     seed: int = 42,
     return_panel_data: bool = True,
     include_oracles: bool = False,
-    n_donors: int = 30,
-    n_pre_periods: Optional[int] = None,
-    n_post_periods: Optional[int] = None,
-    treatment_effect_rate: float = 0.12,
-    treatment_effect_slope: float = 0.01,
-    missing_outcome_frac: float = 0.0,
+    n_donors: int = 40,
+    n_pre_periods: Optional[int] = 36,
+    n_post_periods: Optional[int] = 6,
+    treatment_effect_rate: float = 0.10,
+    treatment_effect_slope: float = 0.002,
     **advanced_params,
 ) -> PanelOutput:
     """
@@ -41,29 +80,30 @@ def generate_scm_gamma_26(
         `mu_treated`, `tau_mean_true`.
         Scenario-level outputs always exclude synthetic covariates
         `exposure`, `macro_index`, `seasonality_index`.
-    n_donors : int, default=30
+    n_donors : int, default=40
         Number of donor units.
-    n_pre_periods : int or None, default=None
+    n_pre_periods : int or None, default=36
         Number of pre-treatment periods. Preferred explicit horizon control.
         When both `n_pre_periods` and `n_post_periods` are omitted, scenario
-        defaults are used (`36` pre, `12` post). The generated panel includes
+        defaults are used (`36` pre, `6` post). The generated panel includes
         one explicit intervention-anchor period, so each unit has
         ``n_pre_periods + 1 + n_post_periods`` rows.
-    n_post_periods : int or None, default=None
+    n_post_periods : int or None, default=6
         Number of post-treatment periods. Must be provided together with
         `n_pre_periods` when using explicit horizon control.
-    treatment_effect_rate : float, default=0.12
+    treatment_effect_rate : float, default=0.10
         Long-run post-treatment relative effect scale. The first post period is
         attenuated by a ramp factor ``1 - exp(-1 / 2.5)`` (about 0.33x when slope
         is zero).
-    treatment_effect_slope : float, default=0.01
+    treatment_effect_slope : float, default=0.002
         Linear slope of the post-treatment relative effect path.
-    missing_outcome_frac : float, default=0.0
-        Fraction of outcomes to mask as missing in the base generator.
     **advanced_params
         Forwarded to :func:`causalis.dgp.panel_data_scm.generate_scm_gamma_data`.
         Common advanced knobs include `time_start`, `calendar_start`,
-        and latent/missingness configuration.
+        and latent-factor configuration. Defaults used by this wrapper are
+        `gamma_shape=120`, `donor_noise_std_log=0.03`,
+        `common_factor_std_log=0.03`, `latent_factor_std_log=0.0`,
+        and `prefit_mismatch_std_log=0.0`.
 
     Returns
     -------
@@ -89,11 +129,21 @@ def generate_scm_gamma_26(
       period in the panel, contract-level pre periods are
       ``n_pre_periods + 1`` and post periods are ``n_post_periods``.
     - With this function's default arguments, the explicit values are:
-      ``n_pre_periods=36``, ``n_post_periods=12``, ``calendar_start='2000-01'``,
+      ``n_pre_periods=36``, ``n_post_periods=6``, ``calendar_start='2000-01'``,
       ``time_start=1``, first treated period at ``Period('2003-02', 'M')``,
       and intervention anchor at ``Period('2003-01', 'M')``.
     """
-    return generate_scm_gamma_26_data(
+    default_advanced_params = dict(
+        gamma_shape=120,
+        donor_noise_std_log=0.03,
+        common_factor_std_log=0.03,
+        latent_factor_std_log=0.0,
+        prefit_mismatch_std_log=0.0,
+    )
+    merged_advanced_params = {**default_advanced_params, **advanced_params}
+
+    return _generate_scm26(
+        distribution="gamma",
         seed=seed,
         return_panel_data=return_panel_data,
         include_oracles=include_oracles,
@@ -102,8 +152,7 @@ def generate_scm_gamma_26(
         n_post_periods=n_post_periods,
         treatment_effect_rate=treatment_effect_rate,
         treatment_effect_slope=treatment_effect_slope,
-        missing_outcome_frac=missing_outcome_frac,
-        advanced_params=advanced_params,
+        advanced_params=merged_advanced_params,
     )
 
 
@@ -111,12 +160,11 @@ def generate_scm_poisson_26(
     seed: int = 42,
     return_panel_data: bool = True,
     include_oracles: bool = False,
-    n_donors: int = 10,
-    n_pre_periods: Optional[int] = None,
-    n_post_periods: Optional[int] = None,
-    treatment_effect_rate: float = 0.10,
-    treatment_effect_slope: float = 0.005,
-    donor_missing_block_frac: float = 0.08,
+    n_donors: int = 20,
+    n_pre_periods: Optional[int] = 180,
+    n_post_periods: Optional[int] = 4,
+    treatment_effect_rate: float = 0.15,
+    treatment_effect_slope: float = 0.0005,
     **advanced_params,
 ) -> PanelOutput:
     """
@@ -135,29 +183,29 @@ def generate_scm_poisson_26(
         `mu_treated`, `tau_mean_true`.
         Scenario-level outputs always exclude synthetic covariates
         `exposure`, `macro_index`, `seasonality_index`.
-    n_donors : int, default=10
+    n_donors : int, default=20
         Number of donor units.
-    n_pre_periods : int or None, default=None
+    n_pre_periods : int or None, default=180
         Number of pre-treatment periods. Preferred explicit horizon control.
         When both `n_pre_periods` and `n_post_periods` are omitted, scenario
-        defaults are used (`36` pre, `12` post). The generated panel includes
+        defaults are used (`36` pre, `6` post). The generated panel includes
         one explicit intervention-anchor period, so each unit has
         ``n_pre_periods + 1 + n_post_periods`` rows.
-    n_post_periods : int or None, default=None
+    n_post_periods : int or None, default=4
         Number of post-treatment periods. Must be provided together with
         `n_pre_periods` when using explicit horizon control.
-    treatment_effect_rate : float, default=0.10
+    treatment_effect_rate : float, default=0.15
         Long-run post-treatment relative effect scale. The first post period is
         attenuated by a ramp factor ``1 - exp(-1 / 2.5)`` (about 0.33x when slope
         is zero).
-    treatment_effect_slope : float, default=0.005
+    treatment_effect_slope : float, default=0.0005
         Linear slope of the post-treatment relative effect path.
-    donor_missing_block_frac : float, default=0.08
-        Fraction of donor-only rows to mask via contiguous missing-time blocks.
     **advanced_params
         Forwarded to :func:`causalis.dgp.panel_data_scm.generate_scm_poisson_data`.
         Common advanced knobs include `time_start`, `calendar_start`,
-        and latent/missingness configuration.
+        and latent-factor configuration. Defaults used by this wrapper are
+        `donor_noise_std_log=0.02`, `common_factor_std_log=0.02`,
+        `latent_factor_std_log=0.0`, and `prefit_mismatch_std_log=0.0`.
 
     Returns
     -------
@@ -183,11 +231,20 @@ def generate_scm_poisson_26(
       period in the panel, contract-level pre periods are
       ``n_pre_periods + 1`` and post periods are ``n_post_periods``.
     - With this function's default arguments, the explicit values are:
-      ``n_pre_periods=36``, ``n_post_periods=12``, ``calendar_start='2000-01'``,
+      ``n_pre_periods=180``, ``n_post_periods=4``, ``calendar_start='2000-01'``,
       ``time_start=1``, first treated period at ``Period('2003-02', 'M')``,
       and intervention anchor at ``Period('2003-01', 'M')``.
     """
-    return generate_scm_poisson_26_data(
+    default_advanced_params = dict(
+        donor_noise_std_log=0.02,
+        common_factor_std_log=0.02,
+        latent_factor_std_log=0.0,
+        prefit_mismatch_std_log=0.0,
+    )
+    merged_advanced_params = {**default_advanced_params, **advanced_params}
+
+    return _generate_scm26(
+        distribution="poisson",
         seed=seed,
         return_panel_data=return_panel_data,
         include_oracles=include_oracles,
@@ -196,6 +253,5 @@ def generate_scm_poisson_26(
         n_post_periods=n_post_periods,
         treatment_effect_rate=treatment_effect_rate,
         treatment_effect_slope=treatment_effect_slope,
-        donor_missing_block_frac=donor_missing_block_frac,
-        advanced_params=advanced_params,
+        advanced_params=merged_advanced_params,
     )

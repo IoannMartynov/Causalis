@@ -3,25 +3,11 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict
 
-import matplotlib as mpl
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
 from causalis.data_contracts.panel_data_scm import PanelDataSCM
 from causalis.data_contracts.panel_estimate import PanelEstimate
-
-
-def _to_plot_time(value: object) -> object:
-    if isinstance(value, pd.Period):
-        return value.to_timestamp()
-    return value
-
-
-def _to_plot_index(index: pd.Index) -> pd.Index:
-    if isinstance(index, pd.PeriodIndex):
-        return index.to_timestamp()
-    return index
 
 
 def _as_finite_float(value: Any) -> float | None:
@@ -68,13 +54,37 @@ def _series_mean_signed(series: pd.Series) -> float | None:
     return float(np.mean(values))
 
 
+def _coerce_bool(value: Any) -> bool | None:
+    if value is None:
+        return None
+    if isinstance(value, (bool, np.bool_)):
+        return bool(value)
+    if isinstance(value, (int, np.integer)):
+        if value in (0, 1):
+            return bool(value)
+        return None
+    if isinstance(value, str):
+        token = value.strip().lower()
+        if token in {"true", "t", "1", "yes", "y"}:
+            return True
+        if token in {"false", "f", "0", "no", "n"}:
+            return False
+    return None
+
+
+def _coerce_string_list(value: Any) -> list[str]:
+    if isinstance(value, (list, tuple, set)):
+        out: list[str] = []
+        for item in value:
+            text = str(item).strip()
+            if text:
+                out.append(text)
+        return out
+    return []
+
+
 def _extract_placebo_atts(diagnostics: Dict[str, Any]) -> np.ndarray:
     raw = diagnostics.get("att_placebo_att_distribution")
-    if raw is None:
-        # Newer ASCM diagnostics expose cross-fit fold ATT estimates.
-        fold_estimates = diagnostics.get("average_att_fold_estimates")
-        if isinstance(fold_estimates, dict):
-            raw = list(fold_estimates.values())
     if raw is None:
         return np.asarray([], dtype=float)
 
@@ -98,7 +108,9 @@ def _resolve_att_aug(estimate: PanelEstimate, diagnostics: Dict[str, Any]) -> fl
         if resolved is not None:
             return resolved
 
-    effect_vals = pd.to_numeric(estimate.effect_by_time, errors="coerce").to_numpy(dtype=float)
+    effect_series = pd.to_numeric(estimate.effect_by_time, errors="coerce")
+    post_idx = effect_series.index.intersection(pd.Index(list(estimate.post_times)))
+    effect_vals = effect_series.loc[post_idx].to_numpy(dtype=float)
     effect_vals = effect_vals[np.isfinite(effect_vals)]
     if effect_vals.size == 0:
         return None
@@ -106,7 +118,26 @@ def _resolve_att_aug(estimate: PanelEstimate, diagnostics: Dict[str, Any]) -> fl
 
 
 def _resolve_att_sc(estimate: PanelEstimate, diagnostics: Dict[str, Any]) -> float | None:
-    return _as_finite_float(getattr(estimate, "att_sc", diagnostics.get("att_sc")))
+    for value in (
+        getattr(estimate, "att_sc", None),
+        diagnostics.get("att_sc"),
+    ):
+        resolved = _as_finite_float(value)
+        if resolved is not None:
+            return resolved
+
+    synthetic_sc = _optional_series_attr(estimate, "synthetic_outcome_sc")
+    if synthetic_sc is None:
+        return None
+
+    observed = estimate.observed_outcome
+    gap_sc = observed - synthetic_sc
+    post_idx = gap_sc.index.intersection(pd.Index(list(estimate.post_times)))
+    post_vals = pd.to_numeric(gap_sc.loc[post_idx], errors="coerce").to_numpy(dtype=float)
+    post_vals = post_vals[np.isfinite(post_vals)]
+    if post_vals.size == 0:
+        return None
+    return float(np.mean(post_vals))
 
 
 def _missing_cell_fraction(paneldata: PanelDataSCM) -> float:
@@ -114,196 +145,19 @@ def _missing_cell_fraction(paneldata: PanelDataSCM) -> float:
     if df.empty:
         return 0.0
 
-    missing = df[paneldata.y].isna()
+    unit_idx = pd.Index(df[paneldata.unit_col].unique())
+    time_idx = pd.Index(paneldata.analysis_times())
+    full_grid = pd.MultiIndex.from_product(
+        [unit_idx, time_idx],
+        names=[paneldata.unit_col, paneldata.time_col],
+    )
+    y_full = (
+        df.set_index([paneldata.unit_col, paneldata.time_col])[paneldata.y]
+        .reindex(full_grid)
+        .reset_index(drop=True)
+    )
+    missing = y_full.isna()
     return float(missing.mean())
-
-
-def _save_observed_vs_synthetic(
-    *,
-    observed: pd.Series,
-    synthetic_aug: pd.Series,
-    synthetic_sc: pd.Series | None,
-    treatment_start: Any,
-    save_path: Path,
-    dpi: int,
-) -> None:
-    rc = {
-        "font.size": 11,
-        "axes.titlesize": 13,
-        "axes.labelsize": 12,
-        "legend.fontsize": 10,
-        "xtick.labelsize": 10,
-        "ytick.labelsize": 10,
-    }
-    with mpl.rc_context(rc):
-        fig, ax = plt.subplots(figsize=(10.0, 5.5), dpi=dpi)
-        cycle = mpl.rcParams["axes.prop_cycle"].by_key().get("color", ["C0", "C1", "C2"])
-        observed_x = _to_plot_index(observed.index)
-        synthetic_aug_x = _to_plot_index(synthetic_aug.index)
-        synthetic_sc_x = _to_plot_index(synthetic_sc.index) if synthetic_sc is not None else None
-
-        ax.plot(
-            observed_x,
-            observed.values,
-            color=cycle[0],
-            linewidth=2.6,
-            label="Observed (treated)",
-            zorder=3,
-        )
-        ax.plot(
-            synthetic_aug_x,
-            synthetic_aug.values,
-            color=cycle[1 % len(cycle)],
-            linewidth=2.2,
-            label="Synthetic (augmented)",
-            zorder=2,
-        )
-        if synthetic_sc is not None and synthetic_sc_x is not None:
-            ax.plot(
-                synthetic_sc_x,
-                synthetic_sc.values,
-                color=cycle[2 % len(cycle)],
-                linewidth=1.8,
-                linestyle="--",
-                label="Synthetic (SC)",
-                zorder=1,
-            )
-        ax.axvline(
-            _to_plot_time(treatment_start),
-            linestyle="--",
-            linewidth=1.7,
-            color="0.25",
-            label="Intervention",
-            zorder=4,
-        )
-
-        ax.set_title("Observed vs Synthetic Outcome Path")
-        ax.set_xlabel("Time")
-        ax.set_ylabel("Outcome")
-        ax.grid(True, linewidth=0.5, alpha=0.45)
-        for spine in ("top", "right"):
-            ax.spines[spine].set_visible(False)
-        ax.legend(frameon=False)
-        fig.tight_layout()
-        fig.savefig(save_path, dpi=dpi, bbox_inches="tight", pad_inches=0.1)
-        plt.close(fig)
-
-
-def _save_gap_over_time(
-    *,
-    gap_aug: pd.Series,
-    gap_sc: pd.Series | None,
-    treatment_start: Any,
-    save_path: Path,
-    dpi: int,
-) -> None:
-    rc = {
-        "font.size": 11,
-        "axes.titlesize": 13,
-        "axes.labelsize": 12,
-        "legend.fontsize": 10,
-        "xtick.labelsize": 10,
-        "ytick.labelsize": 10,
-    }
-    with mpl.rc_context(rc):
-        fig, ax = plt.subplots(figsize=(10.0, 5.5), dpi=dpi)
-        cycle = mpl.rcParams["axes.prop_cycle"].by_key().get("color", ["C0", "C1", "C2"])
-        gap_aug_x = _to_plot_index(gap_aug.index)
-        gap_sc_x = _to_plot_index(gap_sc.index) if gap_sc is not None else None
-
-        ax.plot(
-            gap_aug_x,
-            gap_aug.values,
-            color=cycle[0],
-            linewidth=2.3,
-            label="Gap (augmented)",
-        )
-        if gap_sc is not None and gap_sc_x is not None:
-            ax.plot(
-                gap_sc_x,
-                gap_sc.values,
-                color=cycle[1 % len(cycle)],
-                linewidth=1.9,
-                linestyle="--",
-                label="Gap (SC)",
-            )
-        ax.axhline(0.0, color="0.35", linewidth=1.2, linestyle=":")
-        ax.axvline(
-            _to_plot_time(treatment_start),
-            linestyle="--",
-            linewidth=1.7,
-            color="0.25",
-            label="Intervention",
-        )
-
-        ax.set_title("Gap Over Time (Observed - Synthetic)")
-        ax.set_xlabel("Time")
-        ax.set_ylabel("Gap")
-        ax.grid(True, linewidth=0.5, alpha=0.45)
-        for spine in ("top", "right"):
-            ax.spines[spine].set_visible(False)
-        ax.legend(frameon=False)
-        fig.tight_layout()
-        fig.savefig(save_path, dpi=dpi, bbox_inches="tight", pad_inches=0.1)
-        plt.close(fig)
-
-
-def _save_placebo_histogram(
-    *,
-    placebo_atts: np.ndarray,
-    treated_att: float,
-    save_path: Path,
-    dpi: int,
-) -> None:
-    rc = {
-        "font.size": 11,
-        "axes.titlesize": 13,
-        "axes.labelsize": 12,
-        "legend.fontsize": 10,
-        "xtick.labelsize": 10,
-        "ytick.labelsize": 10,
-    }
-    with mpl.rc_context(rc):
-        fig, ax = plt.subplots(figsize=(10.0, 5.5), dpi=dpi)
-
-        if placebo_atts.size > 0:
-            n_bins = int(np.clip(np.ceil(np.sqrt(placebo_atts.size)) + 2, 5, 30))
-            ax.hist(
-                placebo_atts,
-                bins=n_bins,
-                color="#5B8FF9",
-                edgecolor="white",
-                alpha=0.85,
-                label="Placebo ATTs",
-            )
-        else:
-            ax.text(
-                0.5,
-                0.5,
-                "No placebo ATT draws available",
-                ha="center",
-                va="center",
-                transform=ax.transAxes,
-            )
-
-        ax.axvline(
-            treated_att,
-            color="#D7263D",
-            linewidth=2.0,
-            linestyle="--",
-            label=f"Treated ATT = {treated_att:.4g}",
-        )
-
-        ax.set_title("Placebo ATT Distribution")
-        ax.set_xlabel("ATT")
-        ax.set_ylabel("Count")
-        ax.grid(True, axis="y", linewidth=0.5, alpha=0.45)
-        for spine in ("top", "right"):
-            ax.spines[spine].set_visible(False)
-        ax.legend(frameon=False)
-        fig.tight_layout()
-        fig.savefig(save_path, dpi=dpi, bbox_inches="tight", pad_inches=0.1)
-        plt.close(fig)
 
 
 def run_scm_diagnostics(
@@ -334,8 +188,7 @@ def run_scm_diagnostics(
         )
 
     diagnostics = dict(estimate.diagnostics or {})
-    out_dir = Path(output_dir) if output_dir is not None else Path(__file__).resolve().parent
-    out_dir.mkdir(parents=True, exist_ok=True)
+    _ = output_dir, filename_prefix, dpi  # plotting is handled by diagnostic_plots.py
 
     observed = estimate.observed_outcome.copy()
     synthetic_aug = estimate.synthetic_outcome.copy()
@@ -344,19 +197,21 @@ def run_scm_diagnostics(
     gap_sc = (observed - synthetic_sc) if synthetic_sc is not None else None
 
     pre_times = list(estimate.pre_times)
+    pre_idx = gap_aug.index.intersection(pd.Index(pre_times))
     k_eff = min(int(pre_tail_k), len(pre_times))
     if k_eff > 0:
         tail_pre_times = pre_times[-k_eff:]
-        mean_gap_last_k_pre_aug = _as_finite_float(gap_aug.loc[tail_pre_times].mean())
+        tail_pre_idx = gap_aug.index.intersection(pd.Index(tail_pre_times))
+        mean_gap_last_k_pre_aug = _as_finite_float(gap_aug.loc[tail_pre_idx].mean())
         mean_gap_last_k_pre_sc = (
-            _as_finite_float(gap_sc.loc[tail_pre_times].mean()) if gap_sc is not None else None
+            _as_finite_float(gap_sc.loc[tail_pre_idx].mean()) if gap_sc is not None else None
         )
     else:
         mean_gap_last_k_pre_aug = None
         mean_gap_last_k_pre_sc = None
 
-    pre_gap_aug = gap_aug.loc[pre_times]
-    pre_gap_sc = gap_sc.loc[pre_times] if gap_sc is not None else None
+    pre_gap_aug = gap_aug.loc[pre_idx]
+    pre_gap_sc = gap_sc.loc[pre_idx] if gap_sc is not None else None
 
     pre_rmse_sc = _as_finite_float(diagnostics.get("pre_rmse_sc"))
     if pre_rmse_sc is None:
@@ -370,12 +225,16 @@ def run_scm_diagnostics(
     pre_mae_aug = _as_finite_float(diagnostics.get("pre_mae_augmented"))
     if pre_mae_aug is None:
         pre_mae_aug = _series_mae(pre_gap_aug)
-    max_abs_pre_gap = _as_finite_float(diagnostics.get("max_abs_pre_gap"))
-    if max_abs_pre_gap is None:
-        max_abs_pre_gap = _series_max_abs(pre_gap_aug)
-    mean_signed_pre_gap = _as_finite_float(diagnostics.get("mean_signed_pre_gap"))
-    if mean_signed_pre_gap is None:
-        mean_signed_pre_gap = _series_mean_signed(pre_gap_aug)
+    max_abs_pre_gap_augmented = _as_finite_float(diagnostics.get("max_abs_pre_gap_augmented"))
+    if max_abs_pre_gap_augmented is None:
+        max_abs_pre_gap_augmented = _as_finite_float(diagnostics.get("max_abs_pre_gap"))
+    if max_abs_pre_gap_augmented is None:
+        max_abs_pre_gap_augmented = _series_max_abs(pre_gap_aug)
+    mean_signed_pre_gap_augmented = _as_finite_float(diagnostics.get("mean_signed_pre_gap_augmented"))
+    if mean_signed_pre_gap_augmented is None:
+        mean_signed_pre_gap_augmented = _as_finite_float(diagnostics.get("mean_signed_pre_gap"))
+    if mean_signed_pre_gap_augmented is None:
+        mean_signed_pre_gap_augmented = _series_mean_signed(pre_gap_aug)
 
     donor_weights_sc = getattr(estimate, "donor_weights_sc", None)
     w_sc = (
@@ -397,12 +256,26 @@ def run_scm_diagnostics(
     sum_weights_augmented = _as_finite_float(diagnostics.get("sum_weights_augmented"))
     if sum_weights_augmented is None and w_aug_finite.size > 0:
         sum_weights_augmented = float(np.sum(w_aug_finite))
-    herfindahl_weights = float(np.sum(np.square(w_aug_finite))) if w_aug_finite.size > 0 else None
-    effective_n_donors = (
-        float(1.0 / herfindahl_weights)
-        if herfindahl_weights is not None and herfindahl_weights > 0.0
+
+    w_sc_finite = w_sc[np.isfinite(w_sc)]
+    herfindahl_weights_sc = float(np.sum(np.square(w_sc_finite))) if w_sc_finite.size > 0 else None
+    effective_n_donors_sc = (
+        float(1.0 / herfindahl_weights_sc)
+        if herfindahl_weights_sc is not None and herfindahl_weights_sc > 0.0
         else None
     )
+
+    abs_sum_aug = float(np.sum(np.abs(w_aug_finite))) if w_aug_finite.size > 0 else None
+    if abs_sum_aug is not None and abs_sum_aug > 0.0:
+        w_aug_abs_norm = np.abs(w_aug_finite) / abs_sum_aug
+        herfindahl_abs_augmented = float(np.sum(np.square(w_aug_abs_norm)))
+        effective_n_donors_abs_augmented = (
+            float(1.0 / herfindahl_abs_augmented) if herfindahl_abs_augmented > 0.0 else None
+        )
+    else:
+        herfindahl_abs_augmented = None
+        effective_n_donors_abs_augmented = None
+
     n_negative_weights = int(np.sum(w_aug_finite < 0.0))
     if l1_norm_weight_aug is None or l1_norm_weight_aug <= 0.0:
         negative_weight_share = None
@@ -438,9 +311,9 @@ def run_scm_diagnostics(
         ci_high_abs = _as_finite_float(diagnostics.get("average_att_ci_upper"))
 
     placebo_ci_is_unbounded_raw = diagnostics.get("att_placebo_ci_is_unbounded")
-    placebo_ci_is_unbounded = (
-        bool(placebo_ci_is_unbounded_raw) if placebo_ci_is_unbounded_raw is not None else False
-    )
+    placebo_ci_is_unbounded = _coerce_bool(placebo_ci_is_unbounded_raw)
+    if placebo_ci_is_unbounded is None:
+        placebo_ci_is_unbounded = False
 
     is_robust_model = str(estimate.model) == "RobustSyntheticControl"
     missing_cell_fraction = _as_finite_float(diagnostics.get("missing_cell_fraction"))
@@ -448,9 +321,7 @@ def run_scm_diagnostics(
         missing_cell_fraction = _missing_cell_fraction(paneldata)
 
     completion_converged_raw = diagnostics.get("completion_converged")
-    completion_converged = (
-        bool(completion_converged_raw) if completion_converged_raw is not None else None
-    )
+    completion_converged = _coerce_bool(completion_converged_raw)
     completion_effective_rank = diagnostics.get("completion_effective_rank")
     if completion_effective_rank is not None:
         try:
@@ -458,34 +329,21 @@ def run_scm_diagnostics(
         except (TypeError, ValueError):
             completion_effective_rank = None
 
-    observed_vs_synth_path = out_dir / f"{filename_prefix}_observed_vs_synthetic.png"
-    gap_path = out_dir / f"{filename_prefix}_gap_over_time.png"
-    placebo_hist_path = out_dir / f"{filename_prefix}_placebo_att_histogram.png"
-
-    _save_observed_vs_synthetic(
-        observed=observed,
-        synthetic_aug=synthetic_aug,
-        synthetic_sc=synthetic_sc,
-        treatment_start=estimate.treatment_start,
-        save_path=observed_vs_synth_path,
-        dpi=int(dpi),
-    )
-    _save_gap_over_time(
-        gap_aug=gap_aug,
-        gap_sc=gap_sc,
-        treatment_start=estimate.treatment_start,
-        save_path=gap_path,
-        dpi=int(dpi),
-    )
     treated_att_aug = _resolve_att_aug(estimate, diagnostics)
     if treated_att_aug is None:
-        raise ValueError("Unable to resolve augmented ATT for diagnostics plot.")
-    _save_placebo_histogram(
-        placebo_atts=placebo_atts,
-        treated_att=float(treated_att_aug),
-        save_path=placebo_hist_path,
-        dpi=int(dpi),
-    )
+        raise ValueError("Unable to resolve augmented ATT for diagnostics metrics.")
+
+    slsqp_fallback_reasons = _coerce_string_list(diagnostics.get("slsqp_fallback_reasons"))
+    slsqp_fallback_count_raw = diagnostics.get("slsqp_fallback_count")
+    try:
+        slsqp_fallback_count = int(slsqp_fallback_count_raw)
+    except (TypeError, ValueError):
+        slsqp_fallback_count = len(slsqp_fallback_reasons)
+    slsqp_fallback_count = max(0, slsqp_fallback_count)
+
+    suppressed_fit_warnings = _coerce_string_list(diagnostics.get("suppressed_fit_warnings"))
+    if not suppressed_fit_warnings:
+        suppressed_fit_warnings = _coerce_string_list(diagnostics.get("stability_warning_messages"))
 
     metrics: Dict[str, Any] = {
         "n_donors": int(len(estimate.donor_weights_augmented)),
@@ -495,8 +353,10 @@ def run_scm_diagnostics(
         "pre_rmse_aug": pre_rmse_aug,
         "pre_rmse_augmented": pre_rmse_aug,
         "pre_mae_augmented": pre_mae_aug,
-        "max_abs_pre_gap": max_abs_pre_gap,
-        "mean_signed_pre_gap": mean_signed_pre_gap,
+        "max_abs_pre_gap": max_abs_pre_gap_augmented,
+        "max_abs_pre_gap_augmented": max_abs_pre_gap_augmented,
+        "mean_signed_pre_gap": mean_signed_pre_gap_augmented,
+        "mean_signed_pre_gap_augmented": mean_signed_pre_gap_augmented,
         "att_sc": _resolve_att_sc(estimate, diagnostics),
         "att_aug": treated_att_aug,
         "max_weight_sc": max_weight_sc,
@@ -505,8 +365,12 @@ def run_scm_diagnostics(
         "l1_norm_weight_aug": l1_norm_weight_aug,
         "l1_norm_weights_augmented": l1_norm_weight_aug,
         "sum_weights_augmented": sum_weights_augmented,
-        "effective_n_donors": effective_n_donors,
-        "herfindahl_weights": herfindahl_weights,
+        "effective_n_donors": effective_n_donors_sc,
+        "effective_n_donors_sc": effective_n_donors_sc,
+        "herfindahl_weights": herfindahl_weights_sc,
+        "herfindahl_weights_sc": herfindahl_weights_sc,
+        "effective_n_donors_abs_augmented": effective_n_donors_abs_augmented,
+        "herfindahl_abs_augmented": herfindahl_abs_augmented,
         "negative_weight_share": negative_weight_share,
         "n_negative_weights": n_negative_weights,
         "cond_augmented_gram": _as_finite_float(diagnostics.get("cond_augmented_gram")),
@@ -522,9 +386,13 @@ def run_scm_diagnostics(
         "mean_gap_last_k_pre_sc": mean_gap_last_k_pre_sc,
         "mean_gap_last_k_pre_aug": mean_gap_last_k_pre_aug,
         "pre_tail_k_used": int(k_eff),
+        "slsqp_fallback_count": slsqp_fallback_count,
+        "slsqp_fallback_reasons": slsqp_fallback_reasons,
+        "suppressed_fit_warning_count": int(len(suppressed_fit_warnings)),
+        "suppressed_fit_warnings": list(suppressed_fit_warnings),
     }
 
-    return {"metrics": metrics}
+    return {"metrics": metrics, "warnings": list(suppressed_fit_warnings)}
 
 
 __all__ = ["run_scm_diagnostics"]

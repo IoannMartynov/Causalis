@@ -21,9 +21,9 @@ def _make_panel_with_effect(effect: float = 2.5) -> pd.DataFrame:
 
         rows.extend(
             [
-                {"unit_id": "T", "time_id": t, "y": y_treat},
-                {"unit_id": "C1", "time_id": t, "y": y_c1},
-                {"unit_id": "C2", "time_id": t, "y": y_c2},
+                {"unit_id": "T", "time_id": t, "y": y_treat, "treated_time": 1 if idx >= 4 else 0},
+                {"unit_id": "C1", "time_id": t, "y": y_c1, "treated_time": 0},
+                {"unit_id": "C2", "time_id": t, "y": y_c2, "treated_time": 0},
             ]
         )
     return pd.DataFrame(rows)
@@ -34,9 +34,8 @@ def _panel(df: pd.DataFrame, **overrides) -> PanelDataSCM:
         "unit_col": "unit_id",
         "time_col": "time_id",
         "y": "y",
+        "treated_time": "treated_time",
         "df": df,
-        "treated_unit": "T",
-        "treatment_start": "2020-04-01",
     }
     kwargs.update(overrides)
     return PanelDataSCM(**kwargs)
@@ -50,33 +49,23 @@ def test_ascm_fit_and_estimate_interface():
     estimate = model.estimate()
 
     assert isinstance(estimate, PanelEstimate)
-    assert estimate.estimand == "ATTE"
+    assert estimate.estimand == "dynamic_effect_path"
     assert estimate.model == "AugmentedSyntheticControl"
     assert len(estimate.pre_times) == 3
     assert len(estimate.post_times) == 3
-    assert len(estimate.att_by_time) == 3
-    assert set(estimate.donor_weights_sc.keys()) == {"C1", "C2"}
-    assert estimate.att > 2.0
-    if estimate.ci_lower_absolute is not None and estimate.ci_upper_absolute is not None:
-        assert estimate.ci_lower_absolute <= estimate.ci_upper_absolute
-    else:
-        assert estimate.diagnostics["att_placebo_ci_is_unbounded"] is True
-        assert estimate.diagnostics["att_placebo_min_possible_p"] > estimate.alpha
+    assert len(estimate.effect_by_time) == 3
+    assert set(estimate.donor_weights_augmented.keys()) == {"C1", "C2"}
+    assert float(estimate.effect_by_time.mean()) > 2.0
+    assert len(estimate.ci_lower_by_time) == len(estimate.post_times)
+    assert len(estimate.ci_upper_by_time) == len(estimate.post_times)
     assert estimate.alpha == 0.05
-    assert estimate.p_value is not None
-    assert 0.0 <= estimate.p_value <= 1.0
-    assert isinstance(estimate.is_significant, bool)
-    assert estimate.diagnostics["att_pre_resid_n"] == len(estimate.pre_times)
-    assert estimate.diagnostics["att_p_value_method"] == "placebo_in_space_att"
-    assert estimate.diagnostics["att_placebo_n"] >= 1
-    assert estimate.diagnostics["att_is_significant_fit_adjusted"] in {True, False, None}
-    warning = estimate.diagnostics["att_fit_adjusted_warning"]
-    assert warning is None or isinstance(warning, str)
-    if estimate.is_significant is True and estimate.diagnostics["att_is_significant_fit_adjusted"] is False:
-        assert warning is not None
-    if estimate.value_relative is not None and estimate.ci_lower_relative is not None:
-        assert estimate.ci_upper_relative is not None
-        assert estimate.ci_lower_relative <= estimate.ci_upper_relative
+    pvals_non_missing = estimate.p_value_by_time.dropna()
+    assert ((pvals_non_missing >= 0.0) & (pvals_non_missing <= 1.0)).all()
+    assert estimate.is_significant_by_time.isin([True, False]).all()
+    assert estimate.diagnostics["n_pre_periods"] == len(estimate.pre_times)
+    assert estimate.diagnostics["n_post_periods"] == len(estimate.post_times)
+    assert estimate.diagnostics["estimand"] == "dynamic_effect_path"
+    assert estimate.diagnostics["average_att_ttest_available"] in {True, False}
 
 
 def test_ascm_alias_and_not_fitted_guard():
@@ -97,16 +86,15 @@ def test_ascm_requires_balanced_block_no_missing_cells():
 def test_ascm_requires_balanced_block_no_missing_outcomes():
     df = _make_panel_with_effect()
     df.loc[(df["unit_id"] == "C1") & (df["time_id"] == "2020-03-01"), "y"] = np.nan
-    data = _panel(df)
-
-    with pytest.raises(ValueError, match="balanced block"):
-        AugmentedSyntheticControl().fit(data)
+    with pytest.raises(ValueError, match="contains nulls"):
+        _panel(df)
 
 
 def test_ascm_requires_nonempty_pre_and_post():
     df = _make_panel_with_effect()
-    with pytest.raises(ValueError, match="No post-treatment periods available"):
-        _panel(df, treatment_start="2020-10-01")
+    df.loc[df["unit_id"] == "T", "treated_time"] = 1
+    with pytest.raises(ValueError, match="No pre-treatment periods available"):
+        _panel(df)
 
 
 def test_ascm_contract_requires_at_least_two_donors():
@@ -118,7 +106,7 @@ def test_ascm_contract_requires_at_least_two_donors():
 
 def test_ascm_rejects_invalid_explicit_periods():
     df = _make_panel_with_effect()
-    with pytest.raises(ValueError, match="pre_periods must contain only periods < treatment_start"):
+    with pytest.raises(ValueError, match="pre_periods"):
         _panel(
             df,
             pre_periods=["2020-01-01", "2020-02-01", "2020-04-01"],

@@ -131,10 +131,15 @@ class PanelEstimate(BaseModel):
             raise ValueError("effect_by_time must contain only finite numeric values.")
 
         p_numeric = pd.to_numeric(self.p_value_by_time, errors="coerce")
-        if p_numeric.isna().any() or not np.isfinite(p_numeric.to_numpy()).all():
+        raw_missing = self.p_value_by_time.isna()
+        coerced_missing = p_numeric.isna()
+        if bool((coerced_missing & (~raw_missing)).any()):
             raise ValueError("p_value_by_time must contain only finite numeric values.")
-        if ((p_numeric < 0.0) | (p_numeric > 1.0)).any():
-            raise ValueError("p_value_by_time values must be in [0, 1].")
+        p_non_missing = p_numeric[~coerced_missing]
+        if not np.isfinite(p_non_missing.to_numpy()).all():
+            raise ValueError("p_value_by_time must contain only finite numeric values.")
+        if ((p_non_missing < 0.0) | (p_non_missing > 1.0)).any():
+            raise ValueError("p_value_by_time values must be in [0, 1] where provided.")
 
         for val in self.is_significant_by_time.to_list():
             if not isinstance(val, (bool, np.bool_)):
@@ -271,13 +276,16 @@ class PanelEstimate(BaseModel):
             else:
                 value_relative = self._fmt_float(rel)
 
+        inference_label = (
+            self.diagnostics.get("pointwise_ci_method")
+            or self.diagnostics.get("inference_default")
+            or "average_att_ttest"
+        )
+
         summary = {
             "estimand": estimand,
             "model": self.model,
-            "inference": self.diagnostics.get(
-                "pointwise_ci_method",
-                "cwz_overlapping_moving_block",
-            ),
+            "inference": inference_label,
             "value": value,
             "value_relative": value_relative,
             "alpha": self._fmt_float(self.alpha),

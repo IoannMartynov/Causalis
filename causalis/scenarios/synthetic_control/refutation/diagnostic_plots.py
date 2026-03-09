@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from typing import Any, Literal, Optional, Tuple
+from typing import Tuple
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 
 from causalis.data_contracts.panel_estimate import PanelEstimate
@@ -27,71 +26,9 @@ def _ensure_panel_estimate(estimate: PanelEstimate) -> None:
         raise TypeError("estimate must be a PanelEstimate instance.")
 
 
-def _extract_placebo_att_distribution(
-    estimate: PanelEstimate,
-    *,
-    source: Literal["augmented", "sc"],
-) -> np.ndarray:
-    diagnostics = dict(estimate.diagnostics or {})
-    key = (
-        "att_placebo_att_distribution"
-        if source == "augmented"
-        else "att_sc_placebo_att_distribution"
-    )
-    raw = diagnostics.get(key)
-    if raw is None and source == "augmented":
-        # Newer ASCM diagnostics expose cross-fit fold ATT estimates instead of placebo draws.
-        raw = diagnostics.get("average_att_fold_estimates")
-        if isinstance(raw, dict):
-            raw = list(raw.values())
-    if raw is None:
-        return np.asarray([], dtype=float)
-
-    values = pd.to_numeric(pd.Series(list(raw)), errors="coerce").to_numpy(dtype=float)
-    return values[np.isfinite(values)]
-
-
 def _optional_series_attr(estimate: PanelEstimate, attr_name: str) -> pd.Series | None:
     value = getattr(estimate, attr_name, None)
     return value if isinstance(value, pd.Series) else None
-
-
-def _resolve_att_value(estimate: PanelEstimate, *, source: Literal["augmented", "sc"]) -> float:
-    diagnostics = dict(estimate.diagnostics or {})
-    candidates: list[Any] = []
-    if source == "augmented":
-        candidates.extend(
-            [
-                getattr(estimate, "att", None),
-                diagnostics.get("att"),
-                diagnostics.get("average_att_estimate"),
-            ]
-        )
-    else:
-        candidates.extend(
-            [
-                getattr(estimate, "att_sc", None),
-                diagnostics.get("att_sc"),
-            ]
-        )
-
-    if source == "augmented":
-        effect_vals = pd.to_numeric(estimate.effect_by_time, errors="coerce").to_numpy(dtype=float)
-        finite_effects = effect_vals[np.isfinite(effect_vals)]
-        if finite_effects.size > 0:
-            candidates.append(float(np.mean(finite_effects)))
-
-    for value in candidates:
-        if value is None:
-            continue
-        try:
-            numeric_value = float(value)
-        except (TypeError, ValueError):
-            continue
-        if np.isfinite(numeric_value):
-            return numeric_value
-
-    raise ValueError("Unable to resolve treated ATT from estimate/diagnostics.")
 
 
 def observed_vs_synthetic_plot(
@@ -240,84 +177,7 @@ def gap_over_time_plot(
     return fig
 
 
-def placebo_att_histogram_plot(
-    estimate: PanelEstimate,
-    *,
-    source: Literal["augmented", "sc"] = "augmented",
-    bins: Optional[int] = None,
-    figsize: Tuple[float, float] = (10.0, 5.5),
-    dpi: int = 220,
-    font_scale: float = 1.10,
-) -> plt.Figure:
-    """Plot placebo ATT histogram with treated ATT line."""
-    _ensure_panel_estimate(estimate)
-    if source not in {"augmented", "sc"}:
-        raise ValueError("source must be 'augmented' or 'sc'.")
-
-    placebo_atts = _extract_placebo_att_distribution(estimate, source=source)
-    treated_att = _resolve_att_value(estimate, source=source)
-
-    rc = {
-        "font.size": 11 * font_scale,
-        "axes.titlesize": 13 * font_scale,
-        "axes.labelsize": 12 * font_scale,
-        "legend.fontsize": 10 * font_scale,
-        "xtick.labelsize": 10 * font_scale,
-        "ytick.labelsize": 10 * font_scale,
-    }
-    with mpl.rc_context(rc):
-        fig, ax = plt.subplots(figsize=figsize, dpi=dpi)
-
-        if placebo_atts.size > 0:
-            bins_eff = (
-                int(np.clip(np.ceil(np.sqrt(placebo_atts.size)) + 2, 5, 30))
-                if bins is None
-                else int(bins)
-            )
-            if bins_eff <= 0:
-                raise ValueError("bins must be positive when provided.")
-            ax.hist(
-                placebo_atts,
-                bins=bins_eff,
-                color="#5B8FF9",
-                edgecolor="white",
-                alpha=0.85,
-                label="Placebo ATTs",
-            )
-        else:
-            ax.text(
-                0.5,
-                0.5,
-                "No placebo ATT draws available",
-                ha="center",
-                va="center",
-                transform=ax.transAxes,
-            )
-
-        label_suffix = "augmented" if source == "augmented" else "SC"
-        ax.axvline(
-            treated_att,
-            color="#D7263D",
-            linewidth=2.0,
-            linestyle="--",
-            label=f"Treated ATT ({label_suffix}) = {treated_att:.4g}",
-        )
-
-        ax.set_title("Placebo ATT Histogram")
-        ax.set_xlabel("ATT")
-        ax.set_ylabel("Count")
-        ax.grid(True, axis="y", linewidth=0.5, alpha=0.45)
-        for spine in ("top", "right"):
-            ax.spines[spine].set_visible(False)
-        ax.legend(frameon=False)
-        fig.tight_layout()
-
-    plt.close(fig)
-    return fig
-
-
 __all__ = [
     "observed_vs_synthetic_plot",
     "gap_over_time_plot",
-    "placebo_att_histogram_plot",
 ]

@@ -11,7 +11,6 @@ from causalis.scenarios.synthetic_control import (
     ASCM,
     gap_over_time_plot,
     observed_vs_synthetic_plot,
-    placebo_att_histogram_plot,
 )
 
 
@@ -30,10 +29,10 @@ def _make_panel_with_effect(effect: float = 2.5) -> pd.DataFrame:
 
         rows.extend(
             [
-                {"unit_id": "T", "time_id": t, "y": y_treat},
-                {"unit_id": "C1", "time_id": t, "y": y_c1},
-                {"unit_id": "C2", "time_id": t, "y": y_c2},
-                {"unit_id": "C3", "time_id": t, "y": y_c3},
+                {"unit_id": "T", "time_id": t, "y": y_treat, "treated_time": 1 if idx >= 4 else 0},
+                {"unit_id": "C1", "time_id": t, "y": y_c1, "treated_time": 0},
+                {"unit_id": "C2", "time_id": t, "y": y_c2, "treated_time": 0},
+                {"unit_id": "C3", "time_id": t, "y": y_c3, "treated_time": 0},
             ]
         )
     return pd.DataFrame(rows)
@@ -45,9 +44,8 @@ def _fit_estimate():
         unit_col="unit_id",
         time_col="time_id",
         y="y",
+        treated_time="treated_time",
         df=df,
-        treated_unit="T",
-        treatment_start="2020-04-01",
     )
     return ASCM(lambda_aug=0.5).fit(data).estimate()
 
@@ -81,22 +79,8 @@ def test_gap_over_time_plot_from_panel_estimate():
     assert "Intervention" in labels
 
 
-def test_placebo_att_histogram_plot_from_panel_estimate():
-    estimate = _fit_estimate()
-
-    fig = placebo_att_histogram_plot(estimate, source="augmented")
-    ax = fig.axes[0]
-    labels = [line.get_label() for line in ax.lines]
-
-    assert isinstance(fig, mpl_figure.Figure)
-    assert not plt.fignum_exists(fig.number)
-    assert ax.get_title() == "Placebo ATT Histogram"
-    assert any(str(label).startswith("Treated ATT (augmented)") for label in labels)
-
-
 def test_synthetic_control_namespace_exposes_new_diagnostic_plots():
     import causalis.scenarios.synthetic_control as scm
 
     assert hasattr(scm, "observed_vs_synthetic_plot")
     assert hasattr(scm, "gap_over_time_plot")
-    assert hasattr(scm, "placebo_att_histogram_plot")

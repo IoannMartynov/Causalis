@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import Any, Hashable, Literal, Optional, Union
 
-import numpy as np
 import pandas as pd
 
 from causalis.data_contracts.panel_data_scm import PanelDataSCM
@@ -21,16 +20,6 @@ _SCM26_ORACLE_COLS = (
 _SCM26_COVARIATE_COLS = ("exposure", "macro_index", "seasonality_index")
 _DEFAULT_SCM26_PRE_PERIODS = 36
 _DEFAULT_SCM26_POST_PERIODS = 6
-
-
-def _build_panel_from_output_df(df: pd.DataFrame) -> PanelDataSCM:
-    return PanelDataSCM(
-        df=df,
-        y="y",
-        unit_col="unit_id",
-        time_col="calendar_time",
-        treated_time="treated_time",
-    )
 
 
 def _rebuild_panel_with_df(panel: PanelDataSCM, df: pd.DataFrame) -> PanelDataSCM:
@@ -85,77 +74,6 @@ def _resolve_pre_post_periods(
     return _infer_pre_post_periods(n=n, n_donors=n_donors)
 
 
-def _inject_donor_missing_periods(
-    *,
-    df: pd.DataFrame,
-    treated_unit: Hashable,
-    random_state: int,
-    donor_missing_block_frac: float,
-    donor_missing_block_min_len: int,
-    donor_missing_block_max_len: Optional[int],
-) -> pd.DataFrame:
-    """Inject contiguous missing-outcome periods for donor units only."""
-    if donor_missing_block_frac <= 0.0:
-        return df
-    if not (0.0 <= donor_missing_block_frac < 1.0):
-        raise ValueError("donor_missing_block_frac must be in [0, 1).")
-    if donor_missing_block_min_len < 1:
-        raise ValueError("donor_missing_block_min_len must be >= 1.")
-    if donor_missing_block_max_len is not None and donor_missing_block_max_len < 1:
-        raise ValueError("donor_missing_block_max_len must be >= 1 when provided.")
-    if (
-        donor_missing_block_max_len is not None
-        and donor_missing_block_max_len < donor_missing_block_min_len
-    ):
-        raise ValueError("donor_missing_block_max_len must be >= donor_missing_block_min_len.")
-
-    out = df.copy()
-    donors = [u for u in out["unit_id"].unique().tolist() if u != treated_unit]
-    if not donors:
-        return out
-
-    rng = np.random.default_rng(random_state)
-    donor_mask = out["unit_id"] != treated_unit
-    n_target = int(round(donor_missing_block_frac * int(donor_mask.sum())))
-    if n_target <= 0:
-        return out
-
-    donor_idx = {
-        unit: out[out["unit_id"] == unit].sort_values("calendar_time").index.to_numpy(dtype=int)
-        for unit in donors
-    }
-    protected_set = {int(idx_arr[0]) for idx_arr in donor_idx.values() if idx_arr.size > 0}
-    miss_set: set[int] = set()
-    n_tries = max(100, 25 * n_target)
-    for _ in range(n_tries):
-        if len(miss_set) >= n_target:
-            break
-        unit = donors[int(rng.integers(0, len(donors)))]
-        idx = donor_idx[unit]
-        n_unit = int(idx.size)
-        if n_unit <= 1:
-            continue
-        min_len = int(min(max(1, donor_missing_block_min_len), n_unit))
-        max_len_candidate = n_unit if donor_missing_block_max_len is None else int(donor_missing_block_max_len)
-        max_len = int(min(max_len_candidate, n_unit))
-        if max_len < min_len:
-            continue
-
-        block_len = int(rng.integers(min_len, max_len + 1))
-        start = int(rng.integers(0, n_unit - block_len + 1))
-        for idx_i in idx[start : start + block_len]:
-            idx_int = int(idx_i)
-            if idx_int in protected_set:
-                continue
-            miss_set.add(idx_int)
-            if len(miss_set) >= n_target:
-                break
-
-    if miss_set:
-        out.loc[list(miss_set), "y"] = np.nan
-    return out
-
-
 def _hide_internal_oracle_columns(df: pd.DataFrame) -> pd.DataFrame:
     """Drop internal oracle diagnostics that should not be exposed in DGP outputs."""
     return df.drop(columns=["tau_rate_true"], errors="ignore")
@@ -190,23 +108,6 @@ def _finalize_output(out: PanelOutput) -> PanelOutput:
     return _rebuild_panel_with_df(out, _finalize_output_df(out.df))
 
 
-def _panel_from_dataframe(
-    *,
-    df: pd.DataFrame,
-    config: PanelSCMGeneratorConfig,
-) -> PanelDataSCM:
-    out_df = df.copy()
-    if "treated_time" not in out_df.columns:
-        treatment_start = (
-            pd.Period(config.calendar_start, freq=config.time_freq)
-            + (int(config.time_start) - 1 + int(config.n_pre_periods))
-        )
-        out_df["treated_time"] = (
-            (out_df["unit_id"] == config.treated_unit) & (out_df["calendar_time"] >= treatment_start)
-        ).astype(int)
-    return _build_panel_from_output_df(out_df)
-
-
 def _merge_config_with_locked_params(
     *,
     advanced_params: dict[str, Any],
@@ -230,6 +131,20 @@ def _merge_config_with_locked_params(
     return merged
 
 
+def _build_generator_config(
+    *,
+    advanced_params: dict[str, Any],
+    locked_params: dict[str, Any],
+    wrapper_name: str,
+) -> PanelSCMGeneratorConfig:
+    config_params = _merge_config_with_locked_params(
+        advanced_params=advanced_params,
+        locked_params=locked_params,
+        wrapper_name=wrapper_name,
+    )
+    return PanelSCMGeneratorConfig(**config_params)
+
+
 def generate_scm_data(
     n_donors: int = 5,
     n_pre_periods: int = 20,
@@ -243,8 +158,6 @@ def generate_scm_data(
     treated_unit: Hashable = "treated",
     donor_prefix: str = "donor_",
     random_state: Optional[int] = 42,
-    missing_outcome_frac: float = 0.0,
-    missing_cell_frac: float = 0.0,
     return_panel_data: bool = True,
     dirichlet_alpha: float = 1.0,
     rho_common: float = 0.0,
@@ -255,14 +168,17 @@ def generate_scm_data(
     rho_latent: float = 0.0,
     prefit_mismatch_std: float = 0.0,
     rho_prefit_mismatch: float = 0.0,
-    missing_block_frac: float = 0.0,
-    missing_block_min_len: int = 2,
-    missing_block_max_len: Optional[int] = None,
-    protect_treated_pre: bool = False,
-    protect_treated_post: bool = False,
     treatment_effect_mode: Literal["additive", "multiplicative"] = "additive",
 ) -> PanelOutput:
-    """Medium-level wrapper for Gaussian SCM panel generation."""
+    """
+    Medium-level wrapper for Gaussian SCM panel generation.
+
+    Notes
+    -----
+    The Gaussian treated counterfactual path is exact SCM only when both
+    `treated_noise_std=0.0` and `prefit_mismatch_std=0.0`. With either term
+    non-zero, the generator intentionally produces an approximate-SCM fit path.
+    """
     config = PanelSCMGeneratorConfig(
         outcome_distribution="gaussian",
         n_donors=n_donors,
@@ -277,8 +193,6 @@ def generate_scm_data(
         treated_unit=treated_unit,
         donor_prefix=donor_prefix,
         random_state=random_state,
-        missing_outcome_frac=missing_outcome_frac,
-        missing_cell_frac=missing_cell_frac,
         return_panel_data=return_panel_data,
         dirichlet_alpha=dirichlet_alpha,
         rho_common=rho_common,
@@ -289,11 +203,6 @@ def generate_scm_data(
         rho_latent=rho_latent,
         prefit_mismatch_std=prefit_mismatch_std,
         rho_prefit_mismatch=rho_prefit_mismatch,
-        missing_block_frac=missing_block_frac,
-        missing_block_min_len=missing_block_min_len,
-        missing_block_max_len=missing_block_max_len,
-        protect_treated_pre=protect_treated_pre,
-        protect_treated_post=protect_treated_post,
         treatment_effect_mode=treatment_effect_mode,
     )
     out = PanelSCMGenerator(config).generate()
@@ -307,7 +216,6 @@ def generate_scm_gamma_data(
     n_donors: int = 8,
     treatment_effect_rate: float = 0.12,
     treatment_effect_slope: float = 0.01,
-    missing_outcome_frac: float = 0.0,
     n_pre_periods: Optional[int] = None,
     n_post_periods: Optional[int] = None,
     **advanced_params,
@@ -337,16 +245,13 @@ def generate_scm_gamma_data(
         treatment_effect_rate=treatment_effect_rate,
         treatment_effect_slope=treatment_effect_slope,
         random_state=seed,
-        missing_outcome_frac=missing_outcome_frac,
         return_panel_data=return_panel_data,
     )
-    config_params = _merge_config_with_locked_params(
+    config = _build_generator_config(
         advanced_params=advanced_params,
         locked_params=locked_params,
         wrapper_name="generate_scm_gamma_data",
     )
-
-    config = PanelSCMGeneratorConfig(**config_params)
     out = PanelSCMGenerator(config).generate()
     return _finalize_output(out)
 
@@ -358,9 +263,6 @@ def generate_scm_poisson_data(
     n_donors: int = 8,
     treatment_effect_rate: float = 0.10,
     treatment_effect_slope: float = 0.005,
-    donor_missing_block_frac: float = 0.08,
-    donor_missing_block_min_len: int = 2,
-    donor_missing_block_max_len: Optional[int] = 4,
     n_pre_periods: Optional[int] = None,
     n_post_periods: Optional[int] = None,
     **advanced_params,
@@ -369,9 +271,7 @@ def generate_scm_poisson_data(
     Medium-level wrapper for realistic Poisson SCM panel generation.
 
     Preferred usage is explicit `n_pre_periods` and `n_post_periods`. If both
-    are omitted, they are inferred from `n`. Default behavior injects donor-only
-    missing periods, keeping treated post periods observed so
-    RobustSyntheticControl can be exercised reliably.
+    are omitted, they are inferred from `n`.
     The post-treatment effect path uses a ramp-in: at the first post period, the
     effective relative lift is
     `treatment_effect_rate * (1 - exp(-1 / 2.5))` (about 0.33x of the parameter
@@ -392,41 +292,15 @@ def generate_scm_poisson_data(
         treatment_effect_rate=treatment_effect_rate,
         treatment_effect_slope=treatment_effect_slope,
         random_state=seed,
-        # We inject donor-only missingness below.
-        missing_outcome_frac=0.0,
-        missing_cell_frac=0.0,
-        missing_block_frac=0.0,
-        return_panel_data=False,
-        protect_treated_post=True,
+        return_panel_data=return_panel_data,
     )
-    config_params = _merge_config_with_locked_params(
+    config = _build_generator_config(
         advanced_params=advanced_params,
         locked_params=locked_params,
         wrapper_name="generate_scm_poisson_data",
     )
-
-    config = PanelSCMGeneratorConfig(**config_params)
-    df = PanelSCMGenerator(config).generate(return_panel_data=False)
-
-    df = _inject_donor_missing_periods(
-        df=df,
-        treated_unit=config.treated_unit,
-        random_state=seed + 11_813,
-        donor_missing_block_frac=donor_missing_block_frac,
-        donor_missing_block_min_len=donor_missing_block_min_len,
-        donor_missing_block_max_len=donor_missing_block_max_len,
-    )
-    df = df.sort_values(["unit_id", "calendar_time"]).reset_index(drop=True)
-    df["observed"] = (~df["y"].isna()).astype(int)
-    df = _finalize_output_df(df)
-
-    if not return_panel_data:
-        return df
-
-    return _panel_from_dataframe(
-        df=df,
-        config=config,
-    )
+    out = PanelSCMGenerator(config).generate()
+    return _finalize_output(out)
 
 
 def _resolve_scm26_periods(
@@ -452,7 +326,7 @@ def _expand_scm26_periods_with_anchor(
     return int(n_pre_periods) + 1, int(n_post_periods)
 
 
-def _apply_scm26_anchor_period_windows(
+def _validate_scm26_anchor_period_windows(
     out: PanelOutput,
     *,
     n_pre_periods: int,
@@ -503,17 +377,10 @@ def _with_scm26_treated_time(
     if isinstance(out, pd.DataFrame):
         if "calendar_time" not in out.columns:
             raise RuntimeError("Expected 'calendar_time' column to derive treated_time.")
-        if "is_treated_unit" in out.columns:
-            treated_rows = out[out["is_treated_unit"].astype(int) == 1]
-            treated_units = pd.Index(treated_rows["unit_id"].unique()).tolist()
-            if len(treated_units) != 1:
-                raise RuntimeError(
-                    "Expected exactly one treated unit in 'is_treated_unit' when deriving treated_time."
-                )
-            treated_unit = treated_units[0]
-            treated_unit_mask = out["unit_id"] == treated_unit
-        else:
+        if "is_treated_unit" not in out.columns:
             raise RuntimeError("Expected 'is_treated_unit' column to derive treated_time.")
+        treated_unit = _derive_treated_unit_from_flagged_rows(out)
+        treated_unit_mask = out["unit_id"] == treated_unit
 
         out_df = out.copy()
         out_df["treated_time"] = (
@@ -573,7 +440,7 @@ def _postprocess_scm26_output(
     n_post_periods: int,
     include_oracles: bool,
 ) -> PanelOutput:
-    out = _apply_scm26_anchor_period_windows(
+    out = _validate_scm26_anchor_period_windows(
         out,
         n_pre_periods=n_pre_periods,
         n_post_periods=n_post_periods,
@@ -581,6 +448,57 @@ def _postprocess_scm26_output(
     out = _with_scm26_treated_time(out, n_pre_periods=n_pre_periods)
     out = _apply_scm26_include_oracles(out, include_oracles=include_oracles)
     return _format_scm26_output_columns(out)
+
+
+def _derive_treated_unit_from_flagged_rows(df: pd.DataFrame) -> Any:
+    treated_rows = df[df["is_treated_unit"].astype(int) == 1]
+    treated_units = pd.Index(treated_rows["unit_id"].unique()).tolist()
+    if len(treated_units) != 1:
+        raise RuntimeError(
+            "Expected exactly one treated unit in 'is_treated_unit' when deriving treated_time."
+        )
+    return treated_units[0]
+
+
+def _generate_scm26_via_base_generator(
+    *,
+    base_generator: Any,
+    seed: int,
+    return_panel_data: bool,
+    include_oracles: bool,
+    n_donors: int,
+    n_pre_periods: Optional[int],
+    n_post_periods: Optional[int],
+    treatment_effect_rate: float,
+    treatment_effect_slope: float,
+    advanced_params: dict[str, Any],
+) -> PanelOutput:
+    n_pre_periods_resolved, n_post_periods_resolved = _resolve_scm26_periods(
+        n_pre_periods=n_pre_periods,
+        n_post_periods=n_post_periods,
+    )
+    n_pre_effective, n_post_effective = _expand_scm26_periods_with_anchor(
+        n_pre_periods=n_pre_periods_resolved,
+        n_post_periods=n_post_periods_resolved,
+    )
+    kwargs = dict(
+        seed=seed,
+        return_panel_data=return_panel_data,
+        n_donors=n_donors,
+        n_pre_periods=n_pre_effective,
+        n_post_periods=n_post_effective,
+        treatment_effect_rate=treatment_effect_rate,
+        treatment_effect_slope=treatment_effect_slope,
+    )
+    kwargs.update(advanced_params)
+
+    out = base_generator(**kwargs)
+    return _postprocess_scm26_output(
+        out,
+        n_pre_periods=n_pre_periods_resolved,
+        n_post_periods=n_post_periods_resolved,
+        include_oracles=include_oracles,
+    )
 
 
 def generate_scm_gamma_26_data(
@@ -593,35 +511,19 @@ def generate_scm_gamma_26_data(
     n_post_periods: Optional[int],
     treatment_effect_rate: float,
     treatment_effect_slope: float,
-    missing_outcome_frac: float,
     advanced_params: dict[str, Any],
 ) -> PanelOutput:
-    n_pre_periods_resolved, n_post_periods_resolved = _resolve_scm26_periods(
-        n_pre_periods=n_pre_periods,
-        n_post_periods=n_post_periods,
-    )
-    n_pre_effective, n_post_effective = _expand_scm26_periods_with_anchor(
-        n_pre_periods=n_pre_periods_resolved,
-        n_post_periods=n_post_periods_resolved,
-    )
-    n_total_target = int((n_donors + 1) * (n_pre_effective + n_post_effective))
-    out = generate_scm_gamma_data(
-        n=n_total_target,
+    return _generate_scm26_via_base_generator(
+        base_generator=generate_scm_gamma_data,
         seed=seed,
         return_panel_data=return_panel_data,
+        include_oracles=include_oracles,
         n_donors=n_donors,
-        n_pre_periods=n_pre_effective,
-        n_post_periods=n_post_effective,
+        n_pre_periods=n_pre_periods,
+        n_post_periods=n_post_periods,
         treatment_effect_rate=treatment_effect_rate,
         treatment_effect_slope=treatment_effect_slope,
-        missing_outcome_frac=missing_outcome_frac,
-        **advanced_params,
-    )
-    return _postprocess_scm26_output(
-        out,
-        n_pre_periods=n_pre_periods_resolved,
-        n_post_periods=n_post_periods_resolved,
-        include_oracles=include_oracles,
+        advanced_params=advanced_params,
     )
 
 
@@ -635,33 +537,17 @@ def generate_scm_poisson_26_data(
     n_post_periods: Optional[int],
     treatment_effect_rate: float,
     treatment_effect_slope: float,
-    donor_missing_block_frac: float,
     advanced_params: dict[str, Any],
 ) -> PanelOutput:
-    n_pre_periods_resolved, n_post_periods_resolved = _resolve_scm26_periods(
-        n_pre_periods=n_pre_periods,
-        n_post_periods=n_post_periods,
-    )
-    n_pre_effective, n_post_effective = _expand_scm26_periods_with_anchor(
-        n_pre_periods=n_pre_periods_resolved,
-        n_post_periods=n_post_periods_resolved,
-    )
-    n_total_target = int((n_donors + 1) * (n_pre_effective + n_post_effective))
-    out = generate_scm_poisson_data(
-        n=n_total_target,
+    return _generate_scm26_via_base_generator(
+        base_generator=generate_scm_poisson_data,
         seed=seed,
         return_panel_data=return_panel_data,
+        include_oracles=include_oracles,
         n_donors=n_donors,
-        n_pre_periods=n_pre_effective,
-        n_post_periods=n_post_effective,
+        n_pre_periods=n_pre_periods,
+        n_post_periods=n_post_periods,
         treatment_effect_rate=treatment_effect_rate,
         treatment_effect_slope=treatment_effect_slope,
-        donor_missing_block_frac=donor_missing_block_frac,
-        **advanced_params,
-    )
-    return _postprocess_scm26_output(
-        out,
-        n_pre_periods=n_pre_periods_resolved,
-        n_post_periods=n_post_periods_resolved,
-        include_oracles=include_oracles,
+        advanced_params=advanced_params,
     )

@@ -2,7 +2,6 @@ from .outcome_panel_plot import outcome_panel_plot
 from .diagnostic_plots import (
     gap_over_time_plot,
     observed_vs_synthetic_plot,
-    placebo_att_histogram_plot,
 )
 from .donors_diagnostics import (
     donors_diagnostics,
@@ -20,7 +19,6 @@ __all__ = [
     "outcome_panel_plot",
     "observed_vs_synthetic_plot",
     "gap_over_time_plot",
-    "placebo_att_histogram_plot",
     "donors_diagnostics",
     "run_scm_feasibility",
     "placebo_in_space_table",
