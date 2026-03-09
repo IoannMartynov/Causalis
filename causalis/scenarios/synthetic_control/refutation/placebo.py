@@ -78,6 +78,22 @@ def _validate_inputs(estimate: PanelEstimate, paneldata: PanelDataSCM) -> None:
             "estimate.treatment_start must match paneldata.treatment_start "
             f"({estimate.treatment_start!r} != {paneldata.treatment_start!r})."
         )
+    panel_pre_times = list(paneldata.pre_times())
+    panel_post_times = list(paneldata.post_times())
+    if list(estimate.pre_times) != panel_pre_times:
+        raise ValueError("estimate.pre_times must exactly match paneldata.pre_times().")
+    if list(estimate.post_times) != panel_post_times:
+        raise ValueError("estimate.post_times must exactly match paneldata.post_times().")
+
+    expected_idx = pd.Index(panel_pre_times + panel_post_times)
+    if not estimate.observed_outcome.index.equals(expected_idx):
+        raise ValueError(
+            "estimate.observed_outcome index must exactly match paneldata pre+post analysis time index."
+        )
+    if not estimate.synthetic_outcome.index.equals(expected_idx):
+        raise ValueError(
+            "estimate.synthetic_outcome index must exactly match paneldata pre+post analysis time index."
+        )
 
 
 def _build_placebo_panel(
@@ -85,8 +101,18 @@ def _build_placebo_panel(
     paneldata: PanelDataSCM,
     treated_unit: Hashable,
     treatment_start: Any,
+    max_time: Any | None = None,
+    excluded_units: set[Hashable] | None = None,
 ) -> PanelDataSCM:
     df = paneldata.df_analysis().copy()
+    if excluded_units:
+        if treated_unit in excluded_units:
+            raise ValueError("treated_unit cannot be excluded from placebo panel construction.")
+        df = df[~df[paneldata.unit_col].isin(excluded_units)].copy()
+    if max_time is not None:
+        df = df[df[paneldata.time_col] <= max_time].copy()
+    if df.empty:
+        raise ValueError("No rows available after applying placebo panel time restriction.")
     df[paneldata.treated_time] = 0
     treated_mask = (df[paneldata.unit_col] == treated_unit) & (df[paneldata.time_col] >= treatment_start)
     df.loc[treated_mask, paneldata.treated_time] = 1
@@ -105,11 +131,15 @@ def _fit_placebo_estimate(
     treated_unit: Hashable,
     treatment_start: Any,
     model_kwargs: Dict[str, Any] | None,
+    max_time: Any | None = None,
+    excluded_units: set[Hashable] | None = None,
 ) -> PanelEstimate:
     placebo_panel = _build_placebo_panel(
         paneldata=paneldata,
         treated_unit=treated_unit,
         treatment_start=treatment_start,
+        max_time=max_time,
+        excluded_units=excluded_units,
     )
     model = ASCM(**(model_kwargs or {}))
     return model.fit(placebo_panel).estimate()
@@ -138,22 +168,24 @@ def placebo_in_space_table(
     *,
     model_kwargs: Dict[str, Any] | None = None,
 ) -> pd.DataFrame:
-    """Build Abadie-style placebo-in-space RMSPE ratio table."""
+    """Build Abadie-style placebo-in-space RMSPE ratio table.
+
+    For donor-as-treated placebo fits, the actual treated unit is excluded
+    from the donor pool to avoid post-treatment contamination.
+    """
     _validate_inputs(estimate, paneldata)
 
     df = paneldata.df_analysis().copy()
     units = pd.Index(df[paneldata.unit_col].unique()).tolist()
     rows: list[dict[str, Any]] = []
     for unit_id in units:
-        if unit_id == estimate.treated_unit:
-            unit_estimate = estimate
-        else:
-            unit_estimate = _fit_placebo_estimate(
-                paneldata=paneldata,
-                treated_unit=unit_id,
-                treatment_start=paneldata.treatment_start,
-                model_kwargs=model_kwargs,
-            )
+        unit_estimate = _fit_placebo_estimate(
+            paneldata=paneldata,
+            treated_unit=unit_id,
+            treatment_start=paneldata.treatment_start,
+            model_kwargs=model_kwargs,
+            excluded_units={paneldata.treated_unit} if unit_id != paneldata.treated_unit else None,
+        )
         gap = unit_estimate.observed_outcome - unit_estimate.synthetic_outcome
         pre_gap = gap.loc[list(unit_estimate.pre_times)]
         post_gap = gap.loc[list(unit_estimate.post_times)]
@@ -208,19 +240,34 @@ def placebo_in_time_table(
     paneldata: PanelDataSCM,
     *,
     model_kwargs: Dict[str, Any] | None = None,
+    pseudo_post_horizon: int | None = None,
 ) -> pd.DataFrame:
-    """Build CWZ-style placebo-in-time structural-break table."""
+    """Build pre-treatment-only placebo-in-time falsification table."""
     _validate_inputs(estimate, paneldata)
 
     pre_times = list(paneldata.pre_times())
-    placebo_starts = pre_times[1:]
+    post_times = list(paneldata.post_times())
+    horizon = int(len(post_times) if pseudo_post_horizon is None else pseudo_post_horizon)
+    if horizon < 1:
+        raise ValueError("pseudo_post_horizon must be >= 1.")
+
+    # Average ATT t-test inference requires at least two pre-treatment periods.
+    # Skip placebo starts that would leave fewer than two pre periods.
+    min_pre_periods_for_inference = 2
+    placebo_starts = pre_times[min_pre_periods_for_inference:]
     rows: list[dict[str, Any]] = []
-    for placebo_start in placebo_starts:
+    for start_idx, placebo_start in enumerate(placebo_starts, start=min_pre_periods_for_inference):
+        pseudo_post_end_idx = start_idx + horizon - 1
+        if pseudo_post_end_idx >= len(pre_times):
+            continue
+        pseudo_post_end = pre_times[pseudo_post_end_idx]
+
         placebo_estimate = _fit_placebo_estimate(
             paneldata=paneldata,
             treated_unit=paneldata.treated_unit,
             treatment_start=placebo_start,
             model_kwargs=model_kwargs,
+            max_time=pseudo_post_end,
         )
         diagnostics = dict(placebo_estimate.diagnostics or {})
         p_value = _as_finite_float(diagnostics.get("average_att_p_value"))
@@ -276,6 +323,7 @@ def run_placebo_tests(
     paneldata: PanelDataSCM,
     *,
     model_kwargs: Dict[str, Any] | None = None,
+    pseudo_post_horizon: int | None = None,
 ) -> Dict[str, pd.DataFrame]:
     """Run placebo-in-space and placebo-in-time robustness tests."""
     _validate_inputs(estimate, paneldata)
@@ -289,6 +337,7 @@ def run_placebo_tests(
             estimate=estimate,
             paneldata=paneldata,
             model_kwargs=model_kwargs,
+            pseudo_post_horizon=pseudo_post_horizon,
         ),
     }
 

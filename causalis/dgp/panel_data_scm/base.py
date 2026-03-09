@@ -30,6 +30,12 @@ def _draw_ar1_series(
     return out
 
 
+def _monthly_seasonality_signal(t_rel: np.ndarray) -> np.ndarray:
+    """Calendar-like seasonality for monthly panels (annual + semiannual harmonics)."""
+    t = np.asarray(t_rel, dtype=float)
+    return np.sin(2.0 * np.pi * t / 12.0) + 0.5 * np.cos(2.0 * np.pi * t / 6.0)
+
+
 def _sample_coupled_poisson_pair(
     *,
     rng: np.random.Generator,
@@ -61,68 +67,6 @@ def _sample_coupled_poisson_pair(
     return y0.astype(float), y1.astype(float)
 
 
-def _drop_block_missing_cells(
-    df: pd.DataFrame,
-    *,
-    rng: np.random.Generator,
-    missing_block_frac: float,
-    block_min_len: int,
-    block_max_len: Optional[int],
-    protected_index: Optional[set[int]] = None,
-) -> pd.DataFrame:
-    if missing_block_frac <= 0.0:
-        return df
-
-    n_target = int(round(missing_block_frac * len(df)))
-    if n_target <= 0:
-        return df
-
-    protected_set = set() if protected_index is None else set(protected_index)
-
-    by_unit = {
-        unit: grp.sort_values("calendar_time").index.to_numpy(dtype=int)
-        for unit, grp in df.groupby("unit_id", sort=False)
-    }
-    units = list(by_unit.keys())
-    if not units:
-        return df
-
-    missing_set: set[int] = set()
-    n_tries = max(100, 25 * n_target)
-    for _ in range(n_tries):
-        if len(missing_set) >= n_target:
-            break
-
-        unit = units[int(rng.integers(0, len(units)))]
-        unit_idx = by_unit[unit]
-        n_unit = int(unit_idx.size)
-        if n_unit <= 1:
-            continue
-
-        min_len = int(min(max(1, block_min_len), n_unit))
-        max_len_candidate = n_unit if block_max_len is None else int(block_max_len)
-        max_len = int(min(max_len_candidate, n_unit))
-        if max_len < min_len:
-            continue
-
-        block_len = int(rng.integers(min_len, max_len + 1))
-        start = int(rng.integers(0, n_unit - block_len + 1))
-        candidate = unit_idx[start : start + block_len]
-        for idx in candidate:
-            idx_int = int(idx)
-            if idx_int in protected_set:
-                continue
-            missing_set.add(idx_int)
-            if len(missing_set) >= n_target:
-                break
-
-    if not missing_set:
-        return df
-    out = df.copy()
-    out.loc[list(missing_set), "y"] = np.nan
-    return out
-
-
 @dataclass(frozen=True)
 class PanelSCMGeneratorConfig:
     # Shared panel shape / IDs
@@ -146,15 +90,6 @@ class PanelSCMGeneratorConfig:
     rho_latent: float = 0.0
     rho_prefit_mismatch: float = 0.0
 
-    # Shared missingness knobs
-    missing_outcome_frac: float = 0.0
-    missing_cell_frac: float = 0.0
-    missing_block_frac: float = 0.0
-    missing_block_min_len: int = 2
-    missing_block_max_len: Optional[int] = None
-    protect_treated_pre: bool = False
-    protect_treated_post: bool = False
-
     # Mode selector
     outcome_distribution: Literal["gaussian", "gamma", "poisson"] = "gaussian"
 
@@ -175,9 +110,6 @@ class PanelSCMGeneratorConfig:
     common_factor_std_log: float = 0.10
     latent_factor_std_log: float = 0.10
     prefit_mismatch_std_log: float = 0.08
-
-
-_POSITIVE_MODE_COVARIATES: tuple[str, ...] = ("exposure", "macro_index", "seasonality_index")
 
 
 @dataclass(frozen=True)
@@ -246,25 +178,6 @@ class PanelSCMGenerator:
         ):
             if not (-1.0 < rho < 1.0):
                 raise ValueError(f"{rho_name} must be in (-1, 1).")
-        if not (0.0 <= c.missing_outcome_frac < 1.0):
-            raise ValueError("missing_outcome_frac must be in [0, 1).")
-        if not (0.0 <= c.missing_cell_frac < 1.0):
-            raise ValueError("missing_cell_frac must be in [0, 1).")
-        if not (0.0 <= c.missing_block_frac < 1.0):
-            raise ValueError("missing_block_frac must be in [0, 1).")
-        if c.missing_block_min_len < 1:
-            raise ValueError("missing_block_min_len must be >= 1.")
-        if c.missing_block_max_len is not None and c.missing_block_max_len < 1:
-            raise ValueError("missing_block_max_len must be >= 1 when provided.")
-        if (
-            c.missing_block_max_len is not None
-            and c.missing_block_max_len < c.missing_block_min_len
-        ):
-            raise ValueError("missing_block_max_len must be >= missing_block_min_len.")
-        if not isinstance(c.protect_treated_pre, bool):
-            raise ValueError("protect_treated_pre must be a boolean.")
-        if not isinstance(c.protect_treated_post, bool):
-            raise ValueError("protect_treated_post must be a boolean.")
         if c.outcome_distribution not in {"gaussian", "gamma", "poisson"}:
             raise ValueError("outcome_distribution must be 'gaussian', 'gamma', or 'poisson'.")
 
@@ -376,7 +289,7 @@ class PanelSCMGenerator:
         calendar_times, _ = self._calendar_axis(n_total=n_total)
         post_idx = np.arange(c.n_pre_periods, n_total, dtype=int)
 
-        season = np.sin(2.0 * np.pi * t_rel / 12.0) + 0.5 * np.cos(2.0 * np.pi * t_rel / 6.0)
+        season = _monthly_seasonality_signal(t_rel)
         macro_log = _draw_ar1_series(
             rng=rng,
             n_periods=n_total,
@@ -391,7 +304,6 @@ class PanelSCMGenerator:
 
         donor_names = self._donor_names()
         donor_exposure = np.empty((n_total, c.n_donors), dtype=float)
-        donor_eta = np.empty((n_total, c.n_donors), dtype=float)
         donor_mu = np.empty((n_total, c.n_donors), dtype=float)
 
         centered_t = t_rel - t_rel.mean()
@@ -440,7 +352,6 @@ class PanelSCMGenerator:
                 + latent_term
                 + donor_noise
             )
-            donor_eta[:, j] = eta
             donor_mu[:, j] = np.exp(np.clip(np.log(donor_exposure[:, j]) + eta, -6.0, 10.0))
 
         true_weights = rng.dirichlet(np.full(c.n_donors, fill_value=c.dirichlet_alpha, dtype=float))
@@ -450,16 +361,10 @@ class PanelSCMGenerator:
             rho=c.rho_prefit_mismatch,
             innovation_std=c.prefit_mismatch_std_log,
         )
-        prefit_mismatch_exposure = _draw_ar1_series(
-            rng=rng,
-            n_periods=n_total,
-            rho=c.rho_prefit_mismatch,
-            innovation_std=0.5 * c.prefit_mismatch_std_log,
-        )
-        treated_exposure_cf = (donor_exposure @ true_weights) * np.exp(prefit_mismatch_exposure)
+        treated_exposure_cf = donor_exposure @ true_weights
         treated_exposure_cf = np.clip(treated_exposure_cf, 1.0, None)
-        treated_eta_cf = (donor_eta @ true_weights) + prefit_mismatch_eta
-        treated_mu_cf = np.exp(np.clip(np.log(treated_exposure_cf) + treated_eta_cf, -6.0, 10.0))
+        treated_mu_cf = donor_mu @ true_weights
+        treated_mu_cf = treated_mu_cf * np.exp(prefit_mismatch_eta)
         treated_mu_cf = np.clip(treated_mu_cf, 1e-6, None)
 
         effect_rate = self._post_effect_rate(n_total=n_total, post_idx=post_idx)
@@ -535,7 +440,7 @@ class PanelSCMGenerator:
         self,
         *,
         rng: np.random.Generator,
-    ) -> tuple[pd.DataFrame, list[Hashable], tuple[str, ...]]:
+    ) -> pd.DataFrame:
         c = self.config
         n_total = self._n_total_periods()
         t_rel = np.arange(n_total, dtype=float)
@@ -547,7 +452,7 @@ class PanelSCMGenerator:
             rho=c.rho_common,
             innovation_std=c.common_factor_std,
         )
-        season = np.sin(2.0 * np.pi * t_rel / max(4, n_total))
+        season = _monthly_seasonality_signal(t_rel)
 
         donor_names = self._donor_names()
         donor_matrix = np.empty((n_total, c.n_donors), dtype=float)
@@ -638,13 +543,13 @@ class PanelSCMGenerator:
                     }
                 )
 
-        return pd.DataFrame(rows), donor_names, ()
+        return pd.DataFrame(rows)
 
     def _generate_gamma_panel(
         self,
         *,
         rng: np.random.Generator,
-    ) -> tuple[pd.DataFrame, list[Hashable], tuple[str, ...]]:
+    ) -> pd.DataFrame:
         c = self.config
         components = self._build_positive_mode_components(
             rng=rng,
@@ -678,13 +583,13 @@ class PanelSCMGenerator:
             treated_y_cf=treated_y_cf,
             tau_realized_true=tau_realized_true,
         )
-        return df, components.donor_names, _POSITIVE_MODE_COVARIATES
+        return df
 
     def _generate_poisson_panel(
         self,
         *,
         rng: np.random.Generator,
-    ) -> tuple[pd.DataFrame, list[Hashable], tuple[str, ...]]:
+    ) -> pd.DataFrame:
         components = self._build_positive_mode_components(
             rng=rng,
             priors=_PositiveModePriors(
@@ -713,62 +618,25 @@ class PanelSCMGenerator:
             treated_y_cf=treated_y_cf,
             tau_realized_true=tau_realized_true,
         )
-        return df, components.donor_names, _POSITIVE_MODE_COVARIATES
+        return df
 
-    def _apply_missingness(self, *, df: pd.DataFrame, rng: np.random.Generator) -> pd.DataFrame:
+    def _generate_outcome_panel(self, *, rng: np.random.Generator) -> pd.DataFrame:
         c = self.config
-        out = df.copy()
-        _, treatment_start = self._calendar_axis(n_total=self._n_total_periods())
+        if c.outcome_distribution == "gaussian":
+            return self._generate_gaussian_panel(rng=rng)
+        if c.outcome_distribution == "gamma":
+            return self._generate_gamma_panel(rng=rng)
+        return self._generate_poisson_panel(rng=rng)
 
-        treated_mask = out["unit_id"] == c.treated_unit
-        protected_treated_idx: set[int] = set()
-        if c.protect_treated_pre:
-            protected_treated_idx.update(
-                out.index[(treated_mask) & (out["calendar_time"] < treatment_start)].to_numpy(dtype=int).tolist()
-            )
-        if c.protect_treated_post:
-            protected_treated_idx.update(
-                out.index[(treated_mask) & (out["calendar_time"] >= treatment_start)].to_numpy(dtype=int).tolist()
-            )
-
-        protected_structured_idx: set[int] = set(
-            out.groupby("unit_id", sort=False, as_index=False)
-            .head(1)
-            .index
-            .to_numpy(dtype=int)
-            .tolist()
+    @staticmethod
+    def _build_panel_contract(df: pd.DataFrame) -> PanelDataSCM:
+        return PanelDataSCM(
+            df=df,
+            y="y",
+            unit_col="unit_id",
+            time_col="calendar_time",
+            treated_time="treated_time",
         )
-        protected_structured_idx.update(protected_treated_idx)
-
-        if c.missing_outcome_frac > 0.0:
-            n_missing = int(round(c.missing_outcome_frac * len(out)))
-            if n_missing > 0:
-                eligible = out.index.difference(pd.Index(sorted(protected_treated_idx))).to_numpy(dtype=int)
-                if eligible.size > 0:
-                    n_missing_eff = int(min(n_missing, eligible.size))
-                    idx_missing = rng.choice(eligible, size=n_missing_eff, replace=False)
-                    out.loc[idx_missing, "y"] = np.nan
-
-        if c.missing_cell_frac > 0.0:
-            n_missing = int(round(c.missing_cell_frac * len(out)))
-            if n_missing > 0:
-                eligible = out.index.difference(pd.Index(sorted(protected_structured_idx))).to_numpy(dtype=int)
-                if eligible.size > 0:
-                    n_missing_eff = int(min(n_missing, eligible.size))
-                    idx_missing = rng.choice(eligible, size=n_missing_eff, replace=False)
-                    out.loc[idx_missing, "y"] = np.nan
-
-        if c.missing_block_frac > 0.0:
-            out = _drop_block_missing_cells(
-                out,
-                rng=rng,
-                missing_block_frac=c.missing_block_frac,
-                block_min_len=c.missing_block_min_len,
-                block_max_len=c.missing_block_max_len,
-                protected_index=protected_structured_idx,
-            )
-
-        return out
 
     def generate(
         self,
@@ -778,16 +646,9 @@ class PanelSCMGenerator:
         c = self.config
         return_panel_data_flag = c.return_panel_data if return_panel_data is None else bool(return_panel_data)
         rng = np.random.default_rng(c.random_state)
-
-        if c.outcome_distribution == "gaussian":
-            df, donor_names, covariate_cols = self._generate_gaussian_panel(rng=rng)
-        elif c.outcome_distribution == "gamma":
-            df, donor_names, covariate_cols = self._generate_gamma_panel(rng=rng)
-        else:
-            df, donor_names, covariate_cols = self._generate_poisson_panel(rng=rng)
+        df = self._generate_outcome_panel(rng=rng)
 
         _, treatment_start = self._calendar_axis(n_total=self._n_total_periods())
-        df = self._apply_missingness(df=df, rng=rng)
         df = df.sort_values(["unit_id", "calendar_time"]).reset_index(drop=True)
         df["treated_time"] = (
             (df["unit_id"] == c.treated_unit) & (df["calendar_time"] >= treatment_start)
@@ -797,11 +658,4 @@ class PanelSCMGenerator:
         if not return_panel_data_flag:
             return df
 
-        panel = PanelDataSCM(
-            df=df,
-            y="y",
-            unit_col="unit_id",
-            time_col="calendar_time",
-            treated_time="treated_time",
-        )
-        return panel
+        return self._build_panel_contract(df)

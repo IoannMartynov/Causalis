@@ -56,8 +56,33 @@ class _AverageATTTTestResult:
     block_length: int
 
 
+@dataclass(frozen=True)
+class _FitContext:
+    """Prepared matrices/time metadata used throughout model fitting."""
+
+    data: PanelDataSCM
+    donors: list[Hashable]
+    pre_times: list[Any]
+    post_times: list[Any]
+    all_times: list[Any]
+    y1_all: np.ndarray
+    y1_pre: np.ndarray
+    y0_all: np.ndarray
+    x0_pre: np.ndarray
+
+
+@dataclass(frozen=True)
+class _SeriesOutputs:
+    """Observed/synthetic/gap series computed from fitted augmented weights."""
+
+    observed_series: pd.Series
+    synthetic_series: pd.Series
+    gap_series: pd.Series
+    effect_by_time: pd.Series
+
+
 class AugmentedSyntheticControl:
-    """Augmented Synthetic Control with aggregate-first inference.
+    """Ridge-augmented synthetic control with simplex anchor and aggregate-first inference.
 
     Notes
     -----
@@ -166,6 +191,27 @@ class AugmentedSyntheticControl:
 
         self._is_fitted: bool = False
         self._data: PanelDataSCM | None = None
+        self._donors: list[Hashable] = []
+        self._pre_times: list[Any] = []
+        self._post_times: list[Any] = []
+        self._all_times: list[Any] = []
+        self._w_aug: np.ndarray = np.array([], dtype=float)
+        self._observed: pd.Series = pd.Series(dtype=float, name="observed_outcome")
+        self._synthetic: pd.Series = pd.Series(dtype=float, name="synthetic_outcome")
+        self._gap: pd.Series = pd.Series(dtype=float, name="gap")
+        self._effect_by_time: pd.Series = pd.Series(dtype=float, name="effect_by_time")
+        self._ci_lower_by_time: pd.Series = pd.Series(dtype=float, name="ci_lower_by_time")
+        self._ci_upper_by_time: pd.Series = pd.Series(dtype=float, name="ci_upper_by_time")
+        self._p_value_by_time: pd.Series = pd.Series(dtype=float, name="p_value_by_time")
+        self._is_significant_by_time: pd.Series = pd.Series(dtype=bool, name="is_significant_by_time")
+        self._confidence_set_by_time: dict[Any, list[tuple[float, float]]] = {}
+        self._average_att_ttest: _AverageATTTTestResult = self._empty_average_att_ttest_result(
+            "Model has not been fitted."
+        )
+        self._diagnostics: dict[str, Any] = {}
+        self._slsqp_fallback_count: int = 0
+        self._slsqp_fallback_reasons: list[str] = []
+        self._stability_warning_messages: list[str] = []
 
     # ---------------------------------------------------------------------
     # Core numerics
@@ -182,6 +228,54 @@ class AugmentedSyntheticControl:
     @staticmethod
     def _solve_linear(a: np.ndarray, b: np.ndarray) -> np.ndarray:
         return solve_linear_system(a, b)
+
+    @staticmethod
+    def _resolve_prefit_inputs(
+        *,
+        x0_pre: np.ndarray | None,
+        y1_pre: np.ndarray | None,
+        x: np.ndarray | None,
+        y: np.ndarray | None,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Resolve pre-period design/target inputs with alias support.
+
+        Notes
+        -----
+        Internal helpers historically accepted ``x0_pre``/``y1_pre`` while
+        newer callers use ``x``/``y``. This resolver supports both for
+        compatibility and enforces that callers do not pass duplicate aliases.
+        """
+        if x0_pre is not None and x is not None:
+            raise ValueError("Provide only one of x0_pre or x, not both.")
+        if y1_pre is not None and y is not None:
+            raise ValueError("Provide only one of y1_pre or y, not both.")
+
+        x_value = x0_pre if x0_pre is not None else x
+        y_value = y1_pre if y1_pre is not None else y
+        if x_value is None or y_value is None:
+            raise ValueError("Both design matrix and treated outcome vector are required.")
+
+        x_arr = np.asarray(x_value, dtype=float)
+        y_arr = np.asarray(y_value, dtype=float)
+        return x_arr, y_arr
+
+    @staticmethod
+    def _validate_prefit_inputs(
+        *,
+        x: np.ndarray,
+        y: np.ndarray,
+    ) -> None:
+        """Validate pre-period donor matrix and treated outcome vector."""
+        if x.ndim != 2:
+            raise ValueError("x must be 2D with shape (n_periods, n_donors).")
+        if y.ndim != 1:
+            raise ValueError("y must be 1D with shape (n_periods,).")
+        if x.shape[0] != y.shape[0]:
+            raise ValueError("x and y must have the same number of rows.")
+        if x.shape[1] < 1:
+            raise ValueError("At least one donor is required.")
+        if not np.isfinite(x).all() or not np.isfinite(y).all():
+            raise ValueError("x and y must contain only finite values.")
 
     def _fit_simplex_weights_projected_gradient(
         self,
@@ -237,14 +331,21 @@ class AugmentedSyntheticControl:
 
         return self._project_to_simplex(w)
 
-    def _fit_simplex_weights(self, *, x: np.ndarray, y: np.ndarray) -> np.ndarray:
+    def _fit_simplex_weights(
+        self,
+        *,
+        x0_pre: np.ndarray | None = None,
+        y1_pre: np.ndarray | None = None,
+        x: np.ndarray | None = None,
+        y: np.ndarray | None = None,
+    ) -> np.ndarray:
         """Estimate donor weights on the simplex.
 
         Parameters
         ----------
-        x : numpy.ndarray
+        x0_pre, x : numpy.ndarray
             Donor matrix with shape ``(n_periods, n_donors)``.
-        y : numpy.ndarray
+        y1_pre, y : numpy.ndarray
             Treated outcomes with shape ``(n_periods,)``.
 
         Returns
@@ -257,21 +358,14 @@ class AugmentedSyntheticControl:
         Uses SLSQP first, then falls back to projected-gradient if SLSQP does
         not converge.
         """
-        x_arr = np.asarray(x, dtype=float)
-        y_arr = np.asarray(y, dtype=float)
-
-        if x_arr.ndim != 2:
-            raise ValueError("x must be 2D with shape (n_periods, n_donors).")
-        if y_arr.ndim != 1:
-            raise ValueError("y must be 1D with shape (n_periods,).")
-        if x_arr.shape[0] != y_arr.shape[0]:
-            raise ValueError("x and y must have the same number of rows.")
-        if not np.isfinite(x_arr).all() or not np.isfinite(y_arr).all():
-            raise ValueError("x and y must contain only finite values.")
-
+        x_arr, y_arr = self._resolve_prefit_inputs(
+            x0_pre=x0_pre,
+            y1_pre=y1_pre,
+            x=x,
+            y=y,
+        )
+        self._validate_prefit_inputs(x=x_arr, y=y_arr)
         n_donors = int(x_arr.shape[1])
-        if n_donors < 1:
-            raise ValueError("At least one donor is required.")
 
         w0 = np.full(n_donors, 1.0 / float(n_donors), dtype=float)
         gram = x_arr.T @ x_arr + self.lambda_sc * np.eye(n_donors, dtype=float)
@@ -299,20 +393,30 @@ class AugmentedSyntheticControl:
         if bool(result.success) and result.x is not None and np.isfinite(result.x).all():
             return self._project_to_simplex(np.asarray(result.x, dtype=float))
 
+        reason = str(getattr(result, "message", "unknown failure"))
+        self._record_slsqp_fallback(reason=reason)
         return self._fit_simplex_weights_projected_gradient(
             gram=gram,
             rhs=rhs,
             w_init=w0,
         )
 
-    def _augment_weights(self, *, x: np.ndarray, y: np.ndarray, w_sc: np.ndarray) -> np.ndarray:
+    def _augment_weights(
+        self,
+        *,
+        w_sc: np.ndarray,
+        x0_pre: np.ndarray | None = None,
+        y1_pre: np.ndarray | None = None,
+        x: np.ndarray | None = None,
+        y: np.ndarray | None = None,
+    ) -> np.ndarray:
         """Compute augmented donor weights around simplex baseline weights.
 
         Parameters
         ----------
-        x : numpy.ndarray
+        x0_pre, x : numpy.ndarray
             Donor matrix with shape ``(n_periods, n_donors)``.
-        y : numpy.ndarray
+        y1_pre, y : numpy.ndarray
             Treated outcomes with shape ``(n_periods,)``.
         w_sc : numpy.ndarray
             Baseline simplex SCM weights.
@@ -322,11 +426,21 @@ class AugmentedSyntheticControl:
         numpy.ndarray
             Augmented donor weights.
         """
-        x_arr = np.asarray(x, dtype=float)
-        y_arr = np.asarray(y, dtype=float)
+        x_arr, y_arr = self._resolve_prefit_inputs(
+            x0_pre=x0_pre,
+            y1_pre=y1_pre,
+            x=x,
+            y=y,
+        )
+        self._validate_prefit_inputs(x=x_arr, y=y_arr)
         w_sc_arr = np.asarray(w_sc, dtype=float)
 
         n_donors = int(x_arr.shape[1])
+        if w_sc_arr.shape != (n_donors,):
+            raise ValueError("w_sc must have shape (n_donors,).")
+        if not np.isfinite(w_sc_arr).all():
+            raise ValueError("w_sc must contain only finite values.")
+
         gram = x_arr.T @ x_arr + self.lambda_aug * np.eye(n_donors, dtype=float)
         if self.enforce_sum_to_one_augmented and self.lambda_aug == 0.0:
             if int(np.linalg.matrix_rank(gram)) < n_donors:
@@ -349,14 +463,21 @@ class AugmentedSyntheticControl:
 
         return np.asarray(w_aug, dtype=float)
 
-    def _fit_augmented_weights(self, *, x: np.ndarray, y: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    def _fit_augmented_weights(
+        self,
+        *,
+        x0_pre: np.ndarray | None = None,
+        y1_pre: np.ndarray | None = None,
+        x: np.ndarray | None = None,
+        y: np.ndarray | None = None,
+    ) -> tuple[np.ndarray, np.ndarray]:
         """Fit both simplex and augmented donor weights.
 
         Parameters
         ----------
-        x : numpy.ndarray
+        x0_pre, x : numpy.ndarray
             Donor matrix with shape ``(n_periods, n_donors)``.
-        y : numpy.ndarray
+        y1_pre, y : numpy.ndarray
             Treated outcomes with shape ``(n_periods,)``.
 
         Returns
@@ -364,8 +485,15 @@ class AugmentedSyntheticControl:
         tuple[numpy.ndarray, numpy.ndarray]
             ``(w_sc, w_aug)`` baseline simplex and augmented weights.
         """
-        w_sc = self._fit_simplex_weights(x=x, y=y)
-        w_aug = self._augment_weights(x=x, y=y, w_sc=w_sc)
+        x_arr, y_arr = self._resolve_prefit_inputs(
+            x0_pre=x0_pre,
+            y1_pre=y1_pre,
+            x=x,
+            y=y,
+        )
+        self._validate_prefit_inputs(x=x_arr, y=y_arr)
+        w_sc = self._fit_simplex_weights(x=x_arr, y=y_arr)
+        w_aug = self._augment_weights(x=x_arr, y=y_arr, w_sc=w_sc)
         return w_sc, w_aug
 
     # ---------------------------------------------------------------------
@@ -472,6 +600,44 @@ class AugmentedSyntheticControl:
 
         return panel, donors, pre_times, post_times, all_times
 
+    def _build_fit_context(self, data: PanelDataSCM) -> _FitContext:
+        """Prepare panel matrices and aligned time metadata for fitting."""
+        panel, donors, pre_times, post_times, all_times = self._prepare_balanced_panel(data)
+        treated = data.treated_unit
+        return _FitContext(
+            data=data,
+            donors=donors,
+            pre_times=pre_times,
+            post_times=post_times,
+            all_times=all_times,
+            y1_all=panel.loc[treated, all_times].to_numpy(dtype=float),
+            y1_pre=panel.loc[treated, pre_times].to_numpy(dtype=float),
+            y0_all=panel.loc[donors, all_times].to_numpy(dtype=float).T,
+            x0_pre=panel.loc[donors, pre_times].to_numpy(dtype=float).T,
+        )
+
+    @staticmethod
+    def _build_series_outputs(
+        *,
+        y1_all: np.ndarray,
+        y0_hat: np.ndarray,
+        all_times: list[Any],
+        post_times: list[Any],
+    ) -> _SeriesOutputs:
+        """Build observed/synthetic/gap/effect series from fitted outcomes."""
+        gap = np.asarray(y1_all, dtype=float) - np.asarray(y0_hat, dtype=float)
+        observed_series = pd.Series(np.asarray(y1_all, dtype=float), index=all_times, name="observed_outcome")
+        synthetic_series = pd.Series(np.asarray(y0_hat, dtype=float), index=all_times, name="synthetic_outcome")
+        gap_series = pd.Series(gap, index=all_times, name="gap")
+        effect_by_time = gap_series.loc[post_times].copy()
+        effect_by_time.name = "effect_by_time"
+        return _SeriesOutputs(
+            observed_series=observed_series,
+            synthetic_series=synthetic_series,
+            gap_series=gap_series,
+            effect_by_time=effect_by_time,
+        )
+
     # ---------------------------------------------------------------------
     # Added: average ATT t-test inference (1812.10820)
     # ---------------------------------------------------------------------
@@ -567,13 +733,14 @@ class AugmentedSyntheticControl:
         where ``gap_k`` is computed with fold-specific weights fit on the
         complement pre-period sample.
         """
-        y1 = np.asarray(y1_observed, dtype=float).reshape(-1)
+        y1_raw = np.asarray(y1_observed, dtype=float)
         x = np.asarray(y0_all, dtype=float)
         n_pre = int(len(pre_times))
         n_post = int(len(post_times))
 
-        if y1.ndim != 1:
+        if y1_raw.ndim != 1:
             return self._empty_average_att_ttest_result("y1_observed must be one-dimensional.")
+        y1 = np.asarray(y1_raw, dtype=float)
         if x.ndim != 2:
             return self._empty_average_att_ttest_result("y0_all must be two-dimensional.")
         if x.shape[0] != y1.size:
@@ -690,7 +857,7 @@ class AugmentedSyntheticControl:
         -------
         _PointwiseConformalResult
             Result container with effect path populated and inference fields set
-            to neutral placeholders.
+            to neutral placeholders (``NaN`` p-values/CIs).
         """
         post_index = pd.Index(post_times)
         return _PointwiseConformalResult(
@@ -708,7 +875,7 @@ class AugmentedSyntheticControl:
                 name="ci_upper_by_time",
             ),
             p_value_by_time=pd.Series(
-                1.0,
+                np.nan,
                 index=post_index,
                 dtype=float,
                 name="p_value_by_time",
@@ -786,7 +953,8 @@ class AugmentedSyntheticControl:
         Returns
         -------
         float
-            One-sided permutation p-value clipped to ``[0, 1]``.
+            Permutation p-value for the absolute CWZ statistic, clipped to
+            ``[0, 1]``.
         """
         resid = np.asarray(residuals, dtype=float).reshape(-1)
         observed = self._conformal_stat_from_residuals(resid, n_pre=n_pre)
@@ -1252,6 +1420,39 @@ class AugmentedSyntheticControl:
         max_abs_w_aug = float(np.max(np.abs(w_aug)))
         return cond_gram_aug, l1_w_aug, max_abs_w_aug
 
+    def _record_slsqp_fallback(self, *, reason: str) -> None:
+        """Persist SLSQP fallback metadata for post-fit diagnostics."""
+        self._slsqp_fallback_count += 1
+        reason_clean = str(reason).strip() or "unknown failure"
+        if reason_clean not in self._slsqp_fallback_reasons:
+            self._slsqp_fallback_reasons.append(reason_clean)
+
+    def _record_stability_warning(self, *, message: str) -> None:
+        """Persist fit-stability warnings without emitting RuntimeWarning."""
+        message_clean = str(message).strip()
+        if message_clean and message_clean not in self._stability_warning_messages:
+            self._stability_warning_messages.append(message_clean)
+
+    def _suppressed_fit_warnings(self) -> list[str]:
+        """Build user-facing fit warnings for diagnostics/refutation output."""
+        warnings_out: list[str] = []
+        if self._slsqp_fallback_count > 0:
+            if len(self._slsqp_fallback_reasons) == 1:
+                warnings_out.append(
+                    "SLSQP simplex optimization did not converge; falling back to projected-gradient "
+                    f"solver. Occurrences: {self._slsqp_fallback_count}. "
+                    f"Reason: {self._slsqp_fallback_reasons[0]}"
+                )
+            else:
+                reasons = "; ".join(self._slsqp_fallback_reasons)
+                warnings_out.append(
+                    "SLSQP simplex optimization did not converge; falling back to projected-gradient "
+                    f"solver. Occurrences: {self._slsqp_fallback_count}. "
+                    f"Reasons: {reasons}"
+                )
+        warnings_out.extend(self._stability_warning_messages)
+        return warnings_out
+
     def _warn_on_augmented_weight_metrics(
         self,
         *,
@@ -1259,7 +1460,7 @@ class AugmentedSyntheticControl:
         l1_w_aug: float,
         max_abs_w_aug: float,
     ) -> None:
-        """Emit warnings when augmented weights look numerically unstable.
+        """Record stability warnings when augmented weights look unstable.
 
         Parameters
         ----------
@@ -1271,19 +1472,15 @@ class AugmentedSyntheticControl:
             Maximum absolute augmented weight.
         """
         if cond_gram_aug > self._AUGMENTED_GRAM_COND_WARN_THRESHOLD:
-            warnings.warn(
-                f"Augmented normal equations are ill-conditioned (cond={cond_gram_aug:.2e}).",
-                RuntimeWarning,
-                stacklevel=2,
+            self._record_stability_warning(
+                message=f"Augmented normal equations are ill-conditioned (cond={cond_gram_aug:.2e})."
             )
         if (
             l1_w_aug > self._AUGMENTED_WEIGHT_L1_WARN_THRESHOLD
             or max_abs_w_aug > self._AUGMENTED_WEIGHT_MAX_ABS_WARN_THRESHOLD
         ):
-            warnings.warn(
-                "Augmented donor weights are extreme; estimates may be unstable.",
-                RuntimeWarning,
-                stacklevel=2,
+            self._record_stability_warning(
+                message="Augmented donor weights are extreme; estimates may be unstable."
             )
 
     def _build_diagnostics(
@@ -1334,6 +1531,9 @@ class AugmentedSyntheticControl:
             self.compute_pointwise_conformal
             and any(len(grid) > 0 for grid in pointwise.grid_by_time.values())
         )
+        pointwise_ci_method = (
+            "cwz_overlapping_moving_block" if pointwise_conformal_available else None
+        )
         return {
             "n_donors": len(self._donors),
             "n_pre_periods": len(self._pre_times),
@@ -1353,16 +1553,20 @@ class AugmentedSyntheticControl:
             "min_weight_sc": float(np.min(w_sc)),
             "max_weight_sc": float(np.max(w_sc)),
             "cond_augmented_gram": cond_gram_aug,
+            "slsqp_fallback_occurred": bool(self._slsqp_fallback_count > 0),
+            "slsqp_fallback_count": int(self._slsqp_fallback_count),
+            "slsqp_fallback_reasons": list(self._slsqp_fallback_reasons),
+            "stability_warning_messages": list(self._stability_warning_messages),
+            "suppressed_fit_warnings": self._suppressed_fit_warnings(),
             "estimand": "dynamic_effect_path",
             "ci_alpha": float(self.alpha),
             "inference_default": "average_att_ttest",
+            "effect_by_time_inference_default": (
+                "pointwise_conformal" if pointwise_conformal_available else "descriptive_only"
+            ),
             "pointwise_conformal_requested": bool(self.compute_pointwise_conformal),
             "pointwise_conformal_available": pointwise_conformal_available,
-            "pointwise_ci_method": (
-                "cwz_overlapping_moving_block"
-                if pointwise_conformal_available
-                else "average_att_ttest"
-            ),
+            "pointwise_ci_method": pointwise_ci_method,
             "pointwise_min_possible_p_value": (
                 min_possible_p if self.compute_pointwise_conformal else np.nan
             ),
@@ -1372,7 +1576,10 @@ class AugmentedSyntheticControl:
             "p_value_by_time_is_pointwise_not_joint": (
                 True if pointwise_conformal_available else None
             ),
-            "multiple_testing_adjusted": False,
+            "is_significant_by_time_is_placeholder_without_pointwise": (
+                None if pointwise_conformal_available else True
+            ),
+            "multiple_testing_adjusted": (False if pointwise_conformal_available else None),
             "pointwise_confidence_set_representation": (
                 "grid_approximated_contiguous_segments"
                 if pointwise_conformal_available
@@ -1391,7 +1598,7 @@ class AugmentedSyntheticControl:
             ],
             "average_att_ttest_requested": bool(self.compute_average_att_ttest),
             "average_att_ttest_available": bool(average_att_ttest.available),
-            "average_att_ttest_method": "cwz_2018_debiased_self_normalized_t",
+            "average_att_ttest_method": "cwz_style_debiased_self_normalized_t_on_ascm",
             "average_att_ttest_message": average_att_ttest.message,
             "average_att_n_folds_requested": int(self.average_att_n_folds),
             "average_att_n_folds_used": int(average_att_ttest.n_folds),
@@ -1494,6 +1701,50 @@ class AugmentedSyntheticControl:
 
         self._average_att_ttest = average_att_ttest
 
+    def _reset_fit_state(self) -> None:
+        """Clear fitted artifacts so failed refits cannot leak stale state."""
+        self._is_fitted = False
+        self._data = None
+        self._donors = []
+        self._pre_times = []
+        self._post_times = []
+        self._all_times = []
+        self._w_aug = np.array([], dtype=float)
+        self._observed = pd.Series(dtype=float, name="observed_outcome")
+        self._synthetic = pd.Series(dtype=float, name="synthetic_outcome")
+        self._gap = pd.Series(dtype=float, name="gap")
+        self._effect_by_time = pd.Series(dtype=float, name="effect_by_time")
+        self._ci_lower_by_time = pd.Series(dtype=float, name="ci_lower_by_time")
+        self._ci_upper_by_time = pd.Series(dtype=float, name="ci_upper_by_time")
+        self._p_value_by_time = pd.Series(dtype=float, name="p_value_by_time")
+        self._is_significant_by_time = pd.Series(dtype=bool, name="is_significant_by_time")
+        self._confidence_set_by_time = {}
+        self._average_att_ttest = self._empty_average_att_ttest_result("Model has not been fitted.")
+        self._diagnostics = {}
+        self._slsqp_fallback_count = 0
+        self._slsqp_fallback_reasons = []
+        self._stability_warning_messages = []
+
+    def _warn_pointwise_conformal_feasibility(self, *, n_pre: int, min_possible_p: float) -> None:
+        """Warn when pointwise conformal rejection is impossible or unstable."""
+        if not self.compute_pointwise_conformal:
+            return
+        if self.alpha < min_possible_p:
+            warnings.warn(
+                f"alpha={self.alpha:.3f} is smaller than the minimum attainable pointwise p-value "
+                f"{min_possible_p:.3f}; rejection is impossible with the current number of "
+                "pre-treatment periods.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+        if n_pre < 10:
+            warnings.warn(
+                "Very short pre-treatment window detected; moving-block pointwise p-values will be "
+                "highly discrete and inference may be unstable.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+
     # ---------------------------------------------------------------------
     # Public API
     # ---------------------------------------------------------------------
@@ -1516,76 +1767,47 @@ class AugmentedSyntheticControl:
         ValueError
             If input type is invalid or panel requirements are violated.
         """
-        # Reset fit state so failed refits cannot leak stale estimates.
-        self._is_fitted = False
-        self._data = None
+        self._reset_fit_state()
 
         if not isinstance(data, PanelDataSCM):
             raise ValueError("Input must be a PanelDataSCM object.")
 
-        panel, donors, pre_times, post_times, all_times = self._prepare_balanced_panel(data)
+        fit_ctx = self._build_fit_context(data)
+        w_sc, w_aug = self._fit_augmented_weights(x0_pre=fit_ctx.x0_pre, y1_pre=fit_ctx.y1_pre)
+        y0_hat = fit_ctx.y0_all @ w_aug
 
-        treated = data.treated_unit
-        y1_all = panel.loc[treated, all_times].to_numpy(dtype=float)
-        y1_pre = panel.loc[treated, pre_times].to_numpy(dtype=float)
-
-        y0_all = panel.loc[donors, all_times].to_numpy(dtype=float).T
-        x0_pre = panel.loc[donors, pre_times].to_numpy(dtype=float).T
-
-        w_sc, w_aug = self._fit_augmented_weights(x=x0_pre, y=y1_pre)
-
-        y0_hat = y0_all @ w_aug
-        gap = y1_all - y0_hat
-        n_pre = len(pre_times)
+        n_pre = len(fit_ctx.pre_times)
         min_possible_p = 1.0 / float(n_pre + 1)
-
-        # Pre residuals are reused in conformal-grid scale heuristics.
-        pre_residuals = y1_pre - (x0_pre @ w_aug)
-
-        if self.compute_pointwise_conformal:
-            if self.alpha < min_possible_p:
-                warnings.warn(
-                    f"alpha={self.alpha:.3f} is smaller than the minimum attainable pointwise p-value "
-                    f"{min_possible_p:.3f}; rejection is impossible with the current number of "
-                    "pre-treatment periods.",
-                    RuntimeWarning,
-                    stacklevel=2,
-                )
-            if n_pre < 10:
-                warnings.warn(
-                    "Very short pre-treatment window detected; moving-block pointwise p-values will be "
-                    "highly discrete and inference may be unstable.",
-                    RuntimeWarning,
-                    stacklevel=2,
-                )
-
-        observed_series = pd.Series(y1_all, index=all_times, name="observed_outcome")
-        synthetic_series = pd.Series(y0_hat, index=all_times, name="synthetic_outcome")
-        gap_series = pd.Series(gap, index=all_times, name="gap")
-        effect_by_time = gap_series.loc[post_times].copy()
-        effect_by_time.name = "effect_by_time"
+        self._warn_pointwise_conformal_feasibility(n_pre=n_pre, min_possible_p=min_possible_p)
+        pre_residuals = fit_ctx.y1_pre - (fit_ctx.x0_pre @ w_aug)
+        series_outputs = self._build_series_outputs(
+            y1_all=fit_ctx.y1_all,
+            y0_hat=y0_hat,
+            all_times=fit_ctx.all_times,
+            post_times=fit_ctx.post_times,
+        )
 
         # Stage 1: default inference, aggregate post-window ATT t-test.
         average_att_ttest = self._compute_average_att_ttest_if_requested(
-            y1_observed=y1_all,
-            y0_all=y0_all,
-            pre_times=pre_times,
-            post_times=post_times,
+            y1_observed=fit_ctx.y1_all,
+            y0_all=fit_ctx.y0_all,
+            pre_times=fit_ctx.pre_times,
+            post_times=fit_ctx.post_times,
         )
 
         # Stage 2: optional dynamic pointwise conformal inference.
         pointwise = self._compute_pointwise_conformal_if_requested(
-            y1_observed=y1_all,
-            y0_all=y0_all,
+            y1_observed=fit_ctx.y1_all,
+            y0_all=fit_ctx.y0_all,
             n_pre=n_pre,
-            post_times=post_times,
-            effect_by_time=effect_by_time,
+            post_times=fit_ctx.post_times,
+            effect_by_time=series_outputs.effect_by_time,
             pre_residuals=pre_residuals,
         )
 
         # Stage 3: stability checks on final augmented fit.
         cond_gram_aug, l1_w_aug, max_abs_w_aug = self._compute_augmented_weight_metrics(
-            x0_pre=x0_pre,
+            x0_pre=fit_ctx.x0_pre,
             w_aug=w_aug,
         )
         self._warn_on_augmented_weight_metrics(
@@ -1596,20 +1818,20 @@ class AugmentedSyntheticControl:
 
         # Stage 4: persist fitted state and publish diagnostics.
         self._assign_fitted_state(
-            data=data,
-            donors=donors,
-            pre_times=pre_times,
-            post_times=post_times,
-            all_times=all_times,
+            data=fit_ctx.data,
+            donors=fit_ctx.donors,
+            pre_times=fit_ctx.pre_times,
+            post_times=fit_ctx.post_times,
+            all_times=fit_ctx.all_times,
             w_aug=w_aug,
-            observed_series=observed_series,
-            synthetic_series=synthetic_series,
-            gap_series=gap_series,
+            observed_series=series_outputs.observed_series,
+            synthetic_series=series_outputs.synthetic_series,
+            gap_series=series_outputs.gap_series,
             pointwise=pointwise,
             average_att_ttest=average_att_ttest,
         )
 
-        full_sample_post_mean_gap = float(np.mean(effect_by_time.to_numpy(dtype=float)))
+        full_sample_post_mean_gap = float(np.mean(series_outputs.effect_by_time.to_numpy(dtype=float)))
         self._diagnostics = self._build_diagnostics(
             pointwise=pointwise,
             average_att_ttest=average_att_ttest,
@@ -1633,7 +1855,9 @@ class AugmentedSyntheticControl:
         -------
         PanelEstimate
             Dynamic path estimates with pointwise inference fields. Aggregate
-            average ATT t-test outputs are provided in ``diagnostics``.
+            average ATT t-test outputs are provided in ``diagnostics`` and are
+            the default formal inference layer. If pointwise conformal is not
+            computed, pointwise p-values/CIs are returned as ``NaN`` placeholders.
 
         Raises
         ------

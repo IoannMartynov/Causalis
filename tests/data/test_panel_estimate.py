@@ -145,6 +145,13 @@ def test_alpha_and_pvalue_by_time_must_be_valid():
         PanelEstimate(**kwargs_pvalue)
 
 
+def test_pvalue_by_time_allows_missing_placeholders():
+    kwargs = _base_estimate_kwargs()
+    kwargs["p_value_by_time"] = pd.Series([np.nan, np.nan], index=["2020-04", "2020-05"])
+    est = PanelEstimate(**kwargs)
+    assert est.p_value_by_time.isna().all()
+
+
 def test_augmented_weight_sum_enforced_only_when_configured():
     kwargs_enforced = _base_estimate_kwargs()
     kwargs_enforced["donor_weights_augmented"] = {"C1": 0.8, "C2": 0.5}
