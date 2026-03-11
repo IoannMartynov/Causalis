@@ -14,17 +14,17 @@ PanelOutput = Union[pd.DataFrame, PanelDataSCM]
 
 
 def _generate_scm26(
-    *,
-    distribution: str,
-    seed: int,
-    return_panel_data: bool,
-    include_oracles: bool,
-    n_donors: int,
-    n_pre_periods: Optional[int],
-    n_post_periods: Optional[int],
-    treatment_effect_rate: float,
-    treatment_effect_slope: float,
-    advanced_params: dict,
+        *,
+        distribution: str,
+        seed: int,
+        return_panel_data: bool,
+        include_oracles: bool,
+        n_donors: int,
+        n_pre_periods: Optional[int],
+        n_post_periods: Optional[int],
+        treatment_effect_rate: float,
+        treatment_effect_slope: float,
+        advanced_params: dict,
 ) -> PanelOutput:
     if distribution == "gamma":
         return generate_scm_gamma_26_data(
@@ -54,17 +54,17 @@ def _generate_scm26(
 
 
 def generate_scm_gamma_26(
-    seed: int = 42,
-    return_panel_data: bool = True,
-    include_oracles: bool = False,
-    n_donors: int = 40,
-    n_pre_periods: Optional[int] = 36,
-    n_post_periods: Optional[int] = 6,
-    treatment_effect_rate: float = 0.10,
-    treatment_effect_slope: float = 0.002,
-    **advanced_params,
+        seed: int = 42,
+        return_panel_data: bool = True,
+        include_oracles: bool = False,
+        n_donors: int = 40,
+        n_pre_periods: Optional[int] = 36,
+        n_post_periods: Optional[int] = 6,
+        treatment_effect_rate: float = 0.10,
+        treatment_effect_slope: float = 0.002,
+        **advanced_params,
 ) -> PanelOutput:
-    """
+    r"""
     Generate realistic Gamma synthetic-control panel data.
 
     Parameters
@@ -112,6 +112,18 @@ def generate_scm_gamma_26(
 
     Notes
     -----
+    DGP Math:
+    The data follows a hierarchical log-linear model for the mean: math:`\mu`.
+    For each donor unit :math:`j` at time :math:`t`, the mean is :math:`\mu_{tj} = E_{tj} \cdot \exp(\eta_{tj})`
+    where :math:`E_{tj}` is exposure (with growth and noise) and :math:`\eta_{tj}` includes seasonality,
+    common factors (macro index), latent factors, and unit-specific noise.
+    Outcomes are sampled as :math:`y_{tj} \sim \text{Gamma}(k, \mu_{tj}/k)`, where :math:`k` is `gamma_shape`.
+
+    The treated unit's counterfactual mean :math:`\mu_{t, cf}` is a weighted combination of donors
+    (via Dirichlet weights) with a potential pre-fit mismatch. The realized treated outcome
+    is :math:`y_{t, treated} = y_{t, cf} \cdot (1 + \tau_t^{rate})`, where :math:`\tau_t^{rate}` is the
+    relative treatment effect.
+
     Time-axis semantics:
 
     - `n_pre_periods`: number of periods strictly before the intervention anchor.
@@ -157,17 +169,17 @@ def generate_scm_gamma_26(
 
 
 def generate_scm_poisson_26(
-    seed: int = 42,
-    return_panel_data: bool = True,
-    include_oracles: bool = False,
-    n_donors: int = 20,
-    n_pre_periods: Optional[int] = 180,
-    n_post_periods: Optional[int] = 4,
-    treatment_effect_rate: float = 0.15,
-    treatment_effect_slope: float = 0.0005,
-    **advanced_params,
+        seed: int = 42,
+        return_panel_data: bool = True,
+        include_oracles: bool = False,
+        n_donors: int = 20,
+        n_pre_periods: Optional[int] = 180,
+        n_post_periods: Optional[int] = 4,
+        treatment_effect_rate: float = 0.15,
+        treatment_effect_slope: float = 0.0005,
+        **advanced_params,
 ) -> PanelOutput:
-    """
+    r"""
     Generate realistic Poisson synthetic-control panel data.
 
     Parameters
@@ -214,6 +226,18 @@ def generate_scm_poisson_26(
 
     Notes
     -----
+    DGP Math:
+    The data follows a hierarchical log-linear model for the mean :math:`\mu`.
+    For each donor unit :math:`j` at time :math:`t`, the mean is :math:`\mu_{tj} = E_{tj} \cdot \exp(\eta_{tj})`
+    where :math:`E_{tj}` is exposure and :math:`\eta_{tj}` includes seasonality, common factors,
+    latent factors, and unit-specific noise.
+    Outcomes are sampled as :math:`y_{tj} \sim \text{Poisson}(\mu_{tj})`.
+
+    The treated unit's counterfactual mean :math:`\mu_{t, cf}` is a weighted combination of donors.
+    The realized treated outcome :math:`y_{t, treated}` is sampled from a Poisson distribution
+    coupled with the counterfactual :math:`y_{t, cf}` via a thinning/superposition property to
+    maintain exact marginals while ensuring the realized effect is driven by the multiplier.
+
     Time-axis semantics:
 
     - `n_pre_periods`: number of periods strictly before the intervention anchor.
