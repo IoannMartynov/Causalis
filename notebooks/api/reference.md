@@ -732,6 +732,8 @@ from the input data.
 The model stores a validated internal dataframe snapshot used by all contract
 methods; mutating the public `df` attribute after construction does not
 affect validated contract behavior.
+Outcome `y` must not contain null/NaN values. Represent missing panel
+periods by omitting unit-time rows, not by keeping rows with `NaN` outcome.
 For fiscal quarter/year semantics, pass `time_col` explicitly as
 `pandas.Period` with the desired fiscal frequency.
 
@@ -769,6 +771,12 @@ df_analysis() -> pd.DataFrame
 
 ```python
 donor_pool() -> Sequence[Hashable]
+```
+
+##### `last_post_period`
+
+```python
+last_post_period: pd.Period
 ```
 
 ##### `model_config`
@@ -869,7 +877,8 @@ Result contract for dynamic synthetic-control effect-path estimates.
 
 **Functions:**
 
-- [**summary**](#causalis.data_contracts.PanelEstimate.summary) – Return a dynamic-path summary with pointwise inference details.
+- [**summary**](#causalis.data_contracts.PanelEstimate.summary) – Return a compact CausalEstimate-style summary table.
+- [**summary_poinwise**](#causalis.data_contracts.PanelEstimate.summary_poinwise) – Return pointwise post-period estimates as a flat DataFrame.
 
 ##### `alpha`
 
@@ -976,10 +985,18 @@ pre_times: List[TimeLike]
 ##### `summary`
 
 ```python
-summary() -> Dict[str, Any]
+summary() -> pd.DataFrame
 ```
 
-Return a dynamic-path summary with pointwise inference details.
+Return a compact CausalEstimate-style summary table.
+
+##### `summary_poinwise`
+
+```python
+summary_poinwise() -> pd.DataFrame
+```
+
+Return pointwise post-period estimates as a flat DataFrame.
 
 ##### `synthetic_outcome`
 
@@ -2604,6 +2621,8 @@ from the input data.
 The model stores a validated internal dataframe snapshot used by all contract
 methods; mutating the public `df` attribute after construction does not
 affect validated contract behavior.
+Outcome `y` must not contain null/NaN values. Represent missing panel
+periods by omitting unit-time rows, not by keeping rows with `NaN` outcome.
 For fiscal quarter/year semantics, pass `time_col` explicitly as
 `pandas.Period` with the desired fiscal frequency.
 
@@ -2641,6 +2660,12 @@ df_analysis() -> pd.DataFrame
 
 ```python
 donor_pool() -> Sequence[Hashable]
+```
+
+###### `last_post_period`
+
+```python
+last_post_period: pd.Period
 ```
 
 ###### `model_config`
@@ -2753,7 +2778,8 @@ Result contract for dynamic synthetic-control effect-path estimates.
 
 **Functions:**
 
-- [**summary**](#causalis.data_contracts.panel_estimate.PanelEstimate.summary) – Return a dynamic-path summary with pointwise inference details.
+- [**summary**](#causalis.data_contracts.panel_estimate.PanelEstimate.summary) – Return a compact CausalEstimate-style summary table.
+- [**summary_poinwise**](#causalis.data_contracts.panel_estimate.PanelEstimate.summary_poinwise) – Return pointwise post-period estimates as a flat DataFrame.
 
 ###### `alpha`
 
@@ -2860,10 +2886,18 @@ pre_times: List[TimeLike]
 ###### `summary`
 
 ```python
-summary() -> Dict[str, Any]
+summary() -> pd.DataFrame
 ```
 
-Return a dynamic-path summary with pointwise inference details.
+Return a compact CausalEstimate-style summary table.
+
+###### `summary_poinwise`
+
+```python
+summary_poinwise() -> pd.DataFrame
+```
+
+Return pointwise post-period estimates as a flat DataFrame.
 
 ###### `synthetic_outcome`
 
@@ -5687,8 +5721,6 @@ generate_scm_data(
     treated_unit: Hashable = "treated",
     donor_prefix: str = "donor_",
     random_state: Optional[int] = 42,
-    missing_outcome_frac: float = 0.0,
-    missing_cell_frac: float = 0.0,
     return_panel_data: bool = True,
     dirichlet_alpha: float = 1.0,
     rho_common: float = 0.0,
@@ -5699,16 +5731,20 @@ generate_scm_data(
     rho_latent: float = 0.0,
     prefit_mismatch_std: float = 0.0,
     rho_prefit_mismatch: float = 0.0,
-    missing_block_frac: float = 0.0,
-    missing_block_min_len: int = 2,
-    missing_block_max_len: Optional[int] = None,
-    protect_treated_pre: bool = False,
-    protect_treated_post: bool = False,
     treatment_effect_mode: Literal["additive", "multiplicative"] = "additive",
 ) -> PanelOutput
 ```
 
 Medium-level wrapper for Gaussian SCM panel generation.
+
+<details class="note" open markdown="1">
+<summary>Notes</summary>
+
+The Gaussian treated counterfactual path is exact SCM only when both
+`treated_noise_std=0.0` and `prefit_mismatch_std=0.0`. With either term
+non-zero, the generator intentionally produces an approximate-SCM fit path.
+
+</details>
 
 #### `make_cuped_binary_26`
 
@@ -6839,13 +6875,6 @@ PanelSCMGeneratorConfig(
     latent_loading_std: float = 0.35,
     rho_latent: float = 0.0,
     rho_prefit_mismatch: float = 0.0,
-    missing_outcome_frac: float = 0.0,
-    missing_cell_frac: float = 0.0,
-    missing_block_frac: float = 0.0,
-    missing_block_min_len: int = 2,
-    missing_block_max_len: Optional[int] = None,
-    protect_treated_pre: bool = False,
-    protect_treated_post: bool = False,
     outcome_distribution: Literal["gaussian", "gamma", "poisson"] = "gaussian",
     treatment_effect: float = 2.0,
     treatment_effect_slope: float = 0.0,
@@ -6930,36 +6959,6 @@ latent_factor_std_log: float = 0.1
 latent_loading_std: float = 0.35
 ```
 
-###### `missing_block_frac`
-
-```python
-missing_block_frac: float = 0.0
-```
-
-###### `missing_block_max_len`
-
-```python
-missing_block_max_len: Optional[int] = None
-```
-
-###### `missing_block_min_len`
-
-```python
-missing_block_min_len: int = 2
-```
-
-###### `missing_cell_frac`
-
-```python
-missing_cell_frac: float = 0.0
-```
-
-###### `missing_outcome_frac`
-
-```python
-missing_outcome_frac: float = 0.0
-```
-
 ###### `n_donors`
 
 ```python
@@ -7000,18 +6999,6 @@ prefit_mismatch_std: float = 0.0
 
 ```python
 prefit_mismatch_std_log: float = 0.08
-```
-
-###### `protect_treated_post`
-
-```python
-protect_treated_post: bool = False
-```
-
-###### `protect_treated_pre`
-
-```python
-protect_treated_pre: bool = False
 ```
 
 ###### `random_state`
@@ -7152,13 +7139,6 @@ PanelSCMGeneratorConfig(
     latent_loading_std: float = 0.35,
     rho_latent: float = 0.0,
     rho_prefit_mismatch: float = 0.0,
-    missing_outcome_frac: float = 0.0,
-    missing_cell_frac: float = 0.0,
-    missing_block_frac: float = 0.0,
-    missing_block_min_len: int = 2,
-    missing_block_max_len: Optional[int] = None,
-    protect_treated_pre: bool = False,
-    protect_treated_post: bool = False,
     outcome_distribution: Literal["gaussian", "gamma", "poisson"] = "gaussian",
     treatment_effect: float = 2.0,
     treatment_effect_slope: float = 0.0,
@@ -7243,36 +7223,6 @@ latent_factor_std_log: float = 0.1
 latent_loading_std: float = 0.35
 ```
 
-####### `missing_block_frac`
-
-```python
-missing_block_frac: float = 0.0
-```
-
-####### `missing_block_max_len`
-
-```python
-missing_block_max_len: Optional[int] = None
-```
-
-####### `missing_block_min_len`
-
-```python
-missing_block_min_len: int = 2
-```
-
-####### `missing_cell_frac`
-
-```python
-missing_cell_frac: float = 0.0
-```
-
-####### `missing_outcome_frac`
-
-```python
-missing_outcome_frac: float = 0.0
-```
-
 ####### `n_donors`
 
 ```python
@@ -7313,18 +7263,6 @@ prefit_mismatch_std: float = 0.0
 
 ```python
 prefit_mismatch_std_log: float = 0.08
-```
-
-####### `protect_treated_post`
-
-```python
-protect_treated_post: bool = False
-```
-
-####### `protect_treated_pre`
-
-```python
-protect_treated_pre: bool = False
 ```
 
 ####### `random_state`
@@ -7443,8 +7381,6 @@ generate_scm_data(
     treated_unit: Hashable = "treated",
     donor_prefix: str = "donor_",
     random_state: Optional[int] = 42,
-    missing_outcome_frac: float = 0.0,
-    missing_cell_frac: float = 0.0,
     return_panel_data: bool = True,
     dirichlet_alpha: float = 1.0,
     rho_common: float = 0.0,
@@ -7455,16 +7391,20 @@ generate_scm_data(
     rho_latent: float = 0.0,
     prefit_mismatch_std: float = 0.0,
     rho_prefit_mismatch: float = 0.0,
-    missing_block_frac: float = 0.0,
-    missing_block_min_len: int = 2,
-    missing_block_max_len: Optional[int] = None,
-    protect_treated_pre: bool = False,
-    protect_treated_post: bool = False,
     treatment_effect_mode: Literal["additive", "multiplicative"] = "additive",
 ) -> PanelOutput
 ```
 
 Medium-level wrapper for Gaussian SCM panel generation.
+
+<details class="note" open markdown="1">
+<summary>Notes</summary>
+
+The Gaussian treated counterfactual path is exact SCM only when both
+`treated_noise_std=0.0` and `prefit_mismatch_std=0.0`. With either term
+non-zero, the generator intentionally produces an approximate-SCM fit path.
+
+</details>
 
 ###### `generate_scm_gamma_26_data`
 
@@ -7479,7 +7419,6 @@ generate_scm_gamma_26_data(
     n_post_periods: Optional[int],
     treatment_effect_rate: float,
     treatment_effect_slope: float,
-    missing_outcome_frac: float,
     advanced_params: dict[str, Any]
 ) -> PanelOutput
 ```
@@ -7494,7 +7433,6 @@ generate_scm_gamma_data(
     n_donors: int = 8,
     treatment_effect_rate: float = 0.12,
     treatment_effect_slope: float = 0.01,
-    missing_outcome_frac: float = 0.0,
     n_pre_periods: Optional[int] = None,
     n_post_periods: Optional[int] = None,
     **advanced_params: Optional[int]
@@ -7523,7 +7461,6 @@ generate_scm_poisson_26_data(
     n_post_periods: Optional[int],
     treatment_effect_rate: float,
     treatment_effect_slope: float,
-    donor_missing_block_frac: float,
     advanced_params: dict[str, Any]
 ) -> PanelOutput
 ```
@@ -7538,9 +7475,6 @@ generate_scm_poisson_data(
     n_donors: int = 8,
     treatment_effect_rate: float = 0.1,
     treatment_effect_slope: float = 0.005,
-    donor_missing_block_frac: float = 0.08,
-    donor_missing_block_min_len: int = 2,
-    donor_missing_block_max_len: Optional[int] = 4,
     n_pre_periods: Optional[int] = None,
     n_post_periods: Optional[int] = None,
     **advanced_params: Optional[int]
@@ -7550,9 +7484,7 @@ generate_scm_poisson_data(
 Medium-level wrapper for realistic Poisson SCM panel generation.
 
 Preferred usage is explicit `n_pre_periods` and `n_post_periods`. If both
-are omitted, they are inferred from `n`. Default behavior injects donor-only
-missing periods, keeping treated post periods observed so
-RobustSyntheticControl can be exercised reliably.
+are omitted, they are inferred from `n`.
 The post-treatment effect path uses a ramp-in: at the first post period, the
 effective relative lift is
 `treatment_effect_rate * (1 - exp(-1 / 2.5))` (about 0.33x of the parameter
@@ -7574,8 +7506,6 @@ generate_scm_data(
     treated_unit: Hashable = "treated",
     donor_prefix: str = "donor_",
     random_state: Optional[int] = 42,
-    missing_outcome_frac: float = 0.0,
-    missing_cell_frac: float = 0.0,
     return_panel_data: bool = True,
     dirichlet_alpha: float = 1.0,
     rho_common: float = 0.0,
@@ -7586,16 +7516,20 @@ generate_scm_data(
     rho_latent: float = 0.0,
     prefit_mismatch_std: float = 0.0,
     rho_prefit_mismatch: float = 0.0,
-    missing_block_frac: float = 0.0,
-    missing_block_min_len: int = 2,
-    missing_block_max_len: Optional[int] = None,
-    protect_treated_pre: bool = False,
-    protect_treated_post: bool = False,
     treatment_effect_mode: Literal["additive", "multiplicative"] = "additive",
 ) -> PanelOutput
 ```
 
 Medium-level wrapper for Gaussian SCM panel generation.
+
+<details class="note" open markdown="1">
+<summary>Notes</summary>
+
+The Gaussian treated counterfactual path is exact SCM only when both
+`treated_noise_std=0.0` and `prefit_mismatch_std=0.0`. With either term
+non-zero, the generator intentionally produces an approximate-SCM fit path.
+
+</details>
 
 ##### `generate_scm_gamma_data`
 
@@ -7607,7 +7541,6 @@ generate_scm_gamma_data(
     n_donors: int = 8,
     treatment_effect_rate: float = 0.12,
     treatment_effect_slope: float = 0.01,
-    missing_outcome_frac: float = 0.0,
     n_pre_periods: Optional[int] = None,
     n_post_periods: Optional[int] = None,
     **advanced_params: Optional[int]
@@ -7633,9 +7566,6 @@ generate_scm_poisson_data(
     n_donors: int = 8,
     treatment_effect_rate: float = 0.1,
     treatment_effect_slope: float = 0.005,
-    donor_missing_block_frac: float = 0.08,
-    donor_missing_block_min_len: int = 2,
-    donor_missing_block_max_len: Optional[int] = 4,
     n_pre_periods: Optional[int] = None,
     n_post_periods: Optional[int] = None,
     **advanced_params: Optional[int]
@@ -7645,9 +7575,7 @@ generate_scm_poisson_data(
 Medium-level wrapper for realistic Poisson SCM panel generation.
 
 Preferred usage is explicit `n_pre_periods` and `n_post_periods`. If both
-are omitted, they are inferred from `n`. Default behavior injects donor-only
-missing periods, keeping treated post periods observed so
-RobustSyntheticControl can be exercised reliably.
+are omitted, they are inferred from `n`.
 The post-treatment effect path uses a ramp-in: at the first post period, the
 effective relative lift is
 `treatment_effect_rate * (1 - exp(-1 / 2.5))` (about 0.33x of the parameter
@@ -12163,23 +12091,27 @@ Convenience wrapper returning the balance block only.
 **Modules:**
 
 - [**dgp**](#causalis.scenarios.synthetic_control.dgp) –
-- [**missing_panel_plot**](#causalis.scenarios.synthetic_control.missing_panel_plot) –
+- [**donors_diagnostics**](#causalis.scenarios.synthetic_control.donors_diagnostics) –
 - [**model**](#causalis.scenarios.synthetic_control.model) –
 - [**outcome_panel_plot**](#causalis.scenarios.synthetic_control.outcome_panel_plot) –
 - [**refutation**](#causalis.scenarios.synthetic_control.refutation) –
 
 **Classes:**
 
-- [**AugmentedSyntheticControl**](#causalis.scenarios.synthetic_control.AugmentedSyntheticControl) – Augmented Synthetic Control with CWZ pointwise conformal inference only.
+- [**AugmentedSyntheticControl**](#causalis.scenarios.synthetic_control.AugmentedSyntheticControl) – Ridge-augmented synthetic control with simplex anchor and aggregate-first inference.
 
 **Functions:**
 
 - [**gap_over_time_plot**](#causalis.scenarios.synthetic_control.gap_over_time_plot) – Plot observed-minus-synthetic gap over time with intervention boundary.
 - [**generate_scm_gamma_26**](#causalis.scenarios.synthetic_control.generate_scm_gamma_26) – Generate realistic Gamma synthetic-control panel data.
 - [**generate_scm_poisson_26**](#causalis.scenarios.synthetic_control.generate_scm_poisson_26) – Generate realistic Poisson synthetic-control panel data.
+- [**leave_one_donor_out_sensitivity**](#causalis.scenarios.synthetic_control.leave_one_donor_out_sensitivity) – Re-fit ASCM dropping each donor once and report leave-one-donor-out sensitivity.
 - [**observed_vs_synthetic_plot**](#causalis.scenarios.synthetic_control.observed_vs_synthetic_plot) – Plot observed treated path against augmented/SC synthetic paths.
-- [**placebo_att_histogram_plot**](#causalis.scenarios.synthetic_control.placebo_att_histogram_plot) – Plot placebo ATT histogram with treated ATT line.
-- [**run_scm_diagnostics**](#causalis.scenarios.synthetic_control.run_scm_diagnostics) – Run compact SCM diagnostics and save the three v1 diagnostic plots.
+- [**placebo_in_space_table**](#causalis.scenarios.synthetic_control.placebo_in_space_table) – Build Abadie-style placebo-in-space RMSPE ratio table.
+- [**placebo_in_time_table**](#causalis.scenarios.synthetic_control.placebo_in_time_table) – Build pre-treatment-only placebo-in-time falsification table.
+- [**run_placebo_tests**](#causalis.scenarios.synthetic_control.run_placebo_tests) – Run placebo-in-space and placebo-in-time robustness tests.
+- [**run_scm_diagnostics**](#causalis.scenarios.synthetic_control.run_scm_diagnostics) – Run compact SCM diagnostics and return thresholded checks.
+- [**run_scm_feasibility**](#causalis.scenarios.synthetic_control.run_scm_feasibility) – Return core SCM feasibility tables from panel data only (EDA phase).
 
 ##### `ASCM`
 
@@ -12201,63 +12133,71 @@ AugmentedSyntheticControl(
     conformal_grid_size: int = 401,
     conformal_grid_min: float | None = None,
     conformal_grid_max: float | None = None,
-    conformal_grid_scale_mult: float = 6.0
+    conformal_grid_scale_mult: float = 6.0,
+    average_att_n_folds: int = 3,
+    compute_average_att_ttest: bool = True,
+    compute_pointwise_conformal: bool = False
 ) -> None
 ```
 
-Augmented Synthetic Control with CWZ pointwise conformal inference only.
-
-Breaking changes:
-
-- only one model path (balanced panel, no robust/matrix-completion route)
-- only one inference path (CWZ moving-block permutation conformal pointwise inversion)
-- only one estimand output shape: dynamic effect path
-
-<details class="estimand" open markdown="1">
-<summary>Estimand</summary>
-
-Dynamic post-treatment effect path theta_t for each post-treatment period t.
-
-</details>
-
-<details class="point-estimate" open markdown="1">
-<summary>Point estimate</summary>
-
-Plug-in post-period gap path from pre-period-fitted augmented SC weights.
-
-</details>
-
-<details class="inference" open markdown="1">
-<summary>Inference</summary>
-
-For each post-treatment period t and candidate theta_t^0 on a grid:
-
-1. Build reduced sample: [all pre periods] + [target post period t].
-1. Impose sharp null on only target post outcome.
-1. Refit ASCM under the null on reduced sample.
-1. Compute residuals and permutation p-value.
-1. Invert test to obtain pointwise CI for theta_t.
-
-</details>
+Ridge-augmented synthetic control with simplex anchor and aggregate-first inference.
 
 <details class="note" open markdown="1">
 <summary>Notes</summary>
 
-- Inference is based on circular moving-block permutations, so validity is
-  approximate under weak dependence rather than exact finite-sample.
-- Returned confidence sets are grid-approximated contiguous accepted segments.
+Average ATT t-test inference is the default post-treatment inference layer.
+Pointwise conformal intervals/p-values are optional and can be enabled for
+dynamic path uncertainty quantification.
 
 </details>
 
 **Functions:**
 
-- [**estimate**](#causalis.scenarios.synthetic_control.AugmentedSyntheticControl.estimate) –
-- [**fit**](#causalis.scenarios.synthetic_control.AugmentedSyntheticControl.fit) –
+- [**estimate**](#causalis.scenarios.synthetic_control.AugmentedSyntheticControl.estimate) – Return dynamic-path estimate object.
+- [**fit**](#causalis.scenarios.synthetic_control.AugmentedSyntheticControl.fit) – Fit ASCM and compute inference outputs.
+
+**Parameters:**
+
+- **lambda_aug** (<code>[float](#float)</code>) – Ridge regularization for augmented weights.
+- **lambda_sc** (<code>[float](#float)</code>) – Numerical regularization for simplex SCM weights.
+- **max_iter** (<code>[int](#int)</code>) – Maximum iterations for constrained optimization routines.
+- **tol** (<code>[float](#float)</code>) – Optimization tolerance.
+- **enforce_sum_to_one_augmented** (<code>[bool](#bool)</code>) – Enforce sum-to-one constraint on augmented weights.
+- **alpha** (<code>[float](#float)</code>) – Default significance level used by `estimate()` inference.
+- **conformal_grid_size** (<code>[int](#int)</code>) – Default number of grid points used in pointwise conformal inversion.
+- **conformal_grid_min** (<code>[float](#float) or None</code>) – Optional default fixed lower bound for conformal grid.
+- **conformal_grid_max** (<code>[float](#float) or None</code>) – Optional default fixed upper bound for conformal grid.
+- **conformal_grid_scale_mult** (<code>[float](#float)</code>) – Default scale multiplier for automatic conformal grid width.
+- **average_att_n_folds** (<code>[int](#int)</code>) – Default requested number of folds for average ATT t-test inference.
+- **compute_average_att_ttest** (<code>[bool](#bool)</code>) – Default toggle for average ATT t-test inference in `estimate()`.
+- **compute_pointwise_conformal** (<code>[bool](#bool)</code>) – Default toggle for pointwise conformal CIs/p-values in `estimate()`.
+
+**Raises:**
+
+- <code>[ValueError](#ValueError)</code> – If any hyperparameter is invalid.
 
 ###### `alpha`
 
 ```python
 alpha = float(alpha)
+```
+
+###### `average_att_n_folds`
+
+```python
+average_att_n_folds = int(average_att_n_folds)
+```
+
+###### `compute_average_att_ttest`
+
+```python
+compute_average_att_ttest = bool(compute_average_att_ttest)
+```
+
+###### `compute_pointwise_conformal`
+
+```python
+compute_pointwise_conformal = bool(compute_pointwise_conformal)
 ```
 
 ###### `conformal_grid_max`
@@ -12299,14 +12239,62 @@ enforce_sum_to_one_augmented = bool(enforce_sum_to_one_augmented)
 ###### `estimate`
 
 ```python
-estimate() -> PanelEstimate
+estimate(
+    *,
+    alpha: float | None = None,
+    conformal_grid_size: int | None = None,
+    conformal_grid_min: float | None = None,
+    conformal_grid_max: float | None = None,
+    conformal_grid_scale_mult: float | None = None,
+    average_att_n_folds: int | None = None,
+    compute_average_att_ttest: bool | None = None,
+    compute_pointwise_conformal: bool | None = None
+) -> PanelEstimate
 ```
+
+Return dynamic-path estimate object.
+
+**Parameters:**
+
+- **alpha** (<code>[float](#float) or None</code>) – Optional per-call significance level override.
+- **conformal_grid_size** (<code>[int](#int) or None</code>) – Optional per-call pointwise conformal grid size override.
+- **conformal_grid_min** (<code>[float](#float) or None</code>) – Optional per-call lower conformal grid bound override.
+- **conformal_grid_max** (<code>[float](#float) or None</code>) – Optional per-call upper conformal grid bound override.
+- **conformal_grid_scale_mult** (<code>[float](#float) or None</code>) – Optional per-call automatic conformal grid scale override.
+- **average_att_n_folds** (<code>[int](#int) or None</code>) – Optional per-call fold-count override for average ATT inference.
+- **compute_average_att_ttest** (<code>[bool](#bool) or None</code>) – Optional per-call toggle for average ATT t-test inference.
+- **compute_pointwise_conformal** (<code>[bool](#bool) or None</code>) – Optional per-call toggle for pointwise conformal inference.
+
+**Returns:**
+
+- <code>[PanelEstimate](#causalis.data_contracts.panel_estimate.PanelEstimate)</code> – Dynamic path estimates with pointwise inference fields. Aggregate
+  average ATT t-test outputs are provided in `diagnostics` and are
+  the default formal inference layer. If pointwise conformal is not
+  computed, pointwise p-values/CIs are returned as `NaN` placeholders.
+
+**Raises:**
+
+- <code>[RuntimeError](#RuntimeError)</code> – If the model is not fitted.
 
 ###### `fit`
 
 ```python
 fit(data: PanelDataSCM) -> 'AugmentedSyntheticControl'
 ```
+
+Fit ASCM and compute inference outputs.
+
+**Parameters:**
+
+- **data** (<code>[PanelDataSCM](#causalis.data_contracts.panel_data_scm.PanelDataSCM)</code>) – Validated synthetic-control panel data.
+
+**Returns:**
+
+- <code>[AugmentedSyntheticControl](#causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl)</code> – Fitted estimator instance.
+
+**Raises:**
+
+- <code>[ValueError](#ValueError)</code> – If input type is invalid or panel requirements are violated.
 
 ###### `lambda_aug`
 
@@ -12352,12 +12340,11 @@ generate_scm_gamma_26(
     seed: int = 42,
     return_panel_data: bool = True,
     include_oracles: bool = False,
-    n_donors: int = 30,
-    n_pre_periods: Optional[int] = None,
-    n_post_periods: Optional[int] = None,
-    treatment_effect_rate: float = 0.12,
-    treatment_effect_slope: float = 0.01,
-    missing_outcome_frac: float = 0.0,
+    n_donors: int = 40,
+    n_pre_periods: Optional[int] = 36,
+    n_post_periods: Optional[int] = 6,
+    treatment_effect_rate: float = 0.1,
+    treatment_effect_slope: float = 0.002,
     **advanced_params: float
 ) -> PanelOutput
 ```
@@ -12377,7 +12364,7 @@ Generate realistic Gamma synthetic-control panel data.
 - **n_donors** (<code>[int](#int)</code>) – Number of donor units.
 - **n_pre_periods** (<code>[int](#int) or None</code>) – Number of pre-treatment periods. Preferred explicit horizon control.
   When both `n_pre_periods` and `n_post_periods` are omitted, scenario
-  defaults are used (`36` pre, `12` post). The generated panel includes
+  defaults are used (`36` pre, `6` post). The generated panel includes
   one explicit intervention-anchor period, so each unit has
   `n_pre_periods + 1 + n_post_periods` rows.
 - **n_post_periods** (<code>[int](#int) or None</code>) – Number of post-treatment periods. Must be provided together with
@@ -12386,10 +12373,12 @@ Generate realistic Gamma synthetic-control panel data.
   attenuated by a ramp factor `1 - exp(-1 / 2.5)` (about 0.33x when slope
   is zero).
 - **treatment_effect_slope** (<code>[float](#float)</code>) – Linear slope of the post-treatment relative effect path.
-- **missing_outcome_frac** (<code>[float](#float)</code>) – Fraction of outcomes to mask as missing in the base generator.
 - \*\***advanced_params** – Forwarded to :func:`causalis.dgp.panel_data_scm.generate_scm_gamma_data`.
   Common advanced knobs include `time_start`, `calendar_start`,
-  and latent/missingness configuration.
+  and latent-factor configuration. Defaults used by this wrapper are
+  `gamma_shape=120`, `donor_noise_std_log=0.03`,
+  `common_factor_std_log=0.03`, `latent_factor_std_log=0.0`,
+  and `prefit_mismatch_std_log=0.0`.
 
 **Returns:**
 
@@ -12397,6 +12386,18 @@ Generate realistic Gamma synthetic-control panel data.
 
 <details class="note" open markdown="1">
 <summary>Notes</summary>
+
+DGP Math:
+The data follows a hierarchical log-linear model for the mean: math:`\mu`.
+For each donor unit :math:`j` at time :math:`t`, the mean is :math:`\mu_{tj} = E_{tj} \cdot \exp(\eta_{tj})`
+where :math:`E_{tj}` is exposure (with growth and noise) and :math:`\eta_{tj}` includes seasonality,
+common factors (macro index), latent factors, and unit-specific noise.
+Outcomes are sampled as :math:`y_{tj} \sim \text{Gamma}(k, \mu_{tj}/k)`, where :math:`k` is `gamma_shape`.
+
+The treated unit's counterfactual mean :math:`\mu_{t, cf}` is a weighted combination of donors
+(via Dirichlet weights) with a potential pre-fit mismatch. The realized treated outcome
+is :math:`y_{t, treated} = y_{t, cf} \cdot (1 + \tau_t^{rate})`, where :math:`\tau_t^{rate}` is the
+relative treatment effect.
 
 Time-axis semantics:
 
@@ -12415,7 +12416,7 @@ Time-axis semantics:
   period in the panel, contract-level pre periods are
   `n_pre_periods + 1` and post periods are `n_post_periods`.
 - With this function's default arguments, the explicit values are:
-  `n_pre_periods=36`, `n_post_periods=12`, `calendar_start='2000-01'`,
+  `n_pre_periods=36`, `n_post_periods=6`, `calendar_start='2000-01'`,
   `time_start=1`, first treated period at `Period('2003-02', 'M')`,
   and intervention anchor at `Period('2003-01', 'M')`.
 
@@ -12428,12 +12429,11 @@ generate_scm_poisson_26(
     seed: int = 42,
     return_panel_data: bool = True,
     include_oracles: bool = False,
-    n_donors: int = 10,
-    n_pre_periods: Optional[int] = None,
-    n_post_periods: Optional[int] = None,
-    treatment_effect_rate: float = 0.1,
-    treatment_effect_slope: float = 0.005,
-    donor_missing_block_frac: float = 0.08,
+    n_donors: int = 20,
+    n_pre_periods: Optional[int] = 180,
+    n_post_periods: Optional[int] = 4,
+    treatment_effect_rate: float = 0.15,
+    treatment_effect_slope: float = 0.0005,
     **advanced_params: float
 ) -> PanelOutput
 ```
@@ -12453,7 +12453,7 @@ Generate realistic Poisson synthetic-control panel data.
 - **n_donors** (<code>[int](#int)</code>) – Number of donor units.
 - **n_pre_periods** (<code>[int](#int) or None</code>) – Number of pre-treatment periods. Preferred explicit horizon control.
   When both `n_pre_periods` and `n_post_periods` are omitted, scenario
-  defaults are used (`36` pre, `12` post). The generated panel includes
+  defaults are used (`36` pre, `6` post). The generated panel includes
   one explicit intervention-anchor period, so each unit has
   `n_pre_periods + 1 + n_post_periods` rows.
 - **n_post_periods** (<code>[int](#int) or None</code>) – Number of post-treatment periods. Must be provided together with
@@ -12462,10 +12462,11 @@ Generate realistic Poisson synthetic-control panel data.
   attenuated by a ramp factor `1 - exp(-1 / 2.5)` (about 0.33x when slope
   is zero).
 - **treatment_effect_slope** (<code>[float](#float)</code>) – Linear slope of the post-treatment relative effect path.
-- **donor_missing_block_frac** (<code>[float](#float)</code>) – Fraction of donor-only rows to mask via contiguous missing-time blocks.
 - \*\***advanced_params** – Forwarded to :func:`causalis.dgp.panel_data_scm.generate_scm_poisson_data`.
   Common advanced knobs include `time_start`, `calendar_start`,
-  and latent/missingness configuration.
+  and latent-factor configuration. Defaults used by this wrapper are
+  `donor_noise_std_log=0.02`, `common_factor_std_log=0.02`,
+  `latent_factor_std_log=0.0`, and `prefit_mismatch_std_log=0.0`.
 
 **Returns:**
 
@@ -12473,6 +12474,18 @@ Generate realistic Poisson synthetic-control panel data.
 
 <details class="note" open markdown="1">
 <summary>Notes</summary>
+
+DGP Math:
+The data follows a hierarchical log-linear model for the mean :math:`\mu`.
+For each donor unit :math:`j` at time :math:`t`, the mean is :math:`\mu_{tj} = E_{tj} \cdot \exp(\eta_{tj})`
+where :math:`E_{tj}` is exposure and :math:`\eta_{tj}` includes seasonality, common factors,
+latent factors, and unit-specific noise.
+Outcomes are sampled as :math:`y_{tj} \sim \text{Poisson}(\mu_{tj})`.
+
+The treated unit's counterfactual mean :math:`\mu_{t, cf}` is a weighted combination of donors.
+The realized treated outcome :math:`y_{t, treated}` is sampled from a Poisson distribution
+coupled with the counterfactual :math:`y_{t, cf}` via a thinning/superposition property to
+maintain exact marginals while ensuring the realized effect is driven by the multiplier.
 
 Time-axis semantics:
 
@@ -12491,11 +12504,34 @@ Time-axis semantics:
   period in the panel, contract-level pre periods are
   `n_pre_periods + 1` and post periods are `n_post_periods`.
 - With this function's default arguments, the explicit values are:
-  `n_pre_periods=36`, `n_post_periods=12`, `calendar_start='2000-01'`,
+  `n_pre_periods=180`, `n_post_periods=4`, `calendar_start='2000-01'`,
   `time_start=1`, first treated period at `Period('2003-02', 'M')`,
   and intervention anchor at `Period('2003-01', 'M')`.
 
 </details>
+
+##### `donors_diagnostics`
+
+**Functions:**
+
+- [**donors_diagnostics**](#causalis.scenarios.synthetic_control.donors_diagnostics.donors_diagnostics) – Build one donor-level diagnostics table for SCM feasibility checks.
+- [**run_scm_feasibility**](#causalis.scenarios.synthetic_control.donors_diagnostics.run_scm_feasibility) – Return core SCM feasibility tables from panel data only (EDA phase).
+
+###### `donors_diagnostics`
+
+```python
+donors_diagnostics(panel_data: PanelDataSCM) -> pd.DataFrame
+```
+
+Build one donor-level diagnostics table for SCM feasibility checks.
+
+###### `run_scm_feasibility`
+
+```python
+run_scm_feasibility(paneldata: PanelDataSCM) -> Dict[str, pd.DataFrame]
+```
+
+Return core SCM feasibility tables from panel data only (EDA phase).
 
 ##### `gap_over_time_plot`
 
@@ -12519,12 +12555,11 @@ generate_scm_gamma_26(
     seed: int = 42,
     return_panel_data: bool = True,
     include_oracles: bool = False,
-    n_donors: int = 30,
-    n_pre_periods: Optional[int] = None,
-    n_post_periods: Optional[int] = None,
-    treatment_effect_rate: float = 0.12,
-    treatment_effect_slope: float = 0.01,
-    missing_outcome_frac: float = 0.0,
+    n_donors: int = 40,
+    n_pre_periods: Optional[int] = 36,
+    n_post_periods: Optional[int] = 6,
+    treatment_effect_rate: float = 0.1,
+    treatment_effect_slope: float = 0.002,
     **advanced_params: float
 ) -> PanelOutput
 ```
@@ -12544,7 +12579,7 @@ Generate realistic Gamma synthetic-control panel data.
 - **n_donors** (<code>[int](#int)</code>) – Number of donor units.
 - **n_pre_periods** (<code>[int](#int) or None</code>) – Number of pre-treatment periods. Preferred explicit horizon control.
   When both `n_pre_periods` and `n_post_periods` are omitted, scenario
-  defaults are used (`36` pre, `12` post). The generated panel includes
+  defaults are used (`36` pre, `6` post). The generated panel includes
   one explicit intervention-anchor period, so each unit has
   `n_pre_periods + 1 + n_post_periods` rows.
 - **n_post_periods** (<code>[int](#int) or None</code>) – Number of post-treatment periods. Must be provided together with
@@ -12553,10 +12588,12 @@ Generate realistic Gamma synthetic-control panel data.
   attenuated by a ramp factor `1 - exp(-1 / 2.5)` (about 0.33x when slope
   is zero).
 - **treatment_effect_slope** (<code>[float](#float)</code>) – Linear slope of the post-treatment relative effect path.
-- **missing_outcome_frac** (<code>[float](#float)</code>) – Fraction of outcomes to mask as missing in the base generator.
 - \*\***advanced_params** – Forwarded to :func:`causalis.dgp.panel_data_scm.generate_scm_gamma_data`.
   Common advanced knobs include `time_start`, `calendar_start`,
-  and latent/missingness configuration.
+  and latent-factor configuration. Defaults used by this wrapper are
+  `gamma_shape=120`, `donor_noise_std_log=0.03`,
+  `common_factor_std_log=0.03`, `latent_factor_std_log=0.0`,
+  and `prefit_mismatch_std_log=0.0`.
 
 **Returns:**
 
@@ -12564,6 +12601,18 @@ Generate realistic Gamma synthetic-control panel data.
 
 <details class="note" open markdown="1">
 <summary>Notes</summary>
+
+DGP Math:
+The data follows a hierarchical log-linear model for the mean: math:`\mu`.
+For each donor unit :math:`j` at time :math:`t`, the mean is :math:`\mu_{tj} = E_{tj} \cdot \exp(\eta_{tj})`
+where :math:`E_{tj}` is exposure (with growth and noise) and :math:`\eta_{tj}` includes seasonality,
+common factors (macro index), latent factors, and unit-specific noise.
+Outcomes are sampled as :math:`y_{tj} \sim \text{Gamma}(k, \mu_{tj}/k)`, where :math:`k` is `gamma_shape`.
+
+The treated unit's counterfactual mean :math:`\mu_{t, cf}` is a weighted combination of donors
+(via Dirichlet weights) with a potential pre-fit mismatch. The realized treated outcome
+is :math:`y_{t, treated} = y_{t, cf} \cdot (1 + \tau_t^{rate})`, where :math:`\tau_t^{rate}` is the
+relative treatment effect.
 
 Time-axis semantics:
 
@@ -12582,7 +12631,7 @@ Time-axis semantics:
   period in the panel, contract-level pre periods are
   `n_pre_periods + 1` and post periods are `n_post_periods`.
 - With this function's default arguments, the explicit values are:
-  `n_pre_periods=36`, `n_post_periods=12`, `calendar_start='2000-01'`,
+  `n_pre_periods=36`, `n_post_periods=6`, `calendar_start='2000-01'`,
   `time_start=1`, first treated period at `Period('2003-02', 'M')`,
   and intervention anchor at `Period('2003-01', 'M')`.
 
@@ -12595,12 +12644,11 @@ generate_scm_poisson_26(
     seed: int = 42,
     return_panel_data: bool = True,
     include_oracles: bool = False,
-    n_donors: int = 10,
-    n_pre_periods: Optional[int] = None,
-    n_post_periods: Optional[int] = None,
-    treatment_effect_rate: float = 0.1,
-    treatment_effect_slope: float = 0.005,
-    donor_missing_block_frac: float = 0.08,
+    n_donors: int = 20,
+    n_pre_periods: Optional[int] = 180,
+    n_post_periods: Optional[int] = 4,
+    treatment_effect_rate: float = 0.15,
+    treatment_effect_slope: float = 0.0005,
     **advanced_params: float
 ) -> PanelOutput
 ```
@@ -12620,7 +12668,7 @@ Generate realistic Poisson synthetic-control panel data.
 - **n_donors** (<code>[int](#int)</code>) – Number of donor units.
 - **n_pre_periods** (<code>[int](#int) or None</code>) – Number of pre-treatment periods. Preferred explicit horizon control.
   When both `n_pre_periods` and `n_post_periods` are omitted, scenario
-  defaults are used (`36` pre, `12` post). The generated panel includes
+  defaults are used (`36` pre, `6` post). The generated panel includes
   one explicit intervention-anchor period, so each unit has
   `n_pre_periods + 1 + n_post_periods` rows.
 - **n_post_periods** (<code>[int](#int) or None</code>) – Number of post-treatment periods. Must be provided together with
@@ -12629,10 +12677,11 @@ Generate realistic Poisson synthetic-control panel data.
   attenuated by a ramp factor `1 - exp(-1 / 2.5)` (about 0.33x when slope
   is zero).
 - **treatment_effect_slope** (<code>[float](#float)</code>) – Linear slope of the post-treatment relative effect path.
-- **donor_missing_block_frac** (<code>[float](#float)</code>) – Fraction of donor-only rows to mask via contiguous missing-time blocks.
 - \*\***advanced_params** – Forwarded to :func:`causalis.dgp.panel_data_scm.generate_scm_poisson_data`.
   Common advanced knobs include `time_start`, `calendar_start`,
-  and latent/missingness configuration.
+  and latent-factor configuration. Defaults used by this wrapper are
+  `donor_noise_std_log=0.02`, `common_factor_std_log=0.02`,
+  `latent_factor_std_log=0.0`, and `prefit_mismatch_std_log=0.0`.
 
 **Returns:**
 
@@ -12640,6 +12689,18 @@ Generate realistic Poisson synthetic-control panel data.
 
 <details class="note" open markdown="1">
 <summary>Notes</summary>
+
+DGP Math:
+The data follows a hierarchical log-linear model for the mean :math:`\mu`.
+For each donor unit :math:`j` at time :math:`t`, the mean is :math:`\mu_{tj} = E_{tj} \cdot \exp(\eta_{tj})`
+where :math:`E_{tj}` is exposure and :math:`\eta_{tj}` includes seasonality, common factors,
+latent factors, and unit-specific noise.
+Outcomes are sampled as :math:`y_{tj} \sim \text{Poisson}(\mu_{tj})`.
+
+The treated unit's counterfactual mean :math:`\mu_{t, cf}` is a weighted combination of donors.
+The realized treated outcome :math:`y_{t, treated}` is sampled from a Poisson distribution
+coupled with the counterfactual :math:`y_{t, cf}` via a thinning/superposition property to
+maintain exact marginals while ensuring the realized effect is driven by the multiplier.
 
 Time-axis semantics:
 
@@ -12658,61 +12719,30 @@ Time-axis semantics:
   period in the panel, contract-level pre periods are
   `n_pre_periods + 1` and post periods are `n_post_periods`.
 - With this function's default arguments, the explicit values are:
-  `n_pre_periods=36`, `n_post_periods=12`, `calendar_start='2000-01'`,
+  `n_pre_periods=180`, `n_post_periods=4`, `calendar_start='2000-01'`,
   `time_start=1`, first treated period at `Period('2003-02', 'M')`,
   and intervention anchor at `Period('2003-01', 'M')`.
 
 </details>
 
-##### `missing_panel_plot`
-
-**Functions:**
-
-- [**missing_panel_plot**](#causalis.scenarios.synthetic_control.missing_panel_plot.missing_panel_plot) – Plot panel missingness as a unit-by-time heatmap.
-
-###### `missing_panel_plot`
+##### `leave_one_donor_out_sensitivity`
 
 ```python
-missing_panel_plot(
+leave_one_donor_out_sensitivity(
+    estimate: PanelEstimate,
     paneldata: PanelDataSCM,
     *,
-    show_intervention: bool = True,
-    max_xticks: int = 12,
-    figsize: Tuple[float, float] = (10.0, 5.5),
-    dpi: int = 220,
-    font_scale: float = 1.1,
-    save: Optional[str] = None,
-    save_dpi: Optional[int] = None,
-    transparent: bool = False
-) -> plt.Figure
+    model_kwargs: Dict[str, Any] | None = None
+) -> pd.DataFrame
 ```
 
-Plot panel missingness as a unit-by-time heatmap.
-
-A cell value of 0 means observed and 1 means missing. Missingness is
-inferred from outcome NaNs.
-
-**Parameters:**
-
-- **paneldata** (<code>[PanelDataSCM](#causalis.data_contracts.panel_data_scm.PanelDataSCM)</code>) – Validated long-format panel contract.
-- **show_intervention** (<code>[bool](#bool)</code>) – If True, draw the intervention boundary as a vertical dashed line.
-- **max_xticks** (<code>[int](#int)</code>) – Maximum number of x-axis tick labels shown.
-- **figsize** (<code>[tuple](#tuple)</code>) – Figure size in inches.
-- **dpi** (<code>[int](#int)</code>) – Dots per inch.
-- **font_scale** (<code>[float](#float)</code>) – Font scaling factor.
-- **save** (<code>[str](#str)</code>) – Optional path to save the figure.
-- **save_dpi** (<code>[int](#int)</code>) – DPI for saved raster outputs.
-- **transparent** (<code>[bool](#bool)</code>) – Whether to save with a transparent background.
-
-**Returns:**
-
-- <code>[Figure](#matplotlib.figure.Figure)</code> – The generated figure.
+Re-fit ASCM dropping each donor once and report leave-one-donor-out sensitivity.
 
 ##### `model`
 
 **Classes:**
 
-- [**AugmentedSyntheticControl**](#causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl) – Augmented Synthetic Control with CWZ pointwise conformal inference only.
+- [**AugmentedSyntheticControl**](#causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl) – Ridge-augmented synthetic control with simplex anchor and aggregate-first inference.
 
 ###### `ASCM`
 
@@ -12734,63 +12764,71 @@ AugmentedSyntheticControl(
     conformal_grid_size: int = 401,
     conformal_grid_min: float | None = None,
     conformal_grid_max: float | None = None,
-    conformal_grid_scale_mult: float = 6.0
+    conformal_grid_scale_mult: float = 6.0,
+    average_att_n_folds: int = 3,
+    compute_average_att_ttest: bool = True,
+    compute_pointwise_conformal: bool = False
 ) -> None
 ```
 
-Augmented Synthetic Control with CWZ pointwise conformal inference only.
-
-Breaking changes:
-
-- only one model path (balanced panel, no robust/matrix-completion route)
-- only one inference path (CWZ moving-block permutation conformal pointwise inversion)
-- only one estimand output shape: dynamic effect path
-
-<details class="estimand" open markdown="1">
-<summary>Estimand</summary>
-
-Dynamic post-treatment effect path theta_t for each post-treatment period t.
-
-</details>
-
-<details class="point-estimate" open markdown="1">
-<summary>Point estimate</summary>
-
-Plug-in post-period gap path from pre-period-fitted augmented SC weights.
-
-</details>
-
-<details class="inference" open markdown="1">
-<summary>Inference</summary>
-
-For each post-treatment period t and candidate theta_t^0 on a grid:
-
-1. Build reduced sample: [all pre periods] + [target post period t].
-1. Impose sharp null on only target post outcome.
-1. Refit ASCM under the null on reduced sample.
-1. Compute residuals and permutation p-value.
-1. Invert test to obtain pointwise CI for theta_t.
-
-</details>
+Ridge-augmented synthetic control with simplex anchor and aggregate-first inference.
 
 <details class="note" open markdown="1">
 <summary>Notes</summary>
 
-- Inference is based on circular moving-block permutations, so validity is
-  approximate under weak dependence rather than exact finite-sample.
-- Returned confidence sets are grid-approximated contiguous accepted segments.
+Average ATT t-test inference is the default post-treatment inference layer.
+Pointwise conformal intervals/p-values are optional and can be enabled for
+dynamic path uncertainty quantification.
 
 </details>
 
 **Functions:**
 
-- [**estimate**](#causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl.estimate) –
-- [**fit**](#causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl.fit) –
+- [**estimate**](#causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl.estimate) – Return dynamic-path estimate object.
+- [**fit**](#causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl.fit) – Fit ASCM and compute inference outputs.
+
+**Parameters:**
+
+- **lambda_aug** (<code>[float](#float)</code>) – Ridge regularization for augmented weights.
+- **lambda_sc** (<code>[float](#float)</code>) – Numerical regularization for simplex SCM weights.
+- **max_iter** (<code>[int](#int)</code>) – Maximum iterations for constrained optimization routines.
+- **tol** (<code>[float](#float)</code>) – Optimization tolerance.
+- **enforce_sum_to_one_augmented** (<code>[bool](#bool)</code>) – Enforce sum-to-one constraint on augmented weights.
+- **alpha** (<code>[float](#float)</code>) – Default significance level used by `estimate()` inference.
+- **conformal_grid_size** (<code>[int](#int)</code>) – Default number of grid points used in pointwise conformal inversion.
+- **conformal_grid_min** (<code>[float](#float) or None</code>) – Optional default fixed lower bound for conformal grid.
+- **conformal_grid_max** (<code>[float](#float) or None</code>) – Optional default fixed upper bound for conformal grid.
+- **conformal_grid_scale_mult** (<code>[float](#float)</code>) – Default scale multiplier for automatic conformal grid width.
+- **average_att_n_folds** (<code>[int](#int)</code>) – Default requested number of folds for average ATT t-test inference.
+- **compute_average_att_ttest** (<code>[bool](#bool)</code>) – Default toggle for average ATT t-test inference in `estimate()`.
+- **compute_pointwise_conformal** (<code>[bool](#bool)</code>) – Default toggle for pointwise conformal CIs/p-values in `estimate()`.
+
+**Raises:**
+
+- <code>[ValueError](#ValueError)</code> – If any hyperparameter is invalid.
 
 ####### `alpha`
 
 ```python
 alpha = float(alpha)
+```
+
+####### `average_att_n_folds`
+
+```python
+average_att_n_folds = int(average_att_n_folds)
+```
+
+####### `compute_average_att_ttest`
+
+```python
+compute_average_att_ttest = bool(compute_average_att_ttest)
+```
+
+####### `compute_pointwise_conformal`
+
+```python
+compute_pointwise_conformal = bool(compute_pointwise_conformal)
 ```
 
 ####### `conformal_grid_max`
@@ -12832,14 +12870,62 @@ enforce_sum_to_one_augmented = bool(enforce_sum_to_one_augmented)
 ####### `estimate`
 
 ```python
-estimate() -> PanelEstimate
+estimate(
+    *,
+    alpha: float | None = None,
+    conformal_grid_size: int | None = None,
+    conformal_grid_min: float | None = None,
+    conformal_grid_max: float | None = None,
+    conformal_grid_scale_mult: float | None = None,
+    average_att_n_folds: int | None = None,
+    compute_average_att_ttest: bool | None = None,
+    compute_pointwise_conformal: bool | None = None
+) -> PanelEstimate
 ```
+
+Return dynamic-path estimate object.
+
+**Parameters:**
+
+- **alpha** (<code>[float](#float) or None</code>) – Optional per-call significance level override.
+- **conformal_grid_size** (<code>[int](#int) or None</code>) – Optional per-call pointwise conformal grid size override.
+- **conformal_grid_min** (<code>[float](#float) or None</code>) – Optional per-call lower conformal grid bound override.
+- **conformal_grid_max** (<code>[float](#float) or None</code>) – Optional per-call upper conformal grid bound override.
+- **conformal_grid_scale_mult** (<code>[float](#float) or None</code>) – Optional per-call automatic conformal grid scale override.
+- **average_att_n_folds** (<code>[int](#int) or None</code>) – Optional per-call fold-count override for average ATT inference.
+- **compute_average_att_ttest** (<code>[bool](#bool) or None</code>) – Optional per-call toggle for average ATT t-test inference.
+- **compute_pointwise_conformal** (<code>[bool](#bool) or None</code>) – Optional per-call toggle for pointwise conformal inference.
+
+**Returns:**
+
+- <code>[PanelEstimate](#causalis.data_contracts.panel_estimate.PanelEstimate)</code> – Dynamic path estimates with pointwise inference fields. Aggregate
+  average ATT t-test outputs are provided in `diagnostics` and are
+  the default formal inference layer. If pointwise conformal is not
+  computed, pointwise p-values/CIs are returned as `NaN` placeholders.
+
+**Raises:**
+
+- <code>[RuntimeError](#RuntimeError)</code> – If the model is not fitted.
 
 ####### `fit`
 
 ```python
 fit(data: PanelDataSCM) -> 'AugmentedSyntheticControl'
 ```
+
+Fit ASCM and compute inference outputs.
+
+**Parameters:**
+
+- **data** (<code>[PanelDataSCM](#causalis.data_contracts.panel_data_scm.PanelDataSCM)</code>) – Validated synthetic-control panel data.
+
+**Returns:**
+
+- <code>[AugmentedSyntheticControl](#causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl)</code> – Fitted estimator instance.
+
+**Raises:**
+
+- <code>[ValueError](#ValueError)</code> – If input type is invalid or panel requirements are violated.
 
 ####### `lambda_aug`
 
@@ -12932,37 +13018,57 @@ optional donor mean, and the intervention boundary.
 
 - <code>[Figure](#matplotlib.figure.Figure)</code> – The generated figure.
 
-##### `placebo_att_histogram_plot`
+##### `placebo_in_space_table`
 
 ```python
-placebo_att_histogram_plot(
+placebo_in_space_table(
     estimate: PanelEstimate,
+    paneldata: PanelDataSCM,
     *,
-    source: Literal["augmented", "sc"] = "augmented",
-    bins: Optional[int] = None,
-    figsize: Tuple[float, float] = (10.0, 5.5),
-    dpi: int = 220,
-    font_scale: float = 1.1
-) -> plt.Figure
+    model_kwargs: Dict[str, Any] | None = None
+) -> pd.DataFrame
 ```
 
-Plot placebo ATT histogram with treated ATT line.
+Build Abadie-style placebo-in-space RMSPE ratio table.
+
+For donor-as-treated placebo fits, the actual treated unit is excluded
+from the donor pool to avoid post-treatment contamination.
+
+##### `placebo_in_time_table`
+
+```python
+placebo_in_time_table(
+    estimate: PanelEstimate,
+    paneldata: PanelDataSCM,
+    *,
+    model_kwargs: Dict[str, Any] | None = None,
+    pseudo_post_horizon: int | None = None
+) -> pd.DataFrame
+```
+
+Build pre-treatment-only placebo-in-time falsification table.
 
 ##### `refutation`
 
 **Modules:**
 
 - [**diagnostic_plots**](#causalis.scenarios.synthetic_control.refutation.diagnostic_plots) –
-- [**missing_panel_plot**](#causalis.scenarios.synthetic_control.refutation.missing_panel_plot) –
+- [**donors_diagnostics**](#causalis.scenarios.synthetic_control.refutation.donors_diagnostics) –
 - [**outcome_panel_plot**](#causalis.scenarios.synthetic_control.refutation.outcome_panel_plot) –
+- [**placebo**](#causalis.scenarios.synthetic_control.refutation.placebo) –
 - [**scm_diagnostics**](#causalis.scenarios.synthetic_control.refutation.scm_diagnostics) –
+- [**sensitivity**](#causalis.scenarios.synthetic_control.refutation.sensitivity) –
 
 **Functions:**
 
 - [**gap_over_time_plot**](#causalis.scenarios.synthetic_control.refutation.gap_over_time_plot) – Plot observed-minus-synthetic gap over time with intervention boundary.
+- [**leave_one_donor_out_sensitivity**](#causalis.scenarios.synthetic_control.refutation.leave_one_donor_out_sensitivity) – Re-fit ASCM dropping each donor once and report leave-one-donor-out sensitivity.
 - [**observed_vs_synthetic_plot**](#causalis.scenarios.synthetic_control.refutation.observed_vs_synthetic_plot) – Plot observed treated path against augmented/SC synthetic paths.
-- [**placebo_att_histogram_plot**](#causalis.scenarios.synthetic_control.refutation.placebo_att_histogram_plot) – Plot placebo ATT histogram with treated ATT line.
-- [**run_scm_diagnostics**](#causalis.scenarios.synthetic_control.refutation.run_scm_diagnostics) – Run compact SCM diagnostics and save the three v1 diagnostic plots.
+- [**placebo_in_space_table**](#causalis.scenarios.synthetic_control.refutation.placebo_in_space_table) – Build Abadie-style placebo-in-space RMSPE ratio table.
+- [**placebo_in_time_table**](#causalis.scenarios.synthetic_control.refutation.placebo_in_time_table) – Build pre-treatment-only placebo-in-time falsification table.
+- [**run_placebo_tests**](#causalis.scenarios.synthetic_control.refutation.run_placebo_tests) – Run placebo-in-space and placebo-in-time robustness tests.
+- [**run_scm_diagnostics**](#causalis.scenarios.synthetic_control.refutation.run_scm_diagnostics) – Run compact SCM diagnostics and return thresholded checks.
+- [**run_scm_feasibility**](#causalis.scenarios.synthetic_control.refutation.run_scm_feasibility) – Return core SCM feasibility tables from panel data only (EDA phase).
 
 ###### `diagnostic_plots`
 
@@ -12970,7 +13076,6 @@ Plot placebo ATT histogram with treated ATT line.
 
 - [**gap_over_time_plot**](#causalis.scenarios.synthetic_control.refutation.diagnostic_plots.gap_over_time_plot) – Plot observed-minus-synthetic gap over time with intervention boundary.
 - [**observed_vs_synthetic_plot**](#causalis.scenarios.synthetic_control.refutation.diagnostic_plots.observed_vs_synthetic_plot) – Plot observed treated path against augmented/SC synthetic paths.
-- [**placebo_att_histogram_plot**](#causalis.scenarios.synthetic_control.refutation.diagnostic_plots.placebo_att_histogram_plot) – Plot placebo ATT histogram with treated ATT line.
 
 ####### `gap_over_time_plot`
 
@@ -13002,21 +13107,28 @@ observed_vs_synthetic_plot(
 
 Plot observed treated path against augmented/SC synthetic paths.
 
-####### `placebo_att_histogram_plot`
+###### `donors_diagnostics`
+
+**Functions:**
+
+- [**donors_diagnostics**](#causalis.scenarios.synthetic_control.refutation.donors_diagnostics.donors_diagnostics) – Build one donor-level diagnostics table for SCM feasibility checks.
+- [**run_scm_feasibility**](#causalis.scenarios.synthetic_control.refutation.donors_diagnostics.run_scm_feasibility) – Return core SCM feasibility tables from panel data only (EDA phase).
+
+####### `donors_diagnostics`
 
 ```python
-placebo_att_histogram_plot(
-    estimate: PanelEstimate,
-    *,
-    source: Literal["augmented", "sc"] = "augmented",
-    bins: Optional[int] = None,
-    figsize: Tuple[float, float] = (10.0, 5.5),
-    dpi: int = 220,
-    font_scale: float = 1.1
-) -> plt.Figure
+donors_diagnostics(panel_data: PanelDataSCM) -> pd.DataFrame
 ```
 
-Plot placebo ATT histogram with treated ATT line.
+Build one donor-level diagnostics table for SCM feasibility checks.
+
+####### `run_scm_feasibility`
+
+```python
+run_scm_feasibility(paneldata: PanelDataSCM) -> Dict[str, pd.DataFrame]
+```
+
+Return core SCM feasibility tables from panel data only (EDA phase).
 
 ###### `gap_over_time_plot`
 
@@ -13033,49 +13145,18 @@ gap_over_time_plot(
 
 Plot observed-minus-synthetic gap over time with intervention boundary.
 
-###### `missing_panel_plot`
-
-**Functions:**
-
-- [**missing_panel_plot**](#causalis.scenarios.synthetic_control.refutation.missing_panel_plot.missing_panel_plot) – Plot panel missingness as a unit-by-time heatmap.
-
-####### `missing_panel_plot`
+###### `leave_one_donor_out_sensitivity`
 
 ```python
-missing_panel_plot(
+leave_one_donor_out_sensitivity(
+    estimate: PanelEstimate,
     paneldata: PanelDataSCM,
     *,
-    show_intervention: bool = True,
-    max_xticks: int = 12,
-    figsize: Tuple[float, float] = (10.0, 5.5),
-    dpi: int = 220,
-    font_scale: float = 1.1,
-    save: Optional[str] = None,
-    save_dpi: Optional[int] = None,
-    transparent: bool = False
-) -> plt.Figure
+    model_kwargs: Dict[str, Any] | None = None
+) -> pd.DataFrame
 ```
 
-Plot panel missingness as a unit-by-time heatmap.
-
-A cell value of 0 means observed and 1 means missing. Missingness is
-inferred from outcome NaNs.
-
-**Parameters:**
-
-- **paneldata** (<code>[PanelDataSCM](#causalis.data_contracts.panel_data_scm.PanelDataSCM)</code>) – Validated long-format panel contract.
-- **show_intervention** (<code>[bool](#bool)</code>) – If True, draw the intervention boundary as a vertical dashed line.
-- **max_xticks** (<code>[int](#int)</code>) – Maximum number of x-axis tick labels shown.
-- **figsize** (<code>[tuple](#tuple)</code>) – Figure size in inches.
-- **dpi** (<code>[int](#int)</code>) – Dots per inch.
-- **font_scale** (<code>[float](#float)</code>) – Font scaling factor.
-- **save** (<code>[str](#str)</code>) – Optional path to save the figure.
-- **save_dpi** (<code>[int](#int)</code>) – DPI for saved raster outputs.
-- **transparent** (<code>[bool](#bool)</code>) – Whether to save with a transparent background.
-
-**Returns:**
-
-- <code>[Figure](#matplotlib.figure.Figure)</code> – The generated figure.
+Re-fit ASCM dropping each donor once and report leave-one-donor-out sensitivity.
 
 ###### `observed_vs_synthetic_plot`
 
@@ -13144,21 +13225,101 @@ optional donor mean, and the intervention boundary.
 
 - <code>[Figure](#matplotlib.figure.Figure)</code> – The generated figure.
 
-###### `placebo_att_histogram_plot`
+###### `placebo`
+
+**Functions:**
+
+- [**placebo_in_space_table**](#causalis.scenarios.synthetic_control.refutation.placebo.placebo_in_space_table) – Build Abadie-style placebo-in-space RMSPE ratio table.
+- [**placebo_in_time_table**](#causalis.scenarios.synthetic_control.refutation.placebo.placebo_in_time_table) – Build pre-treatment-only placebo-in-time falsification table.
+- [**run_placebo_tests**](#causalis.scenarios.synthetic_control.refutation.placebo.run_placebo_tests) – Run placebo-in-space and placebo-in-time robustness tests.
+
+####### `placebo_in_space_table`
 
 ```python
-placebo_att_histogram_plot(
+placebo_in_space_table(
     estimate: PanelEstimate,
+    paneldata: PanelDataSCM,
     *,
-    source: Literal["augmented", "sc"] = "augmented",
-    bins: Optional[int] = None,
-    figsize: Tuple[float, float] = (10.0, 5.5),
-    dpi: int = 220,
-    font_scale: float = 1.1
-) -> plt.Figure
+    model_kwargs: Dict[str, Any] | None = None
+) -> pd.DataFrame
 ```
 
-Plot placebo ATT histogram with treated ATT line.
+Build Abadie-style placebo-in-space RMSPE ratio table.
+
+For donor-as-treated placebo fits, the actual treated unit is excluded
+from the donor pool to avoid post-treatment contamination.
+
+####### `placebo_in_time_table`
+
+```python
+placebo_in_time_table(
+    estimate: PanelEstimate,
+    paneldata: PanelDataSCM,
+    *,
+    model_kwargs: Dict[str, Any] | None = None,
+    pseudo_post_horizon: int | None = None
+) -> pd.DataFrame
+```
+
+Build pre-treatment-only placebo-in-time falsification table.
+
+####### `run_placebo_tests`
+
+```python
+run_placebo_tests(
+    estimate: PanelEstimate,
+    paneldata: PanelDataSCM,
+    *,
+    model_kwargs: Dict[str, Any] | None = None,
+    pseudo_post_horizon: int | None = None
+) -> Dict[str, pd.DataFrame]
+```
+
+Run placebo-in-space and placebo-in-time robustness tests.
+
+###### `placebo_in_space_table`
+
+```python
+placebo_in_space_table(
+    estimate: PanelEstimate,
+    paneldata: PanelDataSCM,
+    *,
+    model_kwargs: Dict[str, Any] | None = None
+) -> pd.DataFrame
+```
+
+Build Abadie-style placebo-in-space RMSPE ratio table.
+
+For donor-as-treated placebo fits, the actual treated unit is excluded
+from the donor pool to avoid post-treatment contamination.
+
+###### `placebo_in_time_table`
+
+```python
+placebo_in_time_table(
+    estimate: PanelEstimate,
+    paneldata: PanelDataSCM,
+    *,
+    model_kwargs: Dict[str, Any] | None = None,
+    pseudo_post_horizon: int | None = None
+) -> pd.DataFrame
+```
+
+Build pre-treatment-only placebo-in-time falsification table.
+
+###### `run_placebo_tests`
+
+```python
+run_placebo_tests(
+    estimate: PanelEstimate,
+    paneldata: PanelDataSCM,
+    *,
+    model_kwargs: Dict[str, Any] | None = None,
+    pseudo_post_horizon: int | None = None
+) -> Dict[str, pd.DataFrame]
+```
+
+Run placebo-in-space and placebo-in-time robustness tests.
 
 ###### `run_scm_diagnostics`
 
@@ -13171,16 +13332,24 @@ run_scm_diagnostics(
     filename_prefix: str = "scm_diagnostics",
     pre_tail_k: int = 3,
     dpi: int = 220
-) -> Dict[str, Any]
+) -> pd.DataFrame
 ```
 
-Run compact SCM diagnostics and save the three v1 diagnostic plots.
+Run compact SCM diagnostics and return thresholded checks.
+
+###### `run_scm_feasibility`
+
+```python
+run_scm_feasibility(paneldata: PanelDataSCM) -> Dict[str, pd.DataFrame]
+```
+
+Return core SCM feasibility tables from panel data only (EDA phase).
 
 ###### `scm_diagnostics`
 
 **Functions:**
 
-- [**run_scm_diagnostics**](#causalis.scenarios.synthetic_control.refutation.scm_diagnostics.run_scm_diagnostics) – Run compact SCM diagnostics and save the three v1 diagnostic plots.
+- [**run_scm_diagnostics**](#causalis.scenarios.synthetic_control.refutation.scm_diagnostics.run_scm_diagnostics) – Run compact SCM diagnostics and return thresholded checks.
 
 ####### `run_scm_diagnostics`
 
@@ -13193,10 +13362,43 @@ run_scm_diagnostics(
     filename_prefix: str = "scm_diagnostics",
     pre_tail_k: int = 3,
     dpi: int = 220
-) -> Dict[str, Any]
+) -> pd.DataFrame
 ```
 
-Run compact SCM diagnostics and save the three v1 diagnostic plots.
+Run compact SCM diagnostics and return thresholded checks.
+
+###### `sensitivity`
+
+**Functions:**
+
+- [**leave_one_donor_out_sensitivity**](#causalis.scenarios.synthetic_control.refutation.sensitivity.leave_one_donor_out_sensitivity) – Re-fit ASCM dropping each donor once and report leave-one-donor-out sensitivity.
+
+####### `leave_one_donor_out_sensitivity`
+
+```python
+leave_one_donor_out_sensitivity(
+    estimate: PanelEstimate,
+    paneldata: PanelDataSCM,
+    *,
+    model_kwargs: Dict[str, Any] | None = None
+) -> pd.DataFrame
+```
+
+Re-fit ASCM dropping each donor once and report leave-one-donor-out sensitivity.
+
+##### `run_placebo_tests`
+
+```python
+run_placebo_tests(
+    estimate: PanelEstimate,
+    paneldata: PanelDataSCM,
+    *,
+    model_kwargs: Dict[str, Any] | None = None,
+    pseudo_post_horizon: int | None = None
+) -> Dict[str, pd.DataFrame]
+```
+
+Run placebo-in-space and placebo-in-time robustness tests.
 
 ##### `run_scm_diagnostics`
 
@@ -13209,10 +13411,18 @@ run_scm_diagnostics(
     filename_prefix: str = "scm_diagnostics",
     pre_tail_k: int = 3,
     dpi: int = 220
-) -> Dict[str, Any]
+) -> pd.DataFrame
 ```
 
-Run compact SCM diagnostics and save the three v1 diagnostic plots.
+Run compact SCM diagnostics and return thresholded checks.
+
+##### `run_scm_feasibility`
+
+```python
+run_scm_feasibility(paneldata: PanelDataSCM) -> Dict[str, pd.DataFrame]
+```
+
+Return core SCM feasibility tables from panel data only (EDA phase).
 
 #### `unconfoundedness`
 
