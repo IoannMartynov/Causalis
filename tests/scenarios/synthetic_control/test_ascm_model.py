@@ -68,6 +68,73 @@ def test_ascm_fit_and_estimate_interface():
     assert estimate.diagnostics["average_att_ttest_available"] in {True, False}
 
 
+def test_ascm_estimate_inference_overrides_are_supported():
+    df = _make_panel_with_effect(effect=3.0)
+    data = _panel(df)
+
+    model = AugmentedSyntheticControl(alpha=0.2, compute_average_att_ttest=True).fit(data)
+    default_estimate = model.estimate()
+    overridden = model.estimate(alpha=0.1, compute_average_att_ttest=False)
+    default_estimate_again = model.estimate()
+
+    assert default_estimate.alpha == 0.2
+    assert overridden.alpha == 0.1
+    assert overridden.diagnostics["ci_alpha"] == pytest.approx(0.1)
+    assert overridden.diagnostics["average_att_ttest_requested"] is False
+    assert overridden.diagnostics["average_att_ttest_available"] is False
+    assert default_estimate_again.alpha == 0.2
+    assert default_estimate_again.diagnostics["average_att_ttest_requested"] is True
+
+
+def test_ascm_estimate_overrides_do_not_mutate_fit_warning_state(monkeypatch):
+    class FailedResult:
+        success = False
+        message = "Positive directional derivative for linesearch"
+        x = None
+
+    def _always_fail(*args, **kwargs):
+        return FailedResult()
+
+    data = _panel(_make_panel_with_effect(effect=3.0))
+    model = AugmentedSyntheticControl(alpha=0.2, compute_average_att_ttest=True).fit(data)
+
+    baseline = model.estimate()
+    base_count = int(model._slsqp_fallback_count)
+    base_reasons = list(model._slsqp_fallback_reasons)
+    base_warnings = list(model._stability_warning_messages)
+
+    monkeypatch.setattr(sc_model, "minimize", _always_fail)
+    overridden = model.estimate(alpha=0.1)
+    overridden_again = model.estimate(alpha=0.15)
+
+    assert model._slsqp_fallback_count == base_count
+    assert model._slsqp_fallback_reasons == base_reasons
+    assert model._stability_warning_messages == base_warnings
+
+    assert overridden.diagnostics["slsqp_fallback_count"] == baseline.diagnostics["slsqp_fallback_count"]
+    assert overridden.diagnostics["slsqp_fallback_reasons"] == baseline.diagnostics["slsqp_fallback_reasons"]
+    assert overridden.diagnostics["stability_warning_messages"] == baseline.diagnostics[
+        "stability_warning_messages"
+    ]
+    assert overridden.diagnostics["suppressed_fit_warnings"] == baseline.diagnostics["suppressed_fit_warnings"]
+
+    assert overridden_again.diagnostics["slsqp_fallback_count"] == baseline.diagnostics[
+        "slsqp_fallback_count"
+    ]
+
+
+def test_ascm_estimate_inference_override_validation():
+    data = _panel(_make_panel_with_effect(effect=2.0))
+    model = AugmentedSyntheticControl().fit(data)
+
+    with pytest.raises(ValueError, match="alpha must be finite and in \\(0, 1\\)"):
+        model.estimate(alpha=1.0)
+    with pytest.raises(ValueError, match="average_att_n_folds"):
+        model.estimate(average_att_n_folds=1)
+    with pytest.raises(ValueError, match="conformal_grid_size"):
+        model.estimate(compute_pointwise_conformal=True, conformal_grid_size=100)
+
+
 def test_ascm_alias_and_not_fitted_guard():
     model = ASCM()
     with pytest.raises(RuntimeError, match="fit"):

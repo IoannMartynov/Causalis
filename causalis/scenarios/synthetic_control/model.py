@@ -81,6 +81,20 @@ class _SeriesOutputs:
     effect_by_time: pd.Series
 
 
+@dataclass(frozen=True)
+class _InferenceConfig:
+    """Inference configuration resolved at estimate-time."""
+
+    alpha: float
+    conformal_grid_size: int
+    conformal_grid_min: float | None
+    conformal_grid_max: float | None
+    conformal_grid_scale_mult: float
+    average_att_n_folds: int
+    compute_average_att_ttest: bool
+    compute_pointwise_conformal: bool
+
+
 class AugmentedSyntheticControl:
     """Ridge-augmented synthetic control with simplex anchor and aggregate-first inference.
 
@@ -128,21 +142,21 @@ class AugmentedSyntheticControl:
         enforce_sum_to_one_augmented : bool, default=True
             Enforce sum-to-one constraint on augmented weights.
         alpha : float, default=0.05
-            Significance level for confidence intervals and tests.
+            Default significance level used by ``estimate()`` inference.
         conformal_grid_size : int, default=401
-            Number of grid points used in pointwise conformal inversion.
+            Default number of grid points used in pointwise conformal inversion.
         conformal_grid_min : float or None, default=None
-            Optional fixed lower bound for conformal grid.
+            Optional default fixed lower bound for conformal grid.
         conformal_grid_max : float or None, default=None
-            Optional fixed upper bound for conformal grid.
+            Optional default fixed upper bound for conformal grid.
         conformal_grid_scale_mult : float, default=6.0
-            Scale multiplier for automatic conformal grid width.
+            Default scale multiplier for automatic conformal grid width.
         average_att_n_folds : int, default=3
-            Requested number of folds for average ATT t-test inference.
+            Default requested number of folds for average ATT t-test inference.
         compute_average_att_ttest : bool, default=True
-            Whether to run average ATT t-test inference.
+            Default toggle for average ATT t-test inference in ``estimate()``.
         compute_pointwise_conformal : bool, default=False
-            Whether to run pointwise conformal CIs/p-values for each post period.
+            Default toggle for pointwise conformal CIs/p-values in ``estimate()``.
 
         Raises
         ------
@@ -191,10 +205,12 @@ class AugmentedSyntheticControl:
 
         self._is_fitted: bool = False
         self._data: PanelDataSCM | None = None
+        self._fit_ctx: _FitContext | None = None
         self._donors: list[Hashable] = []
         self._pre_times: list[Any] = []
         self._post_times: list[Any] = []
         self._all_times: list[Any] = []
+        self._w_sc: np.ndarray = np.array([], dtype=float)
         self._w_aug: np.ndarray = np.array([], dtype=float)
         self._observed: pd.Series = pd.Series(dtype=float, name="observed_outcome")
         self._synthetic: pd.Series = pd.Series(dtype=float, name="synthetic_outcome")
@@ -212,6 +228,110 @@ class AugmentedSyntheticControl:
         self._slsqp_fallback_count: int = 0
         self._slsqp_fallback_reasons: list[str] = []
         self._stability_warning_messages: list[str] = []
+
+    @staticmethod
+    def _validate_inference_config(config: _InferenceConfig) -> None:
+        """Validate estimate-time inference configuration."""
+        if not np.isfinite(config.alpha) or not (0.0 < config.alpha < 1.0):
+            raise ValueError("alpha must be finite and in (0, 1).")
+        if config.average_att_n_folds < 2:
+            raise ValueError("average_att_n_folds must be an integer >= 2.")
+        if config.compute_pointwise_conformal:
+            if config.conformal_grid_size < 3 or config.conformal_grid_size % 2 == 0:
+                raise ValueError("conformal_grid_size must be an odd integer >= 3.")
+            if (
+                not np.isfinite(config.conformal_grid_scale_mult)
+                or config.conformal_grid_scale_mult <= 0.0
+            ):
+                raise ValueError("conformal_grid_scale_mult must be finite and > 0.")
+            if (
+                config.conformal_grid_min is not None
+                and config.conformal_grid_max is not None
+                and config.conformal_grid_min >= config.conformal_grid_max
+            ):
+                raise ValueError("conformal_grid_min must be < conformal_grid_max.")
+
+    def _current_inference_config(self) -> _InferenceConfig:
+        """Return currently active inference defaults on the estimator."""
+        return _InferenceConfig(
+            alpha=float(self.alpha),
+            conformal_grid_size=int(self.conformal_grid_size),
+            conformal_grid_min=(
+                None if self.conformal_grid_min is None else float(self.conformal_grid_min)
+            ),
+            conformal_grid_max=(
+                None if self.conformal_grid_max is None else float(self.conformal_grid_max)
+            ),
+            conformal_grid_scale_mult=float(self.conformal_grid_scale_mult),
+            average_att_n_folds=int(self.average_att_n_folds),
+            compute_average_att_ttest=bool(self.compute_average_att_ttest),
+            compute_pointwise_conformal=bool(self.compute_pointwise_conformal),
+        )
+
+    def _resolve_inference_config(
+        self,
+        *,
+        alpha: float | None = None,
+        conformal_grid_size: int | None = None,
+        conformal_grid_min: float | None = None,
+        conformal_grid_max: float | None = None,
+        conformal_grid_scale_mult: float | None = None,
+        average_att_n_folds: int | None = None,
+        compute_average_att_ttest: bool | None = None,
+        compute_pointwise_conformal: bool | None = None,
+    ) -> _InferenceConfig:
+        """Resolve per-call estimate overrides against constructor defaults."""
+        config = _InferenceConfig(
+            alpha=float(self.alpha if alpha is None else alpha),
+            conformal_grid_size=int(
+                self.conformal_grid_size if conformal_grid_size is None else conformal_grid_size
+            ),
+            conformal_grid_min=(
+                self.conformal_grid_min
+                if conformal_grid_min is None
+                else float(conformal_grid_min)
+            ),
+            conformal_grid_max=(
+                self.conformal_grid_max
+                if conformal_grid_max is None
+                else float(conformal_grid_max)
+            ),
+            conformal_grid_scale_mult=float(
+                self.conformal_grid_scale_mult
+                if conformal_grid_scale_mult is None
+                else conformal_grid_scale_mult
+            ),
+            average_att_n_folds=int(
+                self.average_att_n_folds if average_att_n_folds is None else average_att_n_folds
+            ),
+            compute_average_att_ttest=bool(
+                self.compute_average_att_ttest
+                if compute_average_att_ttest is None
+                else compute_average_att_ttest
+            ),
+            compute_pointwise_conformal=bool(
+                self.compute_pointwise_conformal
+                if compute_pointwise_conformal is None
+                else compute_pointwise_conformal
+            ),
+        )
+        self._validate_inference_config(config)
+        return config
+
+    def _apply_inference_config(self, *, config: _InferenceConfig) -> None:
+        """Temporarily apply inference configuration on the estimator."""
+        self.alpha = float(config.alpha)
+        self.conformal_grid_size = int(config.conformal_grid_size)
+        self.conformal_grid_min = (
+            None if config.conformal_grid_min is None else float(config.conformal_grid_min)
+        )
+        self.conformal_grid_max = (
+            None if config.conformal_grid_max is None else float(config.conformal_grid_max)
+        )
+        self.conformal_grid_scale_mult = float(config.conformal_grid_scale_mult)
+        self.average_att_n_folds = int(config.average_att_n_folds)
+        self.compute_average_att_ttest = bool(config.compute_average_att_ttest)
+        self.compute_pointwise_conformal = bool(config.compute_pointwise_conformal)
 
     # ---------------------------------------------------------------------
     # Core numerics
@@ -1486,6 +1606,7 @@ class AugmentedSyntheticControl:
     def _build_diagnostics(
         self,
         *,
+        fit_ctx: _FitContext,
         pointwise: _PointwiseConformalResult,
         average_att_ttest: _AverageATTTTestResult,
         pre_residuals: np.ndarray,
@@ -1501,6 +1622,8 @@ class AugmentedSyntheticControl:
 
         Parameters
         ----------
+        fit_ctx : _FitContext
+            Prepared matrices/time metadata for the current fitted panel.
         pointwise : _PointwiseConformalResult
             Pointwise path inference results.
         average_att_ttest : _AverageATTTTestResult
@@ -1534,10 +1657,14 @@ class AugmentedSyntheticControl:
         pointwise_ci_method = (
             "cwz_overlapping_moving_block" if pointwise_conformal_available else None
         )
+        pointwise_confidence_set = {
+            key: [(float(lo), float(hi)) for lo, hi in segments]
+            for key, segments in pointwise.confidence_set_by_time.items()
+        }
         return {
-            "n_donors": len(self._donors),
-            "n_pre_periods": len(self._pre_times),
-            "n_post_periods": len(self._post_times),
+            "n_donors": len(fit_ctx.donors),
+            "n_pre_periods": len(fit_ctx.pre_times),
+            "n_post_periods": len(fit_ctx.post_times),
             "enforce_sum_to_one_augmented": bool(self.enforce_sum_to_one_augmented),
             "lambda_sc": float(self.lambda_sc),
             "lambda_sc_role": "numerical_regularizer",
@@ -1549,6 +1676,8 @@ class AugmentedSyntheticControl:
             "max_weight_augmented": float(np.max(w_aug)),
             "l1_norm_weights_augmented": l1_w_aug,
             "max_abs_weight_augmented": max_abs_w_aug,
+            "augmented_weight_l1_warn_threshold": float(self._AUGMENTED_WEIGHT_L1_WARN_THRESHOLD),
+            "augmented_weight_max_abs_warn_threshold": float(self._AUGMENTED_WEIGHT_MAX_ABS_WARN_THRESHOLD),
             "sum_weights_sc": float(np.sum(w_sc)),
             "min_weight_sc": float(np.min(w_sc)),
             "max_weight_sc": float(np.max(w_sc)),
@@ -1587,14 +1716,14 @@ class AugmentedSyntheticControl:
             ),
             "pointwise_grid_by_time": pointwise.grid_by_time,
             "pointwise_grid_p_values_by_time": pointwise.grid_p_values_by_time,
-            "pointwise_confidence_set_by_time": self._confidence_set_by_time,
-            "pointwise_accepted_sets_by_time": self._confidence_set_by_time,
+            "pointwise_confidence_set_by_time": pointwise_confidence_set,
+            "pointwise_accepted_sets_by_time": pointwise_confidence_set,
             "effect_by_time": [
                 {
                     "period": time_key,
                     "estimate": float(pointwise.effect_by_time.loc[time_key]),
                 }
-                for time_key in self._post_times
+                for time_key in fit_ctx.post_times
             ],
             "average_att_ttest_requested": bool(self.compute_average_att_ttest),
             "average_att_ttest_available": bool(average_att_ttest.available),
@@ -1639,11 +1768,8 @@ class AugmentedSyntheticControl:
     def _assign_fitted_state(
         self,
         *,
-        data: PanelDataSCM,
-        donors: list[Hashable],
-        pre_times: list[Any],
-        post_times: list[Any],
-        all_times: list[Any],
+        fit_ctx: _FitContext,
+        w_sc: np.ndarray,
         w_aug: np.ndarray,
         observed_series: pd.Series,
         synthetic_series: pd.Series,
@@ -1655,16 +1781,10 @@ class AugmentedSyntheticControl:
 
         Parameters
         ----------
-        data : PanelDataSCM
-            Contract object used for fitting.
-        donors : list[Hashable]
-            Donor unit identifiers.
-        pre_times : list[Any]
-            Pre-treatment period labels.
-        post_times : list[Any]
-            Post-treatment period labels.
-        all_times : list[Any]
-            Combined analysis period labels.
+        fit_ctx : _FitContext
+            Prepared fit matrices/time metadata.
+        w_sc : numpy.ndarray
+            Baseline simplex donor weights.
         w_aug : numpy.ndarray
             Fitted augmented donor weights.
         observed_series : pandas.Series
@@ -1678,11 +1798,13 @@ class AugmentedSyntheticControl:
         average_att_ttest : _AverageATTTTestResult
             Average ATT inference result container.
         """
-        self._data = data
-        self._donors = list(donors)
-        self._pre_times = list(pre_times)
-        self._post_times = list(post_times)
-        self._all_times = list(all_times)
+        self._data = fit_ctx.data
+        self._fit_ctx = fit_ctx
+        self._donors = list(fit_ctx.donors)
+        self._pre_times = list(fit_ctx.pre_times)
+        self._post_times = list(fit_ctx.post_times)
+        self._all_times = list(fit_ctx.all_times)
+        self._w_sc = np.asarray(w_sc, dtype=float)
         self._w_aug = np.asarray(w_aug, dtype=float)
 
         self._observed = observed_series
@@ -1705,10 +1827,12 @@ class AugmentedSyntheticControl:
         """Clear fitted artifacts so failed refits cannot leak stale state."""
         self._is_fitted = False
         self._data = None
+        self._fit_ctx = None
         self._donors = []
         self._pre_times = []
         self._post_times = []
         self._all_times = []
+        self._w_sc = np.array([], dtype=float)
         self._w_aug = np.array([], dtype=float)
         self._observed = pd.Series(dtype=float, name="observed_outcome")
         self._synthetic = pd.Series(dtype=float, name="synthetic_outcome")
@@ -1745,6 +1869,64 @@ class AugmentedSyntheticControl:
                 stacklevel=2,
             )
 
+    def _compute_inference_artifacts(
+        self,
+        *,
+        fit_ctx: _FitContext,
+        w_sc: np.ndarray,
+        w_aug: np.ndarray,
+        effect_by_time: pd.Series,
+    ) -> tuple[_PointwiseConformalResult, _AverageATTTTestResult, dict[str, Any]]:
+        """Compute inference outputs/diagnostics for active inference config."""
+        n_pre = len(fit_ctx.pre_times)
+        min_possible_p = 1.0 / float(n_pre + 1)
+        self._warn_pointwise_conformal_feasibility(
+            n_pre=n_pre,
+            min_possible_p=min_possible_p,
+        )
+
+        pre_residuals = fit_ctx.y1_pre - (fit_ctx.x0_pre @ w_aug)
+        average_att_ttest = self._compute_average_att_ttest_if_requested(
+            y1_observed=fit_ctx.y1_all,
+            y0_all=fit_ctx.y0_all,
+            pre_times=fit_ctx.pre_times,
+            post_times=fit_ctx.post_times,
+        )
+        pointwise = self._compute_pointwise_conformal_if_requested(
+            y1_observed=fit_ctx.y1_all,
+            y0_all=fit_ctx.y0_all,
+            n_pre=n_pre,
+            post_times=fit_ctx.post_times,
+            effect_by_time=effect_by_time,
+            pre_residuals=pre_residuals,
+        )
+
+        cond_gram_aug, l1_w_aug, max_abs_w_aug = self._compute_augmented_weight_metrics(
+            x0_pre=fit_ctx.x0_pre,
+            w_aug=w_aug,
+        )
+        self._warn_on_augmented_weight_metrics(
+            cond_gram_aug=cond_gram_aug,
+            l1_w_aug=l1_w_aug,
+            max_abs_w_aug=max_abs_w_aug,
+        )
+
+        full_sample_post_mean_gap = float(np.mean(effect_by_time.to_numpy(dtype=float)))
+        diagnostics = self._build_diagnostics(
+            fit_ctx=fit_ctx,
+            pointwise=pointwise,
+            average_att_ttest=average_att_ttest,
+            pre_residuals=pre_residuals,
+            w_sc=w_sc,
+            w_aug=w_aug,
+            min_possible_p=min_possible_p,
+            cond_gram_aug=cond_gram_aug,
+            l1_w_aug=l1_w_aug,
+            max_abs_w_aug=max_abs_w_aug,
+            full_sample_post_mean_gap=full_sample_post_mean_gap,
+        )
+        return pointwise, average_att_ttest, diagnostics
+
     # ---------------------------------------------------------------------
     # Public API
     # ---------------------------------------------------------------------
@@ -1776,53 +1958,23 @@ class AugmentedSyntheticControl:
         w_sc, w_aug = self._fit_augmented_weights(x0_pre=fit_ctx.x0_pre, y1_pre=fit_ctx.y1_pre)
         y0_hat = fit_ctx.y0_all @ w_aug
 
-        n_pre = len(fit_ctx.pre_times)
-        min_possible_p = 1.0 / float(n_pre + 1)
-        self._warn_pointwise_conformal_feasibility(n_pre=n_pre, min_possible_p=min_possible_p)
-        pre_residuals = fit_ctx.y1_pre - (fit_ctx.x0_pre @ w_aug)
         series_outputs = self._build_series_outputs(
             y1_all=fit_ctx.y1_all,
             y0_hat=y0_hat,
             all_times=fit_ctx.all_times,
             post_times=fit_ctx.post_times,
         )
-
-        # Stage 1: default inference, aggregate post-window ATT t-test.
-        average_att_ttest = self._compute_average_att_ttest_if_requested(
-            y1_observed=fit_ctx.y1_all,
-            y0_all=fit_ctx.y0_all,
-            pre_times=fit_ctx.pre_times,
-            post_times=fit_ctx.post_times,
-        )
-
-        # Stage 2: optional dynamic pointwise conformal inference.
-        pointwise = self._compute_pointwise_conformal_if_requested(
-            y1_observed=fit_ctx.y1_all,
-            y0_all=fit_ctx.y0_all,
-            n_pre=n_pre,
-            post_times=fit_ctx.post_times,
-            effect_by_time=series_outputs.effect_by_time,
-            pre_residuals=pre_residuals,
-        )
-
-        # Stage 3: stability checks on final augmented fit.
-        cond_gram_aug, l1_w_aug, max_abs_w_aug = self._compute_augmented_weight_metrics(
-            x0_pre=fit_ctx.x0_pre,
+        pointwise, average_att_ttest, diagnostics = self._compute_inference_artifacts(
+            fit_ctx=fit_ctx,
+            w_sc=w_sc,
             w_aug=w_aug,
-        )
-        self._warn_on_augmented_weight_metrics(
-            cond_gram_aug=cond_gram_aug,
-            l1_w_aug=l1_w_aug,
-            max_abs_w_aug=max_abs_w_aug,
+            effect_by_time=series_outputs.effect_by_time,
         )
 
         # Stage 4: persist fitted state and publish diagnostics.
         self._assign_fitted_state(
-            data=fit_ctx.data,
-            donors=fit_ctx.donors,
-            pre_times=fit_ctx.pre_times,
-            post_times=fit_ctx.post_times,
-            all_times=fit_ctx.all_times,
+            fit_ctx=fit_ctx,
+            w_sc=w_sc,
             w_aug=w_aug,
             observed_series=series_outputs.observed_series,
             synthetic_series=series_outputs.synthetic_series,
@@ -1830,26 +1982,43 @@ class AugmentedSyntheticControl:
             pointwise=pointwise,
             average_att_ttest=average_att_ttest,
         )
-
-        full_sample_post_mean_gap = float(np.mean(series_outputs.effect_by_time.to_numpy(dtype=float)))
-        self._diagnostics = self._build_diagnostics(
-            pointwise=pointwise,
-            average_att_ttest=average_att_ttest,
-            pre_residuals=pre_residuals,
-            w_sc=w_sc,
-            w_aug=w_aug,
-            min_possible_p=min_possible_p,
-            cond_gram_aug=cond_gram_aug,
-            l1_w_aug=l1_w_aug,
-            max_abs_w_aug=max_abs_w_aug,
-            full_sample_post_mean_gap=full_sample_post_mean_gap,
-        )
+        self._diagnostics = diagnostics
 
         self._is_fitted = True
         return self
 
-    def estimate(self) -> PanelEstimate:
+    def estimate(
+        self,
+        *,
+        alpha: float | None = None,
+        conformal_grid_size: int | None = None,
+        conformal_grid_min: float | None = None,
+        conformal_grid_max: float | None = None,
+        conformal_grid_scale_mult: float | None = None,
+        average_att_n_folds: int | None = None,
+        compute_average_att_ttest: bool | None = None,
+        compute_pointwise_conformal: bool | None = None,
+    ) -> PanelEstimate:
         """Return dynamic-path estimate object.
+
+        Parameters
+        ----------
+        alpha : float or None, default=None
+            Optional per-call significance level override.
+        conformal_grid_size : int or None, default=None
+            Optional per-call pointwise conformal grid size override.
+        conformal_grid_min : float or None, default=None
+            Optional per-call lower conformal grid bound override.
+        conformal_grid_max : float or None, default=None
+            Optional per-call upper conformal grid bound override.
+        conformal_grid_scale_mult : float or None, default=None
+            Optional per-call automatic conformal grid scale override.
+        average_att_n_folds : int or None, default=None
+            Optional per-call fold-count override for average ATT inference.
+        compute_average_att_ttest : bool or None, default=None
+            Optional per-call toggle for average ATT t-test inference.
+        compute_pointwise_conformal : bool or None, default=None
+            Optional per-call toggle for pointwise conformal inference.
 
         Returns
         -------
@@ -1867,6 +2036,83 @@ class AugmentedSyntheticControl:
         if not self._is_fitted or self._data is None:
             raise RuntimeError("Model must be fitted with .fit(data) before calling .estimate().")
 
+        overrides_requested = any(
+            value is not None
+            for value in (
+                alpha,
+                conformal_grid_size,
+                conformal_grid_min,
+                conformal_grid_max,
+                conformal_grid_scale_mult,
+                average_att_n_folds,
+                compute_average_att_ttest,
+                compute_pointwise_conformal,
+            )
+        )
+
+        effect_by_time = self._effect_by_time.copy()
+        ci_lower_by_time = self._ci_lower_by_time.copy()
+        ci_upper_by_time = self._ci_upper_by_time.copy()
+        p_value_by_time = self._p_value_by_time.copy()
+        is_significant_by_time = self._is_significant_by_time.copy()
+        confidence_set_by_time = {
+            key: [(float(lo), float(hi)) for lo, hi in segments]
+            for key, segments in self._confidence_set_by_time.items()
+        }
+        diagnostics = dict(self._diagnostics)
+        alpha_out = float(self.alpha)
+
+        if overrides_requested:
+            if self._fit_ctx is None:
+                raise RuntimeError(
+                    "Model fit context is unavailable for estimate-time inference overrides; refit the model."
+                )
+
+            config = self._resolve_inference_config(
+                alpha=alpha,
+                conformal_grid_size=conformal_grid_size,
+                conformal_grid_min=conformal_grid_min,
+                conformal_grid_max=conformal_grid_max,
+                conformal_grid_scale_mult=conformal_grid_scale_mult,
+                average_att_n_folds=average_att_n_folds,
+                compute_average_att_ttest=compute_average_att_ttest,
+                compute_pointwise_conformal=compute_pointwise_conformal,
+            )
+            base_config = self._current_inference_config()
+            base_slsqp_fallback_count = int(self._slsqp_fallback_count)
+            base_slsqp_fallback_reasons = list(self._slsqp_fallback_reasons)
+            base_stability_warning_messages = list(self._stability_warning_messages)
+            try:
+                self._apply_inference_config(config=config)
+                pointwise, _, diagnostics = self._compute_inference_artifacts(
+                    fit_ctx=self._fit_ctx,
+                    w_sc=self._w_sc,
+                    w_aug=self._w_aug,
+                    effect_by_time=self._effect_by_time,
+                )
+            finally:
+                self._apply_inference_config(config=base_config)
+                self._slsqp_fallback_count = base_slsqp_fallback_count
+                self._slsqp_fallback_reasons = list(base_slsqp_fallback_reasons)
+                self._stability_warning_messages = list(base_stability_warning_messages)
+
+            diagnostics["slsqp_fallback_occurred"] = bool(base_slsqp_fallback_count > 0)
+            diagnostics["slsqp_fallback_count"] = int(base_slsqp_fallback_count)
+            diagnostics["slsqp_fallback_reasons"] = list(base_slsqp_fallback_reasons)
+            diagnostics["stability_warning_messages"] = list(base_stability_warning_messages)
+            diagnostics["suppressed_fit_warnings"] = self._suppressed_fit_warnings()
+
+            effect_by_time = pointwise.effect_by_time.copy()
+            ci_lower_by_time = pointwise.ci_lower_by_time.copy()
+            ci_upper_by_time = pointwise.ci_upper_by_time.copy()
+            p_value_by_time = pointwise.p_value_by_time.copy()
+            is_significant_by_time = pointwise.is_significant_by_time.copy()
+            confidence_set_by_time = {
+                key: [(float(lo), float(hi)) for lo, hi in segments]
+                for key, segments in pointwise.confidence_set_by_time.items()
+            }
+            alpha_out = float(config.alpha)
+
         return PanelEstimate(
             estimand="dynamic_effect_path",
             model=self.__class__.__name__,
@@ -1874,22 +2120,19 @@ class AugmentedSyntheticControl:
             treatment_start=self._data.treatment_start,
             pre_times=list(self._pre_times),
             post_times=list(self._post_times),
-            effect_by_time=self._effect_by_time.copy(),
-            ci_lower_by_time=self._ci_lower_by_time.copy(),
-            ci_upper_by_time=self._ci_upper_by_time.copy(),
-            p_value_by_time=self._p_value_by_time.copy(),
-            is_significant_by_time=self._is_significant_by_time.copy(),
-            confidence_set_by_time={
-                key: [(float(lo), float(hi)) for lo, hi in segments]
-                for key, segments in self._confidence_set_by_time.items()
-            },
-            alpha=float(self.alpha),
+            effect_by_time=effect_by_time,
+            ci_lower_by_time=ci_lower_by_time,
+            ci_upper_by_time=ci_upper_by_time,
+            p_value_by_time=p_value_by_time,
+            is_significant_by_time=is_significant_by_time,
+            confidence_set_by_time=confidence_set_by_time,
+            alpha=alpha_out,
             observed_outcome=self._observed.copy(),
             synthetic_outcome=self._synthetic.copy(),
             donor_weights_augmented={
                 donor: float(weight) for donor, weight in zip(self._donors, self._w_aug)
             },
-            diagnostics=dict(self._diagnostics),
+            diagnostics=diagnostics,
         )
 
     def __repr__(self) -> str:
