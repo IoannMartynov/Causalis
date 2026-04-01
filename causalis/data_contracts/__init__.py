@@ -6,6 +6,7 @@ from .causaldata_instrumental import CausalDataInstrumental
 from .panel_data_scm import PanelDataSCM
 from .panel_estimate import PanelEstimate
 from .causal_estimate import CausalEstimate
+from .gate_estimate import GateEstimate
 from .causal_diagnostic_data import DiagnosticData, UnconfoundednessDiagnosticData, RegressionChecks
 
 _DGP_EXPORTS = {
@@ -29,6 +30,7 @@ __all__ = [
     "PanelDataSCM",
     "PanelEstimate",
     "CausalEstimate",
+    "GateEstimate",
     "DiagnosticData",
     "UnconfoundednessDiagnosticData",
     "RegressionChecks",

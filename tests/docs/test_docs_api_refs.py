@@ -14,13 +14,8 @@ def test_scenarios_unconfoundedness_exports():
 
 
 def test_inference_subpackages_functions():
-    # ATT/ATE/CATE/GATE functions referenced in docs by fully qualified names
+    # ATT/ATE/GATE functions referenced in docs by fully qualified names
     unconf = importlib.import_module('causalis.scenarios.unconfoundedness')
     assert hasattr(unconf, 'IRM')
 
-    cate = importlib.import_module('causalis.scenarios.cate.cate')
-    assert hasattr(cate, 'cate_esimand')
-
-    gate = importlib.import_module('causalis.scenarios.cate.gate')
-    assert hasattr(gate, 'gate_esimand')
 

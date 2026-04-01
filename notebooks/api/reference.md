@@ -17,6 +17,7 @@ Causalis: A Python package for causal inference.
 - [**causal_estimate**](#causalis.data_contracts.causal_estimate) –
 - [**causaldata**](#causalis.data_contracts.causaldata) – Causalis Dataclass for storing Cross-sectional DataFrame and column metadata for causal inference.
 - [**causaldata_instrumental**](#causalis.data_contracts.causaldata_instrumental) –
+- [**gate_estimate**](#causalis.data_contracts.gate_estimate) –
 - [**multicausal_estimate**](#causalis.data_contracts.multicausal_estimate) –
 - [**multicausaldata**](#causalis.data_contracts.multicausaldata) – Causalis Dataclass for storing Cross-sectional DataFrame and column metadata
 - [**panel_data_scm**](#causalis.data_contracts.panel_data_scm) –
@@ -28,6 +29,7 @@ Causalis: A Python package for causal inference.
 - [**CausalDataInstrumental**](#causalis.data_contracts.CausalDataInstrumental) – Container for causal inference datasets with causaldata_instrumental variables.
 - [**CausalEstimate**](#causalis.data_contracts.CausalEstimate) – Result container for causal effect estimates.
 - [**DiagnosticData**](#causalis.data_contracts.DiagnosticData) – Base class for all diagnostic data_contracts.
+- [**GateEstimate**](#causalis.data_contracts.GateEstimate) – Result contract for Group Average Treatment Effects (GATE).
 - [**MultiCausalData**](#causalis.data_contracts.MultiCausalData) – Data contract for cross-sectional causal data with multi-class one-hot treatments.
 - [**PanelDataSCM**](#causalis.data_contracts.PanelDataSCM) – Validated long-format panel contract for Synthetic Control estimators.
 - [**PanelEstimate**](#causalis.data_contracts.PanelEstimate) – Result contract for dynamic synthetic-control effect-path estimates.
@@ -499,6 +501,175 @@ Base class for all diagnostic data_contracts.
 
 ```python
 model_config = ConfigDict(arbitrary_types_allowed=True)
+```
+
+#### `GateEstimate`
+
+Bases: <code>[BaseModel](#pydantic.BaseModel)</code>
+
+Result contract for Group Average Treatment Effects (GATE).
+
+**Functions:**
+
+- [**summary**](#causalis.data_contracts.GateEstimate.summary) – Return per-group GATE summary table.
+
+##### `alpha`
+
+```python
+alpha: float
+```
+
+##### `ci_lower`
+
+```python
+ci_lower: np.ndarray
+```
+
+##### `ci_upper`
+
+```python
+ci_upper: np.ndarray
+```
+
+##### `covariance`
+
+```python
+covariance: pd.DataFrame
+```
+
+##### `diagnostic_data`
+
+```python
+diagnostic_data: Optional[Dict[str, Any]] = None
+```
+
+##### `estimand`
+
+```python
+estimand: str = 'GATE'
+```
+
+##### `group_names`
+
+```python
+group_names: List[str]
+```
+
+##### `max_propensity`
+
+```python
+max_propensity: np.ndarray
+```
+
+##### `mean_phi`
+
+```python
+mean_phi: np.ndarray
+```
+
+##### `mean_propensity`
+
+```python
+mean_propensity: np.ndarray
+```
+
+##### `min_propensity`
+
+```python
+min_propensity: np.ndarray
+```
+
+##### `model`
+
+```python
+model: str = 'IRM'
+```
+
+##### `model_config`
+
+```python
+model_config = ConfigDict(arbitrary_types_allowed=True)
+```
+
+##### `model_options`
+
+```python
+model_options: Dict[str, Any] = Field(default_factory=dict)
+```
+
+##### `n_control`
+
+```python
+n_control: np.ndarray
+```
+
+##### `n_group`
+
+```python
+n_group: np.ndarray
+```
+
+##### `n_treated`
+
+```python
+n_treated: np.ndarray
+```
+
+##### `p_values`
+
+```python
+p_values: np.ndarray
+```
+
+##### `share_treated`
+
+```python
+share_treated: np.ndarray
+```
+
+##### `std_errors`
+
+```python
+std_errors: np.ndarray
+```
+
+##### `std_phi`
+
+```python
+std_phi: np.ndarray
+```
+
+##### `summary`
+
+```python
+summary() -> pd.DataFrame
+```
+
+Return per-group GATE summary table.
+
+##### `summary_table`
+
+```python
+summary_table: pd.DataFrame
+```
+
+##### `test_stats`
+
+```python
+test_stats: np.ndarray
+```
+
+##### `time`
+
+```python
+time: str = Field(default_factory=(lambda: datetime.now().strftime("%Y-%m-%d")))
+
+```
+
+##### `values`
+
+```python
+values: np.ndarray
 ```
 
 #### `MultiCausalData`
@@ -2178,6 +2349,181 @@ instrument column as a Series.
 
 ```python
 instrument_name: str = Field(alias='instrument')
+```
+
+#### `gate_estimate`
+
+**Classes:**
+
+- [**GateEstimate**](#causalis.data_contracts.gate_estimate.GateEstimate) – Result contract for Group Average Treatment Effects (GATE).
+
+##### `GateEstimate`
+
+Bases: <code>[BaseModel](#pydantic.BaseModel)</code>
+
+Result contract for Group Average Treatment Effects (GATE).
+
+**Functions:**
+
+- [**summary**](#causalis.data_contracts.gate_estimate.GateEstimate.summary) – Return per-group GATE summary table.
+
+###### `alpha`
+
+```python
+alpha: float
+```
+
+###### `ci_lower`
+
+```python
+ci_lower: np.ndarray
+```
+
+###### `ci_upper`
+
+```python
+ci_upper: np.ndarray
+```
+
+###### `covariance`
+
+```python
+covariance: pd.DataFrame
+```
+
+###### `diagnostic_data`
+
+```python
+diagnostic_data: Optional[Dict[str, Any]] = None
+```
+
+###### `estimand`
+
+```python
+estimand: str = 'GATE'
+```
+
+###### `group_names`
+
+```python
+group_names: List[str]
+```
+
+###### `max_propensity`
+
+```python
+max_propensity: np.ndarray
+```
+
+###### `mean_phi`
+
+```python
+mean_phi: np.ndarray
+```
+
+###### `mean_propensity`
+
+```python
+mean_propensity: np.ndarray
+```
+
+###### `min_propensity`
+
+```python
+min_propensity: np.ndarray
+```
+
+###### `model`
+
+```python
+model: str = 'IRM'
+```
+
+###### `model_config`
+
+```python
+model_config = ConfigDict(arbitrary_types_allowed=True)
+```
+
+###### `model_options`
+
+```python
+model_options: Dict[str, Any] = Field(default_factory=dict)
+```
+
+###### `n_control`
+
+```python
+n_control: np.ndarray
+```
+
+###### `n_group`
+
+```python
+n_group: np.ndarray
+```
+
+###### `n_treated`
+
+```python
+n_treated: np.ndarray
+```
+
+###### `p_values`
+
+```python
+p_values: np.ndarray
+```
+
+###### `share_treated`
+
+```python
+share_treated: np.ndarray
+```
+
+###### `std_errors`
+
+```python
+std_errors: np.ndarray
+```
+
+###### `std_phi`
+
+```python
+std_phi: np.ndarray
+```
+
+###### `summary`
+
+```python
+summary() -> pd.DataFrame
+```
+
+Return per-group GATE summary table.
+
+###### `summary_table`
+
+```python
+summary_table: pd.DataFrame
+```
+
+###### `test_stats`
+
+```python
+test_stats: np.ndarray
+```
+
+###### `time`
+
+```python
+time: str = Field(default_factory=(lambda: datetime.now().strftime("%Y-%m-%d")))
+
+```
+
+###### `values`
+
+```python
+values: np.ndarray
 ```
 
 #### `multicausal_estimate`
@@ -7585,415 +7931,12 @@ when slope is zero).
 
 **Modules:**
 
-- [**cate**](#causalis.scenarios.cate) –
 - [**classic_rct**](#causalis.scenarios.classic_rct) –
 - [**cuped**](#causalis.scenarios.cuped) –
+- [**gate**](#causalis.scenarios.gate) – Group Average Treatment Effect (GATE) estimation utilities.
 - [**multi_unconfoundedness**](#causalis.scenarios.multi_unconfoundedness) –
 - [**synthetic_control**](#causalis.scenarios.synthetic_control) –
 - [**unconfoundedness**](#causalis.scenarios.unconfoundedness) –
-
-#### `cate`
-
-**Modules:**
-
-- [**blp**](#causalis.scenarios.cate.blp) –
-- [**cate**](#causalis.scenarios.cate.cate) – Conditional Average Treatment Effect (CATE) inference methods for causalis.
-- [**gate**](#causalis.scenarios.cate.gate) – Group Average Treatment Effect (GATE) inference methods for causalis.
-
-**Classes:**
-
-- [**BLP**](#causalis.scenarios.cate.BLP) – Best linear predictor (BLP) with orthogonal signals.
-
-##### `BLP`
-
-```python
-BLP(orth_signal, basis, is_gate = False)
-```
-
-Best linear predictor (BLP) with orthogonal signals.
-Mainly used for CATE and GATE estimation for IRM models.
-
-The Best Linear Predictor (BLP) targets the coefficient vector :math:`\beta_0` that minimizes the mean squared error
-between the true treatment effect function :math:`\tau(X)` and a linear combination of basis functions :math:`b(X)`:
-
-.. math::
-\\beta_0 = \\arg\\min\_{\\beta \\in \\mathbb{R}^K} \\mathbb{E}\\Big[\\big(\\tau(X) - b(X)^\\top \\beta \\big)^2\\Big].
-
-This is characterized by the moment condition:
-
-.. math::
-\\mathbb{E}[b(X)\\psi] = \\mathbb{E}[b(X)b(X)^\\top]\\beta_0,
-
-where :math:`\psi` is the orthogonal signal such that :math:`\mathbb{E}[\psi \mid X] = \tau(X)`.
-
-The estimator is obtained via OLS of the orthogonal signal on the basis:
-
-.. math::
-\\hat{\\beta} = (B^\\top B)^{-1}B^\\top\\psi.
-
-**GATE (Group Average Treatment Effect)**
-
-When `is_gate=True`, the basis consists of group indicators (dummy variables).
-In this case, the BLP coefficients correspond to the group means of the orthogonal signal,
-which approximate the GATEs:
-
-.. math::
-\\hat{\\beta}_k = \\frac{1}{n_k}\\sum_{i:G_i=k}\\psi_i \\approx \\text{GATE}\_k.
-
-**Confidence Intervals**
-
-Confidence intervals for any linear combination :math:`\hat{g} = A\hat{\beta}` are computed using the estimated covariance matrix :math:`\widehat{\Omega}`:
-
-.. math::
-\\widehat{\\operatorname{Var}}(\\hat{g}) \\approx A\\widehat{\\Omega}A^\\top.
-
-Pointwise and joint confidence intervals (via Gaussian multiplier bootstrap) are supported.
-
-**Parameters:**
-
-- **orth_signal** (<code>:class:`numpy.array`</code>) – The orthogonal signal to be predicted. Has to be of shape `(n_obs,)`,
-  where `n_obs` is the number of observations.
-- **basis** (<code>:class:`pandas.DataFrame`</code>) – The basis for estimating the best linear predictor. Has to have the shape `(n_obs, d)`,
-  where `n_obs` is the number of observations and `d` is the number of predictors.
-- **is_gate** (<code>[bool](#bool)</code>) – Indicates whether the basis is constructed for GATEs (dummy-basis).
-  Default is `False`.
-
-**Functions:**
-
-- [**confint**](#causalis.scenarios.cate.BLP.confint) – Confidence intervals for the BLP model.
-- [**fit**](#causalis.scenarios.cate.BLP.fit) – Estimate BLP models.
-
-###### `basis`
-
-```python
-basis
-```
-
-Basis.
-
-###### `blp_model`
-
-```python
-blp_model
-```
-
-Best-Linear-Predictor model.
-
-###### `blp_omega`
-
-```python
-blp_omega
-```
-
-Covariance matrix.
-
-###### `confint`
-
-```python
-confint(basis = None, joint = False, alpha = 0.05, n_rep_boot = 500)
-```
-
-Confidence intervals for the BLP model.
-
-**Parameters:**
-
-- **basis** (<code>:class:`pandas.DataFrame`</code>) – The basis for constructing the confidence interval. Has to have the same form as the basis from
-  the construction. If `None` is passed, if the basis is constructed for GATEs, the GATEs are returned.
-  Else, the confidence intervals for the basis coefficients are returned (with pointwise cofidence intervals).
-  Default is `None`.
-- **joint** (<code>[bool](#bool)</code>) – Indicates whether joint confidence intervals are computed.
-  Default is `False`.
-- **alpha** (<code>[float](#float)</code>) – The significance level.
-  Default is `0.05`.
-- **n_rep_boot** (<code>[int](#int)</code>) – The number of bootstrap repetitions (only relevant for joint confidence intervals).
-  Default is `500`.
-
-**Returns:**
-
-- **df_ci** (<code>[DataFrame](#pandas.DataFrame)</code>) – A data_contracts frame with the confidence interval(s).
-
-###### `fit`
-
-```python
-fit(cov_type = 'HC0', diagnostic_data: bool = True, **kwargs: bool)
-```
-
-Estimate BLP models.
-
-**Parameters:**
-
-- **cov_type** (<code>[str](#str)</code>) – The covariance type to be used in the estimation. Default is `'HC0'`.
-  See :meth:`statsmodels.regression.linear_model.OLS.fit` for more information.
-- **diagnostic_data** (<code>[bool](#bool)</code>) – Whether to include diagnostic data_contracts. (Currently not used for BLP).
-- \*\***kwargs** – Additional keyword arguments to be passed to :meth:`statsmodels.regression.linear_model.OLS.fit`.
-
-**Returns:**
-
-- **self** (<code>[object](#object)</code>) –
-
-###### `orth_signal`
-
-```python
-orth_signal
-```
-
-Orthogonal signal.
-
-###### `summary`
-
-```python
-summary
-```
-
-A summary for the best linear predictor effect after calling :meth:`fit`.
-
-##### `blp`
-
-**Classes:**
-
-- [**BLP**](#causalis.scenarios.cate.blp.BLP) – Best linear predictor (BLP) with orthogonal signals.
-
-###### `BLP`
-
-```python
-BLP(orth_signal, basis, is_gate = False)
-```
-
-Best linear predictor (BLP) with orthogonal signals.
-Mainly used for CATE and GATE estimation for IRM models.
-
-The Best Linear Predictor (BLP) targets the coefficient vector :math:`\beta_0` that minimizes the mean squared error
-between the true treatment effect function :math:`\tau(X)` and a linear combination of basis functions :math:`b(X)`:
-
-.. math::
-\\beta_0 = \\arg\\min\_{\\beta \\in \\mathbb{R}^K} \\mathbb{E}\\Big[\\big(\\tau(X) - b(X)^\\top \\beta \\big)^2\\Big].
-
-This is characterized by the moment condition:
-
-.. math::
-\\mathbb{E}[b(X)\\psi] = \\mathbb{E}[b(X)b(X)^\\top]\\beta_0,
-
-where :math:`\psi` is the orthogonal signal such that :math:`\mathbb{E}[\psi \mid X] = \tau(X)`.
-
-The estimator is obtained via OLS of the orthogonal signal on the basis:
-
-.. math::
-\\hat{\\beta} = (B^\\top B)^{-1}B^\\top\\psi.
-
-**GATE (Group Average Treatment Effect)**
-
-When `is_gate=True`, the basis consists of group indicators (dummy variables).
-In this case, the BLP coefficients correspond to the group means of the orthogonal signal,
-which approximate the GATEs:
-
-.. math::
-\\hat{\\beta}_k = \\frac{1}{n_k}\\sum_{i:G_i=k}\\psi_i \\approx \\text{GATE}\_k.
-
-**Confidence Intervals**
-
-Confidence intervals for any linear combination :math:`\hat{g} = A\hat{\beta}` are computed using the estimated covariance matrix :math:`\widehat{\Omega}`:
-
-.. math::
-\\widehat{\\operatorname{Var}}(\\hat{g}) \\approx A\\widehat{\\Omega}A^\\top.
-
-Pointwise and joint confidence intervals (via Gaussian multiplier bootstrap) are supported.
-
-**Parameters:**
-
-- **orth_signal** (<code>:class:`numpy.array`</code>) – The orthogonal signal to be predicted. Has to be of shape `(n_obs,)`,
-  where `n_obs` is the number of observations.
-- **basis** (<code>:class:`pandas.DataFrame`</code>) – The basis for estimating the best linear predictor. Has to have the shape `(n_obs, d)`,
-  where `n_obs` is the number of observations and `d` is the number of predictors.
-- **is_gate** (<code>[bool](#bool)</code>) – Indicates whether the basis is constructed for GATEs (dummy-basis).
-  Default is `False`.
-
-**Functions:**
-
-- [**confint**](#causalis.scenarios.cate.blp.BLP.confint) – Confidence intervals for the BLP model.
-- [**fit**](#causalis.scenarios.cate.blp.BLP.fit) – Estimate BLP models.
-
-####### `basis`
-
-```python
-basis
-```
-
-Basis.
-
-####### `blp_model`
-
-```python
-blp_model
-```
-
-Best-Linear-Predictor model.
-
-####### `blp_omega`
-
-```python
-blp_omega
-```
-
-Covariance matrix.
-
-####### `confint`
-
-```python
-confint(basis = None, joint = False, alpha = 0.05, n_rep_boot = 500)
-```
-
-Confidence intervals for the BLP model.
-
-**Parameters:**
-
-- **basis** (<code>:class:`pandas.DataFrame`</code>) – The basis for constructing the confidence interval. Has to have the same form as the basis from
-  the construction. If `None` is passed, if the basis is constructed for GATEs, the GATEs are returned.
-  Else, the confidence intervals for the basis coefficients are returned (with pointwise cofidence intervals).
-  Default is `None`.
-- **joint** (<code>[bool](#bool)</code>) – Indicates whether joint confidence intervals are computed.
-  Default is `False`.
-- **alpha** (<code>[float](#float)</code>) – The significance level.
-  Default is `0.05`.
-- **n_rep_boot** (<code>[int](#int)</code>) – The number of bootstrap repetitions (only relevant for joint confidence intervals).
-  Default is `500`.
-
-**Returns:**
-
-- **df_ci** (<code>[DataFrame](#pandas.DataFrame)</code>) – A data_contracts frame with the confidence interval(s).
-
-####### `fit`
-
-```python
-fit(cov_type = 'HC0', diagnostic_data: bool = True, **kwargs: bool)
-```
-
-Estimate BLP models.
-
-**Parameters:**
-
-- **cov_type** (<code>[str](#str)</code>) – The covariance type to be used in the estimation. Default is `'HC0'`.
-  See :meth:`statsmodels.regression.linear_model.OLS.fit` for more information.
-- **diagnostic_data** (<code>[bool](#bool)</code>) – Whether to include diagnostic data_contracts. (Currently not used for BLP).
-- \*\***kwargs** – Additional keyword arguments to be passed to :meth:`statsmodels.regression.linear_model.OLS.fit`.
-
-**Returns:**
-
-- **self** (<code>[object](#object)</code>) –
-
-####### `orth_signal`
-
-```python
-orth_signal
-```
-
-Orthogonal signal.
-
-####### `summary`
-
-```python
-summary
-```
-
-A summary for the best linear predictor effect after calling :meth:`fit`.
-
-##### `cate`
-
-Conditional Average Treatment Effect (CATE) inference methods for causalis.
-
-This submodule provides methods for estimating conditional average treatment effects.
-
-**Modules:**
-
-- [**cate_esimand**](#causalis.scenarios.cate.cate.cate_esimand) – IRM-based implementation for estimating CATE (per-observation orthogonal signals).
-
-###### `cate_esimand`
-
-IRM-based implementation for estimating CATE (per-observation orthogonal signals).
-
-This module provides a function that, given a CausalData object, fits the internal IRM
-model and augments the data with a new column 'cate' that contains the orthogonal
-signals (an estimate of the conditional average treatment effect for each unit).
-
-**Functions:**
-
-- [**cate_esimand**](#causalis.scenarios.cate.cate.cate_esimand.cate_esimand) – Estimate per-observation CATEs using IRM and return a DataFrame with a new 'cate' column.
-
-####### `cate_esimand`
-
-```python
-cate_esimand(
-    data: CausalData,
-    ml_g: Optional[Any] = None,
-    ml_m: Optional[Any] = None,
-    n_folds: int = 5,
-    n_rep: int = 1,
-    use_blp: bool = False,
-    X_new: Optional[pd.DataFrame] = None,
-) -> pd.DataFrame
-```
-
-Estimate per-observation CATEs using IRM and return a DataFrame with a new 'cate' column.
-
-**Parameters:**
-
-- **data** (<code>[CausalData](#causalis.dgp.causaldata.CausalData)</code>) – A CausalData object with defined outcome (outcome), treatment (binary 0/1), and confounders.
-- **ml_g** (<code>[estimator](#estimator)</code>) – ML learner for outcome regression g(D, X) = E[Y | D, X] supporting fit/predict.
-  Defaults to CatBoostRegressor if None.
-- **ml_m** (<code>[classifier](#classifier)</code>) – ML learner for propensity m(X) = P[D=1 | X] supporting fit/predict_proba.
-  Defaults to CatBoostClassifier if None.
-- **n_folds** (<code>[int](#int)</code>) – Number of folds for cross-fitting.
-- **n_rep** (<code>[int](#int)</code>) – Number of repetitions for sample splitting.
-- **use_blp** (<code>[bool](#bool)</code>) – If True, and X_new is provided, fits a BLP on the orthogonal signal and predicts CATE for X_new.
-  If False (default), uses the in-sample orthogonal signal and appends to data.
-- **X_new** (<code>[DataFrame](#pandas.DataFrame)</code>) – New covariate matrix for out-of-sample CATE prediction via best linear predictor.
-  Must contain the same feature columns as the confounders in `data_contracts`.
-
-**Returns:**
-
-- <code>[DataFrame](#pandas.DataFrame)</code> – If use_blp is False: returns a copy of data with a new column 'cate'.
-  If use_blp is True and X_new is provided: returns a DataFrame with 'cate' column for X_new rows.
-
-**Raises:**
-
-- <code>[ValueError](#ValueError)</code> – If treatment is not binary 0/1 or required metadata is missing.
-
-##### `gate`
-
-Group Average Treatment Effect (GATE) inference methods for causalis.
-
-This submodule provides methods for estimating group average treatment effects.
-
-**Modules:**
-
-- [**gate_esimand**](#causalis.scenarios.cate.gate.gate_esimand) – Group Average Treatment Effect (GATE) estimation using local DML IRM and BLP.
-
-###### `gate_esimand`
-
-Group Average Treatment Effect (GATE) estimation using local DML IRM and BLP.
-
-**Functions:**
-
-- [**gate_esimand**](#causalis.scenarios.cate.gate.gate_esimand.gate_esimand) – Estimate Group Average Treatment Effects (GATEs).
-
-####### `gate_esimand`
-
-```python
-gate_esimand(
-    data: CausalData,
-    groups: Optional[Union[pd.Series, pd.DataFrame]] = None,
-    n_groups: int = 5,
-    ml_g: Optional[Any] = None,
-    ml_m: Optional[Any] = None,
-    n_folds: int = 5,
-    n_rep: int = 1,
-    alpha: float = 0.05,
-) -> pd.DataFrame
-```
-
-Estimate Group Average Treatment Effects (GATEs).
-
-If `groups` is None, observations are grouped by quantiles of the
-plugin CATE proxy (g1_hat - g0_hat).
 
 #### `classic_rct`
 
@@ -10741,6 +10684,58 @@ style_regression_assumptions_table(table: pd.DataFrame)
 
 Return pandas Styler with colored flag cells for notebook display.
 
+#### `gate`
+
+Group Average Treatment Effect (GATE) estimation utilities.
+
+**Modules:**
+
+- [**model**](#causalis.scenarios.gate.model) –
+
+**Functions:**
+
+- [**estimate_gate_from_irm**](#causalis.scenarios.gate.estimate_gate_from_irm) – Estimate strict GATEs from a fitted IRM via groupwise closed-form robust inference.
+
+##### `estimate_gate_from_irm`
+
+```python
+estimate_gate_from_irm(
+    irm_model: Any,
+    groups: Optional[pd.DataFrame | pd.Series],
+    alpha: float = 0.05,
+    cov_type: str = "HC3",
+    cov_kwds: Optional[Dict[str, Any]] = None,
+    diagnostic_data: bool = True,
+) -> GateEstimate
+```
+
+Estimate strict GATEs from a fitted IRM via groupwise closed-form robust inference.
+
+Groups are assumed to be pre-specified, pre-treatment, mutually exclusive, and exhaustive.
+
+##### `model`
+
+**Functions:**
+
+- [**estimate_gate_from_irm**](#causalis.scenarios.gate.model.estimate_gate_from_irm) – Estimate strict GATEs from a fitted IRM via groupwise closed-form robust inference.
+
+###### `estimate_gate_from_irm`
+
+```python
+estimate_gate_from_irm(
+    irm_model: Any,
+    groups: Optional[pd.DataFrame | pd.Series],
+    alpha: float = 0.05,
+    cov_type: str = "HC3",
+    cov_kwds: Optional[Dict[str, Any]] = None,
+    diagnostic_data: bool = True,
+) -> GateEstimate
+```
+
+Estimate strict GATEs from a fitted IRM via groupwise closed-form robust inference.
+
+Groups are assumed to be pre-specified, pre-treatment, mutually exclusive, and exhaustive.
+
 #### `multi_unconfoundedness`
 
 **Modules:**
@@ -13428,9 +13423,8 @@ Return core SCM feasibility tables from panel data only (EDA phase).
 
 **Modules:**
 
-- [**cate**](#causalis.scenarios.unconfoundedness.cate) – Conditional Average Treatment Effect (CATE) inference methods for causalis.
 - [**dgp**](#causalis.scenarios.unconfoundedness.dgp) –
-- [**gate**](#causalis.scenarios.unconfoundedness.gate) – Group Average Treatment Effect (GATE) inference methods for causalis.
+- [**gate**](#causalis.scenarios.unconfoundedness.gate) – Group Average Treatment Effect (GATE) estimation utilities.
 - [**model**](#causalis.scenarios.unconfoundedness.model) – IRM estimator consuming CausalData.
 - [**refutation**](#causalis.scenarios.unconfoundedness.refutation) – Refutation and robustness utilities for Causalis.
 
@@ -13497,7 +13491,7 @@ Interactive Regression Model (IRM) with cross-fitting using CausalData.
 - [**confint**](#causalis.scenarios.unconfoundedness.IRM.confint) – Compute confidence intervals for the estimated coefficient.
 - [**estimate**](#causalis.scenarios.unconfoundedness.IRM.estimate) – Compute treatment effects using stored nuisance predictions.
 - [**fit**](#causalis.scenarios.unconfoundedness.IRM.fit) – Fit nuisance models via cross-fitting.
-- [**gate**](#causalis.scenarios.unconfoundedness.IRM.gate) – Estimate Group Average Treatment Effects via BLP on orthogonal signal.
+- [**gate**](#causalis.scenarios.unconfoundedness.IRM.gate) – Convenience wrapper for `estimate(score="GATE", ...)`.
 - [**sensitivity_analysis**](#causalis.scenarios.unconfoundedness.IRM.sensitivity_analysis) – Compute a sensitivity analysis following Chernozhukov et al. (2022).
 
 ###### `coef`
@@ -13550,21 +13544,30 @@ Return diagnostic data.
 
 ```python
 estimate(
-    score: str = "ATE", alpha: float = 0.05, diagnostic_data: bool = True
-) -> CausalEstimate
+    score: str = "ATE",
+    alpha: float = 0.05,
+    diagnostic_data: bool = True,
+    groups: Optional[pd.DataFrame | pd.Series] = None,
+    cov_type: str = "HC3",
+    cov_kwds: Optional[Dict[str, Any]] = None,
+) -> CausalEstimate | GateEstimate
 ```
 
 Compute treatment effects using stored nuisance predictions.
 
 **Parameters:**
 
-- **score** (<code>('ATE', 'ATTE')</code>) – Target estimand.
+- **score** (<code>('ATE', 'ATTE', 'GATE')</code>) – Target estimand.
 - **alpha** (<code>[float](#float)</code>) – Significance level for intervals.
 - **diagnostic_data** (<code>[bool](#bool)</code>) – Whether to include diagnostic data_contracts in the result.
+- **groups** (<code>[Optional](#typing.Optional)\[[DataFrame](#pandas.DataFrame) | [Series](#pandas.Series)\]</code>) – Group labels/indicators for `score="GATE"`.
+  If None, fallback to `self.data.gate_groups` when present.
+- **cov_type** (<code>('HC0', 'HC1', 'HC2', 'HC3')</code>) – Robust covariance type for `score="GATE"` inference.
+- **cov_kwds** (<code>[Optional](#typing.Optional)\[[Dict](#typing.Dict)\[[str](#str), [Any](#typing.Any)\]\]</code>) – Additional covariance keyword arguments passed to statsmodels for `score="GATE"`.
 
 **Returns:**
 
-- <code>[CausalEstimate](#causalis.data_contracts.causal_estimate.CausalEstimate)</code> – Result container for the estimated effect.
+- <code>[CausalEstimate](#causalis.data_contracts.causal_estimate.CausalEstimate) or [GateEstimate](#causalis.data_contracts.gate_estimate.GateEstimate)</code> – Result container for the estimated effect.
 
 ###### `fit`
 
@@ -13585,22 +13588,16 @@ Fit nuisance models via cross-fitting.
 ###### `gate`
 
 ```python
-gate(groups: pd.DataFrame | pd.Series, alpha: float = 0.05) -> BLP
+gate(
+    groups: pd.DataFrame | pd.Series,
+    alpha: float = 0.05,
+    cov_type: str = "HC3",
+    cov_kwds: Optional[Dict[str, Any]] = None,
+    diagnostic_data: bool = True,
+) -> GateEstimate
 ```
 
-Estimate Group Average Treatment Effects via BLP on orthogonal signal.
-
-**Parameters:**
-
-- **groups** (<code>[DataFrame](#pandas.DataFrame) or [Series](#pandas.Series)</code>) – Group indicators or labels.
-- If a single column (Series or 1-col DataFrame) with non-boolean values,
-  it is treated as categorical labels and one-hot encoded.
-- If multiple columns or boolean/int indicators, it is used as the basis directly.
-- **alpha** (<code>[float](#float)</code>) – Significance level for intervals (passed to BLP).
-
-**Returns:**
-
-- <code>[BLP](#causalis.scenarios.cate.blp.BLP)</code> – Fitted Best Linear Predictor model.
+Convenience wrapper for `estimate(score="GATE", ...)`.
 
 ###### `ml_g`
 
@@ -13750,67 +13747,6 @@ trimming_threshold = float(trimming_threshold)
 weights = weights
 ```
 
-##### `cate`
-
-Conditional Average Treatment Effect (CATE) inference methods for causalis.
-
-This submodule provides methods for estimating conditional average treatment effects.
-
-**Modules:**
-
-- [**cate_esimand**](#causalis.scenarios.unconfoundedness.cate.cate_esimand) – IRM-based implementation for estimating CATE (per-observation orthogonal signals).
-
-###### `cate_esimand`
-
-IRM-based implementation for estimating CATE (per-observation orthogonal signals).
-
-This module provides a function that, given a CausalData object, fits the internal IRM
-model and augments the data with a new column 'cate' that contains the orthogonal
-signals (an estimate of the conditional average treatment effect for each unit).
-
-**Functions:**
-
-- [**cate_esimand**](#causalis.scenarios.unconfoundedness.cate.cate_esimand.cate_esimand) – Estimate per-observation CATEs using IRM and return a DataFrame with a new 'cate' column.
-
-####### `cate_esimand`
-
-```python
-cate_esimand(
-    data: CausalData,
-    ml_g: Optional[Any] = None,
-    ml_m: Optional[Any] = None,
-    n_folds: int = 5,
-    n_rep: int = 1,
-    use_blp: bool = False,
-    X_new: Optional[pd.DataFrame] = None,
-) -> pd.DataFrame
-```
-
-Estimate per-observation CATEs using IRM and return a DataFrame with a new 'cate' column.
-
-**Parameters:**
-
-- **data** (<code>[CausalData](#causalis.dgp.causaldata.CausalData)</code>) – A CausalData object with defined outcome (outcome), treatment (binary 0/1), and confounders.
-- **ml_g** (<code>[estimator](#estimator)</code>) – ML learner for outcome regression g(D, X) = E[Y | D, X] supporting fit/predict.
-  Defaults to CatBoostRegressor if None.
-- **ml_m** (<code>[classifier](#classifier)</code>) – ML learner for propensity m(X) = P[D=1 | X] supporting fit/predict_proba.
-  Defaults to CatBoostClassifier if None.
-- **n_folds** (<code>[int](#int)</code>) – Number of folds for cross-fitting.
-- **n_rep** (<code>[int](#int)</code>) – Number of repetitions for sample splitting.
-- **use_blp** (<code>[bool](#bool)</code>) – If True, and X_new is provided, fits a BLP on the orthogonal signal and predicts CATE for X_new.
-  If False (default), uses the in-sample orthogonal signal and appends to data.
-- **X_new** (<code>[DataFrame](#pandas.DataFrame)</code>) – New covariate matrix for out-of-sample CATE prediction via best linear predictor.
-  Must contain the same feature columns as the confounders in `data_contracts`.
-
-**Returns:**
-
-- <code>[DataFrame](#pandas.DataFrame)</code> – If use_blp is False: returns a copy of data with a new column 'cate'.
-  If use_blp is True and X_new is provided: returns a DataFrame with 'cate' column for X_new rows.
-
-**Raises:**
-
-- <code>[ValueError](#ValueError)</code> – If treatment is not binary 0/1 or required metadata is missing.
-
 ##### `dgp`
 
 **Functions:**
@@ -13911,47 +13847,34 @@ Based on the scenario in docs/cases/dml_ate.ipynb.
 
 ##### `gate`
 
-Group Average Treatment Effect (GATE) inference methods for causalis.
-
-This submodule provides methods for estimating group average treatment effects.
-
-**Modules:**
-
-- [**gate_esimand**](#causalis.scenarios.unconfoundedness.gate.gate_esimand) – Group Average Treatment Effect (GATE) estimation using local DML IRM and BLP.
-
-###### `gate_esimand`
-
-Group Average Treatment Effect (GATE) estimation using local DML IRM and BLP.
+Group Average Treatment Effect (GATE) estimation utilities.
 
 **Functions:**
 
-- [**gate_esimand**](#causalis.scenarios.unconfoundedness.gate.gate_esimand.gate_esimand) – Estimate Group Average Treatment Effects (GATEs).
+- [**estimate_gate_from_irm**](#causalis.scenarios.unconfoundedness.gate.estimate_gate_from_irm) – Estimate strict GATEs from a fitted IRM via groupwise closed-form robust inference.
 
-####### `gate_esimand`
+###### `estimate_gate_from_irm`
 
 ```python
-gate_esimand(
-    data: CausalData,
-    groups: Optional[Union[pd.Series, pd.DataFrame]] = None,
-    n_groups: int = 5,
-    ml_g: Optional[Any] = None,
-    ml_m: Optional[Any] = None,
-    n_folds: int = 5,
-    n_rep: int = 1,
+estimate_gate_from_irm(
+    irm_model: Any,
+    groups: Optional[pd.DataFrame | pd.Series],
     alpha: float = 0.05,
-) -> pd.DataFrame
+    cov_type: str = "HC3",
+    cov_kwds: Optional[Dict[str, Any]] = None,
+    diagnostic_data: bool = True,
+) -> GateEstimate
 ```
 
-Estimate Group Average Treatment Effects (GATEs).
+Estimate strict GATEs from a fitted IRM via groupwise closed-form robust inference.
 
-If `groups` is None, observations are grouped by quantiles of the
-plugin CATE proxy (g1_hat - g0_hat).
+Groups are assumed to be pre-specified, pre-treatment, mutually exclusive, and exhaustive.
 
 ##### `model`
 
 IRM estimator consuming CausalData.
 
-Implements cross-fitted nuisance estimation for g0, g1 and m, and supports ATE/ATTE scores.
+Implements cross-fitted nuisance estimation for g0, g1 and m, and supports ATE/ATTE/GATE scores.
 
 **Classes:**
 
@@ -14022,7 +13945,7 @@ Interactive Regression Model (IRM) with cross-fitting using CausalData.
 - [**confint**](#causalis.scenarios.unconfoundedness.model.IRM.confint) – Compute confidence intervals for the estimated coefficient.
 - [**estimate**](#causalis.scenarios.unconfoundedness.model.IRM.estimate) – Compute treatment effects using stored nuisance predictions.
 - [**fit**](#causalis.scenarios.unconfoundedness.model.IRM.fit) – Fit nuisance models via cross-fitting.
-- [**gate**](#causalis.scenarios.unconfoundedness.model.IRM.gate) – Estimate Group Average Treatment Effects via BLP on orthogonal signal.
+- [**gate**](#causalis.scenarios.unconfoundedness.model.IRM.gate) – Convenience wrapper for `estimate(score="GATE", ...)`.
 - [**sensitivity_analysis**](#causalis.scenarios.unconfoundedness.model.IRM.sensitivity_analysis) – Compute a sensitivity analysis following Chernozhukov et al. (2022).
 
 ####### `coef`
@@ -14075,21 +13998,30 @@ Return diagnostic data.
 
 ```python
 estimate(
-    score: str = "ATE", alpha: float = 0.05, diagnostic_data: bool = True
-) -> CausalEstimate
+    score: str = "ATE",
+    alpha: float = 0.05,
+    diagnostic_data: bool = True,
+    groups: Optional[pd.DataFrame | pd.Series] = None,
+    cov_type: str = "HC3",
+    cov_kwds: Optional[Dict[str, Any]] = None,
+) -> CausalEstimate | GateEstimate
 ```
 
 Compute treatment effects using stored nuisance predictions.
 
 **Parameters:**
 
-- **score** (<code>('ATE', 'ATTE')</code>) – Target estimand.
+- **score** (<code>('ATE', 'ATTE', 'GATE')</code>) – Target estimand.
 - **alpha** (<code>[float](#float)</code>) – Significance level for intervals.
 - **diagnostic_data** (<code>[bool](#bool)</code>) – Whether to include diagnostic data_contracts in the result.
+- **groups** (<code>[Optional](#typing.Optional)\[[DataFrame](#pandas.DataFrame) | [Series](#pandas.Series)\]</code>) – Group labels/indicators for `score="GATE"`.
+  If None, fallback to `self.data.gate_groups` when present.
+- **cov_type** (<code>('HC0', 'HC1', 'HC2', 'HC3')</code>) – Robust covariance type for `score="GATE"` inference.
+- **cov_kwds** (<code>[Optional](#typing.Optional)\[[Dict](#typing.Dict)\[[str](#str), [Any](#typing.Any)\]\]</code>) – Additional covariance keyword arguments passed to statsmodels for `score="GATE"`.
 
 **Returns:**
 
-- <code>[CausalEstimate](#causalis.data_contracts.causal_estimate.CausalEstimate)</code> – Result container for the estimated effect.
+- <code>[CausalEstimate](#causalis.data_contracts.causal_estimate.CausalEstimate) or [GateEstimate](#causalis.data_contracts.gate_estimate.GateEstimate)</code> – Result container for the estimated effect.
 
 ####### `fit`
 
@@ -14110,22 +14042,16 @@ Fit nuisance models via cross-fitting.
 ####### `gate`
 
 ```python
-gate(groups: pd.DataFrame | pd.Series, alpha: float = 0.05) -> BLP
+gate(
+    groups: pd.DataFrame | pd.Series,
+    alpha: float = 0.05,
+    cov_type: str = "HC3",
+    cov_kwds: Optional[Dict[str, Any]] = None,
+    diagnostic_data: bool = True,
+) -> GateEstimate
 ```
 
-Estimate Group Average Treatment Effects via BLP on orthogonal signal.
-
-**Parameters:**
-
-- **groups** (<code>[DataFrame](#pandas.DataFrame) or [Series](#pandas.Series)</code>) – Group indicators or labels.
-- If a single column (Series or 1-col DataFrame) with non-boolean values,
-  it is treated as categorical labels and one-hot encoded.
-- If multiple columns or boolean/int indicators, it is used as the basis directly.
-- **alpha** (<code>[float](#float)</code>) – Significance level for intervals (passed to BLP).
-
-**Returns:**
-
-- <code>[BLP](#causalis.scenarios.cate.blp.BLP)</code> – Fitted Best Linear Predictor model.
+Convenience wrapper for `estimate(score="GATE", ...)`.
 
 ####### `ml_g`
 
@@ -15223,7 +15149,8 @@ Returns a DataFrame containing r2_y, r2_d, rho and the change in estimates.
 - **effect_estimation** (<code>[dict](#dict)</code>) – A dictionary containing the fitted IRM model under the key 'model'.
 - **benchmarking_set** (<code>[list](#list)\[[str](#str)\]</code>) – List of confounder names to be used for benchmarking (to be removed in the short model).
 - **fit_args** (<code>[dict](#dict)</code>) – Legacy name for additional keyword arguments passed to `IRM.estimate(...)`
-  on the short model. If `score` is omitted, the long-model score is reused.
+  on the short model. If `score` is omitted, ATE/ATTE is inferred from
+  the supplied estimate/model, and defaults to ATE.
   If `diagnostic_data` is omitted, it defaults to `False` for faster benchmarking.
 
 **Returns:**
@@ -15453,7 +15380,8 @@ Returns a DataFrame containing r2_y, r2_d, rho and the change in estimates.
 - **effect_estimation** (<code>[dict](#dict)</code>) – A dictionary containing the fitted IRM model under the key 'model'.
 - **benchmarking_set** (<code>[list](#list)\[[str](#str)\]</code>) – List of confounder names to be used for benchmarking (to be removed in the short model).
 - **fit_args** (<code>[dict](#dict)</code>) – Legacy name for additional keyword arguments passed to `IRM.estimate(...)`
-  on the short model. If `score` is omitted, the long-model score is reused.
+  on the short model. If `score` is omitted, ATE/ATTE is inferred from
+  the supplied estimate/model, and defaults to ATE.
   If `diagnostic_data` is omitted, it defaults to `False` for faster benchmarking.
 
 **Returns:**
@@ -15520,7 +15448,8 @@ Returns a DataFrame containing r2_y, r2_d, rho and the change in estimates.
 - **effect_estimation** (<code>[dict](#dict)</code>) – A dictionary containing the fitted IRM model under the key 'model'.
 - **benchmarking_set** (<code>[list](#list)\[[str](#str)\]</code>) – List of confounder names to be used for benchmarking (to be removed in the short model).
 - **fit_args** (<code>[dict](#dict)</code>) – Legacy name for additional keyword arguments passed to `IRM.estimate(...)`
-  on the short model. If `score` is omitted, the long-model score is reused.
+  on the short model. If `score` is omitted, ATE/ATTE is inferred from
+  the supplied estimate/model, and defaults to ATE.
   If `diagnostic_data` is omitted, it defaults to `False` for faster benchmarking.
 
 **Returns:**
