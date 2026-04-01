@@ -1,7 +1,7 @@
 r"""
 IRM estimator consuming CausalData.
 
-Implements cross-fitted nuisance estimation for g0, g1 and m, and supports ATE/ATTE scores.
+Implements cross-fitted nuisance estimation for g0, g1 and m, and supports ATE/ATTE/GATE scores.
 """
 from __future__ import annotations
 
@@ -25,7 +25,8 @@ except ImportError:
 from causalis.dgp.causaldata import CausalData
 from causalis.data_contracts.causal_estimate import CausalEstimate
 from causalis.data_contracts.causal_diagnostic_data import UnconfoundednessDiagnosticData
-from causalis.scenarios.cate.blp import BLP
+from causalis.data_contracts.gate_estimate import GateEstimate
+from causalis.scenarios.gate.model import estimate_gate_from_irm
 from causalis.scenarios.unconfoundedness._utils import (
     _clip_propensity,
     _is_binary,
@@ -569,11 +570,9 @@ class IRM(BaseEstimator):
             raise ValueError("alpha must be in (0,1)")
         score_u = str(score).upper()
         if score_u == "CATE":
-            raise NotImplementedError(
-                "score='CATE' is not supported by IRM.estimate(); use causalis.scenarios.cate.cate.cate_esimand."
-            )
-        if score_u not in {"ATE", "ATTE"}:
-            raise ValueError("score must be 'ATE' or 'ATTE'")
+            raise NotImplementedError("score='CATE' is not supported.")
+        if score_u not in {"ATE", "ATTE", "GATE"}:
+            raise ValueError("score must be 'ATE', 'ATTE', or 'GATE'")
         return score_u
 
     def _estimate_inference_approx_flags(self, score: str, normalize_ipw_effective: bool) -> Dict[str, bool]:
@@ -939,27 +938,51 @@ class IRM(BaseEstimator):
         self.summary_ = results.summary()
 
     def estimate(
-        self, score: str = "ATE", alpha: float = 0.05, diagnostic_data: bool = True
-    ) -> CausalEstimate:
+        self,
+        score: str = "ATE",
+        alpha: float = 0.05,
+        diagnostic_data: bool = True,
+        groups: Optional[pd.DataFrame | pd.Series] = None,
+        cov_type: str = "HC3",
+        cov_kwds: Optional[Dict[str, Any]] = None,
+    ) -> CausalEstimate | GateEstimate:
         """Compute treatment effects using stored nuisance predictions.
 
         Parameters
         ----------
-        score : {"ATE", "ATTE"}, default "ATE"
+        score : {"ATE", "ATTE", "GATE"}, default "ATE"
             Target estimand.
         alpha : float, default 0.05
             Significance level for intervals.
         diagnostic_data : bool, default True
             Whether to include diagnostic data_contracts in the result.
+        groups : Optional[pd.DataFrame | pd.Series], default None
+            Group labels/indicators for ``score="GATE"``.
+            If None, fallback to ``self.data.gate_groups`` when present.
+        cov_type : {"HC0", "HC1", "HC2", "HC3"}, default "HC3"
+            Robust covariance type for ``score="GATE"`` inference.
+        cov_kwds : Optional[Dict[str, Any]], default None
+            Additional covariance keyword arguments passed to statsmodels for ``score="GATE"``.
 
         Returns
         -------
-        CausalEstimate
+        CausalEstimate or GateEstimate
             Result container for the estimated effect.
         """
         check_is_fitted(self, attributes=["g0_hat_", "g1_hat_", "m_hat_"])
         score = self._validate_estimate_request(score=score, alpha=alpha)
         self.score = score
+
+        if score == "GATE":
+            return estimate_gate_from_irm(
+                irm_model=self,
+                groups=groups,
+                alpha=alpha,
+                cov_type=cov_type,
+                cov_kwds=cov_kwds,
+                diagnostic_data=diagnostic_data,
+            )
+
         # For ATTE we intentionally disable Hájek even if normalize_ipw=True.
         normalize_ipw_effective = self._use_normalized_ipw(score=score, warn=False)
         self.normalize_ipw_effective_ = normalize_ipw_effective
@@ -1109,52 +1132,23 @@ class IRM(BaseEstimator):
         check_is_fitted(self, attributes=["psi_b_"])
         return self.psi_b_
 
-    def gate(self, groups: pd.DataFrame | pd.Series, alpha: float = 0.05) -> BLP:
-        """
-        Estimate Group Average Treatment Effects via BLP on orthogonal signal.
-
-        Parameters
-        ----------
-        groups : pd.DataFrame or pd.Series
-            Group indicators or labels.
-            - If a single column (Series or 1-col DataFrame) with non-boolean values,
-              it is treated as categorical labels and one-hot encoded.
-            - If multiple columns or boolean/int indicators, it is used as the basis directly.
-        alpha : float
-            Significance level for intervals (passed to BLP).
-
-        Returns
-        -------
-        BLP
-            Fitted Best Linear Predictor model.
-        """
-        check_is_fitted(self, attributes=["psi_b_"])
-
-        if isinstance(groups, pd.Series):
-            groups = groups.to_frame()
-
-        # Prepare basis
-        if groups.shape[1] == 1:
-            col = groups.iloc[:, 0]
-            # If single column is not boolean, assume it's categorical labels -> one-hot encode
-            # Even if it is boolean, get_dummies creates False/True columns which is a valid partition
-            # We use prefix to ensure unique column names
-            basis = pd.get_dummies(col, prefix=col.name, dtype=int)
-        else:
-            # Assume multiple columns are already indicators (dummy basis)
-            basis = groups.astype(int)
-
-        # Instantiate and fit BLP using the orthogonal signal
-        # We use the existing BLP class from causalis.scenarios.cate.blp
-        blp_model = BLP(
-            orth_signal=self.orth_signal,
-            basis=basis,
-            is_gate=True
+    def gate(
+        self,
+        groups: pd.DataFrame | pd.Series,
+        alpha: float = 0.05,
+        cov_type: str = "HC3",
+        cov_kwds: Optional[Dict[str, Any]] = None,
+        diagnostic_data: bool = True,
+    ) -> GateEstimate:
+        """Convenience wrapper for ``estimate(score=\"GATE\", ...)``."""
+        return self.estimate(
+            score="GATE",
+            groups=groups,
+            alpha=alpha,
+            cov_type=cov_type,
+            cov_kwds=cov_kwds,
+            diagnostic_data=diagnostic_data,
         )
-        # BLP.fit() uses HC0 covariance by default, which is correct for DML
-        blp_model.fit()
-        
-        return blp_model
 
     # --------- Sensitivity ---------
     def _sensitivity_element_est(

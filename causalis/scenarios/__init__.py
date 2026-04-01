@@ -1,3 +1,3 @@
-from . import classic_rct, unconfoundedness, cate, cuped, synthetic_control
+from . import classic_rct, unconfoundedness, cuped, synthetic_control, gate
 
-__all__ = ["classic_rct", "unconfoundedness", "cate", "cuped", "synthetic_control"]
+__all__ = ["classic_rct", "unconfoundedness", "cuped", "synthetic_control", "gate"]

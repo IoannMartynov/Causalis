@@ -25,6 +25,47 @@ __all__ = [
 _ESSENTIALLY_ZERO = 1e-32
 
 
+def _normalize_ate_atte_score(score: Any) -> str:
+    """Normalize score aliases and enforce ATE/ATTE-only semantics."""
+    score_u = str(score or "ATE").upper()
+    if "ATT" in score_u:
+        return "ATTE"
+    if score_u == "ATE":
+        return "ATE"
+    raise ValueError(
+        "Sensitivity analysis supports only score='ATE' or score='ATTE'. "
+        f"Got {score!r}."
+    )
+
+
+def _resolve_sensitivity_score(effect_estimation: Any, model: Any, explicit_score: Any | None) -> str:
+    """Resolve benchmark/sensitivity score without coupling to model.score=GATE state."""
+    if explicit_score is not None:
+        return _normalize_ate_atte_score(explicit_score)
+
+    score_candidates: list[Any] = []
+
+    if hasattr(effect_estimation, "estimand"):
+        score_candidates.append(getattr(effect_estimation, "estimand", None))
+
+    diag = getattr(effect_estimation, "diagnostic_data", None)
+    if diag is not None and hasattr(diag, "score"):
+        score_candidates.append(getattr(diag, "score", None))
+
+    if hasattr(model, "score"):
+        score_candidates.append(getattr(model, "score", None))
+
+    for cand in score_candidates:
+        if cand is None:
+            continue
+        try:
+            return _normalize_ate_atte_score(cand)
+        except ValueError:
+            continue
+
+    return "ATE"
+
+
 # ---------------- Core sensitivity primitives (public, legacy-compatible) ----------------
 
 def _compute_sensitivity_bias_unified(
@@ -792,7 +833,8 @@ def sensitivity_benchmark(
         List of confounder names to be used for benchmarking (to be removed in the short model).
     fit_args : dict, optional
         Legacy name for additional keyword arguments passed to `IRM.estimate(...)`
-        on the short model. If `score` is omitted, the long-model score is reused.
+        on the short model. If `score` is omitted, ATE/ATTE is inferred from
+        the supplied estimate/model, and defaults to ATE.
         If `diagnostic_data` is omitted, it defaults to `False` for faster benchmarking.
 
     Returns
@@ -894,10 +936,13 @@ def sensitivity_benchmark(
     # Fit short model (IRM.fit does not accept kwargs).
     irm_short.fit()
 
-    # Estimate using long-model score unless explicitly overridden in fit_args.
+    # Estimate score for short model (ATE/ATTE only, independent of model.score=GATE state).
     estimate_args: Dict[str, Any] = dict(fit_args or {})
-    if "score" not in estimate_args:
-        estimate_args["score"] = getattr(model, 'score', 'ATE')
+    estimate_args["score"] = _resolve_sensitivity_score(
+        effect_estimation=effect_estimation,
+        model=model,
+        explicit_score=estimate_args.get("score"),
+    )
     if "diagnostic_data" not in estimate_args:
         # Benchmarking only needs the point estimate from the short model.
         estimate_args["diagnostic_data"] = False
@@ -999,7 +1044,7 @@ def sensitivity_benchmark(
     # ATT weighting if applicable
     p = float(np.mean(d)) if (np.isfinite(np.mean(d)) and np.mean(d) > 0.0) else 1.0
     w_att = np.where(d > 0.5, 1.0 / max(p, 1e-12), 0.0)
-    is_att = str(getattr(model, 'score', '')).upper().startswith('ATT')
+    is_att = str(estimate_args["score"]).upper().startswith('ATT')
     weights = w_att if is_att else None
 
     R2y, yhat_u = _ols_r2_and_fit(r_y, Z, w=weights)
