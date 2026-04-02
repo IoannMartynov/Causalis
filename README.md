@@ -1,5 +1,5 @@
 # Causalis
-![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12-blue)
+![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12%20|%203.13%20|%203.14-blue)
 [![PyPI Downloads](https://static.pepy.tech/personalized-badge/causalis?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=GREEN&left_text=downloads)](https://pepy.tech/projects/causalis)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Code quality](https://img.shields.io/badge/code%20quality-A-brightgreen)
