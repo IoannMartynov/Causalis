@@ -111,9 +111,17 @@ def plot_m_overlap(
             z = (xs - mu) / h0
             return np.exp(-0.5 * z ** 2) / (np.sqrt(2 * np.pi) * h0)
         xr = np.concatenate([x, -x, 2 - x])  # reflect at 0 and 1
-        diff = (xs[None, :] - xr[:, None]) / h
-        kern = np.exp(-0.5 * diff ** 2) / (np.sqrt(2 * np.pi) * h)
-        return kern.mean(axis=0)
+        density = np.zeros_like(xs, dtype=float)
+        norm = xr.size * np.sqrt(2 * np.pi) * h
+        chunk_size = max(256, int(np.ceil(2_000_000 / max(xs.size, 1))))
+        for start in range(0, xr.size, chunk_size):
+            stop = min(start + chunk_size, xr.size)
+            diff = (xs[None, :] - xr[start:stop, None]) / h
+            np.square(diff, out=diff)
+            diff *= -0.5
+            np.exp(diff, out=diff)
+            density += diff.sum(axis=0)
+        return density / norm
 
     def _patch_color(patches, fallback):
         # Grab facecolor from the first bar; fallback to cycle color if needed
