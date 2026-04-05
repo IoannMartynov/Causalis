@@ -66,3 +66,16 @@ def test_irm_raises_on_non_binary_treatment():
 
     with pytest.raises(ValueError):
         IRM(cd_bad, ml_g=ml_g, ml_m=ml_m, n_folds=2).fit()
+
+
+def test_irm_raises_early_when_n_folds_exceeds_minority_class_size():
+    cd = make_causal_data(n=24, outcome_type="normal", random_state=9)
+    df = cd.df.copy()
+    df[cd.treatment.name] = np.array([1] * 3 + [0] * (len(df) - 3))
+    cd_small = CausalData(df=df, treatment=cd.treatment.name, outcome=cd.outcome.name, confounders=cd.confounders)
+
+    ml_g = RandomForestRegressor(n_estimators=10, random_state=0)
+    ml_m = RandomForestClassifier(n_estimators=10, random_state=0)
+
+    with pytest.raises(ValueError, match="minimum treatment class count=3"):
+        IRM(cd_small, ml_g=ml_g, ml_m=ml_m, n_folds=4).fit()

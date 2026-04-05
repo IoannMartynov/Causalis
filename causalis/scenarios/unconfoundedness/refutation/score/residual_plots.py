@@ -20,6 +20,7 @@ def _binned_mean_line(
     *,
     n_bins: int = 20,
 ) -> tuple[np.ndarray, np.ndarray]:
+    """Compute quantile-binned x midpoints and mean y values."""
     x_arr = np.asarray(x, dtype=float).ravel()
     y_arr = np.asarray(y, dtype=float).ravel()
     if x_arr.size == 0 or y_arr.size == 0 or x_arr.size != y_arr.size:
@@ -55,6 +56,7 @@ def _binned_summary(
     *,
     n_bins: int = 20,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Compute quantile-binned x midpoints, mean y values, and counts."""
     x_arr = np.asarray(x, dtype=float).ravel()
     y_arr = np.asarray(y, dtype=float).ravel()
     if x_arr.size == 0 or y_arr.size == 0 or x_arr.size != y_arr.size:
@@ -92,6 +94,7 @@ def _resolve_residual_inputs(
     *,
     clip_propensity: float,
 ) -> dict[str, np.ndarray]:
+    """Resolve residual-plot arrays from diagnostic data or a fallback dataset."""
     if data is not None:
         _validate_estimate_matches_data(data=data, estimate=estimate)
 
@@ -99,7 +102,7 @@ def _resolve_residual_inputs(
     if diagnostic_data is None:
         raise ValueError(
             "Missing estimate.diagnostic_data. "
-            "Call estimate(diagnostic_data=True) first."
+            "Fit IRM with store_diagnostics=True and call estimate() first."
         )
 
     # Fast path: reuse cached residual-plot inputs stored in diagnostic_data.

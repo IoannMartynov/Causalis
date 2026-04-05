@@ -140,8 +140,20 @@ def _validate_gate_group_support(
 
 def _compute_gate_signal_from_irm(irm_model: Any) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Compute canonical (unnormalized) cross-fitted orthogonal GATE signal from fitted IRM nuisances."""
-    y = np.asarray(irm_model._y, dtype=float).reshape(-1)
-    d = np.asarray(irm_model._d, dtype=float).reshape(-1)
+    if hasattr(irm_model, "_resolve_estimation_targets"):
+        y_raw, d_raw = irm_model._resolve_estimation_targets()
+    elif hasattr(irm_model, "_resolve_estimation_sample"):
+        _, y_raw, d_raw = irm_model._resolve_estimation_sample()
+    else:
+        y_raw = getattr(irm_model, "_y", None)
+        d_raw = getattr(irm_model, "_d", None)
+        if y_raw is None or d_raw is None:
+            raise RuntimeError(
+                "IRM does not expose estimate-time sample arrays. Refit with matching data available."
+            )
+
+    y = np.asarray(y_raw, dtype=float).reshape(-1)
+    d = np.asarray(d_raw, dtype=float).reshape(-1)
     g0_hat = np.asarray(irm_model.g0_hat_, dtype=float).reshape(-1)
     g1_hat = np.asarray(irm_model.g1_hat_, dtype=float).reshape(-1)
     m_hat = np.asarray(irm_model.m_hat_, dtype=float).reshape(-1)
@@ -275,7 +287,6 @@ def estimate_gate_from_irm(
     alpha: float = 0.05,
     cov_type: str = "HC3",
     cov_kwds: Optional[Dict[str, Any]] = None,
-    diagnostic_data: bool = True,
 ) -> GateEstimate:
     """Estimate strict GATEs from a fitted IRM via groupwise closed-form robust inference.
 
@@ -400,7 +411,7 @@ def estimate_gate_from_irm(
     }
 
     diagnostic_payload: Optional[Dict[str, Any]] = None
-    if diagnostic_data:
+    if bool(getattr(irm_model, "store_diagnostics", True)):
         diagnostic_payload = {
             "orthogonal_signal": phi.copy(),
             "basis": basis.copy(),

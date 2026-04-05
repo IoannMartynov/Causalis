@@ -33,7 +33,7 @@ def test_irm_atte_score_identities(normalize_ipw):
         trimming_threshold=1e-3,
         random_state=3,
     ).fit()
-    res = irm.estimate(score="ATTE", alpha=0.05, diagnostic_data=True)
+    res = irm.estimate(score="ATTE", alpha=0.05)
 
     psi_a = irm.psi_a_
     psi = irm.psi_

@@ -27,7 +27,7 @@ def test_uncofoundedness_balance_extras_outputs():
         normalize_ipw=True,
         trimming_threshold=1e-3,
         random_state=11,
-    ).fit().estimate(alpha=0.10, diagnostic_data=True)
+    ).fit().estimate(alpha=0.10)
 
     out = run_unconfoundedness_diagnostics(data, res)["balance"]
     # New fields should be present and of correct types

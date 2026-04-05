@@ -1,3 +1,5 @@
+"""Synthetic observational datasets for unconfoundedness experiments."""
+
 from __future__ import annotations
 import pandas as pd
 import numpy as np
@@ -22,6 +24,11 @@ def obs_linear_26_dataset(n: int = 10000, seed: int = 42, include_oracle: bool =
         Whether to include oracle ground-truth columns like 'cate', 'propensity', etc.
     return_causal_data : bool, default=True
         If True, returns a CausalData object. If False, returns a pandas DataFrame.
+
+    Returns
+    -------
+    pandas.DataFrame or CausalData
+        Generated observational sample, optionally wrapped as ``CausalData``.
     """
     confounder_specs = [
         {"name": "tenure_months",     "dist": "normal",   "mu": 24, "sd": 12, "clip_min": 0, "clip_max": 120},
@@ -81,6 +88,12 @@ def generate_obs_hte_26(
         Whether to include oracle ground-truth columns like 'cate', 'propensity', etc.
     return_causal_data : bool, default=True
         If True, returns a CausalData object. If False, returns a pandas DataFrame.
+
+    Returns
+    -------
+    pandas.DataFrame or CausalData
+        Generated heterogeneous-treatment-effect sample, optionally wrapped as
+        ``CausalData``.
     """
     # `x_sampler` builds correlated/derived features; specs define output names/order.
     confounder_specs = [
@@ -96,6 +109,7 @@ def generate_obs_hte_26(
     LOG_SPEND_REF = np.log1p(60.0)
 
     def _split_features(X: np.ndarray) -> dict[str, np.ndarray]:
+        """Build reusable transformed feature views for the scenario equations."""
         # Shared feature engineering for g_y / g_d / tau to avoid repeated slicing.
         tenure, sessions, spend, premium, urban = X.T
         log_sessions = np.log1p(sessions)
@@ -120,6 +134,7 @@ def generate_obs_hte_26(
     ], dtype=float)
 
     def g_y(X: np.ndarray) -> np.ndarray:
+        """Evaluate the nonlinear baseline outcome component."""
         f = _split_features(X)
 
         return (
@@ -140,6 +155,7 @@ def generate_obs_hte_26(
     ], dtype=float)
 
     def g_d(X: np.ndarray) -> np.ndarray:
+        """Evaluate the nonlinear treatment-assignment component."""
         f = _split_features(X)
 
         # Smoothly increasing selection with log_spend; interactions make selection non-separable
@@ -152,6 +168,7 @@ def generate_obs_hte_26(
 
     # Heterogeneous, nonlinear treatment effect tau(X) on the natural scale.
     def tau_fn(X: np.ndarray) -> np.ndarray:
+        """Evaluate the heterogeneous treatment effect on the natural scale."""
         f = _split_features(X)
 
         # Base effect + stronger effect for higher sessions and premium users,
@@ -166,6 +183,7 @@ def generate_obs_hte_26(
         return np.clip(tau, 0.1, 3.0)
 
     def hte_26_x_sampler(n: int, _k: int, seed: int) -> np.ndarray:
+        """Sample correlated covariates used by the HTE benchmark scenario."""
         rng = np.random.default_rng(seed)
         # Sample a correlated latent base first, then derive premium from behavior.
         base_specs = [
@@ -243,6 +261,12 @@ def generate_obs_hte_26_rich(
         Whether to include oracle ground-truth columns like 'cate', 'propensity', etc.
     return_causal_data : bool, default=True
         If True, returns a CausalData object. If False, returns a pandas DataFrame.
+
+    Returns
+    -------
+    pandas.DataFrame or CausalData
+        Generated rich observational sample, optionally wrapped as
+        ``CausalData``.
     """
     # `x_sampler` builds correlated/derived features; specs define output names/order.
     confounder_specs = [
@@ -270,6 +294,7 @@ def generate_obs_hte_26_rich(
     LOG_TICKETS_REF_GZI = np.log1p(1.0)
 
     def _split_rich_features(X: np.ndarray) -> dict[str, np.ndarray]:
+        """Build transformed feature views reused across rich-model equations."""
         # Centralized rich feature map reused in g_y, g_d, tau, g_zi, tau_zi.
         tenure, sessions, spend, age, income, purchases, tickets, premium, mobile, urban, referred = X.T
         log_sessions = np.log1p(sessions)
@@ -306,6 +331,7 @@ def generate_obs_hte_26_rich(
     ], dtype=float)
 
     def g_y(X: np.ndarray) -> np.ndarray:
+        """Evaluate the nonlinear baseline outcome component."""
         f = _split_rich_features(X)
 
         return (
@@ -336,6 +362,7 @@ def generate_obs_hte_26_rich(
     ], dtype=float)
 
     def g_d(X: np.ndarray) -> np.ndarray:
+        """Evaluate the nonlinear treatment-assignment component."""
         f = _split_rich_features(X)
 
         # Selection is tilted toward lower-baseline users so observed treated means can be lower.
@@ -353,6 +380,7 @@ def generate_obs_hte_26_rich(
         )
 
     def tau_fn(X: np.ndarray) -> np.ndarray:
+        """Evaluate the treatment effect shift for the positive outcome branch."""
         f = _split_rich_features(X)
 
         # tau is a log-mean shift for the positive-part branch (not natural-scale CATE).
@@ -371,6 +399,7 @@ def generate_obs_hte_26_rich(
         return np.clip(tau, 0.005, 0.35)
 
     def hte_26_rich_x_sampler(n: int, _k: int, seed: int) -> np.ndarray:
+        """Sample correlated rich covariates and derived behavior indicators."""
         rng = np.random.default_rng(seed)
         # Start from correlated core demographics/usage, then generate derived binaries/counts.
         base_specs = [
@@ -432,6 +461,7 @@ def generate_obs_hte_26_rich(
         ])
 
     def g_zi(X: np.ndarray) -> np.ndarray:
+        """Evaluate the zero-inflation baseline logit component."""
         f = _split_rich_features(X)
 
         # Zero-inflation baseline: logit P(y>0 | X, D=0).
@@ -445,6 +475,7 @@ def generate_obs_hte_26_rich(
         )
 
     def tau_zi_fn(X: np.ndarray) -> np.ndarray:
+        """Evaluate the treatment effect on the zero-inflation logit branch."""
         f = _split_rich_features(X)
 
         # Effect on the nonzero-probability branch: logit shift when treated.
@@ -531,6 +562,11 @@ def generate_obs_hte_binary_26(
         Whether to include oracle columns like 'cate', 'propensity', etc.
     return_causal_data : bool, default=True
         If True, returns a CausalData object. If False, returns a pandas DataFrame.
+
+    Returns
+    -------
+    pandas.DataFrame or CausalData
+        Generated binary-outcome sample, optionally wrapped as ``CausalData``.
     """
     # Modified confounder set vs `generate_obs_hte_26_rich`:
     # - removed: income_monthly, urban_resident
@@ -556,6 +592,7 @@ def generate_obs_hte_binary_26(
     LOG_TICKETS_REF = np.log1p(1.5)
 
     def _split_binary_features(X: np.ndarray) -> dict[str, np.ndarray]:
+        """Build transformed feature views reused across binary-model equations."""
         # Shared feature engineering across g_y / g_d / tau.
         tenure, sessions, spend, age, purchases, tickets, premium, mobile, weekend, email, referred = X.T
         log_sessions = np.log1p(sessions)
@@ -593,6 +630,7 @@ def generate_obs_hte_binary_26(
     ], dtype=float)
 
     def g_y(X: np.ndarray) -> np.ndarray:
+        """Evaluate the baseline log-odds component for the binary outcome."""
         f = _split_binary_features(X)
         return (
             1.1 * np.tanh(f["tenure"] / 24.0)
@@ -623,6 +661,7 @@ def generate_obs_hte_binary_26(
     ], dtype=float)
 
     def g_d(X: np.ndarray) -> np.ndarray:
+        """Evaluate the nonlinear treatment-assignment component."""
         f = _split_binary_features(X)
         soft_spend = 0.85 * np.tanh(f["spend_ctr"])
         return (
@@ -636,6 +675,7 @@ def generate_obs_hte_binary_26(
         )
 
     def tau_fn(X: np.ndarray) -> np.ndarray:
+        """Evaluate the heterogeneous treatment effect on the log-odds scale."""
         f = _split_binary_features(X)
         # For binary outcomes, tau is on log-odds scale; oracle cate remains
         # risk difference via g1 - g0 in CausalDatasetGenerator.
@@ -654,6 +694,7 @@ def generate_obs_hte_binary_26(
         return np.clip(tau, -0.35, 1.4)
 
     def hte_binary_26_x_sampler(n: int, _k: int, seed: int) -> np.ndarray:
+        """Sample correlated covariates and derived binary-behavior features."""
         rng = np.random.default_rng(seed)
         # Correlated latent base; binary/count covariates are derived from behavior.
         base_specs = [

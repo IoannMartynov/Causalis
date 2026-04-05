@@ -21,7 +21,7 @@ def _make_estimate(data: CausalData):
         ml_m=LogisticRegression(max_iter=500),
         n_folds=3,
         random_state=777,
-    ).fit().estimate(score="ATE", diagnostic_data=True)
+    ).fit().estimate(score="ATE")
 
 
 def test_score_diagnostics_is_deterministic_for_fixed_estimate():

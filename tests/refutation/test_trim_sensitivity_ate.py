@@ -22,7 +22,7 @@ def test_score_diagnostics_trimming_threshold_is_respected_in_params():
         ml_m=LogisticRegression(max_iter=400),
         n_folds=3,
         random_state=777,
-    ).fit().estimate(score="ATE", diagnostic_data=True)
+    ).fit().estimate(score="ATE")
 
     report_lo = run_score_diagnostics(data, estimate, trimming_threshold=1e-6)
     report_hi = run_score_diagnostics(data, estimate, trimming_threshold=0.10)

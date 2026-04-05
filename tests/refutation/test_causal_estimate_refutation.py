@@ -66,7 +66,7 @@ def test_unconfoundedness_diagnostics_returns_balance_outputs(sample_causal_data
 
 def test_score_diagnostics_with_missing_y_d_falls_back_to_causal_data(sample_causal_data):
     model = IRM().fit(sample_causal_data)
-    result = model.estimate(score='ATE', diagnostic_data=True)
+    result = model.estimate(score='ATE')
 
     diag_without_yd = result.diagnostic_data.model_copy(update={"y": None, "d": None})
     estimate_without_yd = result.model_copy(update={"diagnostic_data": diag_without_yd})

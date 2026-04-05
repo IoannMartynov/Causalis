@@ -32,7 +32,7 @@ def test_uncofoundedness_balance_ate(normalize_ipw):
         normalize_ipw=normalize_ipw,
         trimming_threshold=1e-3,
         random_state=7,
-    ).fit().estimate(alpha=0.10, diagnostic_data=True)
+    ).fit().estimate(alpha=0.10)
 
     out = run_unconfoundedness_diagnostics(data, res)
 
@@ -82,7 +82,7 @@ def test_uncofoundedness_balance_att(normalize_ipw):
         normalize_ipw=normalize_ipw,
         trimming_threshold=1e-3,
         random_state=13,
-    ).fit().estimate(score="ATTE", alpha=0.10, diagnostic_data=True)
+    ).fit().estimate(score="ATTE", alpha=0.10)
 
     out = run_unconfoundedness_diagnostics(data, res)
 

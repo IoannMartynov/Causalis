@@ -21,7 +21,7 @@ def _make_estimate(data: CausalData, score: str):
         ml_m=LogisticRegression(max_iter=500),
         n_folds=3,
         random_state=19,
-    ).fit().estimate(score=score, diagnostic_data=True)
+    ).fit().estimate(score=score)
 
 
 def test_atte_derivative_wrt_g1_is_zero():

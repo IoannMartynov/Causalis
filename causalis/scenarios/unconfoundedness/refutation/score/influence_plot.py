@@ -24,6 +24,7 @@ from .score_validation import (
 
 
 def _ess(weights: np.ndarray) -> float:
+    """Compute effective sample size for a vector of weights."""
     w = np.asarray(weights, dtype=float).ravel()
     if w.size == 0:
         return float("nan")
@@ -40,6 +41,7 @@ def _resolve_inputs(
     trimming_threshold: Optional[float],
     use_estimator_psi: bool,
 ) -> dict[str, Any]:
+    """Resolve plotting arrays for influence and instability diagnostics."""
     if data is not None:
         _validate_estimate_matches_data(data=data, estimate=estimate)
 
@@ -47,7 +49,7 @@ def _resolve_inputs(
     if diagnostic_data is None:
         raise ValueError(
             "Missing estimate.diagnostic_data. "
-            "Call estimate(diagnostic_data=True) first."
+            "Fit IRM with store_diagnostics=True and call estimate() first."
         )
 
     # Fast path: reuse cached score-plot inputs stored in diagnostic_data.

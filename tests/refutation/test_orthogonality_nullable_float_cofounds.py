@@ -28,7 +28,7 @@ def make_nullable_float_data(n=80, seed=7):
 
 def test_refute_irm_orthogonality_with_nullable_float_confounders_runs():
     data = make_nullable_float_data(n=80, seed=13)
-    estimate = IRM(data, n_folds=3, random_state=13).fit().estimate(score="ATTE", diagnostic_data=True)
+    estimate = IRM(data, n_folds=3, random_state=13).fit().estimate(score="ATTE")
     res = run_score_diagnostics(data, estimate, n_basis_funcs=3, return_summary=True)
 
     assert "orthogonality_derivatives" in res

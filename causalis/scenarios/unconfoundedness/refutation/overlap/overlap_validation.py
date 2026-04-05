@@ -39,6 +39,7 @@ _DEFAULT_THRESHOLDS: Dict[str, float] = {
 
 
 def _validate_estimate_matches_data(data: CausalData, estimate: CausalEstimate) -> None:
+    """Ensure an estimate is aligned with the supplied causal dataset."""
     if str(estimate.treatment) != str(data.treatment_name):
         raise ValueError(
             "estimate.treatment must match data.treatment_name "
@@ -53,6 +54,7 @@ def _validate_estimate_matches_data(data: CausalData, estimate: CausalEstimate) 
 
 
 def _mask_finite_pairs(p: np.ndarray, y: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Drop rows with non-finite values from aligned score/label arrays."""
     p = np.asarray(p, dtype=float).ravel()
     y = np.asarray(y, dtype=float).ravel()
     if p.size == 0 or y.size == 0 or p.size != y.size:
@@ -62,6 +64,7 @@ def _mask_finite_pairs(p: np.ndarray, y: np.ndarray) -> tuple[np.ndarray, np.nda
 
 
 def _auc_mann_whitney(scores: np.ndarray, labels: np.ndarray) -> float:
+    """Compute AUC via the Mann-Whitney rank statistic."""
     y = labels.astype(bool)
     pos = scores[y]
     neg = scores[~y]
@@ -90,6 +93,7 @@ def _auc_mann_whitney(scores: np.ndarray, labels: np.ndarray) -> float:
 
 
 def _ks_statistic(a: np.ndarray, b: np.ndarray) -> float:
+    """Compute the two-sample Kolmogorov-Smirnov statistic."""
     a = np.sort(np.asarray(a, dtype=float))
     b = np.sort(np.asarray(b, dtype=float))
     na, nb = a.size, b.size
@@ -103,12 +107,14 @@ def _ks_statistic(a: np.ndarray, b: np.ndarray) -> float:
 
 
 def _ess(weights: np.ndarray) -> float:
+    """Compute effective sample size for a vector of weights."""
     s = float(weights.sum())
     q = float((weights ** 2).sum())
     return float((s * s) / q) if q > 0.0 else float("nan")
 
 
 def _weight_tail_stats(weights: np.ndarray) -> Dict[str, float]:
+    """Summarize extreme-weight behavior using upper quantiles and maxima."""
     values = np.asarray(weights, dtype=float).ravel()
     if values.size == 0:
         return {
@@ -134,6 +140,7 @@ def _weight_tail_stats(weights: np.ndarray) -> Dict[str, float]:
 
 
 def _ece_binary(p: np.ndarray, y: np.ndarray, n_bins: int) -> float:
+    """Compute expected calibration error for binary outcomes."""
     p = np.asarray(p, dtype=float)
     y = np.asarray(y, dtype=float)
     p = np.clip(p, 0.0, 1.0)
@@ -159,11 +166,13 @@ def _ece_binary(p: np.ndarray, y: np.ndarray, n_bins: int) -> float:
 
 
 def _logit(x: np.ndarray) -> np.ndarray:
+    """Apply a numerically stable logit transform to probabilities."""
     clipped = np.clip(x, 1e-12, 1.0 - 1e-12)
     return np.log(clipped / (1.0 - clipped))
 
 
 def _sigmoid(z: np.ndarray) -> np.ndarray:
+    """Apply a numerically stable logistic transform."""
     z = np.asarray(z, dtype=float)
     out = np.empty_like(z, dtype=float)
     pos = z >= 0
@@ -181,6 +190,7 @@ def _logistic_recalibration(
     tol: float = 1e-8,
     ridge: float = 1e-8,
 ) -> tuple[float, float]:
+    """Fit intercept and slope for logistic recalibration of propensity scores."""
     p = np.asarray(p, dtype=float)
     y = np.asarray(y, dtype=float)
 
@@ -243,6 +253,7 @@ def _logistic_recalibration(
 
 
 def _calibration_report(p: np.ndarray, d: np.ndarray, *, n_bins: int) -> Dict[str, Any]:
+    """Build calibration metrics, reliability bins, and severity flags."""
     p = np.asarray(p, dtype=float).ravel()
     d = np.asarray(d, dtype=int).ravel()
 
@@ -284,6 +295,7 @@ def _calibration_report(p: np.ndarray, d: np.ndarray, *, n_bins: int) -> Dict[st
     alpha, beta = _logistic_recalibration(p, d)
 
     def _flag_ece(value: float) -> str:
+        """Grade expected calibration error against warning thresholds."""
         if np.isnan(value):
             return "NA"
         if value > _DEFAULT_THRESHOLDS["ece_strong"]:
@@ -293,6 +305,7 @@ def _calibration_report(p: np.ndarray, d: np.ndarray, *, n_bins: int) -> Dict[st
         return "GREEN"
 
     def _flag_slope(value: float) -> str:
+        """Grade logistic recalibration slope against warning thresholds."""
         if np.isnan(value):
             return "NA"
         if value < _DEFAULT_THRESHOLDS["slope_strong_lo"] or value > _DEFAULT_THRESHOLDS["slope_strong_hi"]:
@@ -302,6 +315,7 @@ def _calibration_report(p: np.ndarray, d: np.ndarray, *, n_bins: int) -> Dict[st
         return "GREEN"
 
     def _flag_intercept(value: float) -> str:
+        """Grade logistic recalibration intercept against warning thresholds."""
         if np.isnan(value):
             return "NA"
         if abs(value) > _DEFAULT_THRESHOLDS["intercept_strong"]:
@@ -336,7 +350,38 @@ def run_overlap_diagnostics(
     return_summary: bool = True,
     auc_flip_margin: float = 0.05,
 ) -> Dict[str, Any]:
-    """Run overlap diagnostics from `CausalData` and `CausalEstimate`."""
+    """Run overlap and calibration diagnostics for an estimated propensity model.
+
+    Parameters
+    ----------
+    data : CausalData
+        Dataset used to fit the estimator.
+    estimate : CausalEstimate
+        Effect estimate with ``diagnostic_data`` containing propensity-related
+        arrays such as ``m_hat`` and ``d``.
+    thresholds : dict, optional
+        Optional threshold overrides keyed by metric name.
+    n_bins : int, default 10
+        Number of bins used for calibration summaries.
+    use_hajek : bool, optional
+        Whether to evaluate normalized IPW identities. If omitted, the value is
+        inferred from diagnostic metadata.
+    return_summary : bool, default True
+        Include a compact tabular summary in the returned payload.
+    auc_flip_margin : float, default 0.05
+        Margin around 0.5 used when flagging reversed treated/control ranking.
+
+    Returns
+    -------
+    Dict[str, Any]
+        Diagnostic report containing edge-mass, calibration, weight-stability,
+        and optional summary tables.
+
+    Raises
+    ------
+    ValueError
+        If required diagnostic arrays are missing or have incompatible shapes.
+    """
     _validate_estimate_matches_data(data=data, estimate=estimate)
 
     threshold_values = dict(_DEFAULT_THRESHOLDS)
@@ -347,7 +392,7 @@ def run_overlap_diagnostics(
     if diagnostic_data is None:
         raise ValueError(
             "Missing estimate.diagnostic_data. "
-            "Call estimate(diagnostic_data=True) first."
+            "Fit IRM with store_diagnostics=True and call estimate() first."
         )
 
     m_diag = getattr(diagnostic_data, "m_hat", None)
@@ -597,6 +642,7 @@ def run_overlap_diagnostics(
 
     if return_summary:
         def _safe_ratio(numerator: float, denominator: float) -> float:
+            """Safely divide summary statistics while preserving ``nan`` on failure."""
             if (not np.isfinite(numerator)) or (not np.isfinite(denominator)) or denominator == 0.0:
                 return float("nan")
             return float(numerator / denominator)

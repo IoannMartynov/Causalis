@@ -1,3 +1,5 @@
+"""Plotting helpers for overlap diagnostics and propensity score geometry."""
+
 from typing import Tuple, Optional, Any, Union
 import numpy as np
 import matplotlib as mpl
@@ -9,6 +11,7 @@ from causalis.data_contracts.causal_diagnostic_data import UnconfoundednessDiagn
 def _resolve_overlap_diag(
     diag: Union[UnconfoundednessDiagnosticData, CausalEstimate, dict]
 ) -> UnconfoundednessDiagnosticData:
+    """Resolve diagnostic payloads accepted by overlap plotting helpers."""
     if isinstance(diag, UnconfoundednessDiagnosticData):
         resolved = diag
     elif isinstance(diag, CausalEstimate):
@@ -21,7 +24,7 @@ def _resolve_overlap_diag(
     if resolved is None:
         raise ValueError(
             "plot_m_overlap expects UnconfoundednessDiagnosticData or CausalEstimate "
-            "with diagnostic_data. Call estimate(..., diagnostic_data=True)."
+            "with diagnostic data. Fit IRM with store_diagnostics=True and call estimate()."
         )
 
     if not hasattr(resolved, "m_hat") or not hasattr(resolved, "d"):
@@ -91,6 +94,7 @@ def plot_m_overlap(
 
     # ------- Helpers --------------------------------------------------------
     def _silverman_bandwidth(x):
+        """Estimate a stable bandwidth for bounded-kernel density overlays."""
         x = np.asarray(x, float)
         n = x.size
         if n < 2:
@@ -102,6 +106,7 @@ def plot_m_overlap(
         return float(max(h, 0.02))
 
     def _kde_reflect(x, xs, h):
+        """Estimate a boundary-corrected KDE by reflecting samples at 0 and 1."""
         x = np.asarray(x, float)
         if x.size == 0:
             return np.zeros_like(xs)
@@ -124,6 +129,7 @@ def plot_m_overlap(
         return density / norm
 
     def _patch_color(patches, fallback):
+        """Return the first visible histogram patch color or a fallback color."""
         # Grab facecolor from the first bar; fallback to cycle color if needed
         for p in patches:
             fc = p.get_facecolor()

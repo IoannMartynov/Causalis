@@ -21,7 +21,7 @@ def _fit_estimate(data: CausalData, score: str = "ATE"):
         ml_m=LogisticRegression(max_iter=500),
         n_folds=2,
         random_state=5,
-    ).fit().estimate(score=score, diagnostic_data=True)
+    ).fit().estimate(score=score)
 
 
 def test_score_diagnostics_derivative_column_names():

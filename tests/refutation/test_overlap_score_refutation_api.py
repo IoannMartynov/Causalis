@@ -25,7 +25,7 @@ def _make_estimate(data: CausalData):
         trimming_threshold=1e-3,
         random_state=19,
     ).fit()
-    return model.estimate(score="ATE", alpha=0.10, diagnostic_data=True)
+    return model.estimate(score="ATE", alpha=0.10)
 
 
 def test_overlap_single_api_with_causal_estimate():

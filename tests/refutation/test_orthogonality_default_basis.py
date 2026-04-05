@@ -19,7 +19,7 @@ def _make_estimate(data: CausalData):
         ml_m=LogisticRegression(max_iter=400),
         n_folds=3,
         random_state=42,
-    ).fit().estimate(score="ATE", diagnostic_data=True)
+    ).fit().estimate(score="ATE")
 
 
 def test_default_basis_uses_all_confounders_plus_constant():
