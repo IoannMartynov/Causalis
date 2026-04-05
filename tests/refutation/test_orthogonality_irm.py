@@ -15,7 +15,7 @@ def test_score_diagnostics_att_runs_and_returns_expected_columns():
         ml_m=RandomForestClassifier(n_estimators=30, random_state=2),
         n_folds=3,
     ).fit()
-    estimate = model.estimate(score="ATTE", diagnostic_data=True)
+    estimate = model.estimate(score="ATTE")
 
     res = run_score_diagnostics(cd, estimate, return_summary=True)
 

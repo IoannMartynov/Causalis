@@ -1,0 +1,31 @@
+# {py:mod}`causalis.shared.outcome_outliers`
+
+```{py:module} causalis.shared.outcome_outliers
+```
+
+```{autodoc2-docstring} causalis.shared.outcome_outliers
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`outcome_outliers <causalis.shared.outcome_outliers.outcome_outliers>`
+  - ```{autodoc2-docstring} causalis.shared.outcome_outliers.outcome_outliers
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} outcome_outliers(data: causalis.dgp.causaldata.CausalData | causalis.dgp.multicausaldata.MultiCausalData, treatment: typing.Optional[str] = None, outcome: typing.Optional[str] = None, *, method: typing.Literal[causalis.shared.outcome_outliers.outcome_outliers.iqr, zscore] = 'iqr', iqr_k: float = 1.5, z_thresh: float = 3.0, tail: typing.Literal[both, causalis.shared.outcome_outliers.outcome_outliers.lower, causalis.shared.outcome_outliers.outcome_outliers.upper] = 'both', return_rows: bool = False) -> pandas.DataFrame | tuple[pandas.DataFrame, pandas.DataFrame]
+:canonical: causalis.shared.outcome_outliers.outcome_outliers
+
+```{autodoc2-docstring} causalis.shared.outcome_outliers.outcome_outliers
+```
+````

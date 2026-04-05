@@ -13,6 +13,7 @@ from causalis.dgp.causaldata import CausalData
 
 
 def _normalize_score(score: Any) -> str:
+    """Normalize supported score aliases to ``ATE`` or ``ATTE``."""
     score_u = str(score or "ATE").upper()
     if "ATT" in score_u:
         return "ATTE"
@@ -22,6 +23,7 @@ def _normalize_score(score: Any) -> str:
 
 
 def _validate_estimate_matches_data(data: CausalData, estimate: CausalEstimate) -> None:
+    """Ensure an estimate is aligned with the supplied causal dataset."""
     df = data.get_df()
 
     if str(estimate.treatment) != str(data.treatment_name):
@@ -49,6 +51,7 @@ def _resolve_trimming_threshold(
     diagnostic_data: Any,
     estimate: CausalEstimate,
 ) -> float:
+    """Resolve the clipping threshold from explicit, diagnostic, or model state."""
     if trimming_threshold is not None:
         return float(trimming_threshold)
 
@@ -61,6 +64,7 @@ def _resolve_trimming_threshold(
 
 
 def _resolve_normalize_ipw(score: str, diagnostic_data: Any, estimate: CausalEstimate) -> bool:
+    """Resolve whether normalized IPW should be used for diagnostics."""
     normalize_ipw = getattr(diagnostic_data, "normalize_ipw", None)
     if normalize_ipw is None:
         normalize_ipw = estimate.model_options.get("normalize_ipw", False)
@@ -75,6 +79,7 @@ def _normalize_ipw_terms(
     *,
     normalize_ipw: bool,
 ) -> Tuple[np.ndarray, np.ndarray]:
+    """Build treated and control IPW terms with optional mean normalization."""
     h1 = d / m
     h0 = (1.0 - d) / (1.0 - m)
     if normalize_ipw:
@@ -90,6 +95,7 @@ def _resolve_ate_weights(
     w_raw: Optional[np.ndarray],
     w_bar_raw: Optional[np.ndarray],
 ) -> Tuple[np.ndarray, np.ndarray]:
+    """Resolve ATE weight vectors from diagnostic payloads."""
     if w_raw is None:
         w = np.ones(n, dtype=float)
     else:
@@ -124,6 +130,7 @@ def _aipw_score_ate(
     w: np.ndarray,
     w_bar: np.ndarray,
 ) -> np.ndarray:
+    """Compute per-observation ATE score residuals."""
     m_clipped = np.clip(m, trimming_threshold, 1.0 - trimming_threshold)
     h1, h0 = _normalize_ipw_terms(d, m_clipped, normalize_ipw=normalize_ipw)
     u0 = y - g0
@@ -140,6 +147,7 @@ def _aipw_score_atte(
     theta: float,
     trimming_threshold: float,
 ) -> np.ndarray:
+    """Compute per-observation ATTE score residuals."""
     m_clipped = np.clip(m, trimming_threshold, 1.0 - trimming_threshold)
     p_treated = float(np.mean(d))
     gamma = m_clipped / (1.0 - m_clipped)
@@ -160,6 +168,7 @@ def _orthogonality_derivatives_ate(
     w: np.ndarray,
     w_bar: np.ndarray,
 ) -> pd.DataFrame:
+    """Estimate finite-basis orthogonality derivatives for the ATE score."""
     n, b = x_basis.shape
     m_clipped = np.clip(m, trimming_threshold, 1.0 - trimming_threshold)
     h1, h0 = _normalize_ipw_terms(d, m_clipped, normalize_ipw=normalize_ipw)
@@ -203,6 +212,7 @@ def _orthogonality_derivatives_atte(
     m: np.ndarray,
     trimming_threshold: float,
 ) -> pd.DataFrame:
+    """Estimate finite-basis orthogonality derivatives for the ATTE score."""
     n, b = x_basis.shape
     p_treated = float(np.mean(d))
     m_clipped = np.clip(m, trimming_threshold, 1.0 - trimming_threshold)
@@ -248,6 +258,7 @@ def _influence_summary(
     psi_override: Optional[np.ndarray] = None,
     k: int = 10,
 ) -> Dict[str, Any]:
+    """Summarize tail behavior and most influential score contributions."""
     if psi_override is not None:
         psi = np.asarray(psi_override, dtype=float).ravel()
     elif score == "ATE":
@@ -299,6 +310,7 @@ def _influence_summary(
 
 
 def _grade(value: float, warn: float, strong: float) -> str:
+    """Map a scalar diagnostic value to a traffic-light severity flag."""
     if value is None or not np.isfinite(value):
         return "NA"
     value_f = float(value)
@@ -310,6 +322,7 @@ def _grade(value: float, warn: float, strong: float) -> str:
 
 
 def _two_sided_pvalue_from_t(t_stat: float) -> float:
+    """Approximate a two-sided Gaussian p-value from a t-like statistic."""
     if not np.isfinite(t_stat):
         return float("nan")
     return float(math.erfc(abs(float(t_stat)) / math.sqrt(2.0)))
@@ -320,6 +333,7 @@ def _oos_moment_test_from_psi(
     psi_b: np.ndarray,
     folds: np.ndarray,
 ) -> Dict[str, Any]:
+    """Compute out-of-sample moment checks using fold-wise leave-one-fold fits."""
     fold_rows = []
     psi_all: list[np.ndarray] = []
 
@@ -406,14 +420,42 @@ def run_score_diagnostics(
     n_basis_funcs: Optional[int] = None,
     return_summary: bool = True,
 ) -> Dict[str, Any]:
-    """Run score diagnostics from `CausalData` and `CausalEstimate`."""
+    """Run orthogonality and influence diagnostics for ATE or ATTE scores.
+
+    Parameters
+    ----------
+    data : CausalData
+        Dataset used to fit the estimator.
+    estimate : CausalEstimate
+        Effect estimate with ``diagnostic_data`` containing nuisance predictions
+        and optionally cached score arrays.
+    trimming_threshold : float, optional
+        Propensity clipping threshold. If omitted, the value is inferred from
+        diagnostic or model metadata.
+    n_basis_funcs : int, optional
+        Number of simple basis functions used in orthogonality checks. Defaults
+        to one intercept plus all available confounders.
+    return_summary : bool, default True
+        Include a compact summary table in the returned payload.
+
+    Returns
+    -------
+    Dict[str, Any]
+        Diagnostic report with orthogonality checks, influence summaries,
+        optional out-of-sample tests, and a summary table.
+
+    Raises
+    ------
+    ValueError
+        If required diagnostic arrays are missing or have incompatible shapes.
+    """
     _validate_estimate_matches_data(data=data, estimate=estimate)
 
     diagnostic_data = estimate.diagnostic_data
     if diagnostic_data is None:
         raise ValueError(
             "Missing estimate.diagnostic_data. "
-            "Call estimate(diagnostic_data=True) first."
+            "Fit IRM with store_diagnostics=True and call estimate() first."
         )
 
     m_raw = getattr(diagnostic_data, "m_hat", None)

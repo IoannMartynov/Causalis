@@ -1,3 +1,5 @@
+"""Balance and sensitivity diagnostics for unconfoundedness assumptions."""
+
 from .unconfoundedness_validation import (
     run_unconfoundedness_diagnostics,
 )

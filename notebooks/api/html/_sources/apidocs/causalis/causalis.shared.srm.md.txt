@@ -1,0 +1,169 @@
+# {py:mod}`causalis.shared.srm`
+
+```{py:module} causalis.shared.srm
+```
+
+```{autodoc2-docstring} causalis.shared.srm
+:allowtitles:
+```
+
+## Module Contents
+
+### Classes
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`SRMResult <causalis.shared.srm.SRMResult>`
+  - ```{autodoc2-docstring} causalis.shared.srm.SRMResult
+    :summary:
+    ```
+````
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`check_srm <causalis.shared.srm.check_srm>`
+  - ```{autodoc2-docstring} causalis.shared.srm.check_srm
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`Number <causalis.shared.srm.Number>`
+  - ```{autodoc2-docstring} causalis.shared.srm.Number
+    :summary:
+    ```
+* - {py:obj}`__all__ <causalis.shared.srm.__all__>`
+  - ```{autodoc2-docstring} causalis.shared.srm.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} Number
+:canonical: causalis.shared.srm.Number
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.shared.srm.Number
+```
+
+````
+
+`````{py:class} SRMResult
+:canonical: causalis.shared.srm.SRMResult
+
+```{autodoc2-docstring} causalis.shared.srm.SRMResult
+```
+
+````{py:attribute} chi2
+:canonical: causalis.shared.srm.SRMResult.chi2
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.shared.srm.SRMResult.chi2
+```
+
+````
+
+````{py:attribute} p_value
+:canonical: causalis.shared.srm.SRMResult.p_value
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.shared.srm.SRMResult.p_value
+```
+
+````
+
+````{py:attribute} expected
+:canonical: causalis.shared.srm.SRMResult.expected
+:type: typing.Dict[typing.Hashable, float]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.shared.srm.SRMResult.expected
+```
+
+````
+
+````{py:attribute} observed
+:canonical: causalis.shared.srm.SRMResult.observed
+:type: typing.Dict[typing.Hashable, int]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.shared.srm.SRMResult.observed
+```
+
+````
+
+````{py:attribute} alpha
+:canonical: causalis.shared.srm.SRMResult.alpha
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.shared.srm.SRMResult.alpha
+```
+
+````
+
+````{py:attribute} is_srm
+:canonical: causalis.shared.srm.SRMResult.is_srm
+:type: bool
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.shared.srm.SRMResult.is_srm
+```
+
+````
+
+````{py:attribute} warning
+:canonical: causalis.shared.srm.SRMResult.warning
+:type: str | None
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.shared.srm.SRMResult.warning
+```
+
+````
+
+````{py:method} __repr__() -> str
+:canonical: causalis.shared.srm.SRMResult.__repr__
+
+````
+
+`````
+
+````{py:function} check_srm(assignments: typing.Union[typing.Iterable[typing.Hashable], pandas.Series, causalis.dgp.causaldata.CausalData, collections.abc.Mapping[typing.Hashable, causalis.shared.srm.Number]], target_allocation: typing.Dict[typing.Hashable, causalis.shared.srm.Number], alpha: float = 0.001, min_expected: float = 5.0, strict_variants: bool = True) -> causalis.shared.srm.SRMResult
+:canonical: causalis.shared.srm.check_srm
+
+```{autodoc2-docstring} causalis.shared.srm.check_srm
+```
+````
+
+````{py:data} __all__
+:canonical: causalis.shared.srm.__all__
+:value: >
+   ['SRMResult', 'check_srm']
+
+```{autodoc2-docstring} causalis.shared.srm.__all__
+```
+
+````

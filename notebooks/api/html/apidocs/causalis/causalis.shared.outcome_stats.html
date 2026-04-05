@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>causalis.shared.outcome_stats &#8212; Causalis API Reference  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="causalis.shared.sutva_validation" href="causalis.shared.sutva_validation.html" />
+    <link rel="prev" title="causalis.shared.outcome_plots" href="causalis.shared.outcome_plots.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-causalis.shared.outcome_stats">
+<span id="causalis-shared-outcome-stats"></span><h1><a class="reference internal" href="#module-causalis.shared.outcome_stats" title="causalis.shared.outcome_stats"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.shared.outcome_stats</span></code></a><a class="headerlink" href="#module-causalis.shared.outcome_stats" title="Link to this heading">¶</a></h1>
+<p>Outcome shared grouped by treatment for CausalData.</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.shared.outcome_stats.outcome_stats" title="causalis.shared.outcome_stats.outcome_stats"><code class="xref py py-obj docutils literal notranslate"><span class="pre">outcome_stats</span></code></a></p></td>
+<td><p>Comprehensive outcome shared grouped by treatment.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.shared.outcome_stats.outcome_stats">
+<span class="sig-prename descclassname"><span class="pre">causalis.shared.outcome_stats.</span></span><span class="sig-name descname"><span class="pre">outcome_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">causalis.dgp.causaldata.CausalData</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">causalis.dgp.multicausaldata.MultiCausalData</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.shared.outcome_stats.outcome_stats" title="Link to this definition">¶</a></dt>
+<dd><p>Comprehensive outcome shared grouped by treatment.</p>
+<p>Returns a DataFrame with detailed outcome shared for each treatment group,
+including count, mean, std, min, various percentiles, and max.
+This function provides comprehensive outcome analysis and returns
+data_contracts in a clean DataFrame format suitable for reporting.</p>
+<p class="rubric" id="id1">Parameters</p>
+<p>data : CausalData or MultiCausalData
+The causal dataset containing treatment and outcome variables.</p>
+<p class="rubric" id="id2">Returns</p>
+<p>pd.DataFrame
+DataFrame with treatment groups as index and the following columns:
+- count: number of observations in each group
+- mean: average outcome value
+- std: standard deviation of outcome
+- min: minimum outcome value
+- p10: 10th percentile
+- p25: 25th percentile (Q1)
+- median: 50th percentile (median)
+- p75: 75th percentile (Q3)
+- p90: 90th percentile
+- max: maximum outcome value</p>
+<p class="rubric" id="id3">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>stats = outcome_stats(causal_data)
+print(stats)
+treatment  count      mean       std       min       p10       p25    median       p75       p90       max
+0          0   3000  5.123456  2.345678  0.123456  2.345678  3.456789  5.123456  6.789012  7.890123  9.876543
+1          1   2000  6.789012  2.456789  0.234567  3.456789  4.567890  6.789012  8.901234  9.012345  10.987654</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../reference.html">Causalis API Reference</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../reference.html">Documentation overview</a><ul>
+  <li><a href="../index.html">API Modules</a><ul>
+  <li><a href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a><ul>
+  <li><a href="causalis.shared.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.shared</span></code></a><ul>
+      <li>Previous: <a href="causalis.shared.outcome_plots.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.shared.outcome_plots</span></code></a></li>
+      <li>Next: <a href="causalis.shared.sutva_validation.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.shared.sutva_validation</span></code></a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../../_sources/apidocs/causalis/causalis.shared.outcome_stats.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

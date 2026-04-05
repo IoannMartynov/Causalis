@@ -1,0 +1,64 @@
+# {py:mod}`causalis.scenarios.synthetic_control.refutation.diagnostic_plots`
+
+```{py:module} causalis.scenarios.synthetic_control.refutation.diagnostic_plots
+```
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.diagnostic_plots
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`observed_vs_synthetic_plot <causalis.scenarios.synthetic_control.refutation.diagnostic_plots.observed_vs_synthetic_plot>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.diagnostic_plots.observed_vs_synthetic_plot
+    :summary:
+    ```
+* - {py:obj}`gap_over_time_plot <causalis.scenarios.synthetic_control.refutation.diagnostic_plots.gap_over_time_plot>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.diagnostic_plots.gap_over_time_plot
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.scenarios.synthetic_control.refutation.diagnostic_plots.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.diagnostic_plots.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} observed_vs_synthetic_plot(estimate: causalis.data_contracts.panel_estimate.PanelEstimate, *, show_sc: bool = True, figsize: typing.Tuple[float, float] = (10.0, 5.5), dpi: int = 220, font_scale: float = 1.1) -> matplotlib.pyplot.Figure
+:canonical: causalis.scenarios.synthetic_control.refutation.diagnostic_plots.observed_vs_synthetic_plot
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.diagnostic_plots.observed_vs_synthetic_plot
+```
+````
+
+````{py:function} gap_over_time_plot(estimate: causalis.data_contracts.panel_estimate.PanelEstimate, *, show_sc: bool = True, figsize: typing.Tuple[float, float] = (10.0, 5.5), dpi: int = 220, font_scale: float = 1.1) -> matplotlib.pyplot.Figure
+:canonical: causalis.scenarios.synthetic_control.refutation.diagnostic_plots.gap_over_time_plot
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.diagnostic_plots.gap_over_time_plot
+```
+````
+
+````{py:data} __all__
+:canonical: causalis.scenarios.synthetic_control.refutation.diagnostic_plots.__all__
+:value: >
+   ['observed_vs_synthetic_plot', 'gap_over_time_plot']
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.diagnostic_plots.__all__
+```
+
+````

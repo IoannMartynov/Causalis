@@ -1,0 +1,97 @@
+# {py:mod}`causalis.dgp.panel_data_scm.functional`
+
+```{py:module} causalis.dgp.panel_data_scm.functional
+```
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.functional
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`generate_scm_data <causalis.dgp.panel_data_scm.functional.generate_scm_data>`
+  - ```{autodoc2-docstring} causalis.dgp.panel_data_scm.functional.generate_scm_data
+    :summary:
+    ```
+* - {py:obj}`generate_scm_gamma_data <causalis.dgp.panel_data_scm.functional.generate_scm_gamma_data>`
+  - ```{autodoc2-docstring} causalis.dgp.panel_data_scm.functional.generate_scm_gamma_data
+    :summary:
+    ```
+* - {py:obj}`generate_scm_poisson_data <causalis.dgp.panel_data_scm.functional.generate_scm_poisson_data>`
+  - ```{autodoc2-docstring} causalis.dgp.panel_data_scm.functional.generate_scm_poisson_data
+    :summary:
+    ```
+* - {py:obj}`generate_scm_gamma_26_data <causalis.dgp.panel_data_scm.functional.generate_scm_gamma_26_data>`
+  - ```{autodoc2-docstring} causalis.dgp.panel_data_scm.functional.generate_scm_gamma_26_data
+    :summary:
+    ```
+* - {py:obj}`generate_scm_poisson_26_data <causalis.dgp.panel_data_scm.functional.generate_scm_poisson_26_data>`
+  - ```{autodoc2-docstring} causalis.dgp.panel_data_scm.functional.generate_scm_poisson_26_data
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`PanelOutput <causalis.dgp.panel_data_scm.functional.PanelOutput>`
+  - ```{autodoc2-docstring} causalis.dgp.panel_data_scm.functional.PanelOutput
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} PanelOutput
+:canonical: causalis.dgp.panel_data_scm.functional.PanelOutput
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.functional.PanelOutput
+```
+
+````
+
+````{py:function} generate_scm_data(n_donors: int = 5, n_pre_periods: int = 20, n_post_periods: int = 10, treatment_effect: float = 2.0, treatment_effect_slope: float = 0.0, donor_noise_std: float = 0.2, treated_noise_std: float = 0.1, common_factor_std: float = 0.15, time_start: int = 1, treated_unit: typing.Hashable = 'treated', donor_prefix: str = 'donor_', random_state: typing.Optional[int] = 42, return_panel_data: bool = True, dirichlet_alpha: float = 1.0, rho_common: float = 0.0, rho_donor: float = 0.0, n_latent_factors: int = 0, latent_factor_std: float = 0.2, latent_loading_std: float = 0.35, rho_latent: float = 0.0, prefit_mismatch_std: float = 0.0, rho_prefit_mismatch: float = 0.0, treatment_effect_mode: typing.Literal[additive, multiplicative] = 'additive') -> causalis.dgp.panel_data_scm.functional.PanelOutput
+:canonical: causalis.dgp.panel_data_scm.functional.generate_scm_data
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.functional.generate_scm_data
+```
+````
+
+````{py:function} generate_scm_gamma_data(n: int = 432, seed: int = 42, return_panel_data: bool = True, n_donors: int = 8, treatment_effect_rate: float = 0.12, treatment_effect_slope: float = 0.01, n_pre_periods: typing.Optional[int] = None, n_post_periods: typing.Optional[int] = None, **advanced_params) -> causalis.dgp.panel_data_scm.functional.PanelOutput
+:canonical: causalis.dgp.panel_data_scm.functional.generate_scm_gamma_data
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.functional.generate_scm_gamma_data
+```
+````
+
+````{py:function} generate_scm_poisson_data(n: int = 432, seed: int = 42, return_panel_data: bool = True, n_donors: int = 8, treatment_effect_rate: float = 0.1, treatment_effect_slope: float = 0.005, n_pre_periods: typing.Optional[int] = None, n_post_periods: typing.Optional[int] = None, **advanced_params) -> causalis.dgp.panel_data_scm.functional.PanelOutput
+:canonical: causalis.dgp.panel_data_scm.functional.generate_scm_poisson_data
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.functional.generate_scm_poisson_data
+```
+````
+
+````{py:function} generate_scm_gamma_26_data(*, seed: int, return_panel_data: bool, include_oracles: bool, n_donors: int, n_pre_periods: typing.Optional[int], n_post_periods: typing.Optional[int], treatment_effect_rate: float, treatment_effect_slope: float, advanced_params: dict[str, typing.Any]) -> causalis.dgp.panel_data_scm.functional.PanelOutput
+:canonical: causalis.dgp.panel_data_scm.functional.generate_scm_gamma_26_data
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.functional.generate_scm_gamma_26_data
+```
+````
+
+````{py:function} generate_scm_poisson_26_data(*, seed: int, return_panel_data: bool, include_oracles: bool, n_donors: int, n_pre_periods: typing.Optional[int], n_post_periods: typing.Optional[int], treatment_effect_rate: float, treatment_effect_slope: float, advanced_params: dict[str, typing.Any]) -> causalis.dgp.panel_data_scm.functional.PanelOutput
+:canonical: causalis.dgp.panel_data_scm.functional.generate_scm_poisson_26_data
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.functional.generate_scm_poisson_26_data
+```
+````

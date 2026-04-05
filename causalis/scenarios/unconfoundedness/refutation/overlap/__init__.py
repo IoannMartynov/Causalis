@@ -1,3 +1,5 @@
+"""Overlap diagnostics and plotting utilities for propensity scores."""
+
 from __future__ import annotations
 
 from .overlap_validation import run_overlap_diagnostics

@@ -1,0 +1,31 @@
+# {py:mod}`causalis.shared.outcome_stats`
+
+```{py:module} causalis.shared.outcome_stats
+```
+
+```{autodoc2-docstring} causalis.shared.outcome_stats
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`outcome_stats <causalis.shared.outcome_stats.outcome_stats>`
+  - ```{autodoc2-docstring} causalis.shared.outcome_stats.outcome_stats
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} outcome_stats(data: causalis.dgp.causaldata.CausalData | causalis.dgp.multicausaldata.MultiCausalData) -> pandas.DataFrame
+:canonical: causalis.shared.outcome_stats.outcome_stats
+
+```{autodoc2-docstring} causalis.shared.outcome_stats.outcome_stats
+```
+````

@@ -1,0 +1,42 @@
+# {py:mod}`causalis.scenarios.classic_rct.dgp`
+
+```{py:module} causalis.scenarios.classic_rct.dgp
+```
+
+```{autodoc2-docstring} causalis.scenarios.classic_rct.dgp
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`generate_classic_rct_26 <causalis.scenarios.classic_rct.dgp.generate_classic_rct_26>`
+  - ```{autodoc2-docstring} causalis.scenarios.classic_rct.dgp.generate_classic_rct_26
+    :summary:
+    ```
+* - {py:obj}`classic_rct_gamma_26 <causalis.scenarios.classic_rct.dgp.classic_rct_gamma_26>`
+  - ```{autodoc2-docstring} causalis.scenarios.classic_rct.dgp.classic_rct_gamma_26
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} generate_classic_rct_26(seed: int = 42, add_pre: bool = False, beta_y: typing.Optional[typing.Union[typing.List[float], numpy.ndarray]] = None, outcome_depends_on_x: bool = True, include_oracle: bool = False, return_causal_data: bool = True, *, n: int = 10000, split: float = 0.5, outcome_params: typing.Optional[typing.Dict] = None, add_ancillary: bool = False, deterministic_ids: bool = True, **kwargs)
+:canonical: causalis.scenarios.classic_rct.dgp.generate_classic_rct_26
+
+```{autodoc2-docstring} causalis.scenarios.classic_rct.dgp.generate_classic_rct_26
+```
+````
+
+````{py:function} classic_rct_gamma_26(seed: int = 42, add_pre: bool = False, beta_y: typing.Optional[typing.Union[typing.List[float], numpy.ndarray]] = None, outcome_depends_on_x: bool = True, include_oracle: bool = False, return_causal_data: bool = True, *, n: int = 10000, split: float = 0.5, outcome_params: typing.Optional[typing.Dict] = None, add_ancillary: bool = True, deterministic_ids: bool = True, **kwargs)
+:canonical: causalis.scenarios.classic_rct.dgp.classic_rct_gamma_26
+
+```{autodoc2-docstring} causalis.scenarios.classic_rct.dgp.classic_rct_gamma_26
+```
+````

@@ -1,0 +1,735 @@
+# {py:mod}`causalis.data_contracts.causal_diagnostic_data`
+
+```{py:module} causalis.data_contracts.causal_diagnostic_data
+```
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data
+:allowtitles:
+```
+
+## Module Contents
+
+### Classes
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`DiagnosticData <causalis.data_contracts.causal_diagnostic_data.DiagnosticData>`
+  - ```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.DiagnosticData
+    :summary:
+    ```
+* - {py:obj}`UnconfoundednessDiagnosticData <causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData>`
+  - ```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData
+    :summary:
+    ```
+* - {py:obj}`MultiUnconfoundednessDiagnosticData <causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData>`
+  - ```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData
+    :summary:
+    ```
+* - {py:obj}`DiffInMeansDiagnosticData <causalis.data_contracts.causal_diagnostic_data.DiffInMeansDiagnosticData>`
+  - ```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.DiffInMeansDiagnosticData
+    :summary:
+    ```
+* - {py:obj}`CUPEDDiagnosticData <causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData>`
+  - ```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData
+    :summary:
+    ```
+````
+
+### API
+
+`````{py:class} DiagnosticData(/, **data: typing.Any)
+:canonical: causalis.data_contracts.causal_diagnostic_data.DiagnosticData
+
+Bases: {py:obj}`pydantic.BaseModel`
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.DiagnosticData
+```
+
+```{rubric} Initialization
+```
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.DiagnosticData.__init__
+```
+
+````{py:attribute} model_config
+:canonical: causalis.data_contracts.causal_diagnostic_data.DiagnosticData.model_config
+:value: >
+   'ConfigDict(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.DiagnosticData.model_config
+```
+
+````
+
+`````
+
+`````{py:class} UnconfoundednessDiagnosticData(/, **data: typing.Any)
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData
+
+Bases: {py:obj}`causalis.data_contracts.causal_diagnostic_data.DiagnosticData`
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData
+```
+
+```{rubric} Initialization
+```
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.__init__
+```
+
+````{py:attribute} m_hat
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.m_hat
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.m_hat
+```
+
+````
+
+````{py:attribute} m_hat_raw
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.m_hat_raw
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.m_hat_raw
+```
+
+````
+
+````{py:attribute} d
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.d
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.d
+```
+
+````
+
+````{py:attribute} y
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.y
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.y
+```
+
+````
+
+````{py:attribute} x
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.x
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.x
+```
+
+````
+
+````{py:attribute} g0_hat
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.g0_hat
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.g0_hat
+```
+
+````
+
+````{py:attribute} g1_hat
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.g1_hat
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.g1_hat
+```
+
+````
+
+````{py:attribute} w
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.w
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.w
+```
+
+````
+
+````{py:attribute} w_bar
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.w_bar
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.w_bar
+```
+
+````
+
+````{py:attribute} psi_b
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.psi_b
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.psi_b
+```
+
+````
+
+````{py:attribute} folds
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.folds
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.folds
+```
+
+````
+
+````{py:attribute} trimming_threshold
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.trimming_threshold
+:type: float
+:value: >
+   0.0
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.trimming_threshold
+```
+
+````
+
+````{py:attribute} normalize_ipw
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.normalize_ipw
+:type: typing.Optional[bool]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.normalize_ipw
+```
+
+````
+
+````{py:attribute} sigma2
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.sigma2
+:type: typing.Optional[float]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.sigma2
+```
+
+````
+
+````{py:attribute} nu2
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.nu2
+:type: typing.Optional[float]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.nu2
+```
+
+````
+
+````{py:attribute} psi_sigma2
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.psi_sigma2
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.psi_sigma2
+```
+
+````
+
+````{py:attribute} psi_nu2
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.psi_nu2
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.psi_nu2
+```
+
+````
+
+````{py:attribute} riesz_rep
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.riesz_rep
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.riesz_rep
+```
+
+````
+
+````{py:attribute} m_alpha
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.m_alpha
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.m_alpha
+```
+
+````
+
+````{py:attribute} psi
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.psi
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.psi
+```
+
+````
+
+````{py:attribute} score
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.score
+:type: typing.Optional[str]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.score
+```
+
+````
+
+````{py:attribute} sensitivity_analysis
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.sensitivity_analysis
+:type: typing.Optional[typing.Dict[str, typing.Any]]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.sensitivity_analysis
+```
+
+````
+
+````{py:attribute} score_plot_cache
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.score_plot_cache
+:type: typing.Optional[typing.Dict[str, typing.Any]]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.score_plot_cache
+```
+
+````
+
+````{py:attribute} residual_plot_cache
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.residual_plot_cache
+:type: typing.Optional[typing.Dict[str, typing.Any]]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.residual_plot_cache
+```
+
+````
+
+`````
+
+`````{py:class} MultiUnconfoundednessDiagnosticData(/, **data: typing.Any)
+:canonical: causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData
+
+Bases: {py:obj}`causalis.data_contracts.causal_diagnostic_data.DiagnosticData`
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData
+```
+
+```{rubric} Initialization
+```
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.__init__
+```
+
+````{py:attribute} m_hat
+:canonical: causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.m_hat
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.m_hat
+```
+
+````
+
+````{py:attribute} m_hat_raw
+:canonical: causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.m_hat_raw
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.m_hat_raw
+```
+
+````
+
+````{py:attribute} d
+:canonical: causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.d
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.d
+```
+
+````
+
+````{py:attribute} y
+:canonical: causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.y
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.y
+```
+
+````
+
+````{py:attribute} x
+:canonical: causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.x
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.x
+```
+
+````
+
+````{py:attribute} g_hat
+:canonical: causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.g_hat
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.g_hat
+```
+
+````
+
+````{py:attribute} psi_b
+:canonical: causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.psi_b
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.psi_b
+```
+
+````
+
+````{py:attribute} folds
+:canonical: causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.folds
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.folds
+```
+
+````
+
+````{py:attribute} trimming_threshold
+:canonical: causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.trimming_threshold
+:type: float
+:value: >
+   0.0
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.trimming_threshold
+```
+
+````
+
+````{py:attribute} normalize_ipw
+:canonical: causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.normalize_ipw
+:type: typing.Optional[bool]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.normalize_ipw
+```
+
+````
+
+````{py:attribute} sigma2
+:canonical: causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.sigma2
+:type: typing.Union[float, numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.sigma2
+```
+
+````
+
+````{py:attribute} nu2
+:canonical: causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.nu2
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.nu2
+```
+
+````
+
+````{py:attribute} psi_sigma2
+:canonical: causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.psi_sigma2
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.psi_sigma2
+```
+
+````
+
+````{py:attribute} psi_nu2
+:canonical: causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.psi_nu2
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.psi_nu2
+```
+
+````
+
+````{py:attribute} riesz_rep
+:canonical: causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.riesz_rep
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.riesz_rep
+```
+
+````
+
+````{py:attribute} m_alpha
+:canonical: causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.m_alpha
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.m_alpha
+```
+
+````
+
+````{py:attribute} psi
+:canonical: causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.psi
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.psi
+```
+
+````
+
+````{py:attribute} score
+:canonical: causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.score
+:type: typing.Optional[str]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.score
+```
+
+````
+
+````{py:attribute} sensitivity_analysis
+:canonical: causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.sensitivity_analysis
+:type: typing.Optional[typing.Dict[str, typing.Any]]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.sensitivity_analysis
+```
+
+````
+
+````{py:attribute} residual_plot_cache
+:canonical: causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.residual_plot_cache
+:type: typing.Optional[typing.Dict[str, typing.Any]]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.residual_plot_cache
+```
+
+````
+
+`````
+
+````{py:class} DiffInMeansDiagnosticData(/, **data: typing.Any)
+:canonical: causalis.data_contracts.causal_diagnostic_data.DiffInMeansDiagnosticData
+
+Bases: {py:obj}`causalis.data_contracts.causal_diagnostic_data.DiagnosticData`
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.DiffInMeansDiagnosticData
+```
+
+```{rubric} Initialization
+```
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.DiffInMeansDiagnosticData.__init__
+```
+
+````
+
+`````{py:class} CUPEDDiagnosticData(/, **data: typing.Any)
+:canonical: causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData
+
+Bases: {py:obj}`causalis.data_contracts.causal_diagnostic_data.DiagnosticData`
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData
+```
+
+```{rubric} Initialization
+```
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.__init__
+```
+
+````{py:attribute} ate_naive
+:canonical: causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.ate_naive
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.ate_naive
+```
+
+````
+
+````{py:attribute} se_naive
+:canonical: causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.se_naive
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.se_naive
+```
+
+````
+
+````{py:attribute} se_reduction_pct_same_cov
+:canonical: causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.se_reduction_pct_same_cov
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.se_reduction_pct_same_cov
+```
+
+````
+
+````{py:attribute} r2_naive
+:canonical: causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.r2_naive
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.r2_naive
+```
+
+````
+
+````{py:attribute} r2_adj
+:canonical: causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.r2_adj
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.r2_adj
+```
+
+````
+
+````{py:attribute} beta_covariates
+:canonical: causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.beta_covariates
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.beta_covariates
+```
+
+````
+
+````{py:attribute} gamma_interactions
+:canonical: causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.gamma_interactions
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.gamma_interactions
+```
+
+````
+
+````{py:attribute} covariate_outcome_corr
+:canonical: causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.covariate_outcome_corr
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.covariate_outcome_corr
+```
+
+````
+
+````{py:attribute} covariates
+:canonical: causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.covariates
+:type: typing.List[str]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.covariates
+```
+
+````
+
+````{py:attribute} adj_type
+:canonical: causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.adj_type
+:type: str
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.adj_type
+```
+
+````
+
+````{py:attribute} regression_checks
+:canonical: causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.regression_checks
+:type: typing.Optional[causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.regression_checks
+```
+
+````
+
+`````

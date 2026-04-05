@@ -1,0 +1,31 @@
+# {py:mod}`causalis.shared.rct_design.mde`
+
+```{py:module} causalis.shared.rct_design.mde
+```
+
+```{autodoc2-docstring} causalis.shared.rct_design.mde
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`calculate_mde <causalis.shared.rct_design.mde.calculate_mde>`
+  - ```{autodoc2-docstring} causalis.shared.rct_design.mde.calculate_mde
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} calculate_mde(sample_size: typing.Union[int, typing.Tuple[int, int]], baseline_rate: typing.Optional[float] = None, variance: typing.Optional[typing.Union[float, typing.Tuple[float, float]]] = None, alpha: float = 0.05, power: float = 0.8, data_type: str = 'conversion', ratio: float = 0.5) -> typing.Dict[str, typing.Any]
+:canonical: causalis.shared.rct_design.mde.calculate_mde
+
+```{autodoc2-docstring} causalis.shared.rct_design.mde.calculate_mde
+```
+````

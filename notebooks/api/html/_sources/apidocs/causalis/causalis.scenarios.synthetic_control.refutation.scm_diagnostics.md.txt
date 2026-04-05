@@ -1,0 +1,53 @@
+# {py:mod}`causalis.scenarios.synthetic_control.refutation.scm_diagnostics`
+
+```{py:module} causalis.scenarios.synthetic_control.refutation.scm_diagnostics
+```
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.scm_diagnostics
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`run_scm_diagnostics <causalis.scenarios.synthetic_control.refutation.scm_diagnostics.run_scm_diagnostics>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.scm_diagnostics.run_scm_diagnostics
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.scenarios.synthetic_control.refutation.scm_diagnostics.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.scm_diagnostics.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} run_scm_diagnostics(estimate: causalis.data_contracts.panel_estimate.PanelEstimate, paneldata: causalis.data_contracts.panel_data_scm.PanelDataSCM, *, output_dir: str | pathlib.Path | None = None, filename_prefix: str = 'scm_diagnostics', pre_tail_k: int = 3, dpi: int = 220) -> pandas.DataFrame
+:canonical: causalis.scenarios.synthetic_control.refutation.scm_diagnostics.run_scm_diagnostics
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.scm_diagnostics.run_scm_diagnostics
+```
+````
+
+````{py:data} __all__
+:canonical: causalis.scenarios.synthetic_control.refutation.scm_diagnostics.__all__
+:value: >
+   ['run_scm_diagnostics']
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.scm_diagnostics.__all__
+```
+
+````

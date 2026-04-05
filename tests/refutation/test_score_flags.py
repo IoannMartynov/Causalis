@@ -24,7 +24,7 @@ def _make_estimate(data: CausalData):
         trimming_threshold=1e-3,
         random_state=29,
     ).fit()
-    return model.estimate(score="ATE", alpha=0.10, diagnostic_data=True)
+    return model.estimate(score="ATE", alpha=0.10)
 
 
 def test_score_diagnostics_returns_flags_and_summary_with_flags_column():

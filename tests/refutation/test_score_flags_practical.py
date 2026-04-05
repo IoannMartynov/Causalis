@@ -16,7 +16,7 @@ def _make_estimate(seed: int):
         ml_m=LogisticRegression(max_iter=400),
         n_folds=3,
         random_state=seed,
-    ).fit().estimate(score="ATE", diagnostic_data=True)
+    ).fit().estimate(score="ATE")
     return data, estimate
 
 

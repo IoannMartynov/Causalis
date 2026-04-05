@@ -1,0 +1,53 @@
+# {py:mod}`causalis.scenarios.synthetic_control.refutation.outcome_panel_plot`
+
+```{py:module} causalis.scenarios.synthetic_control.refutation.outcome_panel_plot
+```
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.outcome_panel_plot
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`outcome_panel_plot <causalis.scenarios.synthetic_control.refutation.outcome_panel_plot.outcome_panel_plot>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.outcome_panel_plot.outcome_panel_plot
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.scenarios.synthetic_control.refutation.outcome_panel_plot.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.outcome_panel_plot.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} outcome_panel_plot(paneldata: causalis.data_contracts.panel_data_scm.PanelDataSCM, *, show_donor_units: bool = True, donor_max_lines: typing.Optional[int] = 20, show_donor_mean: bool = True, donor_alpha: float = 0.35, donor_linewidth: float = 1.2, shade_post_period: bool = True, figsize: typing.Tuple[float, float] = (10.0, 5.5), dpi: int = 220, font_scale: float = 1.1, save: typing.Optional[str] = None, save_dpi: typing.Optional[int] = None, transparent: bool = False) -> matplotlib.pyplot.Figure
+:canonical: causalis.scenarios.synthetic_control.refutation.outcome_panel_plot.outcome_panel_plot
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.outcome_panel_plot.outcome_panel_plot
+```
+````
+
+````{py:data} __all__
+:canonical: causalis.scenarios.synthetic_control.refutation.outcome_panel_plot.__all__
+:value: >
+   ['outcome_panel_plot']
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.outcome_panel_plot.__all__
+```
+
+````

@@ -1,0 +1,108 @@
+# {py:mod}`causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity`
+
+```{py:module} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity
+```
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`compute_bias_aware_ci <causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.compute_bias_aware_ci>`
+  - ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.compute_bias_aware_ci
+    :summary:
+    ```
+* - {py:obj}`format_bias_aware_summary <causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.format_bias_aware_summary>`
+  - ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.format_bias_aware_summary
+    :summary:
+    ```
+* - {py:obj}`get_sensitivity_summary <causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.get_sensitivity_summary>`
+  - ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.get_sensitivity_summary
+    :summary:
+    ```
+* - {py:obj}`sensitivity_benchmark <causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_benchmark>`
+  - ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_benchmark
+    :summary:
+    ```
+* - {py:obj}`sensitivity_analysis <causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_analysis>`
+  - ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_analysis
+    :summary:
+    ```
+* - {py:obj}`interpret_sensitivity_analysis <causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.interpret_sensitivity_analysis>`
+  - ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.interpret_sensitivity_analysis
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} __all__
+:canonical: causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.__all__
+:value: >
+   ['sensitivity_analysis', 'sensitivity_benchmark', 'get_sensitivity_summary', 'interpret_sensitivity_...
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.__all__
+```
+
+````
+
+````{py:function} compute_bias_aware_ci(effect_estimation: typing.Dict[str, typing.Any] | typing.Any, *, r2_y: float, r2_d: float, rho: float = 1.0, H0: float = 0.0, alpha: float = 0.05, use_signed_rr: bool = False) -> typing.Dict[str, typing.Any]
+:canonical: causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.compute_bias_aware_ci
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.compute_bias_aware_ci
+```
+````
+
+````{py:function} format_bias_aware_summary(res: typing.Dict[str, typing.Any], label: str | None = None) -> str
+:canonical: causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.format_bias_aware_summary
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.format_bias_aware_summary
+```
+````
+
+````{py:function} get_sensitivity_summary(effect_estimation: typing.Dict[str, typing.Any] | typing.Any, *, label: typing.Optional[str] = None) -> typing.Optional[str]
+:canonical: causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.get_sensitivity_summary
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.get_sensitivity_summary
+```
+````
+
+````{py:function} sensitivity_benchmark(effect_estimation: typing.Dict[str, typing.Any], benchmarking_set: typing.List[str], fit_args: typing.Optional[typing.Dict[str, typing.Any]] = None) -> pandas.DataFrame
+:canonical: causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_benchmark
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_benchmark
+```
+````
+
+````{py:function} sensitivity_analysis(effect_estimation: typing.Dict[str, typing.Any] | typing.Any, *, r2_y: float, r2_d: float, rho: float = 1.0, H0: float = 0.0, alpha: float = 0.05, use_signed_rr: bool = False) -> typing.Dict[str, typing.Any]
+:canonical: causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_analysis
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_analysis
+```
+````
+
+````{py:function} interpret_sensitivity_analysis(effect_estimation: typing.Dict[str, typing.Any] | typing.Any, *, r2_y: float, r2_d: float, rho: float = 1.0, H0: float = 0.0, alpha: float = 0.05, use_signed_rr: bool = False) -> typing.Dict[str, typing.Any]
+:canonical: causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.interpret_sensitivity_analysis
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.interpret_sensitivity_analysis
+```
+````

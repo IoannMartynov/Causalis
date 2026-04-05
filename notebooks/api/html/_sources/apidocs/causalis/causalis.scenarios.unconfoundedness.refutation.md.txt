@@ -1,0 +1,45 @@
+# {py:mod}`causalis.scenarios.unconfoundedness.refutation`
+
+```{py:module} causalis.scenarios.unconfoundedness.refutation
+```
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation
+:allowtitles:
+```
+
+## Subpackages
+
+```{toctree}
+:titlesonly:
+:maxdepth: 3
+
+causalis.scenarios.unconfoundedness.refutation.unconfoundedness
+causalis.scenarios.unconfoundedness.refutation.score
+causalis.scenarios.unconfoundedness.refutation.overlap
+```
+
+## Package Contents
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.scenarios.unconfoundedness.refutation.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} __all__
+:canonical: causalis.scenarios.unconfoundedness.refutation.__all__
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.__all__
+```
+
+````

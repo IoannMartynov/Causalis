@@ -25,7 +25,13 @@ def _make_synthetic_data(n: int = 500, seed: int = 7) -> tuple[CausalData, pd.Da
     return cd, df
 
 
-def _fit_irm(cd: CausalData, *, normalize_ipw: bool = False, random_state: int = 17) -> IRM:
+def _fit_irm(
+    cd: CausalData,
+    *,
+    normalize_ipw: bool = False,
+    random_state: int = 17,
+    store_diagnostics: bool = True,
+) -> IRM:
     irm = IRM(
         data=cd,
         ml_g=LinearRegression(),
@@ -35,7 +41,7 @@ def _fit_irm(cd: CausalData, *, normalize_ipw: bool = False, random_state: int =
         trimming_threshold=1e-3,
         random_state=random_state,
     )
-    irm.fit()
+    irm.fit(store_diagnostics=store_diagnostics)
     return irm
 
 
@@ -45,7 +51,7 @@ def _groups_from_df(df: pd.DataFrame) -> pd.Series:
 
 def test_irm_estimate_gate_dispatches_to_new_module(monkeypatch):
     cd, df = _make_synthetic_data(n=180, seed=1)
-    irm = _fit_irm(cd)
+    irm = _fit_irm(cd, store_diagnostics=False)
     groups = _groups_from_df(df)
     marker = object()
     captured = {}
@@ -62,7 +68,6 @@ def test_irm_estimate_gate_dispatches_to_new_module(monkeypatch):
         alpha=0.1,
         cov_type="HC2",
         cov_kwds={"use_correction": True},
-        diagnostic_data=False,
     )
     assert res is marker
     assert captured["irm_model"] is irm
@@ -70,7 +75,7 @@ def test_irm_estimate_gate_dispatches_to_new_module(monkeypatch):
     assert captured["alpha"] == 0.1
     assert captured["cov_type"] == "HC2"
     assert captured["cov_kwds"] == {"use_correction": True}
-    assert captured["diagnostic_data"] is False
+    assert captured["irm_model"].store_diagnostics is False
 
 
 def test_gate_basis_handling_inputs():
@@ -140,6 +145,53 @@ def test_gate_inference_covariance_options_and_se_validity():
     assert res_hc1.model_options["cov_type"] == "HC1"
     assert np.all(np.isfinite(res_hc1.std_errors))
     assert np.all(res_hc1.std_errors >= 0.0)
+
+
+def test_gate_payload_follows_fit_store_diagnostics_setting():
+    cd, df = _make_synthetic_data(n=220, seed=14)
+    groups = _groups_from_df(df)
+
+    irm_diag = _fit_irm(cd, store_diagnostics=True)
+    irm_light = _fit_irm(cd, store_diagnostics=False)
+
+    assert irm_diag.estimate(score="GATE", groups=groups).diagnostic_data is not None
+    assert irm_light.estimate(score="GATE", groups=groups).diagnostic_data is None
+
+
+def test_gate_lightweight_mode_uses_cached_targets_without_reloading_dataframe(monkeypatch):
+    cd, df = _make_synthetic_data(n=200, seed=12)
+    groups = _groups_from_df(df)
+    irm = _fit_irm(cd, store_diagnostics=False)
+
+    def _unexpected_get_df(*args, **kwargs):
+        raise AssertionError("GATE unexpectedly reloaded the dataframe")
+
+    monkeypatch.setattr(CausalData, "get_df", _unexpected_get_df)
+    res = irm.estimate(score="GATE", groups=groups)
+
+    assert isinstance(res, GateEstimate)
+
+
+def test_gate_lightweight_mode_matches_full_mode_on_unchanged_data():
+    cd, df = _make_synthetic_data(n=260, seed=18)
+    groups = _groups_from_df(df)
+
+    res_full = _fit_irm(cd, store_diagnostics=True).estimate(score="GATE", groups=groups)
+    res_light = _fit_irm(cd, store_diagnostics=False).estimate(score="GATE", groups=groups)
+
+    np.testing.assert_allclose(res_light.values, res_full.values, atol=1e-12)
+
+
+def test_gate_lightweight_mode_is_stable_after_data_reordering():
+    cd, df = _make_synthetic_data(n=240, seed=22)
+    groups = _groups_from_df(df)
+    irm = _fit_irm(cd, store_diagnostics=False)
+
+    first = irm.estimate(score="GATE", groups=groups)
+    cd.df = cd.df.sample(frac=1.0, random_state=31).reset_index(drop=True)
+    second = irm.estimate(score="GATE", groups=groups)
+
+    np.testing.assert_allclose(second.values, first.values, atol=1e-12)
 
 
 def test_gate_requires_fitted_model():

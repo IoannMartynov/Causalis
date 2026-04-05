@@ -1,0 +1,70 @@
+# {py:mod}`causalis.data_contracts`
+
+```{py:module} causalis.data_contracts
+```
+
+```{autodoc2-docstring} causalis.data_contracts
+:allowtitles:
+```
+
+## Submodules
+
+```{toctree}
+:titlesonly:
+:maxdepth: 1
+
+causalis.data_contracts.causal_diagnostic_data
+causalis.data_contracts.causal_estimate
+causalis.data_contracts.panel_data_scm
+causalis.data_contracts.panel_estimate
+causalis.data_contracts.causaldata_instrumental
+causalis.data_contracts.multicausal_estimate
+causalis.data_contracts.causaldata
+causalis.data_contracts.gate_estimate
+causalis.data_contracts.multicausaldata
+```
+
+## Package Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__getattr__ <causalis.data_contracts.__getattr__>`
+  - ```{autodoc2-docstring} causalis.data_contracts.__getattr__
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.data_contracts.__all__>`
+  - ```{autodoc2-docstring} causalis.data_contracts.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} __all__
+:canonical: causalis.data_contracts.__all__
+:value: >
+   ['CausalData', 'MultiCausalData', 'CausalDataInstrumental', 'PanelDataSCM', 'PanelEstimate', 'Causal...
+
+```{autodoc2-docstring} causalis.data_contracts.__all__
+```
+
+````
+
+````{py:function} __getattr__(name: str)
+:canonical: causalis.data_contracts.__getattr__
+
+```{autodoc2-docstring} causalis.data_contracts.__getattr__
+```
+````

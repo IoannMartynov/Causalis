@@ -1,0 +1,44 @@
+# {py:mod}`causalis.scenarios.unconfoundedness.refutation.unconfoundedness`
+
+```{py:module} causalis.scenarios.unconfoundedness.refutation.unconfoundedness
+```
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness
+:allowtitles:
+```
+
+## Submodules
+
+```{toctree}
+:titlesonly:
+:maxdepth: 1
+
+causalis.scenarios.unconfoundedness.refutation.unconfoundedness.unconfoundedness_validation
+causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity
+```
+
+## Package Contents
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.scenarios.unconfoundedness.refutation.unconfoundedness.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} __all__
+:canonical: causalis.scenarios.unconfoundedness.refutation.unconfoundedness.__all__
+:value: >
+   ['run_unconfoundedness_diagnostics', 'sensitivity_analysis', 'get_sensitivity_summary', 'sensitivity...
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.__all__
+```
+
+````

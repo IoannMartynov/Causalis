@@ -24,7 +24,7 @@ def test_run_score_diagnostics_has_flags_by_default():
         normalize_ipw=True,
         trimming_threshold=1e-3,
         random_state=17,
-    ).fit().estimate(score="ATE", diagnostic_data=True)
+    ).fit().estimate(score="ATE")
 
     report = run_score_diagnostics(data, estimate, return_summary=True)
     assert "flags" in report

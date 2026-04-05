@@ -1,0 +1,31 @@
+# {py:mod}`causalis.dgp.base`
+
+```{py:module} causalis.dgp.base
+```
+
+```{autodoc2-docstring} causalis.dgp.base
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`estimate_gaussian_copula_corr <causalis.dgp.base.estimate_gaussian_copula_corr>`
+  - ```{autodoc2-docstring} causalis.dgp.base.estimate_gaussian_copula_corr
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} estimate_gaussian_copula_corr(df: pandas.DataFrame, cols: list[str]) -> numpy.ndarray
+:canonical: causalis.dgp.base.estimate_gaussian_copula_corr
+
+```{autodoc2-docstring} causalis.dgp.base.estimate_gaussian_copula_corr
+```
+````

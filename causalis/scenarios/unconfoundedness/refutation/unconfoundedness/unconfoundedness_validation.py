@@ -14,6 +14,7 @@ from causalis.dgp.causaldata import CausalData
 
 @dataclass
 class _BalanceInputs:
+    """Normalized inputs used by balance diagnostics."""
     x: np.ndarray
     d: np.ndarray
     m_hat: np.ndarray
@@ -24,6 +25,7 @@ class _BalanceInputs:
 
 
 def _normalize_score(score: Any) -> str:
+    """Normalize supported score aliases to ``ATE`` or ``ATTE``."""
     score_u = str(score or "ATE").upper()
     if "ATT" in score_u:
         return "ATTE"
@@ -33,6 +35,7 @@ def _normalize_score(score: Any) -> str:
 
 
 def _resolve_feature_names(names: Optional[List[str]], p: int) -> List[str]:
+    """Return feature names or generate fallback labels for balance tables."""
     if names is not None:
         names_list = [str(name) for name in names]
         if len(names_list) == p:
@@ -41,6 +44,7 @@ def _resolve_feature_names(names: Optional[List[str]], p: int) -> List[str]:
 
 
 def _validate_estimate_matches_data(data: CausalData, estimate: CausalEstimate) -> None:
+    """Ensure an estimate is aligned with the supplied causal dataset."""
     df = data.get_df()
 
     if str(estimate.treatment) != str(data.treatment_name):
@@ -69,13 +73,14 @@ def _extract_balance_inputs(
     estimate: CausalEstimate,
     normalize: Optional[bool],
 ) -> _BalanceInputs:
+    """Extract and validate balance-diagnostic arrays from estimate metadata."""
     _validate_estimate_matches_data(data=data, estimate=estimate)
 
     diagnostic_data = estimate.diagnostic_data
     if diagnostic_data is None:
         raise ValueError(
             "Missing estimate.diagnostic_data. "
-            "Call estimate(diagnostic_data=True) first."
+            "Fit IRM with store_diagnostics=True and call estimate() first."
         )
 
     m_hat_raw = getattr(diagnostic_data, "m_hat", None)
@@ -165,6 +170,7 @@ def _balance_smd(
     *,
     threshold: float,
 ) -> Dict[str, Any]:
+    """Compute weighted and unweighted standardized mean differences."""
     x = inputs.x
     d = inputs.d
     m_hat = np.clip(inputs.m_hat, 1e-12, 1.0 - 1e-12)
@@ -247,6 +253,7 @@ def _balance_smd(
 
 
 def _grade(value: float, warn: float, strong: float) -> str:
+    """Map a scalar diagnostic value to a traffic-light severity flag."""
     if value is None or not np.isfinite(value):
         return "NA"
     value_f = float(value)
@@ -265,7 +272,35 @@ def run_unconfoundedness_diagnostics(
     normalize: Optional[bool] = None,
     return_summary: bool = True,
 ) -> Dict[str, Any]:
-    """Run unconfoundedness diagnostics from `CausalData` and `CausalEstimate`."""
+    """Run covariate-balance diagnostics implied by unconfoundedness.
+
+    Parameters
+    ----------
+    data : CausalData
+        Dataset used to fit the estimator.
+    estimate : CausalEstimate
+        Effect estimate with ``diagnostic_data`` containing propensity and, when
+        available, weight information.
+    threshold : float, default 0.10
+        SMD threshold used for warnings and pass/fail summaries.
+    normalize : bool, optional
+        Override whether pseudo-population weights are mean-normalized.
+    return_summary : bool, default True
+        Include a compact summary table in the returned payload.
+
+    Returns
+    -------
+    Dict[str, Any]
+        Diagnostic report with weighted balance tables, severity flags, and an
+        optional summary DataFrame.
+
+    Raises
+    ------
+    ValueError
+        If required diagnostic arrays are missing or have incompatible shapes.
+    RuntimeError
+        If balance weights collapse to zero total mass.
+    """
     inputs = _extract_balance_inputs(
         data=data,
         estimate=estimate,

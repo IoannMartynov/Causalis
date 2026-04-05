@@ -1,0 +1,31 @@
+# {py:mod}`causalis.scenarios.classic_rct.inference.conversion_ztest`
+
+```{py:module} causalis.scenarios.classic_rct.inference.conversion_ztest
+```
+
+```{autodoc2-docstring} causalis.scenarios.classic_rct.inference.conversion_ztest
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`conversion_ztest <causalis.scenarios.classic_rct.inference.conversion_ztest.conversion_ztest>`
+  - ```{autodoc2-docstring} causalis.scenarios.classic_rct.inference.conversion_ztest.conversion_ztest
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} conversion_ztest(data: causalis.dgp.causaldata.CausalData, alpha: float = 0.05, ci_method: typing.Literal[newcombe, wald_unpooled, wald_pooled] = 'newcombe', se_for_test: typing.Literal[pooled, unpooled] = 'pooled') -> typing.Dict[str, typing.Any]
+:canonical: causalis.scenarios.classic_rct.inference.conversion_ztest.conversion_ztest
+
+```{autodoc2-docstring} causalis.scenarios.classic_rct.inference.conversion_ztest.conversion_ztest
+```
+````

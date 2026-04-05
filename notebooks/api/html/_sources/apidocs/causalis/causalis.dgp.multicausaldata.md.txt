@@ -1,0 +1,85 @@
+# {py:mod}`causalis.dgp.multicausaldata`
+
+```{py:module} causalis.dgp.multicausaldata
+```
+
+```{autodoc2-docstring} causalis.dgp.multicausaldata
+:allowtitles:
+```
+
+## Submodules
+
+```{toctree}
+:titlesonly:
+:maxdepth: 1
+
+causalis.dgp.multicausaldata.functional
+causalis.dgp.multicausaldata.base
+```
+
+## Package Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`generate_multitreatment_gamma_26 <causalis.dgp.multicausaldata.generate_multitreatment_gamma_26>`
+  - ```{autodoc2-docstring} causalis.dgp.multicausaldata.generate_multitreatment_gamma_26
+    :summary:
+    ```
+* - {py:obj}`generate_multitreatment_binary_26 <causalis.dgp.multicausaldata.generate_multitreatment_binary_26>`
+  - ```{autodoc2-docstring} causalis.dgp.multicausaldata.generate_multitreatment_binary_26
+    :summary:
+    ```
+* - {py:obj}`generate_multitreatment_irm_26 <causalis.dgp.multicausaldata.generate_multitreatment_irm_26>`
+  - ```{autodoc2-docstring} causalis.dgp.multicausaldata.generate_multitreatment_irm_26
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.dgp.multicausaldata.__all__>`
+  - ```{autodoc2-docstring} causalis.dgp.multicausaldata.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} generate_multitreatment_gamma_26(*args, **kwargs)
+:canonical: causalis.dgp.multicausaldata.generate_multitreatment_gamma_26
+
+```{autodoc2-docstring} causalis.dgp.multicausaldata.generate_multitreatment_gamma_26
+```
+````
+
+````{py:function} generate_multitreatment_binary_26(*args, **kwargs)
+:canonical: causalis.dgp.multicausaldata.generate_multitreatment_binary_26
+
+```{autodoc2-docstring} causalis.dgp.multicausaldata.generate_multitreatment_binary_26
+```
+````
+
+````{py:function} generate_multitreatment_irm_26(*args, **kwargs)
+:canonical: causalis.dgp.multicausaldata.generate_multitreatment_irm_26
+
+```{autodoc2-docstring} causalis.dgp.multicausaldata.generate_multitreatment_irm_26
+```
+````
+
+````{py:data} __all__
+:canonical: causalis.dgp.multicausaldata.__all__
+:value: >
+   ['MultiCausalData', 'MultiCausalDatasetGenerator', 'generate_multitreatment', 'generate_multitreatme...
+
+```{autodoc2-docstring} causalis.dgp.multicausaldata.__all__
+```
+
+````

@@ -33,7 +33,7 @@ def _make_estimate(data: CausalData):
         ml_m=LogisticRegression(max_iter=500),
         n_folds=3,
         random_state=7,
-    ).fit().estimate(score="ATE", diagnostic_data=True)
+    ).fit().estimate(score="ATE")
 
 
 def test_refutation_namespace_exposes_current_diagnostics():

@@ -1,0 +1,53 @@
+# {py:mod}`causalis.scenarios.unconfoundedness.refutation.overlap.reliability_plot`
+
+```{py:module} causalis.scenarios.unconfoundedness.refutation.overlap.reliability_plot
+```
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.overlap.reliability_plot
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`plot_propensity_reliability <causalis.scenarios.unconfoundedness.refutation.overlap.reliability_plot.plot_propensity_reliability>`
+  - ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.overlap.reliability_plot.plot_propensity_reliability
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.scenarios.unconfoundedness.refutation.overlap.reliability_plot.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.overlap.reliability_plot.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} plot_propensity_reliability(estimate: causalis.data_contracts.causal_estimate.CausalEstimate, data: typing.Optional[causalis.dgp.causaldata.CausalData] = None, *, n_bins: int = 10, show_recalibration: bool = True, annotate_metrics: bool = True, ax: typing.Optional[matplotlib.pyplot.Axes] = None, figsize: typing.Tuple[float, float] = (7.2, 6.2), dpi: int = 220, font_scale: float = 1.1, point_color: typing.Optional[typing.Any] = None, diagonal_color: typing.Any = '0.35', recalibration_color: typing.Any = 'C1', min_marker_size: float = 35.0, marker_size_scale: float = 250.0, save: typing.Optional[str] = None, save_dpi: typing.Optional[int] = None, transparent: bool = False) -> matplotlib.pyplot.Figure
+:canonical: causalis.scenarios.unconfoundedness.refutation.overlap.reliability_plot.plot_propensity_reliability
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.overlap.reliability_plot.plot_propensity_reliability
+```
+````
+
+````{py:data} __all__
+:canonical: causalis.scenarios.unconfoundedness.refutation.overlap.reliability_plot.__all__
+:value: >
+   ['plot_propensity_reliability']
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.overlap.reliability_plot.__all__
+```
+
+````

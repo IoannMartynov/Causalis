@@ -1,0 +1,53 @@
+# {py:mod}`causalis.scenarios.synthetic_control.refutation.sensitivity`
+
+```{py:module} causalis.scenarios.synthetic_control.refutation.sensitivity
+```
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.sensitivity
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`leave_one_donor_out_sensitivity <causalis.scenarios.synthetic_control.refutation.sensitivity.leave_one_donor_out_sensitivity>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.sensitivity.leave_one_donor_out_sensitivity
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.scenarios.synthetic_control.refutation.sensitivity.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.sensitivity.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} leave_one_donor_out_sensitivity(estimate: causalis.data_contracts.panel_estimate.PanelEstimate, paneldata: causalis.data_contracts.panel_data_scm.PanelDataSCM, *, model_kwargs: typing.Dict[str, typing.Any] | None = None) -> pandas.DataFrame
+:canonical: causalis.scenarios.synthetic_control.refutation.sensitivity.leave_one_donor_out_sensitivity
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.sensitivity.leave_one_donor_out_sensitivity
+```
+````
+
+````{py:data} __all__
+:canonical: causalis.scenarios.synthetic_control.refutation.sensitivity.__all__
+:value: >
+   ['leave_one_donor_out_sensitivity']
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.sensitivity.__all__
+```
+
+````

@@ -1,0 +1,45 @@
+# {py:mod}`causalis.scenarios.unconfoundedness.refutation.score`
+
+```{py:module} causalis.scenarios.unconfoundedness.refutation.score
+```
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.score
+:allowtitles:
+```
+
+## Submodules
+
+```{toctree}
+:titlesonly:
+:maxdepth: 1
+
+causalis.scenarios.unconfoundedness.refutation.score.score_validation
+causalis.scenarios.unconfoundedness.refutation.score.influence_plot
+causalis.scenarios.unconfoundedness.refutation.score.residual_plots
+```
+
+## Package Contents
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.scenarios.unconfoundedness.refutation.score.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.score.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} __all__
+:canonical: causalis.scenarios.unconfoundedness.refutation.score.__all__
+:value: >
+   ['run_score_diagnostics', 'plot_influence_instability', 'plot_residual_diagnostics']
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.score.__all__
+```
+
+````

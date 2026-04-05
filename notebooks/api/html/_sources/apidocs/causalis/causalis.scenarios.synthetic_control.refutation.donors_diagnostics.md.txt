@@ -1,0 +1,64 @@
+# {py:mod}`causalis.scenarios.synthetic_control.refutation.donors_diagnostics`
+
+```{py:module} causalis.scenarios.synthetic_control.refutation.donors_diagnostics
+```
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.donors_diagnostics
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`donors_diagnostics <causalis.scenarios.synthetic_control.refutation.donors_diagnostics.donors_diagnostics>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.donors_diagnostics.donors_diagnostics
+    :summary:
+    ```
+* - {py:obj}`run_scm_feasibility <causalis.scenarios.synthetic_control.refutation.donors_diagnostics.run_scm_feasibility>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.donors_diagnostics.run_scm_feasibility
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.scenarios.synthetic_control.refutation.donors_diagnostics.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.donors_diagnostics.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} donors_diagnostics(panel_data: causalis.data_contracts.panel_data_scm.PanelDataSCM) -> pandas.DataFrame
+:canonical: causalis.scenarios.synthetic_control.refutation.donors_diagnostics.donors_diagnostics
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.donors_diagnostics.donors_diagnostics
+```
+````
+
+````{py:function} run_scm_feasibility(paneldata: causalis.data_contracts.panel_data_scm.PanelDataSCM) -> typing.Dict[str, pandas.DataFrame]
+:canonical: causalis.scenarios.synthetic_control.refutation.donors_diagnostics.run_scm_feasibility
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.donors_diagnostics.run_scm_feasibility
+```
+````
+
+````{py:data} __all__
+:canonical: causalis.scenarios.synthetic_control.refutation.donors_diagnostics.__all__
+:value: >
+   ['donors_diagnostics', 'run_scm_feasibility']
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.donors_diagnostics.__all__
+```
+
+````

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>causalis.scenarios.classic_rct.inference.ttest &#8212; Causalis API Reference  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="causalis.scenarios.classic_rct.inference.bootstrap_diff_in_means" href="causalis.scenarios.classic_rct.inference.bootstrap_diff_in_means.html" />
+    <link rel="prev" title="causalis.scenarios.classic_rct.inference" href="causalis.scenarios.classic_rct.inference.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-causalis.scenarios.classic_rct.inference.ttest">
+<span id="causalis-scenarios-classic-rct-inference-ttest"></span><h1><a class="reference internal" href="#module-causalis.scenarios.classic_rct.inference.ttest" title="causalis.scenarios.classic_rct.inference.ttest"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.classic_rct.inference.ttest</span></code></a><a class="headerlink" href="#module-causalis.scenarios.classic_rct.inference.ttest" title="Link to this heading">¶</a></h1>
+<p>T-test inference for Diff_in_Means model</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.classic_rct.inference.ttest.ttest" title="causalis.scenarios.classic_rct.inference.ttest.ttest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ttest</span></code></a></p></td>
+<td><p>Perform a Welch two-sample t-test comparing outcomes between treated (D=1)
+and control (D=0) groups.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.classic_rct.inference.ttest.ttest">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.classic_rct.inference.ttest.</span></span><span class="sig-name descname"><span class="pre">ttest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">causalis.data_contracts.CausalData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.classic_rct.inference.ttest.ttest" title="Link to this definition">¶</a></dt>
+<dd><p>Perform a Welch two-sample t-test comparing outcomes between treated (D=1)
+and control (D=0) groups.</p>
+<p class="rubric" id="id1">Returns</p>
+<p>Dict[str, Any]
+- p_value: Welch t-test p-value for H0: E[Y|D=1] - E[Y|D=0] = 0
+- absolute_difference: treatment_mean - control_mean
+- absolute_ci: (lower, upper) CI for absolute_difference using Welch df
+- relative_difference: signed percent change = 100 * (treatment_mean / control_mean - 1)
+- relative_se: delta-method SE of relative_difference (percent scale)
+- relative_ci: (lower, upper) CI for relative_difference using delta method (+ Satterthwaite df)</p>
+<p class="rubric" id="id2">Notes</p>
+<p>Delta method for relative percent change:
+r_hat = 100 * (Ybar1/Ybar0 - 1)</p>
+<p>With independent groups and CLT:
+Var(Ybar1) ≈ s1^2/n1
+Var(Ybar0) ≈ s0^2/n2
+Cov(Ybar1, Ybar0) ≈ 0</p>
+<p>Gradient of g(a,b)=a/b - 1 is (1/b, -a/b^2), so:
+Var(r_hat/100) ≈ (1/Ybar0)^2 * (s1^2/n1) + (Ybar1/Ybar0^2)^2 * (s0^2/n2)</p>
+<p>CI uses t-critical with Satterthwaite df; falls back to z if df is invalid.
+If control_mean is near 0, relative stats are undefined/unstable and return inf/nan sentinels.</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../reference.html">Causalis API Reference</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../reference.html">Documentation overview</a><ul>
+  <li><a href="../index.html">API Modules</a><ul>
+  <li><a href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a><ul>
+  <li><a href="causalis.scenarios.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios</span></code></a><ul>
+  <li><a href="causalis.scenarios.classic_rct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.classic_rct</span></code></a><ul>
+  <li><a href="causalis.scenarios.classic_rct.inference.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.classic_rct.inference</span></code></a><ul>
+      <li>Previous: <a href="causalis.scenarios.classic_rct.inference.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.classic_rct.inference</span></code></a></li>
+      <li>Next: <a href="causalis.scenarios.classic_rct.inference.bootstrap_diff_in_means.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.classic_rct.inference.bootstrap_diff_in_means</span></code></a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../../_sources/apidocs/causalis/causalis.scenarios.classic_rct.inference.ttest.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -16,11 +16,13 @@ from .overlap_validation import _calibration_report, _validate_estimate_matches_
 
 
 def _logit(x: np.ndarray) -> np.ndarray:
+    """Apply a numerically stable logit transform to probabilities."""
     clipped = np.clip(np.asarray(x, dtype=float), 1e-12, 1.0 - 1e-12)
     return np.log(clipped / (1.0 - clipped))
 
 
 def _sigmoid(z: np.ndarray) -> np.ndarray:
+    """Apply a numerically stable logistic transform."""
     z_arr = np.asarray(z, dtype=float)
     out = np.empty_like(z_arr, dtype=float)
     pos = z_arr >= 0.0
@@ -36,6 +38,7 @@ def _resolve_calibration_payload(
     *,
     n_bins: int,
 ) -> Dict[str, Any]:
+    """Extract and validate the calibration inputs used by reliability plots."""
     if data is not None:
         _validate_estimate_matches_data(data=data, estimate=estimate)
 
@@ -43,7 +46,7 @@ def _resolve_calibration_payload(
     if diagnostic_data is None:
         raise ValueError(
             "Missing estimate.diagnostic_data. "
-            "Call estimate(diagnostic_data=True) first."
+            "Fit IRM with store_diagnostics=True and call estimate() first."
         )
 
     m_hat = getattr(diagnostic_data, "m_hat", None)

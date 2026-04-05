@@ -1,0 +1,665 @@
+# {py:mod}`causalis.scenarios.cuped.diagnostics.regression_checks`
+
+```{py:module} causalis.scenarios.cuped.diagnostics.regression_checks
+```
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks
+:allowtitles:
+```
+
+## Module Contents
+
+### Classes
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`RegressionChecks <causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks
+    :summary:
+    ```
+````
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`design_matrix_checks <causalis.scenarios.cuped.diagnostics.regression_checks.design_matrix_checks>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.design_matrix_checks
+    :summary:
+    ```
+* - {py:obj}`near_duplicate_corr_pairs <causalis.scenarios.cuped.diagnostics.regression_checks.near_duplicate_corr_pairs>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.near_duplicate_corr_pairs
+    :summary:
+    ```
+* - {py:obj}`vif_from_corr <causalis.scenarios.cuped.diagnostics.regression_checks.vif_from_corr>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.vif_from_corr
+    :summary:
+    ```
+* - {py:obj}`leverage_and_cooks <causalis.scenarios.cuped.diagnostics.regression_checks.leverage_and_cooks>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.leverage_and_cooks
+    :summary:
+    ```
+* - {py:obj}`winsor_fit_tau <causalis.scenarios.cuped.diagnostics.regression_checks.winsor_fit_tau>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.winsor_fit_tau
+    :summary:
+    ```
+* - {py:obj}`run_regression_checks <causalis.scenarios.cuped.diagnostics.regression_checks.run_regression_checks>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.run_regression_checks
+    :summary:
+    ```
+* - {py:obj}`assumption_design_rank <causalis.scenarios.cuped.diagnostics.regression_checks.assumption_design_rank>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.assumption_design_rank
+    :summary:
+    ```
+* - {py:obj}`assumption_condition_number <causalis.scenarios.cuped.diagnostics.regression_checks.assumption_condition_number>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.assumption_condition_number
+    :summary:
+    ```
+* - {py:obj}`assumption_near_duplicates <causalis.scenarios.cuped.diagnostics.regression_checks.assumption_near_duplicates>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.assumption_near_duplicates
+    :summary:
+    ```
+* - {py:obj}`assumption_vif <causalis.scenarios.cuped.diagnostics.regression_checks.assumption_vif>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.assumption_vif
+    :summary:
+    ```
+* - {py:obj}`assumption_ate_gap <causalis.scenarios.cuped.diagnostics.regression_checks.assumption_ate_gap>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.assumption_ate_gap
+    :summary:
+    ```
+* - {py:obj}`assumption_residual_tails <causalis.scenarios.cuped.diagnostics.regression_checks.assumption_residual_tails>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.assumption_residual_tails
+    :summary:
+    ```
+* - {py:obj}`assumption_leverage <causalis.scenarios.cuped.diagnostics.regression_checks.assumption_leverage>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.assumption_leverage
+    :summary:
+    ```
+* - {py:obj}`assumption_cooks <causalis.scenarios.cuped.diagnostics.regression_checks.assumption_cooks>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.assumption_cooks
+    :summary:
+    ```
+* - {py:obj}`assumption_hc23_stability <causalis.scenarios.cuped.diagnostics.regression_checks.assumption_hc23_stability>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.assumption_hc23_stability
+    :summary:
+    ```
+* - {py:obj}`assumption_winsor_sensitivity <causalis.scenarios.cuped.diagnostics.regression_checks.assumption_winsor_sensitivity>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.assumption_winsor_sensitivity
+    :summary:
+    ```
+* - {py:obj}`regression_assumption_rows_from_checks <causalis.scenarios.cuped.diagnostics.regression_checks.regression_assumption_rows_from_checks>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.regression_assumption_rows_from_checks
+    :summary:
+    ```
+* - {py:obj}`regression_assumptions_table_from_checks <causalis.scenarios.cuped.diagnostics.regression_checks.regression_assumptions_table_from_checks>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.regression_assumptions_table_from_checks
+    :summary:
+    ```
+* - {py:obj}`regression_assumptions_table_from_diagnostic_data <causalis.scenarios.cuped.diagnostics.regression_checks.regression_assumptions_table_from_diagnostic_data>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.regression_assumptions_table_from_diagnostic_data
+    :summary:
+    ```
+* - {py:obj}`regression_assumptions_table_from_estimate <causalis.scenarios.cuped.diagnostics.regression_checks.regression_assumptions_table_from_estimate>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.regression_assumptions_table_from_estimate
+    :summary:
+    ```
+* - {py:obj}`regression_assumptions_table_from_data <causalis.scenarios.cuped.diagnostics.regression_checks.regression_assumptions_table_from_data>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.regression_assumptions_table_from_data
+    :summary:
+    ```
+* - {py:obj}`overall_assumption_flag <causalis.scenarios.cuped.diagnostics.regression_checks.overall_assumption_flag>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.overall_assumption_flag
+    :summary:
+    ```
+* - {py:obj}`style_regression_assumptions_table <causalis.scenarios.cuped.diagnostics.regression_checks.style_regression_assumptions_table>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.style_regression_assumptions_table
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`FLAG_GREEN <causalis.scenarios.cuped.diagnostics.regression_checks.FLAG_GREEN>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.FLAG_GREEN
+    :summary:
+    ```
+* - {py:obj}`FLAG_YELLOW <causalis.scenarios.cuped.diagnostics.regression_checks.FLAG_YELLOW>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.FLAG_YELLOW
+    :summary:
+    ```
+* - {py:obj}`FLAG_RED <causalis.scenarios.cuped.diagnostics.regression_checks.FLAG_RED>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.FLAG_RED
+    :summary:
+    ```
+* - {py:obj}`FLAG_LEVEL <causalis.scenarios.cuped.diagnostics.regression_checks.FLAG_LEVEL>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.FLAG_LEVEL
+    :summary:
+    ```
+* - {py:obj}`FLAG_COLOR <causalis.scenarios.cuped.diagnostics.regression_checks.FLAG_COLOR>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.FLAG_COLOR
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} FLAG_GREEN
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.FLAG_GREEN
+:value: >
+   'GREEN'
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.FLAG_GREEN
+```
+
+````
+
+````{py:data} FLAG_YELLOW
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.FLAG_YELLOW
+:value: >
+   'YELLOW'
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.FLAG_YELLOW
+```
+
+````
+
+````{py:data} FLAG_RED
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.FLAG_RED
+:value: >
+   'RED'
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.FLAG_RED
+```
+
+````
+
+````{py:data} FLAG_LEVEL
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.FLAG_LEVEL
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.FLAG_LEVEL
+```
+
+````
+
+````{py:data} FLAG_COLOR
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.FLAG_COLOR
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.FLAG_COLOR
+```
+
+````
+
+`````{py:class} RegressionChecks(/, **data: typing.Any)
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks
+
+Bases: {py:obj}`pydantic.BaseModel`
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks
+```
+
+```{rubric} Initialization
+```
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.__init__
+```
+
+````{py:attribute} ate_naive
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.ate_naive
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.ate_naive
+```
+
+````
+
+````{py:attribute} ate_adj
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.ate_adj
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.ate_adj
+```
+
+````
+
+````{py:attribute} ate_gap
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.ate_gap
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.ate_gap
+```
+
+````
+
+````{py:attribute} ate_gap_over_se_naive
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.ate_gap_over_se_naive
+:type: typing.Optional[float]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.ate_gap_over_se_naive
+```
+
+````
+
+````{py:attribute} k
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.k
+:type: int
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.k
+```
+
+````
+
+````{py:attribute} rank
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.rank
+:type: int
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.rank
+```
+
+````
+
+````{py:attribute} full_rank
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.full_rank
+:type: bool
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.full_rank
+```
+
+````
+
+````{py:attribute} condition_number
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.condition_number
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.condition_number
+```
+
+````
+
+````{py:attribute} p_main_covariates
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.p_main_covariates
+:type: int
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.p_main_covariates
+```
+
+````
+
+````{py:attribute} near_duplicate_pairs
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.near_duplicate_pairs
+:type: list[tuple[str, str, float]]
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.near_duplicate_pairs
+```
+
+````
+
+````{py:attribute} vif
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.vif
+:type: typing.Optional[typing.Dict[str, float]]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.vif
+```
+
+````
+
+````{py:attribute} resid_scale_mad
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.resid_scale_mad
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.resid_scale_mad
+```
+
+````
+
+````{py:attribute} n_std_resid_gt_3
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.n_std_resid_gt_3
+:type: int
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.n_std_resid_gt_3
+```
+
+````
+
+````{py:attribute} n_std_resid_gt_4
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.n_std_resid_gt_4
+:type: int
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.n_std_resid_gt_4
+```
+
+````
+
+````{py:attribute} max_abs_std_resid
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.max_abs_std_resid
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.max_abs_std_resid
+```
+
+````
+
+````{py:attribute} max_leverage
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.max_leverage
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.max_leverage
+```
+
+````
+
+````{py:attribute} leverage_cutoff
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.leverage_cutoff
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.leverage_cutoff
+```
+
+````
+
+````{py:attribute} n_high_leverage
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.n_high_leverage
+:type: int
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.n_high_leverage
+```
+
+````
+
+````{py:attribute} max_cooks
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.max_cooks
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.max_cooks
+```
+
+````
+
+````{py:attribute} cooks_cutoff
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.cooks_cutoff
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.cooks_cutoff
+```
+
+````
+
+````{py:attribute} n_high_cooks
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.n_high_cooks
+:type: int
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.n_high_cooks
+```
+
+````
+
+````{py:attribute} min_one_minus_h
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.min_one_minus_h
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.min_one_minus_h
+```
+
+````
+
+````{py:attribute} n_tiny_one_minus_h
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.n_tiny_one_minus_h
+:type: int
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.n_tiny_one_minus_h
+```
+
+````
+
+````{py:attribute} winsor_q
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.winsor_q
+:type: typing.Optional[float]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.winsor_q
+```
+
+````
+
+````{py:attribute} ate_adj_winsor
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.ate_adj_winsor
+:type: typing.Optional[float]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.ate_adj_winsor
+```
+
+````
+
+````{py:attribute} ate_adj_winsor_gap
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.ate_adj_winsor_gap
+:type: typing.Optional[float]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks.ate_adj_winsor_gap
+```
+
+````
+
+`````
+
+````{py:function} design_matrix_checks(design: pandas.DataFrame) -> tuple[int, int, bool, float]
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.design_matrix_checks
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.design_matrix_checks
+```
+````
+
+````{py:function} near_duplicate_corr_pairs(x: pandas.DataFrame, tol: float, max_pairs: int = 50) -> list[tuple[str, str, float]]
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.near_duplicate_corr_pairs
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.near_duplicate_corr_pairs
+```
+````
+
+````{py:function} vif_from_corr(x: pandas.DataFrame) -> typing.Optional[typing.Dict[str, float]]
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.vif_from_corr
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.vif_from_corr
+```
+````
+
+````{py:function} leverage_and_cooks(y: numpy.ndarray, z: numpy.ndarray, params: numpy.ndarray) -> tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray]
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.leverage_and_cooks
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.leverage_and_cooks
+```
+````
+
+````{py:function} winsor_fit_tau(y: pandas.Series, design: pandas.DataFrame, cov_type: str, use_t_fit: bool, winsor_q: typing.Optional[float]) -> typing.Optional[float]
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.winsor_fit_tau
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.winsor_fit_tau
+```
+````
+
+````{py:function} run_regression_checks(y: pandas.Series, design: pandas.DataFrame, result: typing.Any, result_naive: typing.Any, cov_type: str, use_t_fit: bool, corr_near_one_tol: float, tiny_one_minus_h_tol: float, winsor_q: typing.Optional[float]) -> causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.run_regression_checks
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.run_regression_checks
+```
+````
+
+````{py:function} assumption_design_rank(checks: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks) -> typing.Dict[str, typing.Any]
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.assumption_design_rank
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.assumption_design_rank
+```
+````
+
+````{py:function} assumption_condition_number(checks: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks, warn_threshold: float = 100000000.0, red_multiplier: float = 100.0) -> typing.Dict[str, typing.Any]
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.assumption_condition_number
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.assumption_condition_number
+```
+````
+
+````{py:function} assumption_near_duplicates(checks: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks, red_pairs_threshold: int = 3) -> typing.Dict[str, typing.Any]
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.assumption_near_duplicates
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.assumption_near_duplicates
+```
+````
+
+````{py:function} assumption_vif(checks: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks, warn_threshold: float = 20.0, red_multiplier: float = 2.0) -> typing.Dict[str, typing.Any]
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.assumption_vif
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.assumption_vif
+```
+````
+
+````{py:function} assumption_ate_gap(checks: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks, yellow_threshold: float = 2.0, red_threshold: float = 2.5) -> typing.Dict[str, typing.Any]
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.assumption_ate_gap
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.assumption_ate_gap
+```
+````
+
+````{py:function} assumption_residual_tails(checks: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks, yellow_abs_std_resid: float = 7.0, red_abs_std_resid: float = 10.0) -> typing.Dict[str, typing.Any]
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.assumption_residual_tails
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.assumption_residual_tails
+```
+````
+
+````{py:function} assumption_leverage(checks: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks, yellow_multiplier: float = 5.0, red_multiplier: float = 10.0, red_floor: float = 0.5) -> typing.Dict[str, typing.Any]
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.assumption_leverage
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.assumption_leverage
+```
+````
+
+````{py:function} assumption_cooks(checks: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks, yellow_threshold: float = 0.1, red_threshold: float = 1.0) -> typing.Dict[str, typing.Any]
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.assumption_cooks
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.assumption_cooks
+```
+````
+
+````{py:function} assumption_hc23_stability(checks: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks, cov_type: str, tiny_one_minus_h_tol: float = 1e-08) -> typing.Dict[str, typing.Any]
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.assumption_hc23_stability
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.assumption_hc23_stability
+```
+````
+
+````{py:function} assumption_winsor_sensitivity(checks: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks, winsor_reference_se: typing.Optional[float] = None, yellow_sigma: float = 1.0, red_sigma: float = 2.0, yellow_ratio: float = 0.1, red_ratio: float = 0.25) -> typing.Dict[str, typing.Any]
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.assumption_winsor_sensitivity
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.assumption_winsor_sensitivity
+```
+````
+
+````{py:function} regression_assumption_rows_from_checks(checks: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks, cov_type: str = 'HC2', condition_number_warn_threshold: float = 100000000.0, vif_warn_threshold: float = 20.0, tiny_one_minus_h_tol: float = 1e-08, winsor_reference_se: typing.Optional[float] = None) -> list[typing.Dict[str, typing.Any]]
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.regression_assumption_rows_from_checks
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.regression_assumption_rows_from_checks
+```
+````
+
+````{py:function} regression_assumptions_table_from_checks(checks: causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks, cov_type: str = 'HC2', condition_number_warn_threshold: float = 100000000.0, vif_warn_threshold: float = 20.0, tiny_one_minus_h_tol: float = 1e-08, winsor_reference_se: typing.Optional[float] = None) -> pandas.DataFrame
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.regression_assumptions_table_from_checks
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.regression_assumptions_table_from_checks
+```
+````
+
+````{py:function} regression_assumptions_table_from_diagnostic_data(diagnostic_data: causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData, cov_type: str = 'HC2', condition_number_warn_threshold: float = 100000000.0, vif_warn_threshold: float = 20.0, tiny_one_minus_h_tol: float = 1e-08, winsor_reference_se: typing.Optional[float] = None) -> pandas.DataFrame
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.regression_assumptions_table_from_diagnostic_data
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.regression_assumptions_table_from_diagnostic_data
+```
+````
+
+````{py:function} regression_assumptions_table_from_estimate(data_or_estimate: causalis.dgp.causaldata.CausalData | causalis.data_contracts.causal_estimate.CausalEstimate, estimate: typing.Optional[causalis.data_contracts.causal_estimate.CausalEstimate] = None, style_regression_assumptions_table: typing.Optional[typing.Callable[[pandas.DataFrame], typing.Any]] = None, cov_type: typing.Optional[str] = None, condition_number_warn_threshold: float = 100000000.0, vif_warn_threshold: float = 20.0, tiny_one_minus_h_tol: float = 1e-08) -> typing.Any
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.regression_assumptions_table_from_estimate
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.regression_assumptions_table_from_estimate
+```
+````
+
+````{py:function} regression_assumptions_table_from_data(data: causalis.dgp.causaldata.CausalData, covariates: typing.Sequence[str], model_kwargs: typing.Optional[typing.Dict[str, typing.Any]] = None, fit_kwargs: typing.Optional[typing.Dict[str, typing.Any]] = None) -> pandas.DataFrame
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.regression_assumptions_table_from_data
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.regression_assumptions_table_from_data
+```
+````
+
+````{py:function} overall_assumption_flag(table: pandas.DataFrame) -> str
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.overall_assumption_flag
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.overall_assumption_flag
+```
+````
+
+````{py:function} style_regression_assumptions_table(table: pandas.DataFrame)
+:canonical: causalis.scenarios.cuped.diagnostics.regression_checks.style_regression_assumptions_table
+
+```{autodoc2-docstring} causalis.scenarios.cuped.diagnostics.regression_checks.style_regression_assumptions_table
+```
+````

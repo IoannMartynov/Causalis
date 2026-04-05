@@ -1,0 +1,75 @@
+# {py:mod}`causalis.scenarios.cuped.model`
+
+```{py:module} causalis.scenarios.cuped.model
+```
+
+```{autodoc2-docstring} causalis.scenarios.cuped.model
+:allowtitles:
+```
+
+## Module Contents
+
+### Classes
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`CUPEDModel <causalis.scenarios.cuped.model.CUPEDModel>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.model.CUPEDModel
+    :summary:
+    ```
+````
+
+### API
+
+`````{py:class} CUPEDModel(cov_type: str = 'HC2', alpha: float = 0.05, strict_binary_treatment: bool = True, use_t: typing.Optional[bool] = None, use_t_auto_n_threshold: int = 5000, relative_ci_method: typing.Literal[delta_nocov, bootstrap] = 'delta_nocov', relative_ci_bootstrap_draws: int = 1000, relative_ci_bootstrap_seed: typing.Optional[int] = None, covariate_variance_min: float = 1e-12, condition_number_warn_threshold: float = 100000000.0, run_regression_checks: bool = True, check_action: typing.Literal[ignore, raise] = 'ignore', raise_on_yellow: bool = False, corr_near_one_tol: float = 1e-10, vif_warn_threshold: float = 20.0, winsor_q: typing.Optional[float] = 0.01, tiny_one_minus_h_tol: float = 1e-08)
+:canonical: causalis.scenarios.cuped.model.CUPEDModel
+
+```{autodoc2-docstring} causalis.scenarios.cuped.model.CUPEDModel
+```
+
+```{rubric} Initialization
+```
+
+```{autodoc2-docstring} causalis.scenarios.cuped.model.CUPEDModel.__init__
+```
+
+````{py:method} fit(data: causalis.dgp.causaldata.CausalData, covariates: typing.Optional[typing.Sequence[str]] = None, run_checks: typing.Optional[bool] = None) -> causalis.scenarios.cuped.model.CUPEDModel
+:canonical: causalis.scenarios.cuped.model.CUPEDModel.fit
+
+```{autodoc2-docstring} causalis.scenarios.cuped.model.CUPEDModel.fit
+```
+
+````
+
+````{py:method} estimate(alpha: typing.Optional[float] = None, diagnostic_data: bool = True) -> causalis.data_contracts.causal_estimate.CausalEstimate
+:canonical: causalis.scenarios.cuped.model.CUPEDModel.estimate
+
+```{autodoc2-docstring} causalis.scenarios.cuped.model.CUPEDModel.estimate
+```
+
+````
+
+````{py:method} summary_dict(alpha: typing.Optional[float] = None) -> typing.Dict[str, typing.Any]
+:canonical: causalis.scenarios.cuped.model.CUPEDModel.summary_dict
+
+```{autodoc2-docstring} causalis.scenarios.cuped.model.CUPEDModel.summary_dict
+```
+
+````
+
+````{py:method} assumptions_table() -> typing.Optional[pandas.DataFrame]
+:canonical: causalis.scenarios.cuped.model.CUPEDModel.assumptions_table
+
+```{autodoc2-docstring} causalis.scenarios.cuped.model.CUPEDModel.assumptions_table
+```
+
+````
+
+````{py:method} __repr__() -> str
+:canonical: causalis.scenarios.cuped.model.CUPEDModel.__repr__
+
+````
+
+`````

@@ -835,7 +835,8 @@ def sensitivity_benchmark(
         Legacy name for additional keyword arguments passed to `IRM.estimate(...)`
         on the short model. If `score` is omitted, ATE/ATTE is inferred from
         the supplied estimate/model, and defaults to ATE.
-        If `diagnostic_data` is omitted, it defaults to `False` for faster benchmarking.
+        If `store_diagnostics` or legacy `diagnostic_data` is omitted, the short
+        benchmark model defaults to `store_diagnostics=False` for faster benchmarking.
 
     Returns
     -------
@@ -933,19 +934,20 @@ def sensitivity_benchmark(
         n_jobs=getattr(model, 'n_jobs', 1),
     )
 
-    # Fit short model (IRM.fit does not accept kwargs).
-    irm_short.fit()
+    estimate_args: Dict[str, Any] = dict(fit_args or {})
+    store_diagnostics_short = bool(
+        estimate_args.pop("store_diagnostics", estimate_args.pop("diagnostic_data", False))
+    )
+
+    # Fit short model.
+    irm_short.fit(store_diagnostics=store_diagnostics_short)
 
     # Estimate score for short model (ATE/ATTE only, independent of model.score=GATE state).
-    estimate_args: Dict[str, Any] = dict(fit_args or {})
     estimate_args["score"] = _resolve_sensitivity_score(
         effect_estimation=effect_estimation,
         model=model,
         explicit_score=estimate_args.get("score"),
     )
-    if "diagnostic_data" not in estimate_args:
-        # Benchmarking only needs the point estimate from the short model.
-        estimate_args["diagnostic_data"] = False
     irm_short.estimate(**estimate_args)
 
     # Long model stats
@@ -955,8 +957,16 @@ def sensitivity_benchmark(
     theta_short = float(irm_short.coef_[0])
 
     # Compute residual-based strengths on the long model
-    y = np.asarray(getattr(model, "_y", df_long[outcome_name].to_numpy(dtype=float)), dtype=float)
-    d = np.asarray(getattr(model, "_d", df_long[treatment_name].to_numpy(dtype=float)), dtype=float)
+    y_cached = getattr(model, "_y", None)
+    d_cached = getattr(model, "_d", None)
+    y = np.asarray(
+        df_long[outcome_name].to_numpy(dtype=float) if y_cached is None else y_cached,
+        dtype=float,
+    )
+    d = np.asarray(
+        df_long[treatment_name].to_numpy(dtype=float) if d_cached is None else d_cached,
+        dtype=float,
+    )
     m_hat = np.asarray(model.m_hat_, dtype=float)
     g0 = np.asarray(model.g0_hat_, dtype=float)
     g1 = np.asarray(model.g1_hat_, dtype=float)
@@ -965,9 +975,11 @@ def sensitivity_benchmark(
     r_d = d - m_hat
 
     def _center(a: np.ndarray) -> np.ndarray:
+        """Center an array by its arithmetic mean."""
         return a - np.mean(a)
 
     def _center_w(a: np.ndarray, w: np.ndarray) -> np.ndarray:
+        """Center an array by its weighted mean."""
         w = np.asarray(w, float)
         a = np.asarray(a, float)
         sw = float(np.sum(w))
@@ -1053,6 +1065,7 @@ def sensitivity_benchmark(
     r2_d = float(R2d)
 
     def _safe_corr(u: np.ndarray, v: np.ndarray, w: Optional[np.ndarray] = None) -> float:
+        """Compute a bounded correlation with optional weighting."""
         if w is None:
             u = _center(u); v = _center(v)
             su, sv = np.std(u), np.std(v)
@@ -1210,6 +1223,7 @@ def interpret_sensitivity_analysis(
     )
 
     def _ci_excludes_h0(ci: tuple[float, float], h0: float) -> bool:
+        """Return whether a confidence interval excludes the null value."""
         lo, hi = float(ci[0]), float(ci[1])
         if not (np.isfinite(lo) and np.isfinite(hi)):
             return False

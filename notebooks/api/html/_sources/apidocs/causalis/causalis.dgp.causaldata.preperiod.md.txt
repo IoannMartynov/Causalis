@@ -1,0 +1,197 @@
+# {py:mod}`causalis.dgp.causaldata.preperiod`
+
+```{py:module} causalis.dgp.causaldata.preperiod
+```
+
+```{autodoc2-docstring} causalis.dgp.causaldata.preperiod
+:allowtitles:
+```
+
+## Module Contents
+
+### Classes
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`PreCorrSpec <causalis.dgp.causaldata.preperiod.PreCorrSpec>`
+  - ```{autodoc2-docstring} causalis.dgp.causaldata.preperiod.PreCorrSpec
+    :summary:
+    ```
+````
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`corr_on_scale <causalis.dgp.causaldata.preperiod.corr_on_scale>`
+  - ```{autodoc2-docstring} causalis.dgp.causaldata.preperiod.corr_on_scale
+    :summary:
+    ```
+* - {py:obj}`calibrate_sigma_for_target_corr <causalis.dgp.causaldata.preperiod.calibrate_sigma_for_target_corr>`
+  - ```{autodoc2-docstring} causalis.dgp.causaldata.preperiod.calibrate_sigma_for_target_corr
+    :summary:
+    ```
+* - {py:obj}`add_preperiod_covariate <causalis.dgp.causaldata.preperiod.add_preperiod_covariate>`
+  - ```{autodoc2-docstring} causalis.dgp.causaldata.preperiod.add_preperiod_covariate
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`CorrMethod <causalis.dgp.causaldata.preperiod.CorrMethod>`
+  - ```{autodoc2-docstring} causalis.dgp.causaldata.preperiod.CorrMethod
+    :summary:
+    ```
+* - {py:obj}`Transform <causalis.dgp.causaldata.preperiod.Transform>`
+  - ```{autodoc2-docstring} causalis.dgp.causaldata.preperiod.Transform
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} CorrMethod
+:canonical: causalis.dgp.causaldata.preperiod.CorrMethod
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.dgp.causaldata.preperiod.CorrMethod
+```
+
+````
+
+````{py:data} Transform
+:canonical: causalis.dgp.causaldata.preperiod.Transform
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.dgp.causaldata.preperiod.Transform
+```
+
+````
+
+````{py:function} corr_on_scale(y_pre: numpy.ndarray, y_post: numpy.ndarray, *, transform: causalis.dgp.causaldata.preperiod.Transform = 'log1p', winsor_q: typing.Optional[float] = 0.999, method: causalis.dgp.causaldata.preperiod.CorrMethod = 'pearson') -> float
+:canonical: causalis.dgp.causaldata.preperiod.corr_on_scale
+
+```{autodoc2-docstring} causalis.dgp.causaldata.preperiod.corr_on_scale
+```
+````
+
+`````{py:class} PreCorrSpec
+:canonical: causalis.dgp.causaldata.preperiod.PreCorrSpec
+
+```{autodoc2-docstring} causalis.dgp.causaldata.preperiod.PreCorrSpec
+```
+
+````{py:attribute} target_corr
+:canonical: causalis.dgp.causaldata.preperiod.PreCorrSpec.target_corr
+:type: float
+:value: >
+   0.7
+
+```{autodoc2-docstring} causalis.dgp.causaldata.preperiod.PreCorrSpec.target_corr
+```
+
+````
+
+````{py:attribute} transform
+:canonical: causalis.dgp.causaldata.preperiod.PreCorrSpec.transform
+:type: causalis.dgp.causaldata.preperiod.Transform
+:value: >
+   'log1p'
+
+```{autodoc2-docstring} causalis.dgp.causaldata.preperiod.PreCorrSpec.transform
+```
+
+````
+
+````{py:attribute} winsor_q
+:canonical: causalis.dgp.causaldata.preperiod.PreCorrSpec.winsor_q
+:type: typing.Optional[float]
+:value: >
+   0.999
+
+```{autodoc2-docstring} causalis.dgp.causaldata.preperiod.PreCorrSpec.winsor_q
+```
+
+````
+
+````{py:attribute} method
+:canonical: causalis.dgp.causaldata.preperiod.PreCorrSpec.method
+:type: causalis.dgp.causaldata.preperiod.CorrMethod
+:value: >
+   'pearson'
+
+```{autodoc2-docstring} causalis.dgp.causaldata.preperiod.PreCorrSpec.method
+```
+
+````
+
+````{py:attribute} sigma_lo
+:canonical: causalis.dgp.causaldata.preperiod.PreCorrSpec.sigma_lo
+:type: float
+:value: >
+   0.0
+
+```{autodoc2-docstring} causalis.dgp.causaldata.preperiod.PreCorrSpec.sigma_lo
+```
+
+````
+
+````{py:attribute} sigma_hi
+:canonical: causalis.dgp.causaldata.preperiod.PreCorrSpec.sigma_hi
+:type: float
+:value: >
+   50.0
+
+```{autodoc2-docstring} causalis.dgp.causaldata.preperiod.PreCorrSpec.sigma_hi
+```
+
+````
+
+````{py:attribute} sigma_tol
+:canonical: causalis.dgp.causaldata.preperiod.PreCorrSpec.sigma_tol
+:type: float
+:value: >
+   0.001
+
+```{autodoc2-docstring} causalis.dgp.causaldata.preperiod.PreCorrSpec.sigma_tol
+```
+
+````
+
+````{py:attribute} max_iter
+:canonical: causalis.dgp.causaldata.preperiod.PreCorrSpec.max_iter
+:type: int
+:value: >
+   40
+
+```{autodoc2-docstring} causalis.dgp.causaldata.preperiod.PreCorrSpec.max_iter
+```
+
+````
+
+`````
+
+````{py:function} calibrate_sigma_for_target_corr(y_pre_base: numpy.ndarray, y_post: numpy.ndarray, rng: numpy.random.Generator, spec: causalis.dgp.causaldata.preperiod.PreCorrSpec, *, noise: typing.Optional[numpy.ndarray] = None) -> typing.Tuple[float, float]
+:canonical: causalis.dgp.causaldata.preperiod.calibrate_sigma_for_target_corr
+
+```{autodoc2-docstring} causalis.dgp.causaldata.preperiod.calibrate_sigma_for_target_corr
+```
+````
+
+````{py:function} add_preperiod_covariate(df: pandas.DataFrame, y_col: str, d_col: str, pre_name: str, base_builder: typing.Callable[[pandas.DataFrame], numpy.ndarray], spec: causalis.dgp.causaldata.preperiod.PreCorrSpec, rng: numpy.random.Generator, mask: typing.Optional[numpy.ndarray] = None) -> pandas.DataFrame
+:canonical: causalis.dgp.causaldata.preperiod.add_preperiod_covariate
+
+```{autodoc2-docstring} causalis.dgp.causaldata.preperiod.add_preperiod_covariate
+```
+````

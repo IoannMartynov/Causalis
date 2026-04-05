@@ -1,0 +1,31 @@
+# {py:mod}`causalis.scenarios.classic_rct.inference.ttest`
+
+```{py:module} causalis.scenarios.classic_rct.inference.ttest
+```
+
+```{autodoc2-docstring} causalis.scenarios.classic_rct.inference.ttest
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`ttest <causalis.scenarios.classic_rct.inference.ttest.ttest>`
+  - ```{autodoc2-docstring} causalis.scenarios.classic_rct.inference.ttest.ttest
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} ttest(data: causalis.data_contracts.CausalData, alpha: float = 0.05) -> typing.Dict[str, typing.Any]
+:canonical: causalis.scenarios.classic_rct.inference.ttest.ttest
+
+```{autodoc2-docstring} causalis.scenarios.classic_rct.inference.ttest.ttest
+```
+````

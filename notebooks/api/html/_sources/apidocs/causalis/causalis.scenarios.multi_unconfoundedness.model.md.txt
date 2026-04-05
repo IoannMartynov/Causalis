@@ -1,0 +1,126 @@
+# {py:mod}`causalis.scenarios.multi_unconfoundedness.model`
+
+```{py:module} causalis.scenarios.multi_unconfoundedness.model
+```
+
+```{autodoc2-docstring} causalis.scenarios.multi_unconfoundedness.model
+:allowtitles:
+```
+
+## Module Contents
+
+### Classes
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`MultiTreatmentIRM <causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM>`
+  - ```{autodoc2-docstring} causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM
+    :summary:
+    ```
+````
+
+### API
+
+`````{py:class} MultiTreatmentIRM(data: typing.Optional[causalis.data_contracts.multicausaldata.MultiCausalData] = None, ml_g: typing.Any = None, ml_m: typing.Any = None, *, n_folds: int = 5, n_rep: int = 1, normalize_ipw: bool = False, trimming_rule: str = 'truncate', trimming_threshold: float = 0.01, random_state: typing.Optional[int] = None, n_jobs: int = 1)
+:canonical: causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM
+
+Bases: {py:obj}`sklearn.base.BaseEstimator`
+
+```{autodoc2-docstring} causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM
+```
+
+```{rubric} Initialization
+```
+
+```{autodoc2-docstring} causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.__init__
+```
+
+````{py:method} fit(data: typing.Optional[causalis.data_contracts.multicausaldata.MultiCausalData] = None) -> causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM
+:canonical: causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.fit
+
+```{autodoc2-docstring} causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.fit
+```
+
+````
+
+````{py:method} estimate(score: str = 'ATE', alpha: float = 0.05, diagnostic_data: bool = True) -> causalis.data_contracts.multicausal_estimate.MultiCausalEstimate
+:canonical: causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.estimate
+
+```{autodoc2-docstring} causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.estimate
+```
+
+````
+
+````{py:property} diagnostics_
+:canonical: causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.diagnostics_
+:type: typing.Dict[str, typing.Any]
+
+```{autodoc2-docstring} causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.diagnostics_
+```
+
+````
+
+````{py:property} coef
+:canonical: causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.coef
+:type: numpy.ndarray
+
+```{autodoc2-docstring} causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.coef
+```
+
+````
+
+````{py:property} se
+:canonical: causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.se
+:type: numpy.ndarray
+
+```{autodoc2-docstring} causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.se
+```
+
+````
+
+````{py:property} pvalues
+:canonical: causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.pvalues
+:type: numpy.ndarray
+
+```{autodoc2-docstring} causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.pvalues
+```
+
+````
+
+````{py:property} summary
+:canonical: causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.summary
+:type: pandas.DataFrame
+
+```{autodoc2-docstring} causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.summary
+```
+
+````
+
+````{py:property} orth_signal
+:canonical: causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.orth_signal
+:type: numpy.ndarray
+
+```{autodoc2-docstring} causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.orth_signal
+```
+
+````
+
+````{py:method} sensitivity_analysis(cf_y: typing.Optional[float] = None, r2_d: typing.Any = 0.0, rho: typing.Any = 1.0, H0: float = 0.0, alpha: float = 0.05, *, r2_y: typing.Optional[float] = None) -> causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM
+:canonical: causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.sensitivity_analysis
+
+```{autodoc2-docstring} causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.sensitivity_analysis
+```
+
+````
+
+````{py:method} confint() -> pandas.DataFrame
+:canonical: causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.confint
+
+```{autodoc2-docstring} causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.confint
+```
+
+````
+
+`````

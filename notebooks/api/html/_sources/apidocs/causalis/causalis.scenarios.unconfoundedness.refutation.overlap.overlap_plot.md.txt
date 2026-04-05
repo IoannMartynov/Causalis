@@ -1,0 +1,31 @@
+# {py:mod}`causalis.scenarios.unconfoundedness.refutation.overlap.overlap_plot`
+
+```{py:module} causalis.scenarios.unconfoundedness.refutation.overlap.overlap_plot
+```
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.overlap.overlap_plot
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`plot_m_overlap <causalis.scenarios.unconfoundedness.refutation.overlap.overlap_plot.plot_m_overlap>`
+  - ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.overlap.overlap_plot.plot_m_overlap
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} plot_m_overlap(diag: typing.Union[causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData, causalis.data_contracts.causal_estimate.CausalEstimate, dict], clip: typing.Tuple[float, float] = (0.01, 0.99), bins: typing.Any = 'fd', kde: bool = True, shade_overlap: bool = True, ax: typing.Optional[matplotlib.pyplot.Axes] = None, figsize: typing.Tuple[float, float] = (9, 5.5), dpi: int = 220, font_scale: float = 1.15, save: typing.Optional[str] = None, save_dpi: typing.Optional[int] = None, transparent: bool = False, color_t: typing.Optional[typing.Any] = None, color_c: typing.Optional[typing.Any] = None) -> matplotlib.pyplot.Figure
+:canonical: causalis.scenarios.unconfoundedness.refutation.overlap.overlap_plot.plot_m_overlap
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.overlap.overlap_plot.plot_m_overlap
+```
+````

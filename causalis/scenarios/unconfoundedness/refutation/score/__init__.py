@@ -1,3 +1,5 @@
+"""Score-based diagnostics and visualization utilities for unconfoundedness."""
+
 from .score_validation import (
     run_score_diagnostics,
 )

@@ -1,0 +1,311 @@
+# {py:mod}`causalis.data_contracts.multicausal_estimate`
+
+```{py:module} causalis.data_contracts.multicausal_estimate
+```
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate
+:allowtitles:
+```
+
+## Module Contents
+
+### Classes
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`MultiCausalEstimate <causalis.data_contracts.multicausal_estimate.MultiCausalEstimate>`
+  - ```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate
+    :summary:
+    ```
+````
+
+### API
+
+`````{py:class} MultiCausalEstimate(/, **data: typing.Any)
+:canonical: causalis.data_contracts.multicausal_estimate.MultiCausalEstimate
+
+Bases: {py:obj}`pydantic.BaseModel`
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate
+```
+
+```{rubric} Initialization
+```
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.__init__
+```
+
+````{py:attribute} model_config
+:canonical: causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.model_config
+:value: >
+   'ConfigDict(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.model_config
+```
+
+````
+
+````{py:attribute} estimand
+:canonical: causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.estimand
+:type: str
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.estimand
+```
+
+````
+
+````{py:attribute} model
+:canonical: causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.model
+:type: str
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.model
+```
+
+````
+
+````{py:attribute} model_options
+:canonical: causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.model_options
+:type: typing.Dict[str, typing.Any]
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.model_options
+```
+
+````
+
+````{py:attribute} value
+:canonical: causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.value
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.value
+```
+
+````
+
+````{py:attribute} ci_upper_absolute
+:canonical: causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.ci_upper_absolute
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.ci_upper_absolute
+```
+
+````
+
+````{py:attribute} ci_lower_absolute
+:canonical: causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.ci_lower_absolute
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.ci_lower_absolute
+```
+
+````
+
+````{py:attribute} value_relative
+:canonical: causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.value_relative
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.value_relative
+```
+
+````
+
+````{py:attribute} ci_upper_relative
+:canonical: causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.ci_upper_relative
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.ci_upper_relative
+```
+
+````
+
+````{py:attribute} ci_lower_relative
+:canonical: causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.ci_lower_relative
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.ci_lower_relative
+```
+
+````
+
+````{py:attribute} alpha
+:canonical: causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.alpha
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.alpha
+```
+
+````
+
+````{py:attribute} p_value
+:canonical: causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.p_value
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.p_value
+```
+
+````
+
+````{py:attribute} is_significant
+:canonical: causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.is_significant
+:type: typing.List[bool]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.is_significant
+```
+
+````
+
+````{py:attribute} n_treated
+:canonical: causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.n_treated
+:type: int
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.n_treated
+```
+
+````
+
+````{py:attribute} n_control
+:canonical: causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.n_control
+:type: int
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.n_control
+```
+
+````
+
+````{py:attribute} outcome
+:canonical: causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.outcome
+:type: str
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.outcome
+```
+
+````
+
+````{py:attribute} treatment
+:canonical: causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.treatment
+:type: typing.List[str]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.treatment
+```
+
+````
+
+````{py:attribute} n_treated_by_arm
+:canonical: causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.n_treated_by_arm
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.n_treated_by_arm
+```
+
+````
+
+````{py:attribute} treatment_mean
+:canonical: causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.treatment_mean
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.treatment_mean
+```
+
+````
+
+````{py:attribute} control_mean
+:canonical: causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.control_mean
+:type: typing.Optional[float]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.control_mean
+```
+
+````
+
+````{py:attribute} contrast_labels
+:canonical: causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.contrast_labels
+:type: typing.List[str]
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.contrast_labels
+```
+
+````
+
+````{py:attribute} confounders
+:canonical: causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.confounders
+:type: typing.List[str]
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.confounders
+```
+
+````
+
+````{py:attribute} time
+:canonical: causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.time
+:type: str
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.time
+```
+
+````
+
+````{py:attribute} diagnostic_data
+:canonical: causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.diagnostic_data
+:type: typing.Optional[causalis.data_contracts.causal_diagnostic_data.DiagnosticData]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.diagnostic_data
+```
+
+````
+
+````{py:method} summary() -> pandas.DataFrame
+:canonical: causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.summary
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.summary
+```
+
+````
+
+`````

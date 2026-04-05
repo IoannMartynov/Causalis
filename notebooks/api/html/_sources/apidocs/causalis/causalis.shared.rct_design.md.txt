@@ -1,0 +1,44 @@
+# {py:mod}`causalis.shared.rct_design`
+
+```{py:module} causalis.shared.rct_design
+```
+
+```{autodoc2-docstring} causalis.shared.rct_design
+:allowtitles:
+```
+
+## Submodules
+
+```{toctree}
+:titlesonly:
+:maxdepth: 1
+
+causalis.shared.rct_design.mde
+causalis.shared.rct_design.split
+```
+
+## Package Contents
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.shared.rct_design.__all__>`
+  - ```{autodoc2-docstring} causalis.shared.rct_design.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} __all__
+:canonical: causalis.shared.rct_design.__all__
+:value: >
+   ['calculate_mde', 'assign_variants_df', 'SRMResult', 'check_srm']
+
+```{autodoc2-docstring} causalis.shared.rct_design.__all__
+```
+
+````

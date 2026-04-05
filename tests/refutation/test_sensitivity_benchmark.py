@@ -69,10 +69,10 @@ def test_input_validation():
 def test_benchmark_uses_estimate_estimand_when_model_score_is_gate():
     df = make_synthetic(seed=101)
     irm = fit_irm(df)
-    ate_estimate = irm.estimate(score="ATE", diagnostic_data=True)
+    ate_estimate = irm.estimate(score="ATE")
 
     gate_groups = pd.Series(np.where(df["x1"].to_numpy() > 0.0, "high_x1", "low_x1"), name="grp")
-    _ = irm.estimate(score="GATE", groups=gate_groups, diagnostic_data=False)
+    _ = irm.estimate(score="GATE", groups=gate_groups)
     assert str(irm.score).upper() == "GATE"
 
     res = sensitivity_benchmark(ate_estimate, ["x1"])

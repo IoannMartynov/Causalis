@@ -1,0 +1,97 @@
+# {py:mod}`causalis.dgp.causaldata.functional`
+
+```{py:module} causalis.dgp.causaldata.functional
+```
+
+```{autodoc2-docstring} causalis.dgp.causaldata.functional
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`generate_rct <causalis.dgp.causaldata.functional.generate_rct>`
+  - ```{autodoc2-docstring} causalis.dgp.causaldata.functional.generate_rct
+    :summary:
+    ```
+* - {py:obj}`generate_classic_rct <causalis.dgp.causaldata.functional.generate_classic_rct>`
+  - ```{autodoc2-docstring} causalis.dgp.causaldata.functional.generate_classic_rct
+    :summary:
+    ```
+* - {py:obj}`classic_rct_gamma <causalis.dgp.causaldata.functional.classic_rct_gamma>`
+  - ```{autodoc2-docstring} causalis.dgp.causaldata.functional.classic_rct_gamma
+    :summary:
+    ```
+* - {py:obj}`obs_linear_effect <causalis.dgp.causaldata.functional.obs_linear_effect>`
+  - ```{autodoc2-docstring} causalis.dgp.causaldata.functional.obs_linear_effect
+    :summary:
+    ```
+* - {py:obj}`make_cuped_tweedie <causalis.dgp.causaldata.functional.make_cuped_tweedie>`
+  - ```{autodoc2-docstring} causalis.dgp.causaldata.functional.make_cuped_tweedie
+    :summary:
+    ```
+* - {py:obj}`generate_cuped_binary <causalis.dgp.causaldata.functional.generate_cuped_binary>`
+  - ```{autodoc2-docstring} causalis.dgp.causaldata.functional.generate_cuped_binary
+    :summary:
+    ```
+* - {py:obj}`make_gold_linear <causalis.dgp.causaldata.functional.make_gold_linear>`
+  - ```{autodoc2-docstring} causalis.dgp.causaldata.functional.make_gold_linear
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} generate_rct(n: int = 20000, split: float = 0.5, random_state: typing.Optional[int] = 42, outcome_type: str = 'binary', outcome_params: typing.Optional[typing.Dict] = None, confounder_specs: typing.Optional[typing.List[typing.Dict[str, typing.Any]]] = None, k: int = 0, x_sampler: typing.Optional[typing.Callable[[int, int, int], numpy.ndarray]] = None, add_ancillary: bool = True, deterministic_ids: bool = False, add_pre: bool = True, pre_name: str = 'y_pre', pre_corr: float = 0.7, prognostic_scale: float = 1.0, beta_y: typing.Optional[typing.Union[typing.List[float], numpy.ndarray]] = None, g_y: typing.Optional[typing.Callable[[numpy.ndarray], numpy.ndarray]] = None, use_prognostic: typing.Optional[bool] = None, include_oracle: bool = True, return_causal_data: bool = False) -> typing.Union[pandas.DataFrame, causalis.dgp.causaldata.CausalData]
+:canonical: causalis.dgp.causaldata.functional.generate_rct
+
+```{autodoc2-docstring} causalis.dgp.causaldata.functional.generate_rct
+```
+````
+
+````{py:function} generate_classic_rct(n: int = 10000, split: float = 0.5, random_state: typing.Optional[int] = 42, outcome_params: typing.Optional[typing.Dict] = None, add_pre: bool = False, beta_y: typing.Optional[typing.Union[typing.List[float], numpy.ndarray]] = None, outcome_depends_on_x: bool = True, prognostic_scale: float = 1.0, pre_corr: float = 0.7, return_causal_data: bool = False, add_ancillary: bool = False, deterministic_ids: bool = False, include_oracle: bool = True, **kwargs) -> typing.Union[pandas.DataFrame, causalis.dgp.causaldata.CausalData]
+:canonical: causalis.dgp.causaldata.functional.generate_classic_rct
+
+```{autodoc2-docstring} causalis.dgp.causaldata.functional.generate_classic_rct
+```
+````
+
+````{py:function} classic_rct_gamma(n: int = 10000, split: float = 0.5, random_state: typing.Optional[int] = 42, outcome_params: typing.Optional[typing.Dict] = None, add_pre: bool = False, beta_y: typing.Optional[typing.Union[typing.List[float], numpy.ndarray]] = None, outcome_depends_on_x: bool = True, prognostic_scale: float = 1.0, pre_corr: float = 0.7, add_ancillary: bool = True, deterministic_ids: bool = False, include_oracle: bool = True, return_causal_data: bool = False, **kwargs) -> typing.Union[pandas.DataFrame, causalis.dgp.causaldata.CausalData]
+:canonical: causalis.dgp.causaldata.functional.classic_rct_gamma
+
+```{autodoc2-docstring} causalis.dgp.causaldata.functional.classic_rct_gamma
+```
+````
+
+````{py:function} obs_linear_effect(n: int = 10000, theta: float = 1.0, outcome_type: str = 'continuous', sigma_y: float = 1.0, target_d_rate: typing.Optional[float] = None, confounder_specs: typing.Optional[typing.List[typing.Dict[str, typing.Any]]] = None, beta_y: typing.Optional[numpy.ndarray] = None, beta_d: typing.Optional[numpy.ndarray] = None, random_state: typing.Optional[int] = 42, k: int = 0, x_sampler: typing.Optional[typing.Callable[[int, int, int], numpy.ndarray]] = None, include_oracle: bool = True, add_ancillary: bool = False, deterministic_ids: bool = False) -> pandas.DataFrame
+:canonical: causalis.dgp.causaldata.functional.obs_linear_effect
+
+```{autodoc2-docstring} causalis.dgp.causaldata.functional.obs_linear_effect
+```
+````
+
+````{py:function} make_cuped_tweedie(n: int = 10000, seed: int = 42, add_pre: bool = True, pre_name: str = 'y_pre', pre_target_corr: float = 0.6, pre_spec: typing.Optional[causalis.dgp.causaldata.preperiod.PreCorrSpec] = None, include_oracle: bool = False, return_causal_data: bool = True, theta_log: float = 0.2) -> typing.Union[pandas.DataFrame, causalis.dgp.causaldata.CausalData]
+:canonical: causalis.dgp.causaldata.functional.make_cuped_tweedie
+
+```{autodoc2-docstring} causalis.dgp.causaldata.functional.make_cuped_tweedie
+```
+````
+
+````{py:function} generate_cuped_binary(n: int = 10000, seed: int = 42, add_pre: bool = True, pre_name: str = 'y_pre', pre_target_corr: float = 0.65, pre_spec: typing.Optional[causalis.dgp.causaldata.preperiod.PreCorrSpec] = None, include_oracle: bool = True, return_causal_data: bool = True, theta_logit: float = 0.38) -> typing.Union[pandas.DataFrame, causalis.dgp.causaldata.CausalData]
+:canonical: causalis.dgp.causaldata.functional.generate_cuped_binary
+
+```{autodoc2-docstring} causalis.dgp.causaldata.functional.generate_cuped_binary
+```
+````
+
+````{py:function} make_gold_linear(n: int = 10000, seed: int = 42) -> causalis.dgp.causaldata.CausalData
+:canonical: causalis.dgp.causaldata.functional.make_gold_linear
+
+```{autodoc2-docstring} causalis.dgp.causaldata.functional.make_gold_linear
+```
+````

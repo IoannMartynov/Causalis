@@ -1,0 +1,134 @@
+# {py:mod}`causalis.scenarios.unconfoundedness.model`
+
+```{py:module} causalis.scenarios.unconfoundedness.model
+```
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.model
+:allowtitles:
+```
+
+## Module Contents
+
+### Classes
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`IRM <causalis.scenarios.unconfoundedness.model.IRM>`
+  - ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.model.IRM
+    :summary:
+    ```
+````
+
+### API
+
+`````{py:class} IRM(data: typing.Optional[causalis.dgp.causaldata.CausalData] = None, ml_g: typing.Any = None, ml_m: typing.Any = None, *, n_folds: int = 5, n_rep: int = 1, normalize_ipw: bool = False, trimming_rule: str = 'truncate', trimming_threshold: float = 0.01, weights: typing.Optional[numpy.ndarray | typing.Dict[str, typing.Any]] = None, relative_baseline_min: float = 1e-08, random_state: typing.Optional[int] = None, n_jobs: int = 1, store_diagnostics: bool = True)
+:canonical: causalis.scenarios.unconfoundedness.model.IRM
+
+Bases: {py:obj}`sklearn.base.BaseEstimator`
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.model.IRM
+```
+
+```{rubric} Initialization
+```
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.model.IRM.__init__
+```
+
+````{py:method} fit(data: typing.Optional[causalis.dgp.causaldata.CausalData] = None, *, store_diagnostics: typing.Optional[bool] = None) -> causalis.scenarios.unconfoundedness.model.IRM
+:canonical: causalis.scenarios.unconfoundedness.model.IRM.fit
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.model.IRM.fit
+```
+
+````
+
+````{py:method} estimate(score: str = 'ATE', alpha: float = 0.05, groups: typing.Optional[pandas.DataFrame | pandas.Series] = None, cov_type: str = 'HC3', cov_kwds: typing.Optional[typing.Dict[str, typing.Any]] = None) -> causalis.data_contracts.causal_estimate.CausalEstimate | causalis.data_contracts.gate_estimate.GateEstimate
+:canonical: causalis.scenarios.unconfoundedness.model.IRM.estimate
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.model.IRM.estimate
+```
+
+````
+
+````{py:property} diagnostics_
+:canonical: causalis.scenarios.unconfoundedness.model.IRM.diagnostics_
+:type: typing.Dict[str, typing.Any]
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.model.IRM.diagnostics_
+```
+
+````
+
+````{py:property} coef
+:canonical: causalis.scenarios.unconfoundedness.model.IRM.coef
+:type: numpy.ndarray
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.model.IRM.coef
+```
+
+````
+
+````{py:property} se
+:canonical: causalis.scenarios.unconfoundedness.model.IRM.se
+:type: numpy.ndarray
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.model.IRM.se
+```
+
+````
+
+````{py:property} pvalues
+:canonical: causalis.scenarios.unconfoundedness.model.IRM.pvalues
+:type: numpy.ndarray
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.model.IRM.pvalues
+```
+
+````
+
+````{py:property} summary
+:canonical: causalis.scenarios.unconfoundedness.model.IRM.summary
+:type: pandas.DataFrame
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.model.IRM.summary
+```
+
+````
+
+````{py:property} orth_signal
+:canonical: causalis.scenarios.unconfoundedness.model.IRM.orth_signal
+:type: numpy.ndarray
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.model.IRM.orth_signal
+```
+
+````
+
+````{py:method} gate(groups: pandas.DataFrame | pandas.Series, alpha: float = 0.05, cov_type: str = 'HC3', cov_kwds: typing.Optional[typing.Dict[str, typing.Any]] = None) -> causalis.data_contracts.gate_estimate.GateEstimate
+:canonical: causalis.scenarios.unconfoundedness.model.IRM.gate
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.model.IRM.gate
+```
+
+````
+
+````{py:method} sensitivity_analysis(r2_y: float, r2_d: float, rho: float = 1.0, H0: float = 0.0, alpha: float = 0.05) -> causalis.scenarios.unconfoundedness.model.IRM
+:canonical: causalis.scenarios.unconfoundedness.model.IRM.sensitivity_analysis
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.model.IRM.sensitivity_analysis
+```
+
+````
+
+````{py:method} confint(alpha: float = 0.05) -> pandas.DataFrame
+:canonical: causalis.scenarios.unconfoundedness.model.IRM.confint
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.model.IRM.confint
+```
+
+````
+
+`````

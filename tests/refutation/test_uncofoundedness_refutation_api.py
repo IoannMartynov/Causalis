@@ -27,7 +27,7 @@ def _make_estimate(data: CausalData, *, score: str = "ATE"):
         trimming_threshold=1e-3,
         random_state=7,
     ).fit()
-    return model.estimate(score=score, alpha=0.10, diagnostic_data=True)
+    return model.estimate(score=score, alpha=0.10)
 
 
 def test_uncofoundedness_single_api_with_causal_estimate():

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>causalis.shared.srm &#8212; Causalis API Reference  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="prev" title="causalis.shared.sutva_validation" href="causalis.shared.sutva_validation.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-causalis.shared.srm">
+<span id="causalis-shared-srm"></span><h1><a class="reference internal" href="#module-causalis.shared.srm" title="causalis.shared.srm"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.shared.srm</span></code></a><a class="headerlink" href="#module-causalis.shared.srm" title="Link to this heading">¶</a></h1>
+<p>Sample Ratio Mismatch (SRM) utilities for randomized experiments.</p>
+<p>This module provides a chi-square goodness-of-fit SRM check for randomized
+experiments. It accepts observed assignments as labels or aggregated counts
+and returns a compact result object with diagnostics.</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.shared.srm.SRMResult" title="causalis.shared.srm.SRMResult"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SRMResult</span></code></a></p></td>
+<td><p>Result of a Sample Ratio Mismatch (SRM) check.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.shared.srm.check_srm" title="causalis.shared.srm.check_srm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_srm</span></code></a></p></td>
+<td><p>Check Sample Ratio Mismatch (SRM) for an RCT via a chi-square goodness-of-fit test.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="data">
+<h3>Data<a class="headerlink" href="#data" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.shared.srm.Number" title="causalis.shared.srm.Number"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Number</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.shared.srm.__all__" title="causalis.shared.srm.__all__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__all__</span></code></a></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
+<dl class="py data">
+<dt class="sig sig-object py" id="causalis.shared.srm.Number">
+<span class="sig-prename descclassname"><span class="pre">causalis.shared.srm.</span></span><span class="sig-name descname"><span class="pre">Number</span></span><a class="headerlink" href="#causalis.shared.srm.Number" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="causalis.shared.srm.SRMResult">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">causalis.shared.srm.</span></span><span class="sig-name descname"><span class="pre">SRMResult</span></span><a class="headerlink" href="#causalis.shared.srm.SRMResult" title="Link to this definition">¶</a></dt>
+<dd><p>Result of a Sample Ratio Mismatch (SRM) check.</p>
+<p class="rubric" id="id1">Attributes</p>
+<p>chi2 : float
+The calculated chi-square statistic.
+p_value : float
+The p-value of the test, rounded to 5 decimals.
+expected : dict[Hashable, float]
+Expected counts for each variant.
+observed : dict[Hashable, int]
+Observed counts for each variant.
+alpha : float
+Significance level used for the check.
+is_srm : bool
+True if an SRM was detected (chi-square p-value &lt; alpha), False otherwise.
+warning : str or None
+Warning message if the test assumptions might be violated (e.g., small expected counts).</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.shared.srm.SRMResult.chi2">
+<span class="sig-name descname"><span class="pre">chi2</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.shared.srm.SRMResult.chi2" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.shared.srm.SRMResult.p_value">
+<span class="sig-name descname"><span class="pre">p_value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.shared.srm.SRMResult.p_value" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.shared.srm.SRMResult.expected">
+<span class="sig-name descname"><span class="pre">expected</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Hashable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.shared.srm.SRMResult.expected" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.shared.srm.SRMResult.observed">
+<span class="sig-name descname"><span class="pre">observed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Hashable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.shared.srm.SRMResult.observed" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.shared.srm.SRMResult.alpha">
+<span class="sig-name descname"><span class="pre">alpha</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.shared.srm.SRMResult.alpha" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.shared.srm.SRMResult.is_srm">
+<span class="sig-name descname"><span class="pre">is_srm</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#causalis.shared.srm.SRMResult.is_srm" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.shared.srm.SRMResult.warning">
+<span class="sig-name descname"><span class="pre">warning</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#causalis.shared.srm.SRMResult.warning" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.shared.srm.SRMResult.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#causalis.shared.srm.SRMResult.__repr__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.shared.srm.check_srm">
+<span class="sig-prename descclassname"><span class="pre">causalis.shared.srm.</span></span><span class="sig-name descname"><span class="pre">check_srm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">assignments</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">Hashable</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">pandas.Series</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">causalis.dgp.causaldata.CausalData</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">collections.abc.Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">Hashable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">causalis.shared.srm.Number</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_allocation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Hashable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">causalis.shared.srm.Number</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_expected</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict_variants</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#causalis.shared.srm.SRMResult" title="causalis.shared.srm.SRMResult"><span class="pre">causalis.shared.srm.SRMResult</span></a></span></span><a class="headerlink" href="#causalis.shared.srm.check_srm" title="Link to this definition">¶</a></dt>
+<dd><p>Check Sample Ratio Mismatch (SRM) for an RCT via a chi-square goodness-of-fit test.</p>
+<p class="rubric" id="id2">Parameters</p>
+<p>assignments : Iterable[Hashable] or pandas.Series or CausalData or Mapping[Hashable, Number]
+Observed variant assignments. If iterable or Series, elements are labels per
+unit (user_id, session_id, etc.). If CausalData is provided, the treatment
+column is used. If a mapping is provided, it is treated as
+<code class="docutils literal notranslate"><span class="pre">{variant:</span> <span class="pre">observed_count}</span></code> with non-negative integer counts.
+target_allocation : dict[Hashable, Number]
+Mapping <code class="docutils literal notranslate"><span class="pre">{variant:</span> <span class="pre">p}</span></code> describing intended allocation as probabilities.
+alpha : float, default 1e-3
+Significance level. Use strict values like 1e-3 or 1e-4 in production.
+min_expected : float, default 5.0
+If any expected count &lt; min_expected, a warning is attached.
+strict_variants : bool, default True
+- True: fail if observed variants differ from target keys.
+- False: drop unknown variants and test only on declared ones.</p>
+<p class="rubric" id="id3">Returns</p>
+<p>SRMResult
+The result of the SRM check.</p>
+<p class="rubric" id="id4">Raises</p>
+<p>ValueError
+If inputs are invalid or empty.
+ImportError
+If scipy is required but not installed.</p>
+<p class="rubric" id="id5">Notes</p>
+<ul class="simple">
+<li><p>Target allocation probabilities must sum to 1 within numerical tolerance.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">is_srm</span></code> is computed using the unrounded p-value; the returned
+<code class="docutils literal notranslate"><span class="pre">p_value</span></code> is rounded to 5 decimals.</p></li>
+<li><p>Missing assignments are dropped and reported via <code class="docutils literal notranslate"><span class="pre">warning</span></code>.</p></li>
+<li><p>Requires SciPy for p-value computation.</p></li>
+</ul>
+<p class="rubric" id="id6">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>assignments = [“control”] * 50 + [“treatment”] * 50
+check_srm(assignments, {“control”: 0.5, “treatment”: 0.5}, alpha=1e-3)
+SRMResult(status=no SRM, p_value=1.00000, chi2=0.0000)</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>counts = {“control”: 70, “treatment”: 30}
+check_srm(counts, {“control”: 0.5, “treatment”: 0.5})
+SRMResult(status=SRM DETECTED, p_value=0.00006, chi2=16.0000)</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="causalis.shared.srm.__all__">
+<span class="sig-prename descclassname"><span class="pre">causalis.shared.srm.</span></span><span class="sig-name descname"><span class="pre">__all__</span></span><a class="headerlink" href="#causalis.shared.srm.__all__" title="Link to this definition">¶</a></dt>
+<dd><p>[‘SRMResult’, ‘check_srm’]</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../reference.html">Causalis API Reference</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../reference.html">Documentation overview</a><ul>
+  <li><a href="../index.html">API Modules</a><ul>
+  <li><a href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a><ul>
+  <li><a href="causalis.shared.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.shared</span></code></a><ul>
+      <li>Previous: <a href="causalis.shared.sutva_validation.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.shared.sutva_validation</span></code></a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../../_sources/apidocs/causalis/causalis.shared.srm.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,57 @@
+# {py:mod}`causalis.shared`
+
+```{py:module} causalis.shared
+```
+
+```{autodoc2-docstring} causalis.shared
+:allowtitles:
+```
+
+## Subpackages
+
+```{toctree}
+:titlesonly:
+:maxdepth: 3
+
+causalis.shared.rct_design
+```
+
+## Submodules
+
+```{toctree}
+:titlesonly:
+:maxdepth: 1
+
+causalis.shared.outcome_outliers
+causalis.shared.confounders_balance
+causalis.shared.outcome_plots
+causalis.shared.outcome_stats
+causalis.shared.sutva_validation
+causalis.shared.srm
+```
+
+## Package Contents
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.shared.__all__>`
+  - ```{autodoc2-docstring} causalis.shared.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} __all__
+:canonical: causalis.shared.__all__
+:value: >
+   ['check_srm', 'SRMResult', 'confounders_balance', 'outcome_stats', 'outcome_outliers', 'outcome_plot...
+
+```{autodoc2-docstring} causalis.shared.__all__
+```
+
+````
