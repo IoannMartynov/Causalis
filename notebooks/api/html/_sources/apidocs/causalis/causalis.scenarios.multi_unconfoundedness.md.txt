@@ -1,0 +1,53 @@
+# {py:mod}`causalis.scenarios.multi_unconfoundedness`
+
+```{py:module} causalis.scenarios.multi_unconfoundedness
+```
+
+```{autodoc2-docstring} causalis.scenarios.multi_unconfoundedness
+:allowtitles:
+```
+
+## Subpackages
+
+```{toctree}
+:titlesonly:
+:maxdepth: 3
+
+causalis.scenarios.multi_unconfoundedness.refutation
+```
+
+## Submodules
+
+```{toctree}
+:titlesonly:
+:maxdepth: 1
+
+causalis.scenarios.multi_unconfoundedness.dgp
+causalis.scenarios.multi_unconfoundedness.model
+```
+
+## Package Contents
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.scenarios.multi_unconfoundedness.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.multi_unconfoundedness.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} __all__
+:canonical: causalis.scenarios.multi_unconfoundedness.__all__
+:value: >
+   ['refutation', 'dgp', 'model', 'MultiTreatmentIRM']
+
+```{autodoc2-docstring} causalis.scenarios.multi_unconfoundedness.__all__
+```
+
+````

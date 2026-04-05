@@ -1,0 +1,42 @@
+# {py:mod}`causalis.scenarios.cuped.dgp`
+
+```{py:module} causalis.scenarios.cuped.dgp
+```
+
+```{autodoc2-docstring} causalis.scenarios.cuped.dgp
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`generate_cuped_tweedie_26 <causalis.scenarios.cuped.dgp.generate_cuped_tweedie_26>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.dgp.generate_cuped_tweedie_26
+    :summary:
+    ```
+* - {py:obj}`make_cuped_binary_26 <causalis.scenarios.cuped.dgp.make_cuped_binary_26>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.dgp.make_cuped_binary_26
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} generate_cuped_tweedie_26(n: int = 20000, seed: int = 42, add_pre: bool = True, pre_name: str = 'y_pre', pre_name_2: typing.Optional[str] = None, pre_target_corr: float = 0.82, pre_target_corr_2: typing.Optional[float] = None, pre_spec: typing.Optional[causalis.dgp.causaldata.preperiod.PreCorrSpec] = None, include_oracle: bool = False, return_causal_data: bool = True, theta_log: float = 0.38) -> typing.Union[pandas.DataFrame, causalis.dgp.causaldata.CausalData]
+:canonical: causalis.scenarios.cuped.dgp.generate_cuped_tweedie_26
+
+```{autodoc2-docstring} causalis.scenarios.cuped.dgp.generate_cuped_tweedie_26
+```
+````
+
+````{py:function} make_cuped_binary_26(n: int = 10000, seed: int = 42, add_pre: bool = True, pre_name: str = 'y_pre', pre_target_corr: float = 0.65, pre_spec: typing.Optional[causalis.dgp.causaldata.preperiod.PreCorrSpec] = None, include_oracle: bool = True, return_causal_data: bool = True, theta_logit: float = 0.38) -> typing.Union[pandas.DataFrame, causalis.dgp.causaldata.CausalData]
+:canonical: causalis.scenarios.cuped.dgp.make_cuped_binary_26
+
+```{autodoc2-docstring} causalis.scenarios.cuped.dgp.make_cuped_binary_26
+```
+````

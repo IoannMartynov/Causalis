@@ -1,0 +1,48 @@
+# {py:mod}`causalis.scenarios.synthetic_control.refutation`
+
+```{py:module} causalis.scenarios.synthetic_control.refutation
+```
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation
+:allowtitles:
+```
+
+## Submodules
+
+```{toctree}
+:titlesonly:
+:maxdepth: 1
+
+causalis.scenarios.synthetic_control.refutation.sensitivity
+causalis.scenarios.synthetic_control.refutation.donors_diagnostics
+causalis.scenarios.synthetic_control.refutation.scm_diagnostics
+causalis.scenarios.synthetic_control.refutation.placebo
+causalis.scenarios.synthetic_control.refutation.diagnostic_plots
+causalis.scenarios.synthetic_control.refutation.outcome_panel_plot
+```
+
+## Package Contents
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.scenarios.synthetic_control.refutation.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} __all__
+:canonical: causalis.scenarios.synthetic_control.refutation.__all__
+:value: >
+   ['outcome_panel_plot', 'observed_vs_synthetic_plot', 'gap_over_time_plot', 'donors_diagnostics', 'ru...
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.__all__
+```
+
+````

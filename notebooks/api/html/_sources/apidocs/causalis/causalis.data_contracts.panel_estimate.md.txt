@@ -1,0 +1,264 @@
+# {py:mod}`causalis.data_contracts.panel_estimate`
+
+```{py:module} causalis.data_contracts.panel_estimate
+```
+
+```{autodoc2-docstring} causalis.data_contracts.panel_estimate
+:allowtitles:
+```
+
+## Module Contents
+
+### Classes
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`PanelEstimate <causalis.data_contracts.panel_estimate.PanelEstimate>`
+  - ```{autodoc2-docstring} causalis.data_contracts.panel_estimate.PanelEstimate
+    :summary:
+    ```
+````
+
+### API
+
+`````{py:class} PanelEstimate(/, **data: typing.Any)
+:canonical: causalis.data_contracts.panel_estimate.PanelEstimate
+
+Bases: {py:obj}`pydantic.BaseModel`
+
+```{autodoc2-docstring} causalis.data_contracts.panel_estimate.PanelEstimate
+```
+
+```{rubric} Initialization
+```
+
+```{autodoc2-docstring} causalis.data_contracts.panel_estimate.PanelEstimate.__init__
+```
+
+````{py:attribute} model_config
+:canonical: causalis.data_contracts.panel_estimate.PanelEstimate.model_config
+:value: >
+   'ConfigDict(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.panel_estimate.PanelEstimate.model_config
+```
+
+````
+
+````{py:attribute} estimand
+:canonical: causalis.data_contracts.panel_estimate.PanelEstimate.estimand
+:type: typing.Literal[dynamic_effect_path]
+:value: >
+   'dynamic_effect_path'
+
+```{autodoc2-docstring} causalis.data_contracts.panel_estimate.PanelEstimate.estimand
+```
+
+````
+
+````{py:attribute} model
+:canonical: causalis.data_contracts.panel_estimate.PanelEstimate.model
+:type: str
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.panel_estimate.PanelEstimate.model
+```
+
+````
+
+````{py:attribute} treated_unit
+:canonical: causalis.data_contracts.panel_estimate.PanelEstimate.treated_unit
+:type: typing.Hashable
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.panel_estimate.PanelEstimate.treated_unit
+```
+
+````
+
+````{py:attribute} treatment_start
+:canonical: causalis.data_contracts.panel_estimate.PanelEstimate.treatment_start
+:type: causalis.data_contracts.panel_data_scm.TimeLike
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.panel_estimate.PanelEstimate.treatment_start
+```
+
+````
+
+````{py:attribute} pre_times
+:canonical: causalis.data_contracts.panel_estimate.PanelEstimate.pre_times
+:type: typing.List[causalis.data_contracts.panel_data_scm.TimeLike]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.panel_estimate.PanelEstimate.pre_times
+```
+
+````
+
+````{py:attribute} post_times
+:canonical: causalis.data_contracts.panel_estimate.PanelEstimate.post_times
+:type: typing.List[causalis.data_contracts.panel_data_scm.TimeLike]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.panel_estimate.PanelEstimate.post_times
+```
+
+````
+
+````{py:attribute} effect_by_time
+:canonical: causalis.data_contracts.panel_estimate.PanelEstimate.effect_by_time
+:type: pandas.Series
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.panel_estimate.PanelEstimate.effect_by_time
+```
+
+````
+
+````{py:attribute} ci_lower_by_time
+:canonical: causalis.data_contracts.panel_estimate.PanelEstimate.ci_lower_by_time
+:type: pandas.Series
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.panel_estimate.PanelEstimate.ci_lower_by_time
+```
+
+````
+
+````{py:attribute} ci_upper_by_time
+:canonical: causalis.data_contracts.panel_estimate.PanelEstimate.ci_upper_by_time
+:type: pandas.Series
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.panel_estimate.PanelEstimate.ci_upper_by_time
+```
+
+````
+
+````{py:attribute} p_value_by_time
+:canonical: causalis.data_contracts.panel_estimate.PanelEstimate.p_value_by_time
+:type: pandas.Series
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.panel_estimate.PanelEstimate.p_value_by_time
+```
+
+````
+
+````{py:attribute} is_significant_by_time
+:canonical: causalis.data_contracts.panel_estimate.PanelEstimate.is_significant_by_time
+:type: pandas.Series
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.panel_estimate.PanelEstimate.is_significant_by_time
+```
+
+````
+
+````{py:attribute} confidence_set_by_time
+:canonical: causalis.data_contracts.panel_estimate.PanelEstimate.confidence_set_by_time
+:type: typing.Dict[causalis.data_contracts.panel_data_scm.TimeLike, list[tuple[float, float]]]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.panel_estimate.PanelEstimate.confidence_set_by_time
+```
+
+````
+
+````{py:attribute} alpha
+:canonical: causalis.data_contracts.panel_estimate.PanelEstimate.alpha
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.panel_estimate.PanelEstimate.alpha
+```
+
+````
+
+````{py:attribute} observed_outcome
+:canonical: causalis.data_contracts.panel_estimate.PanelEstimate.observed_outcome
+:type: pandas.Series
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.panel_estimate.PanelEstimate.observed_outcome
+```
+
+````
+
+````{py:attribute} synthetic_outcome
+:canonical: causalis.data_contracts.panel_estimate.PanelEstimate.synthetic_outcome
+:type: pandas.Series
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.panel_estimate.PanelEstimate.synthetic_outcome
+```
+
+````
+
+````{py:attribute} donor_weights_augmented
+:canonical: causalis.data_contracts.panel_estimate.PanelEstimate.donor_weights_augmented
+:type: typing.Dict[typing.Hashable, float]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.panel_estimate.PanelEstimate.donor_weights_augmented
+```
+
+````
+
+````{py:attribute} diagnostics
+:canonical: causalis.data_contracts.panel_estimate.PanelEstimate.diagnostics
+:type: typing.Dict[str, typing.Any]
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.panel_estimate.PanelEstimate.diagnostics
+```
+
+````
+
+````{py:attribute} created_at
+:canonical: causalis.data_contracts.panel_estimate.PanelEstimate.created_at
+:type: datetime.datetime
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.panel_estimate.PanelEstimate.created_at
+```
+
+````
+
+````{py:method} summary() -> pandas.DataFrame
+:canonical: causalis.data_contracts.panel_estimate.PanelEstimate.summary
+
+```{autodoc2-docstring} causalis.data_contracts.panel_estimate.PanelEstimate.summary
+```
+
+````
+
+````{py:method} summary_poinwise() -> pandas.DataFrame
+:canonical: causalis.data_contracts.panel_estimate.PanelEstimate.summary_poinwise
+
+```{autodoc2-docstring} causalis.data_contracts.panel_estimate.PanelEstimate.summary_poinwise
+```
+
+````
+
+`````

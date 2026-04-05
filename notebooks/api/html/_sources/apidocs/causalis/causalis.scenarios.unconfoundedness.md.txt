@@ -1,0 +1,83 @@
+# {py:mod}`causalis.scenarios.unconfoundedness`
+
+```{py:module} causalis.scenarios.unconfoundedness
+```
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness
+:allowtitles:
+```
+
+## Subpackages
+
+```{toctree}
+:titlesonly:
+:maxdepth: 3
+
+causalis.scenarios.unconfoundedness.refutation
+```
+
+## Submodules
+
+```{toctree}
+:titlesonly:
+:maxdepth: 1
+
+causalis.scenarios.unconfoundedness.dgp
+causalis.scenarios.unconfoundedness.model
+```
+
+## Package Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__getattr__ <causalis.scenarios.unconfoundedness.__getattr__>`
+  - ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.__getattr__
+    :summary:
+    ```
+* - {py:obj}`__dir__ <causalis.scenarios.unconfoundedness.__dir__>`
+  - ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.__dir__
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.scenarios.unconfoundedness.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} __all__
+:canonical: causalis.scenarios.unconfoundedness.__all__
+:value: >
+   ['gate', 'refutation', 'dgp', 'IRM']
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.__all__
+```
+
+````
+
+````{py:function} __getattr__(name: str) -> typing.Any
+:canonical: causalis.scenarios.unconfoundedness.__getattr__
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.__getattr__
+```
+````
+
+````{py:function} __dir__() -> list[str]
+:canonical: causalis.scenarios.unconfoundedness.__dir__
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.__dir__
+```
+````

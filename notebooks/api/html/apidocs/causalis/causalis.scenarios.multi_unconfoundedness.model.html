@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>causalis.scenarios.multi_unconfoundedness.model &#8212; Causalis API Reference  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="causalis.shared" href="causalis.shared.html" />
+    <link rel="prev" title="causalis.scenarios.multi_unconfoundedness.dgp" href="causalis.scenarios.multi_unconfoundedness.dgp.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-causalis.scenarios.multi_unconfoundedness.model">
+<span id="causalis-scenarios-multi-unconfoundedness-model"></span><h1><a class="reference internal" href="#module-causalis.scenarios.multi_unconfoundedness.model" title="causalis.scenarios.multi_unconfoundedness.model"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.multi_unconfoundedness.model</span></code></a><a class="headerlink" href="#module-causalis.scenarios.multi_unconfoundedness.model" title="Link to this heading">¶</a></h1>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM" title="causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MultiTreatmentIRM</span></code></a></p></td>
+<td><p>Interactive Regression Model for multi-treatment unconfoundedness.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">causalis.scenarios.multi_unconfoundedness.model.</span></span><span class="sig-name descname"><span class="pre">MultiTreatmentIRM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="causalis.data_contracts.multicausaldata.html#causalis.data_contracts.multicausaldata.MultiCausalData" title="causalis.data_contracts.multicausaldata.MultiCausalData"><span class="pre">causalis.data_contracts.multicausaldata.MultiCausalData</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ml_g</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ml_m</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_folds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_rep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize_ipw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trimming_rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'truncate'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trimming_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">sklearn.base.BaseEstimator</span></code></p>
+<p>Interactive Regression Model for multi-treatment unconfoundedness.</p>
+<p>DoubleML-style cross-fitting estimator consuming <code class="docutils literal notranslate"><span class="pre">MultiCausalData</span></code> and
+producing pairwise ATE contrasts against baseline treatment (column 0).
+Model supports &gt;= 2 treatments.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Parameters
+----------
+data : MultiCausalData
+    Data container with outcome, one-hot multi-treatment indicators, and confounders.
+ml_g : estimator
+    Learner for E[Y|X,D]. If classifier and Y is binary, predict_proba is used; otherwise predict().
+ml_m : classifier
+    Learner for E[D|X] (generelized propensity score). Must support predict_proba() or predict() in (0,1).
+n_folds : int, default 5
+    Number of cross-fitting folds.
+n_rep : int, default 1
+    Number of repetitions of sample splitting. Currently only 1 is supported.
+normalize_ipw : bool, default False
+    Whether to normalize IPW terms within the score.
+    This is a Hajek-style stabilization: it can reduce variance but may add
+    small finite-sample bias.
+trimming_rule : {&quot;truncate&quot;}, default &quot;truncate&quot;
+    Trimming approach for propensity scores.
+trimming_threshold : float, default 1e-2
+    Threshold for trimming if rule is &quot;truncate&quot;.
+random_state : Optional[int], default None
+    Random seed for fold creation.
+n_jobs : int, default 1
+    Number of parallel jobs for fold-level cross-fitting.
+    Use `-1` to use all available CPUs.
+    Practical guidance:
+    - Start with `n_jobs=1` for stable, low-contention defaults.
+    - Increase to `n_jobs=2/4/-1` when cross-fitting is the bottleneck.
+    - If nuisance learners are already multithreaded (e.g. CatBoost with
+      `thread_count=-1`), keep `n_jobs=1` or set learner threads to `1`
+      to avoid CPU oversubscription.
+</pre></div>
+</div>
+<p class="rubric">Initialization</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="causalis.data_contracts.multicausaldata.html#causalis.data_contracts.multicausaldata.MultiCausalData" title="causalis.data_contracts.multicausaldata.MultiCausalData"><span class="pre">causalis.data_contracts.multicausaldata.MultiCausalData</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM" title="causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM"><span class="pre">causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM</span></a></span></span><a class="headerlink" href="#causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.fit" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.estimate">
+<span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">score</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ATE'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diagnostic_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="causalis.data_contracts.multicausal_estimate.html#causalis.data_contracts.multicausal_estimate.MultiCausalEstimate" title="causalis.data_contracts.multicausal_estimate.MultiCausalEstimate"><span class="pre">causalis.data_contracts.multicausal_estimate.MultiCausalEstimate</span></a></span></span><a class="headerlink" href="#causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.estimate" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.diagnostics_">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">diagnostics_</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.diagnostics_" title="Link to this definition">¶</a></dt>
+<dd><p>Return diagnostic data.</p>
+<p class="rubric" id="returns">Returns</p>
+<p>dict
+Dictionary containing ‘m_hat’, ‘g_hat’ and ‘folds’.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.coef">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">coef</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span></em><a class="headerlink" href="#causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.coef" title="Link to this definition">¶</a></dt>
+<dd><p>Return the estimated coefficient.</p>
+<p class="rubric" id="id1">Returns</p>
+<p>np.ndarray
+The estimated coefficient.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.se">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">se</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span></em><a class="headerlink" href="#causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.se" title="Link to this definition">¶</a></dt>
+<dd><p>Return the standard error of the estimate.</p>
+<p class="rubric" id="id2">Returns</p>
+<p>np.ndarray
+The standard error.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.pvalues">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pvalues</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span></em><a class="headerlink" href="#causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.pvalues" title="Link to this definition">¶</a></dt>
+<dd><p>Return the p-values for the estimate.</p>
+<p class="rubric" id="id3">Returns</p>
+<p>np.ndarray
+The p-values.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.summary">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">summary</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="headerlink" href="#causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.summary" title="Link to this definition">¶</a></dt>
+<dd><p>Return a summary DataFrame of the results.</p>
+<p class="rubric" id="id4">Returns</p>
+<p>pd.DataFrame
+The results summary.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.orth_signal">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">orth_signal</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span></em><a class="headerlink" href="#causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.orth_signal" title="Link to this definition">¶</a></dt>
+<dd><p>Return the cross-fitted orthogonal signal (psi_b).</p>
+<p class="rubric" id="id5">Returns</p>
+<p>np.ndarray
+The orthogonal signal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.sensitivity_analysis">
+<span class="sig-name descname"><span class="pre">sensitivity_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cf_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r2_d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">r2_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM" title="causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM"><span class="pre">causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM</span></a></span></span><a class="headerlink" href="#causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.sensitivity_analysis" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.confint">
+<span class="sig-name descname"><span class="pre">confint</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.confint" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../reference.html">Causalis API Reference</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../reference.html">Documentation overview</a><ul>
+  <li><a href="../index.html">API Modules</a><ul>
+  <li><a href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a><ul>
+  <li><a href="causalis.scenarios.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios</span></code></a><ul>
+  <li><a href="causalis.scenarios.multi_unconfoundedness.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.multi_unconfoundedness</span></code></a><ul>
+      <li>Previous: <a href="causalis.scenarios.multi_unconfoundedness.dgp.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.multi_unconfoundedness.dgp</span></code></a></li>
+      <li>Next: <a href="causalis.shared.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.shared</span></code></a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../../_sources/apidocs/causalis/causalis.scenarios.multi_unconfoundedness.model.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

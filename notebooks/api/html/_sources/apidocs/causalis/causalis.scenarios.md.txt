@@ -1,0 +1,48 @@
+# {py:mod}`causalis.scenarios`
+
+```{py:module} causalis.scenarios
+```
+
+```{autodoc2-docstring} causalis.scenarios
+:allowtitles:
+```
+
+## Subpackages
+
+```{toctree}
+:titlesonly:
+:maxdepth: 3
+
+causalis.scenarios.cuped
+causalis.scenarios.classic_rct
+causalis.scenarios.synthetic_control
+causalis.scenarios.unconfoundedness
+causalis.scenarios.gate
+causalis.scenarios.multi_unconfoundedness
+```
+
+## Package Contents
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.scenarios.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} __all__
+:canonical: causalis.scenarios.__all__
+:value: >
+   ['classic_rct', 'unconfoundedness', 'cuped', 'synthetic_control', 'gate']
+
+```{autodoc2-docstring} causalis.scenarios.__all__
+```
+
+````

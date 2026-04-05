@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>causalis.dgp.causaldata.base &#8212; Causalis API Reference  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="causalis.dgp.multicausaldata" href="causalis.dgp.multicausaldata.html" />
+    <link rel="prev" title="causalis.dgp.causaldata.functional" href="causalis.dgp.causaldata.functional.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-causalis.dgp.causaldata.base">
+<span id="causalis-dgp-causaldata-base"></span><h1><a class="reference internal" href="#module-causalis.dgp.causaldata.base" title="causalis.dgp.causaldata.base"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.dgp.causaldata.base</span></code></a><a class="headerlink" href="#module-causalis.dgp.causaldata.base" title="Link to this heading">¶</a></h1>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator" title="causalis.dgp.causaldata.base.CausalDatasetGenerator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CausalDatasetGenerator</span></code></a></p></td>
+<td><p>Generate synthetic causal inference datasets with controllable confounding,
+treatment prevalence, noise, and (optionally) heterogeneous treatment effects.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">causalis.dgp.causaldata.base.</span></span><span class="sig-name descname"><span class="pre">CausalDatasetGenerator</span></span><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator" title="Link to this definition">¶</a></dt>
+<dd><p>Generate synthetic causal inference datasets with controllable confounding,
+treatment prevalence, noise, and (optionally) heterogeneous treatment effects.</p>
+<p><strong>Data model (high level)</strong></p>
+<ul class="simple">
+<li><p>confounders X ∈ R^k are drawn from user-specified distributions.</p></li>
+<li><p>Binary treatment D is assigned by a logistic model:
+D ~ Bernoulli( sigmoid(alpha_d + f_d(X) + u_strength_d * U) ),
+where f_d(X) = (X &#64; beta_d + g_d(X)) * propensity_sharpness, and U ~ N(0,1) is an optional unobserved confounder.</p></li>
+<li><p>Outcome Y depends on treatment and confounders with link determined by <code class="docutils literal notranslate"><span class="pre">outcome_type</span></code>:
+outcome_type = “continuous”:
+Y = alpha_y + f_y(X) + u_strength_y * U + T * tau(X) + ε,  ε ~ N(0, sigma_y^2)
+outcome_type = “binary”:
+logit P(Y=1|T,X,U) = alpha_y + f_y(X) + u_strength_y * U + T * tau(X)
+outcome_type = “poisson”:
+log E[Y|T,X,U]     = alpha_y + f_y(X) + u_strength_y * U + T * tau(X)
+outcome_type = “gamma”:
+log E[Y|T,X,U]     = alpha_y + f_y(X) + u_strength_y * U + T * tau(X)
+where f_y(X) = X &#64; beta_y + g_y(X), and tau(X) is either constant <code class="docutils literal notranslate"><span class="pre">theta</span></code> or a user function.</p></li>
+</ul>
+<p><strong>Returned columns</strong></p>
+<ul class="simple">
+<li><p>y: outcome</p></li>
+<li><p>d: binary treatment (0/1)</p></li>
+<li><p>x1..xk (or user-provided names)</p></li>
+<li><p>m: true propensity P(T=1 | X) marginalized over U</p></li>
+<li><p>m_obs: realized propensity P(T=1 | X, U)</p></li>
+<li><p>tau_link: tau(X) on the structural (link) scale</p></li>
+<li><p>g0: E[Y | X, T=0] on the natural outcome scale marginalized over U .,9</p></li>
+<li><p>g1: E[Y | X, T=1] on the natural outcome scale marginalized over U</p></li>
+<li><p>cate: g1 - g0 (conditional average treatment effect on the natural outcome scale)</p></li>
+</ul>
+<p>Notes on effect scale:</p>
+<ul class="simple">
+<li><p>For “continuous”, <code class="docutils literal notranslate"><span class="pre">theta</span></code> (or tau(X)) is an additive mean difference, so <code class="docutils literal notranslate"><span class="pre">tau_link</span> <span class="pre">==</span> <span class="pre">cate</span></code>.</p></li>
+<li><p>For “binary”, tau acts on the <em>log-odds</em> scale. <code class="docutils literal notranslate"><span class="pre">cate</span></code> is reported as a risk difference.</p></li>
+<li><p>For “poisson” and “gamma”, tau acts on the <em>log-mean</em> scale. <code class="docutils literal notranslate"><span class="pre">cate</span></code> is reported on the mean scale.</p></li>
+</ul>
+<p class="rubric" id="id1">Parameters</p>
+<p>theta : float, default=1.0
+Constant treatment effect used if <code class="docutils literal notranslate"><span class="pre">tau</span></code> is None.
+tau : callable, optional
+Function tau(X) -&gt; array-like shape (n,) for heterogeneous effects.
+beta_y : array-like, optional
+Linear coefficients of confounders in the outcome baseline f_y(X).
+beta_d : array-like, optional
+Linear coefficients of confounders in the treatment score f_d(X).
+g_y : callable, optional
+Nonlinear/additive function g_y(X) -&gt; (n,) added to the outcome baseline.
+g_d : callable, optional
+Nonlinear/additive function g_d(X) -&gt; (n,) added to the treatment score.
+alpha_y : float, default=0.0
+Outcome intercept (natural scale for continuous; log-odds for binary; log-mean for Poisson/Gamma).
+alpha_d : float, default=0.0
+Treatment intercept (log-odds). If <code class="docutils literal notranslate"><span class="pre">target_d_rate</span></code> is set, <code class="docutils literal notranslate"><span class="pre">alpha_d</span></code> is auto-calibrated.
+sigma_y : float, default=1.0
+Std. dev. of the Gaussian noise for continuous outcomes.
+outcome_type : {“continuous”, “binary”, “poisson”, “gamma”, “tweedie”}, default=”continuous”
+Outcome family and link as defined above.
+confounder_specs : list of dict, optional
+Schema for generating confounders. See <code class="docutils literal notranslate"><span class="pre">_gaussian_copula</span></code> for details.
+k : int, default=5
+Number of confounders when <code class="docutils literal notranslate"><span class="pre">confounder_specs</span></code> is None. Defaults to independent N(0,1).
+x_sampler : callable, optional
+Custom sampler (n, k, seed) -&gt; X ndarray of shape (n,k). Overrides <code class="docutils literal notranslate"><span class="pre">confounder_specs</span></code>.
+use_copula : bool, default=False
+If True and <code class="docutils literal notranslate"><span class="pre">confounder_specs</span></code> provided, use Gaussian copula for X.
+copula_corr : array-like, optional
+Correlation matrix for copula.
+target_d_rate : float, optional
+Target treatment prevalence (propensity mean). Calibrates <code class="docutils literal notranslate"><span class="pre">alpha_d</span></code>.
+u_strength_d : float, default=0.0
+Strength of the unobserved confounder U in treatment assignment.
+u_strength_y : float, default=0.0
+Strength of the unobserved confounder U in the outcome.
+propensity_sharpness : float, default=1.0
+Scales the X-driven treatment score to adjust positivity difficulty.
+seed : int, optional
+Random seed for reproducibility.</p>
+<p class="rubric" id="id2">Attributes</p>
+<p>rng : numpy.random.Generator
+Internal RNG seeded from <code class="docutils literal notranslate"><span class="pre">seed</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.theta">
+<span class="sig-name descname"><span class="pre">theta</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.theta" title="Link to this definition">¶</a></dt>
+<dd><p>1.0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.tau">
+<span class="sig-name descname"><span class="pre">tau</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.tau" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.beta_y">
+<span class="sig-name descname"><span class="pre">beta_y</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.beta_y" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.beta_d">
+<span class="sig-name descname"><span class="pre">beta_d</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.beta_d" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.g_y">
+<span class="sig-name descname"><span class="pre">g_y</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.g_y" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.g_d">
+<span class="sig-name descname"><span class="pre">g_d</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.g_d" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.alpha_y">
+<span class="sig-name descname"><span class="pre">alpha_y</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.alpha_y" title="Link to this definition">¶</a></dt>
+<dd><p>0.0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.alpha_d">
+<span class="sig-name descname"><span class="pre">alpha_d</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.alpha_d" title="Link to this definition">¶</a></dt>
+<dd><p>0.0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.sigma_y">
+<span class="sig-name descname"><span class="pre">sigma_y</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.sigma_y" title="Link to this definition">¶</a></dt>
+<dd><p>1.0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.outcome_type">
+<span class="sig-name descname"><span class="pre">outcome_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.outcome_type" title="Link to this definition">¶</a></dt>
+<dd><p>‘continuous’</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.confounder_specs">
+<span class="sig-name descname"><span class="pre">confounder_specs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.confounder_specs" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.k">
+<span class="sig-name descname"><span class="pre">k</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.k" title="Link to this definition">¶</a></dt>
+<dd><p>5</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.x_sampler">
+<span class="sig-name descname"><span class="pre">x_sampler</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.x_sampler" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.use_copula">
+<span class="sig-name descname"><span class="pre">use_copula</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.use_copula" title="Link to this definition">¶</a></dt>
+<dd><p>False</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.copula_corr">
+<span class="sig-name descname"><span class="pre">copula_corr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.copula_corr" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.target_d_rate">
+<span class="sig-name descname"><span class="pre">target_d_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.target_d_rate" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.u_strength_d">
+<span class="sig-name descname"><span class="pre">u_strength_d</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.u_strength_d" title="Link to this definition">¶</a></dt>
+<dd><p>0.0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.u_strength_y">
+<span class="sig-name descname"><span class="pre">u_strength_y</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.u_strength_y" title="Link to this definition">¶</a></dt>
+<dd><p>0.0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.propensity_sharpness">
+<span class="sig-name descname"><span class="pre">propensity_sharpness</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.propensity_sharpness" title="Link to this definition">¶</a></dt>
+<dd><p>1.0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.score_bounding">
+<span class="sig-name descname"><span class="pre">score_bounding</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.score_bounding" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.alpha_zi">
+<span class="sig-name descname"><span class="pre">alpha_zi</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.alpha_zi" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.beta_zi">
+<span class="sig-name descname"><span class="pre">beta_zi</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.beta_zi" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.g_zi">
+<span class="sig-name descname"><span class="pre">g_zi</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.g_zi" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.u_strength_zi">
+<span class="sig-name descname"><span class="pre">u_strength_zi</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.u_strength_zi" title="Link to this definition">¶</a></dt>
+<dd><p>0.0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.tau_zi">
+<span class="sig-name descname"><span class="pre">tau_zi</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.tau_zi" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.pos_dist">
+<span class="sig-name descname"><span class="pre">pos_dist</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.pos_dist" title="Link to this definition">¶</a></dt>
+<dd><p>‘gamma’</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.gamma_shape">
+<span class="sig-name descname"><span class="pre">gamma_shape</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.gamma_shape" title="Link to this definition">¶</a></dt>
+<dd><p>2.0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.lognormal_sigma">
+<span class="sig-name descname"><span class="pre">lognormal_sigma</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.lognormal_sigma" title="Link to this definition">¶</a></dt>
+<dd><p>1.0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.include_oracle">
+<span class="sig-name descname"><span class="pre">include_oracle</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.include_oracle" title="Link to this definition">¶</a></dt>
+<dd><p>True</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.seed">
+<span class="sig-name descname"><span class="pre">seed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.seed" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.rng">
+<span class="sig-name descname"><span class="pre">rng</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.random.Generator</span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.rng" title="Link to this definition">¶</a></dt>
+<dd><p>‘field(…)’</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.__post_init__">
+<span class="sig-name descname"><span class="pre">__post_init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.__post_init__" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize RNG and validate configuration.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.generate">
+<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">U</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.generate" title="Link to this definition">¶</a></dt>
+<dd><p>Draw a synthetic dataset of size <code class="docutils literal notranslate"><span class="pre">n</span></code>.</p>
+<p class="rubric" id="id3">Parameters</p>
+<p>n : int
+Number of samples to generate.
+U : numpy.ndarray, optional
+Unobserved confounder. If None, generated from N(0,1).</p>
+<p class="rubric" id="returns">Returns</p>
+<p>pandas.DataFrame
+The generated dataset with outcome ‘y’, treatment ‘d’, confounders,
+and oracle ground-truth columns.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.to_causal_data">
+<span class="sig-name descname"><span class="pre">to_causal_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confounders</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">causalis.dgp.causaldata.CausalData</span></span></span><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.to_causal_data" title="Link to this definition">¶</a></dt>
+<dd><p>Generate a dataset and convert it to a CausalData object.</p>
+<p class="rubric" id="id4">Parameters</p>
+<p>n : int
+Number of samples to generate.
+confounders : str or list of str, optional
+List of confounder column names to include. If None, automatically detects numeric confounders.</p>
+<p class="rubric" id="id5">Returns</p>
+<p>CausalData
+A CausalData object containing the generated dataset.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.oracle_nuisance">
+<span class="sig-name descname"><span class="pre">oracle_nuisance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_quad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">21</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.oracle_nuisance" title="Link to this definition">¶</a></dt>
+<dd><p>Return nuisance functions (m(x), g0(x), g1(x)) compatible with IRM.</p>
+<p class="rubric" id="id6">Parameters</p>
+<p>num_quad : int, default=21
+Number of quadrature points for marginalizing over U.</p>
+<p class="rubric" id="id7">Returns</p>
+<p>dict
+Dictionary of callables mapping X to nuisance values.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../reference.html">Causalis API Reference</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../reference.html">Documentation overview</a><ul>
+  <li><a href="../index.html">API Modules</a><ul>
+  <li><a href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a><ul>
+  <li><a href="causalis.dgp.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.dgp</span></code></a><ul>
+  <li><a href="causalis.dgp.causaldata.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.dgp.causaldata</span></code></a><ul>
+      <li>Previous: <a href="causalis.dgp.causaldata.functional.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.dgp.causaldata.functional</span></code></a></li>
+      <li>Next: <a href="causalis.dgp.multicausaldata.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.dgp.multicausaldata</span></code></a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../../_sources/apidocs/causalis/causalis.dgp.causaldata.base.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

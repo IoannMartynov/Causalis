@@ -1,0 +1,51 @@
+# {py:mod}`causalis.dgp.causaldata_instrumental.base`
+
+```{py:module} causalis.dgp.causaldata_instrumental.base
+```
+
+```{autodoc2-docstring} causalis.dgp.causaldata_instrumental.base
+:allowtitles:
+```
+
+## Module Contents
+
+### Classes
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`InstrumentalGenerator <causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator>`
+  - ```{autodoc2-docstring} causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator
+    :summary:
+    ```
+````
+
+### API
+
+`````{py:class} InstrumentalGenerator
+:canonical: causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator
+
+```{autodoc2-docstring} causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator
+```
+
+````{py:attribute} seed
+:canonical: causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.seed
+:type: typing.Optional[int]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.seed
+```
+
+````
+
+````{py:method} generate(n: int) -> pandas.DataFrame
+:canonical: causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.generate
+
+```{autodoc2-docstring} causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.generate
+```
+
+````
+
+`````

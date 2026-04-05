@@ -1,0 +1,64 @@
+# {py:mod}`causalis.scenarios.synthetic_control.dgp`
+
+```{py:module} causalis.scenarios.synthetic_control.dgp
+```
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.dgp
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`generate_scm_gamma_26 <causalis.scenarios.synthetic_control.dgp.generate_scm_gamma_26>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control.dgp.generate_scm_gamma_26
+    :summary:
+    ```
+* - {py:obj}`generate_scm_poisson_26 <causalis.scenarios.synthetic_control.dgp.generate_scm_poisson_26>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control.dgp.generate_scm_poisson_26
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`PanelOutput <causalis.scenarios.synthetic_control.dgp.PanelOutput>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control.dgp.PanelOutput
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} PanelOutput
+:canonical: causalis.scenarios.synthetic_control.dgp.PanelOutput
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.dgp.PanelOutput
+```
+
+````
+
+````{py:function} generate_scm_gamma_26(seed: int = 42, return_panel_data: bool = True, include_oracles: bool = False, n_donors: int = 40, n_pre_periods: typing.Optional[int] = 36, n_post_periods: typing.Optional[int] = 6, treatment_effect_rate: float = 0.1, treatment_effect_slope: float = 0.002, **advanced_params) -> causalis.scenarios.synthetic_control.dgp.PanelOutput
+:canonical: causalis.scenarios.synthetic_control.dgp.generate_scm_gamma_26
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.dgp.generate_scm_gamma_26
+```
+````
+
+````{py:function} generate_scm_poisson_26(seed: int = 42, return_panel_data: bool = True, include_oracles: bool = False, n_donors: int = 20, n_pre_periods: typing.Optional[int] = 180, n_post_periods: typing.Optional[int] = 4, treatment_effect_rate: float = 0.15, treatment_effect_slope: float = 0.0005, **advanced_params) -> causalis.scenarios.synthetic_control.dgp.PanelOutput
+:canonical: causalis.scenarios.synthetic_control.dgp.generate_scm_poisson_26
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.dgp.generate_scm_poisson_26
+```
+````

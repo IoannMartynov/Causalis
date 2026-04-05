@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>causalis.shared.outcome_plots &#8212; Causalis API Reference  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="causalis.shared.outcome_stats" href="causalis.shared.outcome_stats.html" />
+    <link rel="prev" title="causalis.shared.confounders_balance" href="causalis.shared.confounders_balance.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-causalis.shared.outcome_plots">
+<span id="causalis-shared-outcome-plots"></span><h1><a class="reference internal" href="#module-causalis.shared.outcome_plots" title="causalis.shared.outcome_plots"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.shared.outcome_plots</span></code></a><a class="headerlink" href="#module-causalis.shared.outcome_plots" title="Link to this heading">¶</a></h1>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.shared.outcome_plots.outcome_plot_dist" title="causalis.shared.outcome_plots.outcome_plot_dist"><code class="xref py py-obj docutils literal notranslate"><span class="pre">outcome_plot_dist</span></code></a></p></td>
+<td><p>Plot the distribution of the outcome for each treatment on a single, pretty plot.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.shared.outcome_plots.outcome_plot_boxplot" title="causalis.shared.outcome_plots.outcome_plot_boxplot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">outcome_plot_boxplot</span></code></a></p></td>
+<td><p>Prettified boxplot of the outcome by treatment.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.shared.outcome_plots.outcome_plots" title="causalis.shared.outcome_plots.outcome_plots"><code class="xref py py-obj docutils literal notranslate"><span class="pre">outcome_plots</span></code></a></p></td>
+<td><p>Plot the distribution of the outcome for every treatment on one plot,
+and also produce a boxplot by treatment to visualize outliers.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.shared.outcome_plots.outcome_plot_dist">
+<span class="sig-prename descclassname"><span class="pre">causalis.shared.outcome_plots.</span></span><span class="sig-name descname"><span class="pre">outcome_plot_dist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">causalis.dgp.causaldata.CausalData</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">causalis.dgp.multicausaldata.MultiCausalData</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'fd'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.45</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sharex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kde</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(0.01,</span> <span class="pre">0.99)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(9,</span> <span class="pre">5.5)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">220</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font_scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">palette</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dpi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transparent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">matplotlib.pyplot.Figure</span></span></span><a class="headerlink" href="#causalis.shared.outcome_plots.outcome_plot_dist" title="Link to this definition">¶</a></dt>
+<dd><p>Plot the distribution of the outcome for each treatment on a single, pretty plot.</p>
+<p class="rubric" id="id6">Features</p>
+<ul class="simple">
+<li><p>High-DPI canvas + scalable fonts</p></li>
+<li><p>Default Matplotlib colors; KDE &amp; mean lines match their histogram colors</p></li>
+<li><p>Numeric outcomes: shared x-range (optional), optional KDE, quantile clipping</p></li>
+<li><p>Categorical outcomes: normalized grouped bars by treatment</p></li>
+<li><p>Binary outcomes: proportion bars with percent labels (no KDE)</p></li>
+<li><p>Optional hi-res export (PNG/SVG/PDF)</p></li>
+</ul>
+<p class="rubric" id="id7">Parameters</p>
+<p>data : CausalData or MultiCausalData
+The causal dataset containing the dataframe and metadata.
+treatment : str, optional
+Treatment column name. For MultiCausalData, if not provided, one-hot
+treatment columns are converted to assigned treatment labels.
+outcome : str, optional
+Outcome column name. Defaults to the one in <code class="docutils literal notranslate"><span class="pre">data_contracts</span></code>.
+bins : str or int, default “fd”
+Number of bins for histograms (e.g., “fd”, “auto”, or an integer).
+density : bool, default True
+Whether to normalize histograms to form a density.
+alpha : float, default 0.45
+Transparency for overlaid histograms and bars.
+sharex : bool, default True
+If True, use the same x-limits across treatments for numeric outcomes.
+kde : bool, default True
+Whether to overlay a smooth density (KDE) for numeric outcomes.
+clip : tuple, optional, default (0.01, 0.99)
+Quantiles to trim tails for nicer view of numeric outcomes.
+figsize : tuple, default (9, 5.5)
+Figure size in inches (width, height).
+dpi : int, default 220
+Dots per inch for the figure.
+font_scale : float, default 1.15
+Scaling factor for all font sizes in the plot.
+palette : list or dict, optional
+Color palette for treatments (list in treatment order or dict {treatment: color}).
+save : str, optional
+Path to save the figure (e.g., “outcome.png”).
+save_dpi : int, optional
+DPI for the saved figure. Defaults to 300 for raster formats.
+transparent : bool, default False
+Whether to save the figure with a transparent background.</p>
+<p class="rubric" id="id8">Returns</p>
+<p>matplotlib.figure.Figure
+The generated figure object.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.shared.outcome_plots.outcome_plot_boxplot">
+<span class="sig-prename descclassname"><span class="pre">causalis.shared.outcome_plots.</span></span><span class="sig-name descname"><span class="pre">outcome_plot_boxplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">causalis.dgp.causaldata.CausalData</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">causalis.dgp.multicausaldata.MultiCausalData</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(9,</span> <span class="pre">5.5)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">220</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font_scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showfliers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patch_artist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">palette</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dpi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transparent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">matplotlib.pyplot.Figure</span></span></span><a class="headerlink" href="#causalis.shared.outcome_plots.outcome_plot_boxplot" title="Link to this definition">¶</a></dt>
+<dd><p>Prettified boxplot of the outcome by treatment.</p>
+<p class="rubric" id="id9">Features</p>
+<ul class="simple">
+<li><p>High-DPI figure, scalable fonts</p></li>
+<li><p>Soft modern color styling (default Matplotlib palette)</p></li>
+<li><p>Optional outliers, gentle transparency</p></li>
+<li><p>Optional save to PNG/SVG/PDF</p></li>
+</ul>
+<p class="rubric" id="id10">Parameters</p>
+<p>data : CausalData or MultiCausalData
+The causal dataset containing the dataframe and metadata.
+treatment : str, optional
+Treatment column name. For MultiCausalData, if not provided, one-hot
+treatment columns are converted to assigned treatment labels.
+outcome : str, optional
+Outcome column name. Defaults to the one in <code class="docutils literal notranslate"><span class="pre">data_contracts</span></code>.
+figsize : tuple, default (9, 5.5)
+Figure size in inches (width, height).
+dpi : int, default 220
+Dots per inch for the figure.
+font_scale : float, default 1.15
+Scaling factor for all font sizes in the plot.
+showfliers : bool, default True
+Whether to show outliers (fliers).
+patch_artist : bool, default True
+Whether to fill boxes with color.
+palette : list or dict, optional
+Color palette for treatments (list in treatment order or dict {treatment: color}).
+save : str, optional
+Path to save the figure (e.g., “boxplot.png”).
+save_dpi : int, optional
+DPI for the saved figure. Defaults to 300 for raster formats.
+transparent : bool, default False
+Whether to save the figure with a transparent background.</p>
+<p class="rubric" id="id11">Returns</p>
+<p>matplotlib.figure.Figure
+The generated figure object.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.shared.outcome_plots.outcome_plots">
+<span class="sig-prename descclassname"><span class="pre">causalis.shared.outcome_plots.</span></span><span class="sig-name descname"><span class="pre">outcome_plots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">causalis.dgp.causaldata.CausalData</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">causalis.dgp.multicausaldata.MultiCausalData</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(7,</span> <span class="pre">4)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sharex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">palette</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">matplotlib.pyplot.Figure</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">matplotlib.pyplot.Figure</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.shared.outcome_plots.outcome_plots" title="Link to this definition">¶</a></dt>
+<dd><p>Plot the distribution of the outcome for every treatment on one plot,
+and also produce a boxplot by treatment to visualize outliers.</p>
+<p class="rubric" id="id12">Parameters</p>
+<p>data : CausalData or MultiCausalData
+The causal dataset containing the dataframe and metadata.
+treatment : str, optional
+Treatment column name. Defaults to the one in <code class="docutils literal notranslate"><span class="pre">data_contracts</span></code>.
+outcome : str, optional
+Outcome column name. Defaults to the one in <code class="docutils literal notranslate"><span class="pre">data_contracts</span></code>.
+bins : int, default 30
+Number of bins for histograms when the outcome is numeric.
+density : bool, default True
+Whether to normalize histograms to form a density.
+alpha : float, default 0.5
+Transparency for overlaid histograms.
+figsize : tuple, default (7, 4)
+Figure size for the plots (width, height).
+sharex : bool, default True
+If True and the outcome is numeric, use the same x-limits across treatments.
+palette : list or dict, optional
+Color palette for treatments (list in treatment order or dict {treatment: color}).</p>
+<p class="rubric" id="id13">Returns</p>
+<p>Tuple[matplotlib.figure.Figure, matplotlib.figure.Figure]
+(fig_distribution, fig_boxplot)</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../reference.html">Causalis API Reference</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../reference.html">Documentation overview</a><ul>
+  <li><a href="../index.html">API Modules</a><ul>
+  <li><a href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a><ul>
+  <li><a href="causalis.shared.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.shared</span></code></a><ul>
+      <li>Previous: <a href="causalis.shared.confounders_balance.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.shared.confounders_balance</span></code></a></li>
+      <li>Next: <a href="causalis.shared.outcome_stats.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.shared.outcome_stats</span></code></a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../../_sources/apidocs/causalis/causalis.shared.outcome_plots.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

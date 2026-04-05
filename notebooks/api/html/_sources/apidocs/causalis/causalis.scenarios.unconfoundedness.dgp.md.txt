@@ -1,0 +1,64 @@
+# {py:mod}`causalis.scenarios.unconfoundedness.dgp`
+
+```{py:module} causalis.scenarios.unconfoundedness.dgp
+```
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.dgp
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`obs_linear_26_dataset <causalis.scenarios.unconfoundedness.dgp.obs_linear_26_dataset>`
+  - ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.dgp.obs_linear_26_dataset
+    :summary:
+    ```
+* - {py:obj}`generate_obs_hte_26 <causalis.scenarios.unconfoundedness.dgp.generate_obs_hte_26>`
+  - ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.dgp.generate_obs_hte_26
+    :summary:
+    ```
+* - {py:obj}`generate_obs_hte_26_rich <causalis.scenarios.unconfoundedness.dgp.generate_obs_hte_26_rich>`
+  - ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.dgp.generate_obs_hte_26_rich
+    :summary:
+    ```
+* - {py:obj}`generate_obs_hte_binary_26 <causalis.scenarios.unconfoundedness.dgp.generate_obs_hte_binary_26>`
+  - ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.dgp.generate_obs_hte_binary_26
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} obs_linear_26_dataset(n: int = 10000, seed: int = 42, include_oracle: bool = True, return_causal_data: bool = True)
+:canonical: causalis.scenarios.unconfoundedness.dgp.obs_linear_26_dataset
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.dgp.obs_linear_26_dataset
+```
+````
+
+````{py:function} generate_obs_hte_26(n: int = 10000, seed: int = 42, include_oracle: bool = True, return_causal_data: bool = True) -> typing.Union[pandas.DataFrame, causalis.dgp.causaldata.CausalData]
+:canonical: causalis.scenarios.unconfoundedness.dgp.generate_obs_hte_26
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.dgp.generate_obs_hte_26
+```
+````
+
+````{py:function} generate_obs_hte_26_rich(n: int = 100000, seed: int = 42, include_oracle: bool = True, return_causal_data: bool = True) -> typing.Union[pandas.DataFrame, causalis.dgp.causaldata.CausalData]
+:canonical: causalis.scenarios.unconfoundedness.dgp.generate_obs_hte_26_rich
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.dgp.generate_obs_hte_26_rich
+```
+````
+
+````{py:function} generate_obs_hte_binary_26(n: int = 100000, seed: int = 42, include_oracle: bool = True, return_causal_data: bool = True) -> typing.Union[pandas.DataFrame, causalis.dgp.causaldata.CausalData]
+:canonical: causalis.scenarios.unconfoundedness.dgp.generate_obs_hte_binary_26
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.dgp.generate_obs_hte_binary_26
+```
+````

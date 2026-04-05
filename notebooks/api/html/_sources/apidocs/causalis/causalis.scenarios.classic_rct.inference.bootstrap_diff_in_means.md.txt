@@ -1,0 +1,31 @@
+# {py:mod}`causalis.scenarios.classic_rct.inference.bootstrap_diff_in_means`
+
+```{py:module} causalis.scenarios.classic_rct.inference.bootstrap_diff_in_means
+```
+
+```{autodoc2-docstring} causalis.scenarios.classic_rct.inference.bootstrap_diff_in_means
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`bootstrap_diff_means <causalis.scenarios.classic_rct.inference.bootstrap_diff_in_means.bootstrap_diff_means>`
+  - ```{autodoc2-docstring} causalis.scenarios.classic_rct.inference.bootstrap_diff_in_means.bootstrap_diff_means
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} bootstrap_diff_means(data: causalis.dgp.causaldata.CausalData, alpha: float = 0.05, n_simul: int = 10000, *, batch_size: int = 512, seed: typing.Optional[int] = None, index_dtype=np.int32) -> typing.Dict[str, typing.Any]
+:canonical: causalis.scenarios.classic_rct.inference.bootstrap_diff_in_means.bootstrap_diff_means
+
+```{autodoc2-docstring} causalis.scenarios.classic_rct.inference.bootstrap_diff_in_means.bootstrap_diff_means
+```
+````

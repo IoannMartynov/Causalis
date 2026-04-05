@@ -1,0 +1,81 @@
+# {py:mod}`causalis.scenarios.synthetic_control.model`
+
+```{py:module} causalis.scenarios.synthetic_control.model
+```
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.model
+:allowtitles:
+```
+
+## Module Contents
+
+### Classes
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`AugmentedSyntheticControl <causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`ASCM <causalis.scenarios.synthetic_control.model.ASCM>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control.model.ASCM
+    :summary:
+    ```
+````
+
+### API
+
+`````{py:class} AugmentedSyntheticControl(*, lambda_aug: float = 1.0, lambda_sc: float = 1e-06, max_iter: int = 2000, tol: float = 1e-09, enforce_sum_to_one_augmented: bool = True, alpha: float = 0.05, conformal_grid_size: int = 401, conformal_grid_min: float | None = None, conformal_grid_max: float | None = None, conformal_grid_scale_mult: float = 6.0, average_att_n_folds: int = 3, compute_average_att_ttest: bool = True, compute_pointwise_conformal: bool = False)
+:canonical: causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl
+```
+
+```{rubric} Initialization
+```
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl.__init__
+```
+
+````{py:method} fit(data: causalis.data_contracts.panel_data_scm.PanelDataSCM) -> causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl
+:canonical: causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl.fit
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl.fit
+```
+
+````
+
+````{py:method} estimate(*, alpha: float | None = None, conformal_grid_size: int | None = None, conformal_grid_min: float | None = None, conformal_grid_max: float | None = None, conformal_grid_scale_mult: float | None = None, average_att_n_folds: int | None = None, compute_average_att_ttest: bool | None = None, compute_pointwise_conformal: bool | None = None) -> causalis.data_contracts.panel_estimate.PanelEstimate
+:canonical: causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl.estimate
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl.estimate
+```
+
+````
+
+````{py:method} __repr__() -> str
+:canonical: causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl.__repr__
+
+````
+
+`````
+
+````{py:data} ASCM
+:canonical: causalis.scenarios.synthetic_control.model.ASCM
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.model.ASCM
+```
+
+````

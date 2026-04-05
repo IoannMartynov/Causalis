@@ -1,0 +1,53 @@
+# {py:mod}`causalis.scenarios.synthetic_control`
+
+```{py:module} causalis.scenarios.synthetic_control
+```
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control
+:allowtitles:
+```
+
+## Subpackages
+
+```{toctree}
+:titlesonly:
+:maxdepth: 3
+
+causalis.scenarios.synthetic_control.refutation
+```
+
+## Submodules
+
+```{toctree}
+:titlesonly:
+:maxdepth: 1
+
+causalis.scenarios.synthetic_control.dgp
+causalis.scenarios.synthetic_control.model
+```
+
+## Package Contents
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.scenarios.synthetic_control.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} __all__
+:canonical: causalis.scenarios.synthetic_control.__all__
+:value: >
+   ['AugmentedSyntheticControl', 'ASCM', 'generate_scm_gamma_26', 'generate_scm_poisson_26', 'refutatio...
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.__all__
+```
+
+````

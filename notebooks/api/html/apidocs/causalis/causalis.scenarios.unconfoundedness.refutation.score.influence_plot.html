@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>causalis.scenarios.unconfoundedness.refutation.score.influence_plot &#8212; Causalis API Reference  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="causalis.scenarios.unconfoundedness.refutation.score.residual_plots" href="causalis.scenarios.unconfoundedness.refutation.score.residual_plots.html" />
+    <link rel="prev" title="causalis.scenarios.unconfoundedness.refutation.score.score_validation" href="causalis.scenarios.unconfoundedness.refutation.score.score_validation.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-causalis.scenarios.unconfoundedness.refutation.score.influence_plot">
+<span id="causalis-scenarios-unconfoundedness-refutation-score-influence-plot"></span><h1><a class="reference internal" href="#module-causalis.scenarios.unconfoundedness.refutation.score.influence_plot" title="causalis.scenarios.unconfoundedness.refutation.score.influence_plot"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.unconfoundedness.refutation.score.influence_plot</span></code></a><a class="headerlink" href="#module-causalis.scenarios.unconfoundedness.refutation.score.influence_plot" title="Link to this heading">¶</a></h1>
+<p>Influence/instability plots for score-based diagnostics.</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.unconfoundedness.refutation.score.influence_plot.plot_influence_instability" title="causalis.scenarios.unconfoundedness.refutation.score.influence_plot.plot_influence_instability"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_influence_instability</span></code></a></p></td>
+<td><p>Plot instability diagnostics for per-unit score (EIF moment).</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="data">
+<h3>Data<a class="headerlink" href="#data" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.unconfoundedness.refutation.score.influence_plot.__all__" title="causalis.scenarios.unconfoundedness.refutation.score.influence_plot.__all__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__all__</span></code></a></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.unconfoundedness.refutation.score.influence_plot.plot_influence_instability">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.unconfoundedness.refutation.score.influence_plot.</span></span><span class="sig-name descname"><span class="pre">plot_influence_instability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="causalis.data_contracts.causal_estimate.html#causalis.data_contracts.causal_estimate.CausalEstimate" title="causalis.data_contracts.causal_estimate.CausalEstimate"><span class="pre">causalis.data_contracts.causal_estimate.CausalEstimate</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">causalis.dgp.causaldata.CausalData</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">trimming_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_estimator_psi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_ipw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'fd'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_hist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scatter_log_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">220</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font_scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dpi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transparent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">matplotlib.pyplot.Figure</span></span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.refutation.score.influence_plot.plot_influence_instability" title="Link to this definition">¶</a></dt>
+<dd><p>Plot instability diagnostics for per-unit score (EIF moment).</p>
+<p class="rubric" id="id1">Panels</p>
+<ol class="arabic simple">
+<li><p>Histogram of <code class="docutils literal notranslate"><span class="pre">|psi_i|</span></code> (optional log-x scale).</p></li>
+<li><p>Scatter of <code class="docutils literal notranslate"><span class="pre">|psi_i|</span></code> versus clipped propensity <code class="docutils literal notranslate"><span class="pre">m_i</span></code>.</p></li>
+<li><p>(optional) Histogram of IPW terms.</p></li>
+<li><p>(optional) ESS ratio bars for treated/control weights.</p></li>
+</ol>
+<p class="rubric" id="id2">Parameters</p>
+<p>estimate : CausalEstimate
+Estimate with diagnostic data (<code class="docutils literal notranslate"><span class="pre">m_hat</span></code>, <code class="docutils literal notranslate"><span class="pre">g0_hat</span></code>; optionally <code class="docutils literal notranslate"><span class="pre">y</span></code>, <code class="docutils literal notranslate"><span class="pre">d</span></code>, <code class="docutils literal notranslate"><span class="pre">g1_hat</span></code>, <code class="docutils literal notranslate"><span class="pre">psi</span></code>).
+data : CausalData, optional
+Optional fallback source for <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">d</span></code> if not stored in diagnostic data.
+trimming_threshold : float, optional
+Propensity clipping threshold. If omitted, uses diagnostic/model defaults.
+use_estimator_psi : bool, default True
+Use estimator-provided <code class="docutils literal notranslate"><span class="pre">diagnostic_data.psi</span></code> when available; otherwise reconstruct score.
+include_ipw : bool, default True
+Add IPW-term histogram and ESS ratio bar panels.
+bins : Any, default “fd”
+Histogram bins for non-log histograms.
+log_hist : bool, default False
+Use log-scaled x-axis bins for <code class="docutils literal notranslate"><span class="pre">|psi_i|</span></code> histogram when possible.
+scatter_log_y : bool, default True
+Plot <code class="docutils literal notranslate"><span class="pre">|psi_i|</span></code> on log scale in the scatter panel.
+top_k : int, default 10
+Highlight top-k largest <code class="docutils literal notranslate"><span class="pre">|psi_i|</span></code> in the scatter panel.
+figsize : tuple, optional
+Figure size. Defaults to <code class="docutils literal notranslate"><span class="pre">(12,</span> <span class="pre">8)</span></code> with IPW panels, <code class="docutils literal notranslate"><span class="pre">(11,</span> <span class="pre">4.6)</span></code> otherwise.
+dpi : int, default 220
+Dots per inch.
+font_scale : float, default 1.10
+Font scaling factor.
+save : str, optional
+Path to save the figure.
+save_dpi : int, optional
+DPI for saving.
+transparent : bool, default False
+Whether to save with transparency.</p>
+<p class="rubric" id="id3">Returns</p>
+<p>matplotlib.figure.Figure
+The generated figure.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="causalis.scenarios.unconfoundedness.refutation.score.influence_plot.__all__">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.unconfoundedness.refutation.score.influence_plot.</span></span><span class="sig-name descname"><span class="pre">__all__</span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.refutation.score.influence_plot.__all__" title="Link to this definition">¶</a></dt>
+<dd><p>[‘plot_influence_instability’]</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../reference.html">Causalis API Reference</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../reference.html">Documentation overview</a><ul>
+  <li><a href="../index.html">API Modules</a><ul>
+  <li><a href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a><ul>
+  <li><a href="causalis.scenarios.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios</span></code></a><ul>
+  <li><a href="causalis.scenarios.unconfoundedness.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.unconfoundedness</span></code></a><ul>
+  <li><a href="causalis.scenarios.unconfoundedness.refutation.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.unconfoundedness.refutation</span></code></a><ul>
+  <li><a href="causalis.scenarios.unconfoundedness.refutation.score.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.unconfoundedness.refutation.score</span></code></a><ul>
+      <li>Previous: <a href="causalis.scenarios.unconfoundedness.refutation.score.score_validation.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.unconfoundedness.refutation.score.score_validation</span></code></a></li>
+      <li>Next: <a href="causalis.scenarios.unconfoundedness.refutation.score.residual_plots.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.unconfoundedness.refutation.score.residual_plots</span></code></a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../../_sources/apidocs/causalis/causalis.scenarios.unconfoundedness.refutation.score.influence_plot.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

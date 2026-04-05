@@ -1,0 +1,410 @@
+# {py:mod}`causalis.dgp.panel_data_scm.base`
+
+```{py:module} causalis.dgp.panel_data_scm.base
+```
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base
+:allowtitles:
+```
+
+## Module Contents
+
+### Classes
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`PanelSCMGeneratorConfig <causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig>`
+  - ```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig
+    :summary:
+    ```
+* - {py:obj}`PanelSCMGenerator <causalis.dgp.panel_data_scm.base.PanelSCMGenerator>`
+  - ```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGenerator
+    :summary:
+    ```
+````
+
+### API
+
+`````{py:class} PanelSCMGeneratorConfig
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig
+```
+
+````{py:attribute} n_donors
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.n_donors
+:type: int
+:value: >
+   5
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.n_donors
+```
+
+````
+
+````{py:attribute} n_pre_periods
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.n_pre_periods
+:type: int
+:value: >
+   20
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.n_pre_periods
+```
+
+````
+
+````{py:attribute} n_post_periods
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.n_post_periods
+:type: int
+:value: >
+   10
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.n_post_periods
+```
+
+````
+
+````{py:attribute} time_start
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.time_start
+:type: int
+:value: >
+   1
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.time_start
+```
+
+````
+
+````{py:attribute} time_freq
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.time_freq
+:type: str
+:value: >
+   'M'
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.time_freq
+```
+
+````
+
+````{py:attribute} calendar_start
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.calendar_start
+:type: str
+:value: >
+   '2000-01'
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.calendar_start
+```
+
+````
+
+````{py:attribute} treated_unit
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.treated_unit
+:type: typing.Hashable
+:value: >
+   'treated'
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.treated_unit
+```
+
+````
+
+````{py:attribute} donor_prefix
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.donor_prefix
+:type: str
+:value: >
+   'donor_'
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.donor_prefix
+```
+
+````
+
+````{py:attribute} random_state
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.random_state
+:type: typing.Optional[int]
+:value: >
+   42
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.random_state
+```
+
+````
+
+````{py:attribute} return_panel_data
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.return_panel_data
+:type: bool
+:value: >
+   True
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.return_panel_data
+```
+
+````
+
+````{py:attribute} dirichlet_alpha
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.dirichlet_alpha
+:type: float
+:value: >
+   1.0
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.dirichlet_alpha
+```
+
+````
+
+````{py:attribute} rho_common
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.rho_common
+:type: float
+:value: >
+   0.0
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.rho_common
+```
+
+````
+
+````{py:attribute} rho_donor
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.rho_donor
+:type: float
+:value: >
+   0.0
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.rho_donor
+```
+
+````
+
+````{py:attribute} n_latent_factors
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.n_latent_factors
+:type: int
+:value: >
+   0
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.n_latent_factors
+```
+
+````
+
+````{py:attribute} latent_loading_std
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.latent_loading_std
+:type: float
+:value: >
+   0.35
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.latent_loading_std
+```
+
+````
+
+````{py:attribute} rho_latent
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.rho_latent
+:type: float
+:value: >
+   0.0
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.rho_latent
+```
+
+````
+
+````{py:attribute} rho_prefit_mismatch
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.rho_prefit_mismatch
+:type: float
+:value: >
+   0.0
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.rho_prefit_mismatch
+```
+
+````
+
+````{py:attribute} outcome_distribution
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.outcome_distribution
+:type: typing.Literal[gaussian, gamma, poisson]
+:value: >
+   'gaussian'
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.outcome_distribution
+```
+
+````
+
+````{py:attribute} treatment_effect
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.treatment_effect
+:type: float
+:value: >
+   2.0
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.treatment_effect
+```
+
+````
+
+````{py:attribute} treatment_effect_slope
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.treatment_effect_slope
+:type: float
+:value: >
+   0.0
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.treatment_effect_slope
+```
+
+````
+
+````{py:attribute} donor_noise_std
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.donor_noise_std
+:type: float
+:value: >
+   0.2
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.donor_noise_std
+```
+
+````
+
+````{py:attribute} treated_noise_std
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.treated_noise_std
+:type: float
+:value: >
+   0.1
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.treated_noise_std
+```
+
+````
+
+````{py:attribute} common_factor_std
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.common_factor_std
+:type: float
+:value: >
+   0.15
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.common_factor_std
+```
+
+````
+
+````{py:attribute} latent_factor_std
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.latent_factor_std
+:type: float
+:value: >
+   0.2
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.latent_factor_std
+```
+
+````
+
+````{py:attribute} prefit_mismatch_std
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.prefit_mismatch_std
+:type: float
+:value: >
+   0.0
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.prefit_mismatch_std
+```
+
+````
+
+````{py:attribute} treatment_effect_mode
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.treatment_effect_mode
+:type: typing.Literal[additive, multiplicative]
+:value: >
+   'additive'
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.treatment_effect_mode
+```
+
+````
+
+````{py:attribute} treatment_effect_rate
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.treatment_effect_rate
+:type: float
+:value: >
+   0.12
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.treatment_effect_rate
+```
+
+````
+
+````{py:attribute} gamma_shape
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.gamma_shape
+:type: float
+:value: >
+   6.0
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.gamma_shape
+```
+
+````
+
+````{py:attribute} donor_noise_std_log
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.donor_noise_std_log
+:type: float
+:value: >
+   0.15
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.donor_noise_std_log
+```
+
+````
+
+````{py:attribute} common_factor_std_log
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.common_factor_std_log
+:type: float
+:value: >
+   0.1
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.common_factor_std_log
+```
+
+````
+
+````{py:attribute} latent_factor_std_log
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.latent_factor_std_log
+:type: float
+:value: >
+   0.1
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.latent_factor_std_log
+```
+
+````
+
+````{py:attribute} prefit_mismatch_std_log
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.prefit_mismatch_std_log
+:type: float
+:value: >
+   0.08
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig.prefit_mismatch_std_log
+```
+
+````
+
+`````
+
+`````{py:class} PanelSCMGenerator(config: causalis.dgp.panel_data_scm.base.PanelSCMGeneratorConfig)
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGenerator
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGenerator
+```
+
+```{rubric} Initialization
+```
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGenerator.__init__
+```
+
+````{py:method} generate(*, return_panel_data: typing.Optional[bool] = None) -> typing.Union[pandas.DataFrame, causalis.data_contracts.panel_data_scm.PanelDataSCM]
+:canonical: causalis.dgp.panel_data_scm.base.PanelSCMGenerator.generate
+
+```{autodoc2-docstring} causalis.dgp.panel_data_scm.base.PanelSCMGenerator.generate
+```
+
+````
+
+`````

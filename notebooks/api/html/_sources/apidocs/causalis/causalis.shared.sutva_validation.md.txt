@@ -1,0 +1,68 @@
+# {py:mod}`causalis.shared.sutva_validation`
+
+```{py:module} causalis.shared.sutva_validation
+```
+
+```{autodoc2-docstring} causalis.shared.sutva_validation
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`print_sutva_questions <causalis.shared.sutva_validation.print_sutva_questions>`
+  - ```{autodoc2-docstring} causalis.shared.sutva_validation.print_sutva_questions
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`QUESTIONS <causalis.shared.sutva_validation.QUESTIONS>`
+  - ```{autodoc2-docstring} causalis.shared.sutva_validation.QUESTIONS
+    :summary:
+    ```
+* - {py:obj}`__all__ <causalis.shared.sutva_validation.__all__>`
+  - ```{autodoc2-docstring} causalis.shared.sutva_validation.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} QUESTIONS
+:canonical: causalis.shared.sutva_validation.QUESTIONS
+:type: typing.Iterable[str]
+:value: >
+   ('1.) Are your clients independent (i). Outcome of ones do not depend on others?', '2.) Are all clie...
+
+```{autodoc2-docstring} causalis.shared.sutva_validation.QUESTIONS
+```
+
+````
+
+````{py:function} print_sutva_questions() -> None
+:canonical: causalis.shared.sutva_validation.print_sutva_questions
+
+```{autodoc2-docstring} causalis.shared.sutva_validation.print_sutva_questions
+```
+````
+
+````{py:data} __all__
+:canonical: causalis.shared.sutva_validation.__all__
+:value: >
+   ['QUESTIONS', 'print_sutva_questions']
+
+```{autodoc2-docstring} causalis.shared.sutva_validation.__all__
+```
+
+````

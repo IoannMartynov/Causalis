@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>causalis.scenarios.synthetic_control.dgp &#8212; Causalis API Reference  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="causalis.scenarios.synthetic_control.model" href="causalis.scenarios.synthetic_control.model.html" />
+    <link rel="prev" title="causalis.scenarios.synthetic_control.refutation.outcome_panel_plot" href="causalis.scenarios.synthetic_control.refutation.outcome_panel_plot.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-causalis.scenarios.synthetic_control.dgp">
+<span id="causalis-scenarios-synthetic-control-dgp"></span><h1><a class="reference internal" href="#module-causalis.scenarios.synthetic_control.dgp" title="causalis.scenarios.synthetic_control.dgp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.synthetic_control.dgp</span></code></a><a class="headerlink" href="#module-causalis.scenarios.synthetic_control.dgp" title="Link to this heading">¶</a></h1>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.synthetic_control.dgp.generate_scm_gamma_26" title="causalis.scenarios.synthetic_control.dgp.generate_scm_gamma_26"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_scm_gamma_26</span></code></a></p></td>
+<td><p>Generate realistic Gamma synthetic-control panel data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.synthetic_control.dgp.generate_scm_poisson_26" title="causalis.scenarios.synthetic_control.dgp.generate_scm_poisson_26"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_scm_poisson_26</span></code></a></p></td>
+<td><p>Generate realistic Poisson synthetic-control panel data.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="data">
+<h3>Data<a class="headerlink" href="#data" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.synthetic_control.dgp.PanelOutput" title="causalis.scenarios.synthetic_control.dgp.PanelOutput"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PanelOutput</span></code></a></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
+<dl class="py data">
+<dt class="sig sig-object py" id="causalis.scenarios.synthetic_control.dgp.PanelOutput">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.synthetic_control.dgp.</span></span><span class="sig-name descname"><span class="pre">PanelOutput</span></span><a class="headerlink" href="#causalis.scenarios.synthetic_control.dgp.PanelOutput" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.synthetic_control.dgp.generate_scm_gamma_26">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.synthetic_control.dgp.</span></span><span class="sig-name descname"><span class="pre">generate_scm_gamma_26</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_panel_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_oracles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_donors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">40</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_pre_periods</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">36</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_post_periods</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment_effect_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment_effect_slope</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.002</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">advanced_params</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">causalis.scenarios.synthetic_control.dgp.PanelOutput</span></span></span><a class="headerlink" href="#causalis.scenarios.synthetic_control.dgp.generate_scm_gamma_26" title="Link to this definition">¶</a></dt>
+<dd><p>Generate realistic Gamma synthetic-control panel data.</p>
+<p class="rubric" id="id4">Parameters</p>
+<p>seed : int, default=42
+Random seed.
+return_panel_data : bool, default=True
+If True, return a :class:<code class="docutils literal notranslate"><span class="pre">~causalis.data_contracts.panel_data_scm.PanelDataSCM</span></code>
+object. If False, return a pandas DataFrame.
+include_oracles : bool, default=False
+Whether to include oracle truth columns in the returned data:
+<code class="docutils literal notranslate"><span class="pre">is_treated_unit</span></code>, <code class="docutils literal notranslate"><span class="pre">y_cf</span></code>, <code class="docutils literal notranslate"><span class="pre">tau_realized_true</span></code>, <code class="docutils literal notranslate"><span class="pre">mu_cf</span></code>,
+<code class="docutils literal notranslate"><span class="pre">mu_treated</span></code>, <code class="docutils literal notranslate"><span class="pre">tau_mean_true</span></code>.
+Scenario-level outputs always exclude synthetic covariates
+<code class="docutils literal notranslate"><span class="pre">exposure</span></code>, <code class="docutils literal notranslate"><span class="pre">macro_index</span></code>, <code class="docutils literal notranslate"><span class="pre">seasonality_index</span></code>.
+n_donors : int, default=40
+Number of donor units.
+n_pre_periods : int or None, default=36
+Number of pre-treatment periods. Preferred explicit horizon control.
+When both <code class="docutils literal notranslate"><span class="pre">n_pre_periods</span></code> and <code class="docutils literal notranslate"><span class="pre">n_post_periods</span></code> are omitted, scenario
+defaults are used (<code class="docutils literal notranslate"><span class="pre">36</span></code> pre, <code class="docutils literal notranslate"><span class="pre">6</span></code> post). The generated panel includes
+one explicit intervention-anchor period, so each unit has
+<code class="docutils literal notranslate"><span class="pre">n_pre_periods</span> <span class="pre">+</span> <span class="pre">1</span> <span class="pre">+</span> <span class="pre">n_post_periods</span></code> rows.
+n_post_periods : int or None, default=6
+Number of post-treatment periods. Must be provided together with
+<code class="docutils literal notranslate"><span class="pre">n_pre_periods</span></code> when using explicit horizon control.
+treatment_effect_rate : float, default=0.10
+Long-run post-treatment relative effect scale. The first post period is
+attenuated by a ramp factor <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">-</span> <span class="pre">exp(-1</span> <span class="pre">/</span> <span class="pre">2.5)</span></code> (about 0.33x when slope
+is zero).
+treatment_effect_slope : float, default=0.002
+Linear slope of the post-treatment relative effect path.
+**advanced_params
+Forwarded to :func:<code class="docutils literal notranslate"><span class="pre">causalis.dgp.panel_data_scm.generate_scm_gamma_data</span></code>.
+Common advanced knobs include <code class="docutils literal notranslate"><span class="pre">time_start</span></code>, <code class="docutils literal notranslate"><span class="pre">calendar_start</span></code>,
+and latent-factor configuration. Defaults used by this wrapper are
+<code class="docutils literal notranslate"><span class="pre">gamma_shape=120</span></code>, <code class="docutils literal notranslate"><span class="pre">donor_noise_std_log=0.03</span></code>,
+<code class="docutils literal notranslate"><span class="pre">common_factor_std_log=0.03</span></code>, <code class="docutils literal notranslate"><span class="pre">latent_factor_std_log=0.0</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">prefit_mismatch_std_log=0.0</span></code>.</p>
+<p class="rubric" id="id5">Returns</p>
+<p>pandas.DataFrame or PanelDataSCM
+Long panel data for SCM experiments.</p>
+<p class="rubric" id="id6">Notes</p>
+<p>DGP Math:
+The data follows a hierarchical log-linear model for the mean: math:<code class="docutils literal notranslate"><span class="pre">\mu</span></code>.
+For each donor unit :math:<code class="docutils literal notranslate"><span class="pre">j</span></code> at time :math:<code class="docutils literal notranslate"><span class="pre">t</span></code>, the mean is :math:<code class="docutils literal notranslate"><span class="pre">\mu_{tj}</span> <span class="pre">=</span> <span class="pre">E_{tj}</span> <span class="pre">\cdot</span> <span class="pre">\exp(\eta_{tj})</span></code>
+where :math:<code class="docutils literal notranslate"><span class="pre">E_{tj}</span></code> is exposure (with growth and noise) and :math:<code class="docutils literal notranslate"><span class="pre">\eta_{tj}</span></code> includes seasonality,
+common factors (macro index), latent factors, and unit-specific noise.
+Outcomes are sampled as :math:<code class="docutils literal notranslate"><span class="pre">y_{tj}</span> <span class="pre">\sim</span> <span class="pre">\text{Gamma}(k,</span> <span class="pre">\mu_{tj}/k)</span></code>, where :math:<code class="docutils literal notranslate"><span class="pre">k</span></code> is <code class="docutils literal notranslate"><span class="pre">gamma_shape</span></code>.</p>
+<p>The treated unit’s counterfactual mean :math:<code class="docutils literal notranslate"><span class="pre">\mu_{t,</span> <span class="pre">cf}</span></code> is a weighted combination of donors
+(via Dirichlet weights) with a potential pre-fit mismatch. The realized treated outcome
+is :math:<code class="docutils literal notranslate"><span class="pre">y_{t,</span> <span class="pre">treated}</span> <span class="pre">=</span> <span class="pre">y_{t,</span> <span class="pre">cf}</span> <span class="pre">\cdot</span> <span class="pre">(1</span> <span class="pre">+</span> <span class="pre">\tau_t^{rate})</span></code>, where :math:<code class="docutils literal notranslate"><span class="pre">\tau_t^{rate}</span></code> is the
+relative treatment effect.</p>
+<p>Time-axis semantics:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">n_pre_periods</span></code>: number of periods strictly before the intervention anchor.</p></li>
+<li><p>One explicit intervention-anchor period is included in the output.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">n_post_periods</span></code>: number of periods strictly after the intervention anchor.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">time_start</span></code>: offset for the first <code class="docutils literal notranslate"><span class="pre">calendar_time</span></code> period relative to
+<code class="docutils literal notranslate"><span class="pre">calendar_start</span></code> (default <code class="docutils literal notranslate"><span class="pre">calendar_start=&quot;2000-01&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">time_start=1</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">treated_time</span></code>: explicit 0/1 treatment-assignment indicator in returned
+data (<code class="docutils literal notranslate"><span class="pre">1</span></code> only for treated-unit rows at/after the first treated period;
+<code class="docutils literal notranslate"><span class="pre">0</span></code> otherwise).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PanelDataSCM</span></code> is built with required fields only:
+<code class="docutils literal notranslate"><span class="pre">df</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code>, <code class="docutils literal notranslate"><span class="pre">unit_col</span></code>, <code class="docutils literal notranslate"><span class="pre">time_col</span></code>, <code class="docutils literal notranslate"><span class="pre">treated_time</span></code>.</p></li>
+<li><p>When <code class="docutils literal notranslate"><span class="pre">return_panel_data=True</span></code>, all contract metadata is derived from the
+final <code class="docutils literal notranslate"><span class="pre">treated_time</span></code> path. Because this scenario keeps one explicit anchor
+period in the panel, contract-level pre periods are
+<code class="docutils literal notranslate"><span class="pre">n_pre_periods</span> <span class="pre">+</span> <span class="pre">1</span></code> and post periods are <code class="docutils literal notranslate"><span class="pre">n_post_periods</span></code>.</p></li>
+<li><p>With this function’s default arguments, the explicit values are:
+<code class="docutils literal notranslate"><span class="pre">n_pre_periods=36</span></code>, <code class="docutils literal notranslate"><span class="pre">n_post_periods=6</span></code>, <code class="docutils literal notranslate"><span class="pre">calendar_start='2000-01'</span></code>,
+<code class="docutils literal notranslate"><span class="pre">time_start=1</span></code>, first treated period at <code class="docutils literal notranslate"><span class="pre">Period('2003-02',</span> <span class="pre">'M')</span></code>,
+and intervention anchor at <code class="docutils literal notranslate"><span class="pre">Period('2003-01',</span> <span class="pre">'M')</span></code>.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.synthetic_control.dgp.generate_scm_poisson_26">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.synthetic_control.dgp.</span></span><span class="sig-name descname"><span class="pre">generate_scm_poisson_26</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_panel_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_oracles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_donors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_pre_periods</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">180</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_post_periods</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment_effect_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment_effect_slope</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0005</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">advanced_params</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">causalis.scenarios.synthetic_control.dgp.PanelOutput</span></span></span><a class="headerlink" href="#causalis.scenarios.synthetic_control.dgp.generate_scm_poisson_26" title="Link to this definition">¶</a></dt>
+<dd><p>Generate realistic Poisson synthetic-control panel data.</p>
+<p class="rubric" id="id7">Parameters</p>
+<p>seed : int, default=42
+Random seed.
+return_panel_data : bool, default=True
+If True, return a :class:<code class="docutils literal notranslate"><span class="pre">~causalis.data_contracts.panel_data_scm.PanelDataSCM</span></code>
+object. If False, return a pandas DataFrame.
+include_oracles : bool, default=False
+Whether to include oracle truth columns in the returned data:
+<code class="docutils literal notranslate"><span class="pre">is_treated_unit</span></code>, <code class="docutils literal notranslate"><span class="pre">y_cf</span></code>, <code class="docutils literal notranslate"><span class="pre">tau_realized_true</span></code>, <code class="docutils literal notranslate"><span class="pre">mu_cf</span></code>,
+<code class="docutils literal notranslate"><span class="pre">mu_treated</span></code>, <code class="docutils literal notranslate"><span class="pre">tau_mean_true</span></code>.
+Scenario-level outputs always exclude synthetic covariates
+<code class="docutils literal notranslate"><span class="pre">exposure</span></code>, <code class="docutils literal notranslate"><span class="pre">macro_index</span></code>, <code class="docutils literal notranslate"><span class="pre">seasonality_index</span></code>.
+n_donors : int, default=20
+Number of donor units.
+n_pre_periods : int or None, default=180
+Number of pre-treatment periods. Preferred explicit horizon control.
+When both <code class="docutils literal notranslate"><span class="pre">n_pre_periods</span></code> and <code class="docutils literal notranslate"><span class="pre">n_post_periods</span></code> are omitted, scenario
+defaults are used (<code class="docutils literal notranslate"><span class="pre">36</span></code> pre, <code class="docutils literal notranslate"><span class="pre">6</span></code> post). The generated panel includes
+one explicit intervention-anchor period, so each unit has
+<code class="docutils literal notranslate"><span class="pre">n_pre_periods</span> <span class="pre">+</span> <span class="pre">1</span> <span class="pre">+</span> <span class="pre">n_post_periods</span></code> rows.
+n_post_periods : int or None, default=4
+Number of post-treatment periods. Must be provided together with
+<code class="docutils literal notranslate"><span class="pre">n_pre_periods</span></code> when using explicit horizon control.
+treatment_effect_rate : float, default=0.15
+Long-run post-treatment relative effect scale. The first post period is
+attenuated by a ramp factor <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">-</span> <span class="pre">exp(-1</span> <span class="pre">/</span> <span class="pre">2.5)</span></code> (about 0.33x when slope
+is zero).
+treatment_effect_slope : float, default=0.0005
+Linear slope of the post-treatment relative effect path.
+**advanced_params
+Forwarded to :func:<code class="docutils literal notranslate"><span class="pre">causalis.dgp.panel_data_scm.generate_scm_poisson_data</span></code>.
+Common advanced knobs include <code class="docutils literal notranslate"><span class="pre">time_start</span></code>, <code class="docutils literal notranslate"><span class="pre">calendar_start</span></code>,
+and latent-factor configuration. Defaults used by this wrapper are
+<code class="docutils literal notranslate"><span class="pre">donor_noise_std_log=0.02</span></code>, <code class="docutils literal notranslate"><span class="pre">common_factor_std_log=0.02</span></code>,
+<code class="docutils literal notranslate"><span class="pre">latent_factor_std_log=0.0</span></code>, and <code class="docutils literal notranslate"><span class="pre">prefit_mismatch_std_log=0.0</span></code>.</p>
+<p class="rubric" id="id8">Returns</p>
+<p>pandas.DataFrame or PanelDataSCM
+Long panel data for SCM experiments.</p>
+<p class="rubric" id="id9">Notes</p>
+<p>DGP Math:
+The data follows a hierarchical log-linear model for the mean :math:<code class="docutils literal notranslate"><span class="pre">\mu</span></code>.
+For each donor unit :math:<code class="docutils literal notranslate"><span class="pre">j</span></code> at time :math:<code class="docutils literal notranslate"><span class="pre">t</span></code>, the mean is :math:<code class="docutils literal notranslate"><span class="pre">\mu_{tj}</span> <span class="pre">=</span> <span class="pre">E_{tj}</span> <span class="pre">\cdot</span> <span class="pre">\exp(\eta_{tj})</span></code>
+where :math:<code class="docutils literal notranslate"><span class="pre">E_{tj}</span></code> is exposure and :math:<code class="docutils literal notranslate"><span class="pre">\eta_{tj}</span></code> includes seasonality, common factors,
+latent factors, and unit-specific noise.
+Outcomes are sampled as :math:<code class="docutils literal notranslate"><span class="pre">y_{tj}</span> <span class="pre">\sim</span> <span class="pre">\text{Poisson}(\mu_{tj})</span></code>.</p>
+<p>The treated unit’s counterfactual mean :math:<code class="docutils literal notranslate"><span class="pre">\mu_{t,</span> <span class="pre">cf}</span></code> is a weighted combination of donors.
+The realized treated outcome :math:<code class="docutils literal notranslate"><span class="pre">y_{t,</span> <span class="pre">treated}</span></code> is sampled from a Poisson distribution
+coupled with the counterfactual :math:<code class="docutils literal notranslate"><span class="pre">y_{t,</span> <span class="pre">cf}</span></code> via a thinning/superposition property to
+maintain exact marginals while ensuring the realized effect is driven by the multiplier.</p>
+<p>Time-axis semantics:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">n_pre_periods</span></code>: number of periods strictly before the intervention anchor.</p></li>
+<li><p>One explicit intervention-anchor period is included in the output.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">n_post_periods</span></code>: number of periods strictly after the intervention anchor.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">time_start</span></code>: offset for the first <code class="docutils literal notranslate"><span class="pre">calendar_time</span></code> period relative to
+<code class="docutils literal notranslate"><span class="pre">calendar_start</span></code> (default <code class="docutils literal notranslate"><span class="pre">calendar_start=&quot;2000-01&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">time_start=1</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">treated_time</span></code>: explicit 0/1 treatment-assignment indicator in returned
+data (<code class="docutils literal notranslate"><span class="pre">1</span></code> only for treated-unit rows at/after the first treated period;
+<code class="docutils literal notranslate"><span class="pre">0</span></code> otherwise).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PanelDataSCM</span></code> is built with required fields only:
+<code class="docutils literal notranslate"><span class="pre">df</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code>, <code class="docutils literal notranslate"><span class="pre">unit_col</span></code>, <code class="docutils literal notranslate"><span class="pre">time_col</span></code>, <code class="docutils literal notranslate"><span class="pre">treated_time</span></code>.</p></li>
+<li><p>When <code class="docutils literal notranslate"><span class="pre">return_panel_data=True</span></code>, all contract metadata is derived from the
+final <code class="docutils literal notranslate"><span class="pre">treated_time</span></code> path. Because this scenario keeps one explicit anchor
+period in the panel, contract-level pre periods are
+<code class="docutils literal notranslate"><span class="pre">n_pre_periods</span> <span class="pre">+</span> <span class="pre">1</span></code> and post periods are <code class="docutils literal notranslate"><span class="pre">n_post_periods</span></code>.</p></li>
+<li><p>With this function’s default arguments, the explicit values are:
+<code class="docutils literal notranslate"><span class="pre">n_pre_periods=180</span></code>, <code class="docutils literal notranslate"><span class="pre">n_post_periods=4</span></code>, <code class="docutils literal notranslate"><span class="pre">calendar_start='2000-01'</span></code>,
+<code class="docutils literal notranslate"><span class="pre">time_start=1</span></code>, first treated period at <code class="docutils literal notranslate"><span class="pre">Period('2003-02',</span> <span class="pre">'M')</span></code>,
+and intervention anchor at <code class="docutils literal notranslate"><span class="pre">Period('2003-01',</span> <span class="pre">'M')</span></code>.</p></li>
+</ul>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../reference.html">Causalis API Reference</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../reference.html">Documentation overview</a><ul>
+  <li><a href="../index.html">API Modules</a><ul>
+  <li><a href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a><ul>
+  <li><a href="causalis.scenarios.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios</span></code></a><ul>
+  <li><a href="causalis.scenarios.synthetic_control.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.synthetic_control</span></code></a><ul>
+      <li>Previous: <a href="causalis.scenarios.synthetic_control.refutation.outcome_panel_plot.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.synthetic_control.refutation.outcome_panel_plot</span></code></a></li>
+      <li>Next: <a href="causalis.scenarios.synthetic_control.model.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.synthetic_control.model</span></code></a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../../_sources/apidocs/causalis/causalis.scenarios.synthetic_control.dgp.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

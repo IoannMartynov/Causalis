@@ -1,0 +1,75 @@
+# {py:mod}`causalis.scenarios.synthetic_control.refutation.placebo`
+
+```{py:module} causalis.scenarios.synthetic_control.refutation.placebo
+```
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.placebo
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`placebo_in_space_table <causalis.scenarios.synthetic_control.refutation.placebo.placebo_in_space_table>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.placebo.placebo_in_space_table
+    :summary:
+    ```
+* - {py:obj}`placebo_in_time_table <causalis.scenarios.synthetic_control.refutation.placebo.placebo_in_time_table>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.placebo.placebo_in_time_table
+    :summary:
+    ```
+* - {py:obj}`run_placebo_tests <causalis.scenarios.synthetic_control.refutation.placebo.run_placebo_tests>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.placebo.run_placebo_tests
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.scenarios.synthetic_control.refutation.placebo.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.placebo.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} placebo_in_space_table(estimate: causalis.data_contracts.panel_estimate.PanelEstimate, paneldata: causalis.data_contracts.panel_data_scm.PanelDataSCM, *, model_kwargs: typing.Dict[str, typing.Any] | None = None) -> pandas.DataFrame
+:canonical: causalis.scenarios.synthetic_control.refutation.placebo.placebo_in_space_table
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.placebo.placebo_in_space_table
+```
+````
+
+````{py:function} placebo_in_time_table(estimate: causalis.data_contracts.panel_estimate.PanelEstimate, paneldata: causalis.data_contracts.panel_data_scm.PanelDataSCM, *, model_kwargs: typing.Dict[str, typing.Any] | None = None, pseudo_post_horizon: int | None = None) -> pandas.DataFrame
+:canonical: causalis.scenarios.synthetic_control.refutation.placebo.placebo_in_time_table
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.placebo.placebo_in_time_table
+```
+````
+
+````{py:function} run_placebo_tests(estimate: causalis.data_contracts.panel_estimate.PanelEstimate, paneldata: causalis.data_contracts.panel_data_scm.PanelDataSCM, *, model_kwargs: typing.Dict[str, typing.Any] | None = None, pseudo_post_horizon: int | None = None) -> typing.Dict[str, pandas.DataFrame]
+:canonical: causalis.scenarios.synthetic_control.refutation.placebo.run_placebo_tests
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.placebo.run_placebo_tests
+```
+````
+
+````{py:data} __all__
+:canonical: causalis.scenarios.synthetic_control.refutation.placebo.__all__
+:value: >
+   ['placebo_in_space_table', 'placebo_in_time_table', 'run_placebo_tests']
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control.refutation.placebo.__all__
+```
+
+````

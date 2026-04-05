@@ -1,0 +1,53 @@
+# {py:mod}`causalis.shared.outcome_plots`
+
+```{py:module} causalis.shared.outcome_plots
+```
+
+```{autodoc2-docstring} causalis.shared.outcome_plots
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`outcome_plot_dist <causalis.shared.outcome_plots.outcome_plot_dist>`
+  - ```{autodoc2-docstring} causalis.shared.outcome_plots.outcome_plot_dist
+    :summary:
+    ```
+* - {py:obj}`outcome_plot_boxplot <causalis.shared.outcome_plots.outcome_plot_boxplot>`
+  - ```{autodoc2-docstring} causalis.shared.outcome_plots.outcome_plot_boxplot
+    :summary:
+    ```
+* - {py:obj}`outcome_plots <causalis.shared.outcome_plots.outcome_plots>`
+  - ```{autodoc2-docstring} causalis.shared.outcome_plots.outcome_plots
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} outcome_plot_dist(data: typing.Union[causalis.dgp.causaldata.CausalData, causalis.dgp.multicausaldata.MultiCausalData], treatment: typing.Optional[str] = None, outcome: typing.Optional[str] = None, bins: typing.Union[str, int] = 'fd', density: bool = True, alpha: float = 0.45, sharex: bool = True, kde: bool = True, clip: typing.Optional[typing.Tuple[float, float]] = (0.01, 0.99), figsize: typing.Tuple[float, float] = (9, 5.5), dpi: int = 220, font_scale: float = 1.15, palette: typing.Optional[typing.Union[list, dict]] = None, save: typing.Optional[str] = None, save_dpi: typing.Optional[int] = None, transparent: bool = False) -> matplotlib.pyplot.Figure
+:canonical: causalis.shared.outcome_plots.outcome_plot_dist
+
+```{autodoc2-docstring} causalis.shared.outcome_plots.outcome_plot_dist
+```
+````
+
+````{py:function} outcome_plot_boxplot(data: typing.Union[causalis.dgp.causaldata.CausalData, causalis.dgp.multicausaldata.MultiCausalData], treatment: typing.Optional[str] = None, outcome: typing.Optional[str] = None, figsize: typing.Tuple[float, float] = (9, 5.5), dpi: int = 220, font_scale: float = 1.15, showfliers: bool = True, patch_artist: bool = True, palette: typing.Optional[typing.Union[list, dict]] = None, save: typing.Optional[str] = None, save_dpi: typing.Optional[int] = None, transparent: bool = False) -> matplotlib.pyplot.Figure
+:canonical: causalis.shared.outcome_plots.outcome_plot_boxplot
+
+```{autodoc2-docstring} causalis.shared.outcome_plots.outcome_plot_boxplot
+```
+````
+
+````{py:function} outcome_plots(data: typing.Union[causalis.dgp.causaldata.CausalData, causalis.dgp.multicausaldata.MultiCausalData], treatment: typing.Optional[str] = None, outcome: typing.Optional[str] = None, bins: int = 30, density: bool = True, alpha: float = 0.5, figsize: typing.Tuple[float, float] = (7, 4), sharex: bool = True, palette: typing.Optional[typing.Union[list, dict]] = None) -> typing.Tuple[matplotlib.pyplot.Figure, matplotlib.pyplot.Figure]
+:canonical: causalis.shared.outcome_plots.outcome_plots
+
+```{autodoc2-docstring} causalis.shared.outcome_plots.outcome_plots
+```
+````

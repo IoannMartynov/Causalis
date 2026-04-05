@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>causalis.scenarios.synthetic_control.model &#8212; Causalis API Reference  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="causalis.scenarios.unconfoundedness" href="causalis.scenarios.unconfoundedness.html" />
+    <link rel="prev" title="causalis.scenarios.synthetic_control.dgp" href="causalis.scenarios.synthetic_control.dgp.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-causalis.scenarios.synthetic_control.model">
+<span id="causalis-scenarios-synthetic-control-model"></span><h1><a class="reference internal" href="#module-causalis.scenarios.synthetic_control.model" title="causalis.scenarios.synthetic_control.model"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.synthetic_control.model</span></code></a><a class="headerlink" href="#module-causalis.scenarios.synthetic_control.model" title="Link to this heading">¶</a></h1>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl" title="causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AugmentedSyntheticControl</span></code></a></p></td>
+<td><p>Ridge-augmented synthetic control with simplex anchor and aggregate-first inference.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="data">
+<h3>Data<a class="headerlink" href="#data" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.synthetic_control.model.ASCM" title="causalis.scenarios.synthetic_control.model.ASCM"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ASCM</span></code></a></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">causalis.scenarios.synthetic_control.model.</span></span><span class="sig-name descname"><span class="pre">AugmentedSyntheticControl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">lambda_aug</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lambda_sc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-09</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enforce_sum_to_one_augmented</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conformal_grid_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">401</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conformal_grid_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conformal_grid_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conformal_grid_scale_mult</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">6.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">average_att_n_folds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_average_att_ttest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_pointwise_conformal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl" title="Link to this definition">¶</a></dt>
+<dd><p>Ridge-augmented synthetic control with simplex anchor and aggregate-first inference.</p>
+<p class="rubric" id="id1">Notes</p>
+<p>Average ATT t-test inference is the default post-treatment inference layer.
+Pointwise conformal intervals/p-values are optional and can be enabled for
+dynamic path uncertainty quantification.</p>
+<p class="rubric">Initialization</p>
+<p>Initialize ASCM hyperparameters.</p>
+<p class="rubric" id="parameters">Parameters</p>
+<p>lambda_aug : float, default=1.0
+Ridge regularization for augmented weights.
+lambda_sc : float, default=1e-6
+Numerical regularization for simplex SCM weights.
+max_iter : int, default=2000
+Maximum iterations for constrained optimization routines.
+tol : float, default=1e-9
+Optimization tolerance.
+enforce_sum_to_one_augmented : bool, default=True
+Enforce sum-to-one constraint on augmented weights.
+alpha : float, default=0.05
+Default significance level used by <code class="docutils literal notranslate"><span class="pre">estimate()</span></code> inference.
+conformal_grid_size : int, default=401
+Default number of grid points used in pointwise conformal inversion.
+conformal_grid_min : float or None, default=None
+Optional default fixed lower bound for conformal grid.
+conformal_grid_max : float or None, default=None
+Optional default fixed upper bound for conformal grid.
+conformal_grid_scale_mult : float, default=6.0
+Default scale multiplier for automatic conformal grid width.
+average_att_n_folds : int, default=3
+Default requested number of folds for average ATT t-test inference.
+compute_average_att_ttest : bool, default=True
+Default toggle for average ATT t-test inference in <code class="docutils literal notranslate"><span class="pre">estimate()</span></code>.
+compute_pointwise_conformal : bool, default=False
+Default toggle for pointwise conformal CIs/p-values in <code class="docutils literal notranslate"><span class="pre">estimate()</span></code>.</p>
+<p class="rubric" id="raises">Raises</p>
+<p>ValueError
+If any hyperparameter is invalid.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="causalis.data_contracts.panel_data_scm.html#causalis.data_contracts.panel_data_scm.PanelDataSCM" title="causalis.data_contracts.panel_data_scm.PanelDataSCM"><span class="pre">causalis.data_contracts.panel_data_scm.PanelDataSCM</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl" title="causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl"><span class="pre">causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl</span></a></span></span><a class="headerlink" href="#causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl.fit" title="Link to this definition">¶</a></dt>
+<dd><p>Fit ASCM and compute inference outputs.</p>
+<p class="rubric" id="id2">Parameters</p>
+<p>data : PanelDataSCM
+Validated synthetic-control panel data.</p>
+<p class="rubric" id="returns">Returns</p>
+<p>AugmentedSyntheticControl
+Fitted estimator instance.</p>
+<p class="rubric" id="id3">Raises</p>
+<p>ValueError
+If input type is invalid or panel requirements are violated.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl.estimate">
+<span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conformal_grid_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conformal_grid_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conformal_grid_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conformal_grid_scale_mult</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">average_att_n_folds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_average_att_ttest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_pointwise_conformal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="causalis.data_contracts.panel_estimate.html#causalis.data_contracts.panel_estimate.PanelEstimate" title="causalis.data_contracts.panel_estimate.PanelEstimate"><span class="pre">causalis.data_contracts.panel_estimate.PanelEstimate</span></a></span></span><a class="headerlink" href="#causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl.estimate" title="Link to this definition">¶</a></dt>
+<dd><p>Return dynamic-path estimate object.</p>
+<p class="rubric" id="id4">Parameters</p>
+<p>alpha : float or None, default=None
+Optional per-call significance level override.
+conformal_grid_size : int or None, default=None
+Optional per-call pointwise conformal grid size override.
+conformal_grid_min : float or None, default=None
+Optional per-call lower conformal grid bound override.
+conformal_grid_max : float or None, default=None
+Optional per-call upper conformal grid bound override.
+conformal_grid_scale_mult : float or None, default=None
+Optional per-call automatic conformal grid scale override.
+average_att_n_folds : int or None, default=None
+Optional per-call fold-count override for average ATT inference.
+compute_average_att_ttest : bool or None, default=None
+Optional per-call toggle for average ATT t-test inference.
+compute_pointwise_conformal : bool or None, default=None
+Optional per-call toggle for pointwise conformal inference.</p>
+<p class="rubric" id="id5">Returns</p>
+<p>PanelEstimate
+Dynamic path estimates with pointwise inference fields. Aggregate
+average ATT t-test outputs are provided in <code class="docutils literal notranslate"><span class="pre">diagnostics</span></code> and are
+the default formal inference layer. If pointwise conformal is not
+computed, pointwise p-values/CIs are returned as <code class="docutils literal notranslate"><span class="pre">NaN</span></code> placeholders.</p>
+<p class="rubric" id="id6">Raises</p>
+<p>RuntimeError
+If the model is not fitted.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#causalis.scenarios.synthetic_control.model.AugmentedSyntheticControl.__repr__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="causalis.scenarios.synthetic_control.model.ASCM">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.synthetic_control.model.</span></span><span class="sig-name descname"><span class="pre">ASCM</span></span><a class="headerlink" href="#causalis.scenarios.synthetic_control.model.ASCM" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../reference.html">Causalis API Reference</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../reference.html">Documentation overview</a><ul>
+  <li><a href="../index.html">API Modules</a><ul>
+  <li><a href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a><ul>
+  <li><a href="causalis.scenarios.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios</span></code></a><ul>
+  <li><a href="causalis.scenarios.synthetic_control.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.synthetic_control</span></code></a><ul>
+      <li>Previous: <a href="causalis.scenarios.synthetic_control.dgp.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.synthetic_control.dgp</span></code></a></li>
+      <li>Next: <a href="causalis.scenarios.unconfoundedness.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.unconfoundedness</span></code></a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../../_sources/apidocs/causalis/causalis.scenarios.synthetic_control.model.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

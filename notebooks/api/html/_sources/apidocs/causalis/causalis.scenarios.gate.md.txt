@@ -1,0 +1,62 @@
+# {py:mod}`causalis.scenarios.gate`
+
+```{py:module} causalis.scenarios.gate
+```
+
+```{autodoc2-docstring} causalis.scenarios.gate
+:allowtitles:
+```
+
+## Submodules
+
+```{toctree}
+:titlesonly:
+:maxdepth: 1
+
+causalis.scenarios.gate.model
+```
+
+## Package Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__getattr__ <causalis.scenarios.gate.__getattr__>`
+  - ```{autodoc2-docstring} causalis.scenarios.gate.__getattr__
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.scenarios.gate.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.gate.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} __all__
+:canonical: causalis.scenarios.gate.__all__
+:value: >
+   ['estimate_gate_from_irm']
+
+```{autodoc2-docstring} causalis.scenarios.gate.__all__
+```
+
+````
+
+````{py:function} __getattr__(name: str)
+:canonical: causalis.scenarios.gate.__getattr__
+
+```{autodoc2-docstring} causalis.scenarios.gate.__getattr__
+```
+````

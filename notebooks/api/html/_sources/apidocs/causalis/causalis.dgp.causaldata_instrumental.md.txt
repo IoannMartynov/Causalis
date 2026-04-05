@@ -1,0 +1,44 @@
+# {py:mod}`causalis.dgp.causaldata_instrumental`
+
+```{py:module} causalis.dgp.causaldata_instrumental
+```
+
+```{autodoc2-docstring} causalis.dgp.causaldata_instrumental
+:allowtitles:
+```
+
+## Submodules
+
+```{toctree}
+:titlesonly:
+:maxdepth: 1
+
+causalis.dgp.causaldata_instrumental.functional
+causalis.dgp.causaldata_instrumental.base
+```
+
+## Package Contents
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.dgp.causaldata_instrumental.__all__>`
+  - ```{autodoc2-docstring} causalis.dgp.causaldata_instrumental.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} __all__
+:canonical: causalis.dgp.causaldata_instrumental.__all__
+:value: >
+   ['InstrumentalGenerator', 'generate_iv_data']
+
+```{autodoc2-docstring} causalis.dgp.causaldata_instrumental.__all__
+```
+
+````

@@ -1,0 +1,242 @@
+# {py:mod}`causalis.data_contracts.panel_data_scm`
+
+```{py:module} causalis.data_contracts.panel_data_scm
+```
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_scm
+:allowtitles:
+```
+
+## Module Contents
+
+### Classes
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`PanelDataSCM <causalis.data_contracts.panel_data_scm.PanelDataSCM>`
+  - ```{autodoc2-docstring} causalis.data_contracts.panel_data_scm.PanelDataSCM
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`TimeLike <causalis.data_contracts.panel_data_scm.TimeLike>`
+  - ```{autodoc2-docstring} causalis.data_contracts.panel_data_scm.TimeLike
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} TimeLike
+:canonical: causalis.data_contracts.panel_data_scm.TimeLike
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_scm.TimeLike
+```
+
+````
+
+`````{py:class} PanelDataSCM(/, **data: typing.Any)
+:canonical: causalis.data_contracts.panel_data_scm.PanelDataSCM
+
+Bases: {py:obj}`pydantic.BaseModel`
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_scm.PanelDataSCM
+```
+
+```{rubric} Initialization
+```
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_scm.PanelDataSCM.__init__
+```
+
+````{py:attribute} model_config
+:canonical: causalis.data_contracts.panel_data_scm.PanelDataSCM.model_config
+:value: >
+   'ConfigDict(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_scm.PanelDataSCM.model_config
+```
+
+````
+
+````{py:attribute} df
+:canonical: causalis.data_contracts.panel_data_scm.PanelDataSCM.df
+:type: pandas.DataFrame
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_scm.PanelDataSCM.df
+```
+
+````
+
+````{py:attribute} y
+:canonical: causalis.data_contracts.panel_data_scm.PanelDataSCM.y
+:type: str
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_scm.PanelDataSCM.y
+```
+
+````
+
+````{py:attribute} unit_col
+:canonical: causalis.data_contracts.panel_data_scm.PanelDataSCM.unit_col
+:type: str
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_scm.PanelDataSCM.unit_col
+```
+
+````
+
+````{py:attribute} time_col
+:canonical: causalis.data_contracts.panel_data_scm.PanelDataSCM.time_col
+:type: str
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_scm.PanelDataSCM.time_col
+```
+
+````
+
+````{py:attribute} treated_time
+:canonical: causalis.data_contracts.panel_data_scm.PanelDataSCM.treated_time
+:type: str
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_scm.PanelDataSCM.treated_time
+```
+
+````
+
+````{py:property} treated_unit
+:canonical: causalis.data_contracts.panel_data_scm.PanelDataSCM.treated_unit
+:type: typing.Hashable
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_scm.PanelDataSCM.treated_unit
+```
+
+````
+
+````{py:property} treatment_start
+:canonical: causalis.data_contracts.panel_data_scm.PanelDataSCM.treatment_start
+:type: pandas.Period
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_scm.PanelDataSCM.treatment_start
+```
+
+````
+
+````{py:property} time_freq
+:canonical: causalis.data_contracts.panel_data_scm.PanelDataSCM.time_freq
+:type: str
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_scm.PanelDataSCM.time_freq
+```
+
+````
+
+````{py:property} n_pre_periods
+:canonical: causalis.data_contracts.panel_data_scm.PanelDataSCM.n_pre_periods
+:type: int
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_scm.PanelDataSCM.n_pre_periods
+```
+
+````
+
+````{py:property} n_post_periods
+:canonical: causalis.data_contracts.panel_data_scm.PanelDataSCM.n_post_periods
+:type: int
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_scm.PanelDataSCM.n_post_periods
+```
+
+````
+
+````{py:property} last_post_period
+:canonical: causalis.data_contracts.panel_data_scm.PanelDataSCM.last_post_period
+:type: pandas.Period
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_scm.PanelDataSCM.last_post_period
+```
+
+````
+
+````{py:method} donor_pool() -> typing.Sequence[typing.Hashable]
+:canonical: causalis.data_contracts.panel_data_scm.PanelDataSCM.donor_pool
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_scm.PanelDataSCM.donor_pool
+```
+
+````
+
+````{py:method} df_analysis() -> pandas.DataFrame
+:canonical: causalis.data_contracts.panel_data_scm.PanelDataSCM.df_analysis
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_scm.PanelDataSCM.df_analysis
+```
+
+````
+
+````{py:method} pre_times() -> typing.Sequence[pandas.Period]
+:canonical: causalis.data_contracts.panel_data_scm.PanelDataSCM.pre_times
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_scm.PanelDataSCM.pre_times
+```
+
+````
+
+````{py:method} post_times() -> typing.Sequence[pandas.Period]
+:canonical: causalis.data_contracts.panel_data_scm.PanelDataSCM.post_times
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_scm.PanelDataSCM.post_times
+```
+
+````
+
+````{py:method} analysis_times() -> typing.Sequence[pandas.Period]
+:canonical: causalis.data_contracts.panel_data_scm.PanelDataSCM.analysis_times
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_scm.PanelDataSCM.analysis_times
+```
+
+````
+
+````{py:method} time_to_index() -> dict[pandas.Period, int]
+:canonical: causalis.data_contracts.panel_data_scm.PanelDataSCM.time_to_index
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_scm.PanelDataSCM.time_to_index
+```
+
+````
+
+````{py:method} treatment_start_idx() -> int
+:canonical: causalis.data_contracts.panel_data_scm.PanelDataSCM.treatment_start_idx
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_scm.PanelDataSCM.treatment_start_idx
+```
+
+````
+
+````{py:method} __repr__() -> str
+:canonical: causalis.data_contracts.panel_data_scm.PanelDataSCM.__repr__
+
+````
+
+`````

@@ -1,0 +1,53 @@
+# {py:mod}`causalis.scenarios.cuped`
+
+```{py:module} causalis.scenarios.cuped
+```
+
+```{autodoc2-docstring} causalis.scenarios.cuped
+:allowtitles:
+```
+
+## Subpackages
+
+```{toctree}
+:titlesonly:
+:maxdepth: 3
+
+causalis.scenarios.cuped.diagnostics
+```
+
+## Submodules
+
+```{toctree}
+:titlesonly:
+:maxdepth: 1
+
+causalis.scenarios.cuped.dgp
+causalis.scenarios.cuped.model
+```
+
+## Package Contents
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.scenarios.cuped.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} __all__
+:canonical: causalis.scenarios.cuped.__all__
+:value: >
+   ['CUPEDModel', 'cuped_forest_plot', 'regression_assumptions_table_from_data', 'regression_assumption...
+
+```{autodoc2-docstring} causalis.scenarios.cuped.__all__
+```
+
+````

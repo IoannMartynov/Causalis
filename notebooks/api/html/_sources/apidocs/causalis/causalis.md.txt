@@ -1,0 +1,21 @@
+# {py:mod}`causalis`
+
+```{py:module} causalis
+```
+
+```{autodoc2-docstring} causalis
+:parser: rst
+:allowtitles:
+```
+
+## Subpackages
+
+```{toctree}
+:titlesonly:
+:maxdepth: 3
+
+causalis.data_contracts
+causalis.dgp
+causalis.scenarios
+causalis.shared
+```

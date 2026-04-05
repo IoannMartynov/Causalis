@@ -1,0 +1,322 @@
+# {py:mod}`causalis.data_contracts.gate_estimate`
+
+```{py:module} causalis.data_contracts.gate_estimate
+```
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate
+:allowtitles:
+```
+
+## Module Contents
+
+### Classes
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`GateEstimate <causalis.data_contracts.gate_estimate.GateEstimate>`
+  - ```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate
+    :summary:
+    ```
+````
+
+### API
+
+`````{py:class} GateEstimate(/, **data: typing.Any)
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate
+
+Bases: {py:obj}`pydantic.BaseModel`
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate
+```
+
+```{rubric} Initialization
+```
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.__init__
+```
+
+````{py:attribute} model_config
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate.model_config
+:value: >
+   'ConfigDict(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.model_config
+```
+
+````
+
+````{py:attribute} estimand
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate.estimand
+:type: str
+:value: >
+   'GATE'
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.estimand
+```
+
+````
+
+````{py:attribute} model
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate.model
+:type: str
+:value: >
+   'IRM'
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.model
+```
+
+````
+
+````{py:attribute} group_names
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate.group_names
+:type: typing.List[str]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.group_names
+```
+
+````
+
+````{py:attribute} values
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate.values
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.values
+```
+
+````
+
+````{py:attribute} std_errors
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate.std_errors
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.std_errors
+```
+
+````
+
+````{py:attribute} test_stats
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate.test_stats
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.test_stats
+```
+
+````
+
+````{py:attribute} p_values
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate.p_values
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.p_values
+```
+
+````
+
+````{py:attribute} ci_lower
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate.ci_lower
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.ci_lower
+```
+
+````
+
+````{py:attribute} ci_upper
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate.ci_upper
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.ci_upper
+```
+
+````
+
+````{py:attribute} alpha
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate.alpha
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.alpha
+```
+
+````
+
+````{py:attribute} covariance
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate.covariance
+:type: pandas.DataFrame
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.covariance
+```
+
+````
+
+````{py:attribute} summary_table
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate.summary_table
+:type: pandas.DataFrame
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.summary_table
+```
+
+````
+
+````{py:attribute} model_options
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate.model_options
+:type: typing.Dict[str, typing.Any]
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.model_options
+```
+
+````
+
+````{py:attribute} n_group
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate.n_group
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.n_group
+```
+
+````
+
+````{py:attribute} n_treated
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate.n_treated
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.n_treated
+```
+
+````
+
+````{py:attribute} n_control
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate.n_control
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.n_control
+```
+
+````
+
+````{py:attribute} share_treated
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate.share_treated
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.share_treated
+```
+
+````
+
+````{py:attribute} mean_phi
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate.mean_phi
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.mean_phi
+```
+
+````
+
+````{py:attribute} std_phi
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate.std_phi
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.std_phi
+```
+
+````
+
+````{py:attribute} mean_propensity
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate.mean_propensity
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.mean_propensity
+```
+
+````
+
+````{py:attribute} min_propensity
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate.min_propensity
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.min_propensity
+```
+
+````
+
+````{py:attribute} max_propensity
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate.max_propensity
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.max_propensity
+```
+
+````
+
+````{py:attribute} time
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate.time
+:type: str
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.time
+```
+
+````
+
+````{py:attribute} diagnostic_data
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate.diagnostic_data
+:type: typing.Optional[typing.Dict[str, typing.Any]]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.diagnostic_data
+```
+
+````
+
+````{py:method} summary() -> pandas.DataFrame
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate.summary
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.summary
+```
+
+````
+
+`````

@@ -1,0 +1,192 @@
+# {py:mod}`causalis.data_contracts.multicausaldata`
+
+```{py:module} causalis.data_contracts.multicausaldata
+```
+
+```{autodoc2-docstring} causalis.data_contracts.multicausaldata
+:allowtitles:
+```
+
+## Module Contents
+
+### Classes
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`MultiCausalData <causalis.data_contracts.multicausaldata.MultiCausalData>`
+  - ```{autodoc2-docstring} causalis.data_contracts.multicausaldata.MultiCausalData
+    :summary:
+    ```
+````
+
+### API
+
+`````{py:class} MultiCausalData(/, **data: typing.Any)
+:canonical: causalis.data_contracts.multicausaldata.MultiCausalData
+
+Bases: {py:obj}`pydantic.BaseModel`
+
+```{autodoc2-docstring} causalis.data_contracts.multicausaldata.MultiCausalData
+```
+
+```{rubric} Initialization
+```
+
+```{autodoc2-docstring} causalis.data_contracts.multicausaldata.MultiCausalData.__init__
+```
+
+````{py:attribute} model_config
+:canonical: causalis.data_contracts.multicausaldata.MultiCausalData.model_config
+:value: >
+   'ConfigDict(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.multicausaldata.MultiCausalData.model_config
+```
+
+````
+
+````{py:attribute} MAX_TREATMENTS
+:canonical: causalis.data_contracts.multicausaldata.MultiCausalData.MAX_TREATMENTS
+:type: typing.ClassVar[int]
+:value: >
+   15
+
+```{autodoc2-docstring} causalis.data_contracts.multicausaldata.MultiCausalData.MAX_TREATMENTS
+```
+
+````
+
+````{py:attribute} FLOAT_TOL
+:canonical: causalis.data_contracts.multicausaldata.MultiCausalData.FLOAT_TOL
+:type: typing.ClassVar[float]
+:value: >
+   1e-12
+
+```{autodoc2-docstring} causalis.data_contracts.multicausaldata.MultiCausalData.FLOAT_TOL
+```
+
+````
+
+````{py:attribute} df
+:canonical: causalis.data_contracts.multicausaldata.MultiCausalData.df
+:type: pandas.DataFrame
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.multicausaldata.MultiCausalData.df
+```
+
+````
+
+````{py:attribute} outcome
+:canonical: causalis.data_contracts.multicausaldata.MultiCausalData.outcome
+:type: str
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.multicausaldata.MultiCausalData.outcome
+```
+
+````
+
+````{py:attribute} treatment_names
+:canonical: causalis.data_contracts.multicausaldata.MultiCausalData.treatment_names
+:type: typing.List[str]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.multicausaldata.MultiCausalData.treatment_names
+```
+
+````
+
+````{py:attribute} confounders
+:canonical: causalis.data_contracts.multicausaldata.MultiCausalData.confounders
+:type: typing.List[str]
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.multicausaldata.MultiCausalData.confounders
+```
+
+````
+
+````{py:attribute} user_id
+:canonical: causalis.data_contracts.multicausaldata.MultiCausalData.user_id
+:type: typing.Optional[str]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.multicausaldata.MultiCausalData.user_id
+```
+
+````
+
+````{py:attribute} control_treatment
+:canonical: causalis.data_contracts.multicausaldata.MultiCausalData.control_treatment
+:type: str
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.multicausaldata.MultiCausalData.control_treatment
+```
+
+````
+
+````{py:method} from_df(df: pandas.DataFrame, *, outcome: str, treatment_names: typing.Union[str, typing.List[str]], confounders: typing.Optional[typing.Union[str, typing.List[str]]] = None, user_id: typing.Optional[str] = None, control_treatment: str, **kwargs: typing.Any) -> causalis.data_contracts.multicausaldata.MultiCausalData
+:canonical: causalis.data_contracts.multicausaldata.MultiCausalData.from_df
+:classmethod:
+
+```{autodoc2-docstring} causalis.data_contracts.multicausaldata.MultiCausalData.from_df
+```
+
+````
+
+````{py:property} treatments
+:canonical: causalis.data_contracts.multicausaldata.MultiCausalData.treatments
+:type: pandas.DataFrame
+
+```{autodoc2-docstring} causalis.data_contracts.multicausaldata.MultiCausalData.treatments
+```
+
+````
+
+````{py:property} treatment
+:canonical: causalis.data_contracts.multicausaldata.MultiCausalData.treatment
+:type: pandas.Series
+
+```{autodoc2-docstring} causalis.data_contracts.multicausaldata.MultiCausalData.treatment
+```
+
+````
+
+````{py:property} X
+:canonical: causalis.data_contracts.multicausaldata.MultiCausalData.X
+:type: pandas.DataFrame
+
+```{autodoc2-docstring} causalis.data_contracts.multicausaldata.MultiCausalData.X
+```
+
+````
+
+````{py:method} get_df(columns: typing.Optional[typing.List[str]] = None, include_outcome: bool = True, include_confounders: bool = True, include_treatments: bool = True, include_user_id: bool = False) -> pandas.DataFrame
+:canonical: causalis.data_contracts.multicausaldata.MultiCausalData.get_df
+
+```{autodoc2-docstring} causalis.data_contracts.multicausaldata.MultiCausalData.get_df
+```
+
+````
+
+````{py:method} __repr__() -> str
+:canonical: causalis.data_contracts.multicausaldata.MultiCausalData.__repr__
+
+````
+
+````{py:method} __str__() -> str
+:canonical: causalis.data_contracts.multicausaldata.MultiCausalData.__str__
+
+````
+
+`````

@@ -1,0 +1,31 @@
+# {py:mod}`causalis.dgp.multicausaldata.functional`
+
+```{py:module} causalis.dgp.multicausaldata.functional
+```
+
+```{autodoc2-docstring} causalis.dgp.multicausaldata.functional
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`generate_multitreatment <causalis.dgp.multicausaldata.functional.generate_multitreatment>`
+  - ```{autodoc2-docstring} causalis.dgp.multicausaldata.functional.generate_multitreatment
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} generate_multitreatment(n: int = 10000, n_treatments: int = 3, outcome_type: str = 'continuous', sigma_y: float = 1.0, alpha_y: float = 0.0, gamma_shape: float = 2.0, tau: typing.Optional[typing.Any] = None, target_d_rate: typing.Optional[typing.Union[typing.List[float], typing.Any]] = None, confounder_specs: typing.Optional[typing.List[typing.Dict[str, typing.Any]]] = None, beta_y: typing.Optional[typing.Any] = None, beta_d: typing.Optional[typing.Any] = None, theta: typing.Optional[typing.Any] = None, random_state: typing.Optional[int] = 42, k: int = 0, x_sampler: typing.Optional[typing.Any] = None, use_copula: bool = False, copula_corr: typing.Optional[typing.Any] = None, include_oracle: bool = True, return_causal_data: bool = False, d_names: typing.Optional[typing.List[str]] = None) -> typing.Union[pandas.DataFrame, causalis.data_contracts.multicausaldata.MultiCausalData]
+:canonical: causalis.dgp.multicausaldata.functional.generate_multitreatment
+
+```{autodoc2-docstring} causalis.dgp.multicausaldata.functional.generate_multitreatment
+```
+````

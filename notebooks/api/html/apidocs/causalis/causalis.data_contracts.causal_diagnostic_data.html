@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>causalis.data_contracts.causal_diagnostic_data &#8212; Causalis API Reference  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="causalis.data_contracts.causal_estimate" href="causalis.data_contracts.causal_estimate.html" />
+    <link rel="prev" title="causalis.data_contracts" href="causalis.data_contracts.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-causalis.data_contracts.causal_diagnostic_data">
+<span id="causalis-data-contracts-causal-diagnostic-data"></span><h1><a class="reference internal" href="#module-causalis.data_contracts.causal_diagnostic_data" title="causalis.data_contracts.causal_diagnostic_data"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.data_contracts.causal_diagnostic_data</span></code></a><a class="headerlink" href="#module-causalis.data_contracts.causal_diagnostic_data" title="Link to this heading">¶</a></h1>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.data_contracts.causal_diagnostic_data.DiagnosticData" title="causalis.data_contracts.causal_diagnostic_data.DiagnosticData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DiagnosticData</span></code></a></p></td>
+<td><p>Base class for all diagnostic data_contracts.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData" title="causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UnconfoundednessDiagnosticData</span></code></a></p></td>
+<td><p>Fields common to all models assuming unconfoundedness.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData" title="causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MultiUnconfoundednessDiagnosticData</span></code></a></p></td>
+<td><p>Fields common to all models assuming unconfoundedness with multi_unconfoundedness.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.data_contracts.causal_diagnostic_data.DiffInMeansDiagnosticData" title="causalis.data_contracts.causal_diagnostic_data.DiffInMeansDiagnosticData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DiffInMeansDiagnosticData</span></code></a></p></td>
+<td><p>Diagnostic data_contracts for Difference-in-Means model.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData" title="causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CUPEDDiagnosticData</span></code></a></p></td>
+<td><p>Diagnostic data_contracts for CUPED-style (Lin-interacted OLS) adjustment.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.DiagnosticData">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">causalis.data_contracts.causal_diagnostic_data.</span></span><span class="sig-name descname"><span class="pre">DiagnosticData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data:</span> <span class="pre">typing.Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.DiagnosticData" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">pydantic.BaseModel</span></code></p>
+<p>Base class for all diagnostic data_contracts.</p>
+<p class="rubric">Initialization</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code class="docutils literal notranslate"><span class="pre">ValidationError</span></code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code class="docutils literal notranslate"><span class="pre">self</span></code> is explicitly positional-only to allow <code class="docutils literal notranslate"><span class="pre">self</span></code> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.DiagnosticData.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.DiagnosticData.model_config" title="Link to this definition">¶</a></dt>
+<dd><p>‘ConfigDict(…)’</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">causalis.data_contracts.causal_diagnostic_data.</span></span><span class="sig-name descname"><span class="pre">UnconfoundednessDiagnosticData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data:</span> <span class="pre">typing.Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#causalis.data_contracts.causal_diagnostic_data.DiagnosticData" title="causalis.data_contracts.causal_diagnostic_data.DiagnosticData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">causalis.data_contracts.causal_diagnostic_data.DiagnosticData</span></code></a></p>
+<p>Fields common to all models assuming unconfoundedness.</p>
+<p class="rubric">Initialization</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code class="docutils literal notranslate"><span class="pre">ValidationError</span></code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code class="docutils literal notranslate"><span class="pre">self</span></code> is explicitly positional-only to allow <code class="docutils literal notranslate"><span class="pre">self</span></code> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.m_hat">
+<span class="sig-name descname"><span class="pre">m_hat</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.m_hat" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.m_hat_raw">
+<span class="sig-name descname"><span class="pre">m_hat_raw</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.m_hat_raw" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.d">
+<span class="sig-name descname"><span class="pre">d</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.d" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.y">
+<span class="sig-name descname"><span class="pre">y</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.y" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.x">
+<span class="sig-name descname"><span class="pre">x</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.x" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.g0_hat">
+<span class="sig-name descname"><span class="pre">g0_hat</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.g0_hat" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.g1_hat">
+<span class="sig-name descname"><span class="pre">g1_hat</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.g1_hat" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.w">
+<span class="sig-name descname"><span class="pre">w</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.w" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.w_bar">
+<span class="sig-name descname"><span class="pre">w_bar</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.w_bar" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.psi_b">
+<span class="sig-name descname"><span class="pre">psi_b</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.psi_b" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.folds">
+<span class="sig-name descname"><span class="pre">folds</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.folds" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.trimming_threshold">
+<span class="sig-name descname"><span class="pre">trimming_threshold</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.trimming_threshold" title="Link to this definition">¶</a></dt>
+<dd><p>0.0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.normalize_ipw">
+<span class="sig-name descname"><span class="pre">normalize_ipw</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.normalize_ipw" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.sigma2">
+<span class="sig-name descname"><span class="pre">sigma2</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.sigma2" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.nu2">
+<span class="sig-name descname"><span class="pre">nu2</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.nu2" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.psi_sigma2">
+<span class="sig-name descname"><span class="pre">psi_sigma2</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.psi_sigma2" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.psi_nu2">
+<span class="sig-name descname"><span class="pre">psi_nu2</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.psi_nu2" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.riesz_rep">
+<span class="sig-name descname"><span class="pre">riesz_rep</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.riesz_rep" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.m_alpha">
+<span class="sig-name descname"><span class="pre">m_alpha</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.m_alpha" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.psi">
+<span class="sig-name descname"><span class="pre">psi</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.psi" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.score">
+<span class="sig-name descname"><span class="pre">score</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.score" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.sensitivity_analysis">
+<span class="sig-name descname"><span class="pre">sensitivity_analysis</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.sensitivity_analysis" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.score_plot_cache">
+<span class="sig-name descname"><span class="pre">score_plot_cache</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.score_plot_cache" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.residual_plot_cache">
+<span class="sig-name descname"><span class="pre">residual_plot_cache</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.residual_plot_cache" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">causalis.data_contracts.causal_diagnostic_data.</span></span><span class="sig-name descname"><span class="pre">MultiUnconfoundednessDiagnosticData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data:</span> <span class="pre">typing.Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#causalis.data_contracts.causal_diagnostic_data.DiagnosticData" title="causalis.data_contracts.causal_diagnostic_data.DiagnosticData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">causalis.data_contracts.causal_diagnostic_data.DiagnosticData</span></code></a></p>
+<p>Fields common to all models assuming unconfoundedness with multi_unconfoundedness.</p>
+<p class="rubric">Initialization</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code class="docutils literal notranslate"><span class="pre">ValidationError</span></code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code class="docutils literal notranslate"><span class="pre">self</span></code> is explicitly positional-only to allow <code class="docutils literal notranslate"><span class="pre">self</span></code> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.m_hat">
+<span class="sig-name descname"><span class="pre">m_hat</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.m_hat" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.m_hat_raw">
+<span class="sig-name descname"><span class="pre">m_hat_raw</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.m_hat_raw" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.d">
+<span class="sig-name descname"><span class="pre">d</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.d" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.y">
+<span class="sig-name descname"><span class="pre">y</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.y" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.x">
+<span class="sig-name descname"><span class="pre">x</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.x" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.g_hat">
+<span class="sig-name descname"><span class="pre">g_hat</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.g_hat" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.psi_b">
+<span class="sig-name descname"><span class="pre">psi_b</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.psi_b" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.folds">
+<span class="sig-name descname"><span class="pre">folds</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.folds" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.trimming_threshold">
+<span class="sig-name descname"><span class="pre">trimming_threshold</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.trimming_threshold" title="Link to this definition">¶</a></dt>
+<dd><p>0.0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.normalize_ipw">
+<span class="sig-name descname"><span class="pre">normalize_ipw</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.normalize_ipw" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.sigma2">
+<span class="sig-name descname"><span class="pre">sigma2</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.sigma2" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.nu2">
+<span class="sig-name descname"><span class="pre">nu2</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.nu2" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.psi_sigma2">
+<span class="sig-name descname"><span class="pre">psi_sigma2</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.psi_sigma2" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.psi_nu2">
+<span class="sig-name descname"><span class="pre">psi_nu2</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.psi_nu2" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.riesz_rep">
+<span class="sig-name descname"><span class="pre">riesz_rep</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.riesz_rep" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.m_alpha">
+<span class="sig-name descname"><span class="pre">m_alpha</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.m_alpha" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.psi">
+<span class="sig-name descname"><span class="pre">psi</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.psi" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.score">
+<span class="sig-name descname"><span class="pre">score</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.score" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.sensitivity_analysis">
+<span class="sig-name descname"><span class="pre">sensitivity_analysis</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.sensitivity_analysis" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.residual_plot_cache">
+<span class="sig-name descname"><span class="pre">residual_plot_cache</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData.residual_plot_cache" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.DiffInMeansDiagnosticData">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">causalis.data_contracts.causal_diagnostic_data.</span></span><span class="sig-name descname"><span class="pre">DiffInMeansDiagnosticData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data:</span> <span class="pre">typing.Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.DiffInMeansDiagnosticData" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#causalis.data_contracts.causal_diagnostic_data.DiagnosticData" title="causalis.data_contracts.causal_diagnostic_data.DiagnosticData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">causalis.data_contracts.causal_diagnostic_data.DiagnosticData</span></code></a></p>
+<p>Diagnostic data_contracts for Difference-in-Means model.</p>
+<p class="rubric">Initialization</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code class="docutils literal notranslate"><span class="pre">ValidationError</span></code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code class="docutils literal notranslate"><span class="pre">self</span></code> is explicitly positional-only to allow <code class="docutils literal notranslate"><span class="pre">self</span></code> as a field name.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">causalis.data_contracts.causal_diagnostic_data.</span></span><span class="sig-name descname"><span class="pre">CUPEDDiagnosticData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data:</span> <span class="pre">typing.Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#causalis.data_contracts.causal_diagnostic_data.DiagnosticData" title="causalis.data_contracts.causal_diagnostic_data.DiagnosticData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">causalis.data_contracts.causal_diagnostic_data.DiagnosticData</span></code></a></p>
+<p>Diagnostic data_contracts for CUPED-style (Lin-interacted OLS) adjustment.</p>
+<p class="rubric">Initialization</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code class="docutils literal notranslate"><span class="pre">ValidationError</span></code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code class="docutils literal notranslate"><span class="pre">self</span></code> is explicitly positional-only to allow <code class="docutils literal notranslate"><span class="pre">self</span></code> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.ate_naive">
+<span class="sig-name descname"><span class="pre">ate_naive</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.ate_naive" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.se_naive">
+<span class="sig-name descname"><span class="pre">se_naive</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.se_naive" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.se_reduction_pct_same_cov">
+<span class="sig-name descname"><span class="pre">se_reduction_pct_same_cov</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.se_reduction_pct_same_cov" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.r2_naive">
+<span class="sig-name descname"><span class="pre">r2_naive</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.r2_naive" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.r2_adj">
+<span class="sig-name descname"><span class="pre">r2_adj</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.r2_adj" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.beta_covariates">
+<span class="sig-name descname"><span class="pre">beta_covariates</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.beta_covariates" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.gamma_interactions">
+<span class="sig-name descname"><span class="pre">gamma_interactions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.gamma_interactions" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.covariate_outcome_corr">
+<span class="sig-name descname"><span class="pre">covariate_outcome_corr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.covariate_outcome_corr" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.covariates">
+<span class="sig-name descname"><span class="pre">covariates</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.covariates" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.adj_type">
+<span class="sig-name descname"><span class="pre">adj_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.adj_type" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.regression_checks">
+<span class="sig-name descname"><span class="pre">regression_checks</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="causalis.scenarios.cuped.diagnostics.regression_checks.html#causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks" title="causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks"><span class="pre">causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.regression_checks" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../reference.html">Causalis API Reference</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../reference.html">Documentation overview</a><ul>
+  <li><a href="../index.html">API Modules</a><ul>
+  <li><a href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a><ul>
+  <li><a href="causalis.data_contracts.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.data_contracts</span></code></a><ul>
+      <li>Previous: <a href="causalis.data_contracts.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.data_contracts</span></code></a></li>
+      <li>Next: <a href="causalis.data_contracts.causal_estimate.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.data_contracts.causal_estimate</span></code></a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../../_sources/apidocs/causalis/causalis.data_contracts.causal_diagnostic_data.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

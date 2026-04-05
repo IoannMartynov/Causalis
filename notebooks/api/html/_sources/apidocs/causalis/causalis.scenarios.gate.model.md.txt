@@ -1,0 +1,31 @@
+# {py:mod}`causalis.scenarios.gate.model`
+
+```{py:module} causalis.scenarios.gate.model
+```
+
+```{autodoc2-docstring} causalis.scenarios.gate.model
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`estimate_gate_from_irm <causalis.scenarios.gate.model.estimate_gate_from_irm>`
+  - ```{autodoc2-docstring} causalis.scenarios.gate.model.estimate_gate_from_irm
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} estimate_gate_from_irm(irm_model: typing.Any, groups: typing.Optional[pandas.DataFrame | pandas.Series], alpha: float = 0.05, cov_type: str = 'HC3', cov_kwds: typing.Optional[typing.Dict[str, typing.Any]] = None) -> causalis.data_contracts.gate_estimate.GateEstimate
+:canonical: causalis.scenarios.gate.model.estimate_gate_from_irm
+
+```{autodoc2-docstring} causalis.scenarios.gate.model.estimate_gate_from_irm
+```
+````

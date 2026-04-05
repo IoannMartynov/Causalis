@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity &#8212; Causalis API Reference  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="causalis.scenarios.unconfoundedness.refutation.score" href="causalis.scenarios.unconfoundedness.refutation.score.html" />
+    <link rel="prev" title="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.unconfoundedness_validation" href="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.unconfoundedness_validation.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity">
+<span id="causalis-scenarios-unconfoundedness-refutation-unconfoundedness-sensitivity"></span><h1><a class="reference internal" href="#module-causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity" title="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity</span></code></a><a class="headerlink" href="#module-causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity" title="Link to this heading">¶</a></h1>
+<p>Sensitivity functions refactored into a dedicated module.</p>
+<p>This module centralizes bias-aware sensitivity helpers and the public
+entry points used by refutation utilities for unconfoundedness.</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.compute_bias_aware_ci" title="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.compute_bias_aware_ci"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_bias_aware_ci</span></code></a></p></td>
+<td><p>Compute bias-aware confidence intervals.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.format_bias_aware_summary" title="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.format_bias_aware_summary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">format_bias_aware_summary</span></code></a></p></td>
+<td><p>Render a single, unified bias-aware summary string.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.get_sensitivity_summary" title="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.get_sensitivity_summary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_sensitivity_summary</span></code></a></p></td>
+<td><p>Render a single, unified bias-aware summary string.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_benchmark" title="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_benchmark"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sensitivity_benchmark</span></code></a></p></td>
+<td><p>Computes a benchmark for a given set of features by refitting a short IRM model
+(excluding the provided features) and contrasting it with the original (long) model.
+Returns a DataFrame containing r2_y, r2_d, rho and the change in estimates.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_analysis" title="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_analysis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sensitivity_analysis</span></code></a></p></td>
+<td><p>Compute bias-aware components and cache them.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.interpret_sensitivity_analysis" title="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.interpret_sensitivity_analysis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">interpret_sensitivity_analysis</span></code></a></p></td>
+<td><p>Run sensitivity analysis and return a structured interpretation.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="data">
+<h3>Data<a class="headerlink" href="#data" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.__all__" title="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.__all__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__all__</span></code></a></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
+<dl class="py data">
+<dt class="sig sig-object py" id="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.__all__">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.</span></span><span class="sig-name descname"><span class="pre">__all__</span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.__all__" title="Link to this definition">¶</a></dt>
+<dd><p>[‘sensitivity_analysis’, ‘sensitivity_benchmark’, ‘get_sensitivity_summary’, ‘interpret_sensitivity_…</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.compute_bias_aware_ci">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.</span></span><span class="sig-name descname"><span class="pre">compute_bias_aware_ci</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">effect_estimation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">r2_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r2_d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_signed_rr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.compute_bias_aware_ci" title="Link to this definition">¶</a></dt>
+<dd><p>Compute bias-aware confidence intervals.</p>
+<p>Returns a dict with:</p>
+<ul class="simple">
+<li><p>theta, se, alpha, z</p></li>
+<li><p>sampling_ci</p></li>
+<li><p>theta_bounds_cofounding = [theta_lower, theta_upper] = theta ± bound_width</p></li>
+<li><p>bias_aware_ci = [theta - (bound_width + z<em>se), theta + (bound_width + z</em>se)]</p></li>
+<li><p>max_bias_base, max_bias, bound_width and components (sigma2, nu2)</p></li>
+</ul>
+<p class="rubric" id="id11">Parameters</p>
+<p>effect_estimation : Dict[str, Any] or Any
+The effect estimation object.
+r2_y : float
+Sensitivity parameter for the outcome (R^2 form, R_Y^2).
+r2_d : float
+Sensitivity parameter for the treatment (R^2 form, R_D^2).
+rho : float, default 1.0
+Correlation parameter.
+H0 : float, default 0.0
+Null hypothesis for robustness values.
+alpha : float, default 0.05
+Significance level.
+use_signed_rr : bool, default False
+Whether to use signed rr in the quadratic combination of sensitivity components.
+If True and m_alpha/rr are available, the bias bound is computed via the
+per-unit quadratic form and RV/RVa are not reported.</p>
+<p class="rubric" id="id12">Returns</p>
+<p>dict
+Dictionary with bias-aware results.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.format_bias_aware_summary">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.</span></span><span class="sig-name descname"><span class="pre">format_bias_aware_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">res</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.format_bias_aware_summary" title="Link to this definition">¶</a></dt>
+<dd><p>Render a single, unified bias-aware summary string.</p>
+<p class="rubric" id="id13">Parameters</p>
+<p>res : Dict[str, Any]
+The result dictionary from compute_bias_aware_ci.
+label : str, optional, default None
+The label for the estimand.</p>
+<p class="rubric" id="id14">Returns</p>
+<p>str
+Formatted summary string.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.get_sensitivity_summary">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.</span></span><span class="sig-name descname"><span class="pre">get_sensitivity_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">effect_estimation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.get_sensitivity_summary" title="Link to this definition">¶</a></dt>
+<dd><p>Render a single, unified bias-aware summary string.</p>
+<p>If bias-aware components are missing, shows a sampling-only variant with max_bias=0
+and then formats via <code class="docutils literal notranslate"><span class="pre">format_bias_aware_summary</span></code> for consistency.</p>
+<p class="rubric" id="id15">Parameters</p>
+<p>effect_estimation : Dict[str, Any] or Any
+The effect estimation object.
+label : str, optional, default None
+The label for the estimand.</p>
+<p class="rubric" id="id16">Returns</p>
+<p>Optional[str]
+Formatted summary string or None if extraction fails.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_benchmark">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.</span></span><span class="sig-name descname"><span class="pre">sensitivity_benchmark</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">effect_estimation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">benchmarking_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_benchmark" title="Link to this definition">¶</a></dt>
+<dd><p>Computes a benchmark for a given set of features by refitting a short IRM model
+(excluding the provided features) and contrasting it with the original (long) model.
+Returns a DataFrame containing r2_y, r2_d, rho and the change in estimates.</p>
+<p class="rubric" id="id17">Parameters</p>
+<p>effect_estimation : dict
+A dictionary containing the fitted IRM model under the key ‘model’.
+benchmarking_set : list[str]
+List of confounder names to be used for benchmarking (to be removed in the short model).
+fit_args : dict, optional
+Legacy name for additional keyword arguments passed to <code class="docutils literal notranslate"><span class="pre">IRM.estimate(...)</span></code>
+on the short model. If <code class="docutils literal notranslate"><span class="pre">score</span></code> is omitted, ATE/ATTE is inferred from
+the supplied estimate/model, and defaults to ATE.
+If <code class="docutils literal notranslate"><span class="pre">store_diagnostics</span></code> or legacy <code class="docutils literal notranslate"><span class="pre">diagnostic_data</span></code> is omitted, the short
+benchmark model defaults to <code class="docutils literal notranslate"><span class="pre">store_diagnostics=False</span></code> for faster benchmarking.</p>
+<p class="rubric" id="id18">Returns</p>
+<p>pandas.DataFrame
+A one-row DataFrame indexed by the treatment name with columns:
+- r2_y, r2_d, rho: residual-based benchmarking strengths
+- theta_long, theta_short, delta: effect estimates and their change (long - short)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_analysis">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.</span></span><span class="sig-name descname"><span class="pre">sensitivity_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">effect_estimation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">r2_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r2_d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_signed_rr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_analysis" title="Link to this definition">¶</a></dt>
+<dd><p>Compute bias-aware components and cache them.</p>
+<p class="rubric" id="id19">Parameters</p>
+<p>effect_estimation : Dict[str, Any] or Any
+The effect estimation object.
+r2_y : float
+Sensitivity parameter for the outcome (R^2 form, R_Y^2; converted to odds form internally).
+r2_d : float
+Sensitivity parameter for the treatment (R^2 form, R_D^2).
+rho : float, default 1.0
+Correlation parameter.
+H0 : float, default 0.0
+Null hypothesis for robustness values.
+alpha : float, default 0.05
+Significance level.
+use_signed_rr : bool, default False
+Whether to use signed rr in the quadratic combination of sensitivity components.
+If True and m_alpha/rr are available, the bias bound is computed via the
+per-unit quadratic form and RV/RVa are not reported.</p>
+<p class="rubric" id="id20">Returns</p>
+<p>dict
+Dictionary with bias-aware results:
+- theta, se, alpha, z
+- sampling_ci
+- theta_bounds_cofounding = (theta - bound_width, theta + bound_width)
+- bias_aware_ci = faithful CI for the bounds
+- max_bias and components (sigma2, nu2)
+- params (r2_y, r2_d, rho, use_signed_rr)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.interpret_sensitivity_analysis">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.</span></span><span class="sig-name descname"><span class="pre">interpret_sensitivity_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">effect_estimation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">r2_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r2_d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_signed_rr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.interpret_sensitivity_analysis" title="Link to this definition">¶</a></dt>
+<dd><p>Run sensitivity analysis and return a structured interpretation.</p>
+<p class="rubric" id="id21">Parameters</p>
+<p>effect_estimation : Dict[str, Any] or Any
+The effect estimation object.
+r2_y : float
+Sensitivity parameter for outcome residual confounding strength.
+r2_d : float
+Sensitivity parameter for treatment residual confounding strength.
+rho : float, default 1.0
+Correlation parameter for unobserved confounding.
+H0 : float, default 0.0
+Null hypothesis used for significance checks.
+alpha : float, default 0.05
+Significance level.
+use_signed_rr : bool, default False
+Whether to use signed rr in the quadratic sensitivity combination.</p>
+<p class="rubric" id="id22">Returns</p>
+<p>Dict[str, Any]
+Dictionary with:
+- raw: the output of <code class="docutils literal notranslate"><span class="pre">sensitivity_analysis(...)</span></code>
+- interpretation: machine-readable interpretation fields
+- summary: compact human-readable interpretation</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../reference.html">Causalis API Reference</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../reference.html">Documentation overview</a><ul>
+  <li><a href="../index.html">API Modules</a><ul>
+  <li><a href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a><ul>
+  <li><a href="causalis.scenarios.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios</span></code></a><ul>
+  <li><a href="causalis.scenarios.unconfoundedness.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.unconfoundedness</span></code></a><ul>
+  <li><a href="causalis.scenarios.unconfoundedness.refutation.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.unconfoundedness.refutation</span></code></a><ul>
+  <li><a href="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.unconfoundedness.refutation.unconfoundedness</span></code></a><ul>
+      <li>Previous: <a href="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.unconfoundedness_validation.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.unconfoundedness.refutation.unconfoundedness.unconfoundedness_validation</span></code></a></li>
+      <li>Next: <a href="causalis.scenarios.unconfoundedness.refutation.score.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.unconfoundedness.refutation.score</span></code></a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../../_sources/apidocs/causalis/causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

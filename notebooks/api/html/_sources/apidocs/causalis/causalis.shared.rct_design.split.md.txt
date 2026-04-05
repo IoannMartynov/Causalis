@@ -1,0 +1,31 @@
+# {py:mod}`causalis.shared.rct_design.split`
+
+```{py:module} causalis.shared.rct_design.split
+```
+
+```{autodoc2-docstring} causalis.shared.rct_design.split
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`assign_variants_df <causalis.shared.rct_design.split.assign_variants_df>`
+  - ```{autodoc2-docstring} causalis.shared.rct_design.split.assign_variants_df
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} assign_variants_df(df: pandas.DataFrame, id_col: str, experiment_id: str, variants: typing.Dict[str, float], *, salt: str = 'global_ab_salt', layer_id: str = 'default', variant_col: str = 'variant') -> pandas.DataFrame
+:canonical: causalis.shared.rct_design.split.assign_variants_df
+
+```{autodoc2-docstring} causalis.shared.rct_design.split.assign_variants_df
+```
+````

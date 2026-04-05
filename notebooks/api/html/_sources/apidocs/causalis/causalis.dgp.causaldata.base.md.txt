@@ -1,0 +1,405 @@
+# {py:mod}`causalis.dgp.causaldata.base`
+
+```{py:module} causalis.dgp.causaldata.base
+```
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base
+:allowtitles:
+```
+
+## Module Contents
+
+### Classes
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`CausalDatasetGenerator <causalis.dgp.causaldata.base.CausalDatasetGenerator>`
+  - ```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator
+    :summary:
+    ```
+````
+
+### API
+
+`````{py:class} CausalDatasetGenerator
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator
+```
+
+````{py:attribute} theta
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.theta
+:type: float
+:value: >
+   1.0
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.theta
+```
+
+````
+
+````{py:attribute} tau
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.tau
+:type: typing.Optional[typing.Callable[[numpy.ndarray], numpy.ndarray]]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.tau
+```
+
+````
+
+````{py:attribute} beta_y
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.beta_y
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.beta_y
+```
+
+````
+
+````{py:attribute} beta_d
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.beta_d
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.beta_d
+```
+
+````
+
+````{py:attribute} g_y
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.g_y
+:type: typing.Optional[typing.Callable[[numpy.ndarray], numpy.ndarray]]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.g_y
+```
+
+````
+
+````{py:attribute} g_d
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.g_d
+:type: typing.Optional[typing.Callable[[numpy.ndarray], numpy.ndarray]]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.g_d
+```
+
+````
+
+````{py:attribute} alpha_y
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.alpha_y
+:type: float
+:value: >
+   0.0
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.alpha_y
+```
+
+````
+
+````{py:attribute} alpha_d
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.alpha_d
+:type: float
+:value: >
+   0.0
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.alpha_d
+```
+
+````
+
+````{py:attribute} sigma_y
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.sigma_y
+:type: float
+:value: >
+   1.0
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.sigma_y
+```
+
+````
+
+````{py:attribute} outcome_type
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.outcome_type
+:type: str
+:value: >
+   'continuous'
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.outcome_type
+```
+
+````
+
+````{py:attribute} confounder_specs
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.confounder_specs
+:type: typing.Optional[typing.List[typing.Dict[str, typing.Any]]]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.confounder_specs
+```
+
+````
+
+````{py:attribute} k
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.k
+:type: int
+:value: >
+   5
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.k
+```
+
+````
+
+````{py:attribute} x_sampler
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.x_sampler
+:type: typing.Optional[typing.Callable[[int, int, int], numpy.ndarray]]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.x_sampler
+```
+
+````
+
+````{py:attribute} use_copula
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.use_copula
+:type: bool
+:value: >
+   False
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.use_copula
+```
+
+````
+
+````{py:attribute} copula_corr
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.copula_corr
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.copula_corr
+```
+
+````
+
+````{py:attribute} target_d_rate
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.target_d_rate
+:type: typing.Optional[float]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.target_d_rate
+```
+
+````
+
+````{py:attribute} u_strength_d
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.u_strength_d
+:type: float
+:value: >
+   0.0
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.u_strength_d
+```
+
+````
+
+````{py:attribute} u_strength_y
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.u_strength_y
+:type: float
+:value: >
+   0.0
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.u_strength_y
+```
+
+````
+
+````{py:attribute} propensity_sharpness
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.propensity_sharpness
+:type: float
+:value: >
+   1.0
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.propensity_sharpness
+```
+
+````
+
+````{py:attribute} score_bounding
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.score_bounding
+:type: typing.Optional[float]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.score_bounding
+```
+
+````
+
+````{py:attribute} alpha_zi
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.alpha_zi
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.alpha_zi
+```
+
+````
+
+````{py:attribute} beta_zi
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.beta_zi
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.beta_zi
+```
+
+````
+
+````{py:attribute} g_zi
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.g_zi
+:type: typing.Optional[typing.Callable[[numpy.ndarray], numpy.ndarray]]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.g_zi
+```
+
+````
+
+````{py:attribute} u_strength_zi
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.u_strength_zi
+:type: float
+:value: >
+   0.0
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.u_strength_zi
+```
+
+````
+
+````{py:attribute} tau_zi
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.tau_zi
+:type: typing.Optional[typing.Callable[[numpy.ndarray], numpy.ndarray]]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.tau_zi
+```
+
+````
+
+````{py:attribute} pos_dist
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.pos_dist
+:type: str
+:value: >
+   'gamma'
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.pos_dist
+```
+
+````
+
+````{py:attribute} gamma_shape
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.gamma_shape
+:type: float
+:value: >
+   2.0
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.gamma_shape
+```
+
+````
+
+````{py:attribute} lognormal_sigma
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.lognormal_sigma
+:type: float
+:value: >
+   1.0
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.lognormal_sigma
+```
+
+````
+
+````{py:attribute} include_oracle
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.include_oracle
+:type: bool
+:value: >
+   True
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.include_oracle
+```
+
+````
+
+````{py:attribute} seed
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.seed
+:type: typing.Optional[int]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.seed
+```
+
+````
+
+````{py:attribute} rng
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.rng
+:type: numpy.random.Generator
+:value: >
+   'field(...)'
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.rng
+```
+
+````
+
+````{py:method} __post_init__()
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.__post_init__
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.__post_init__
+```
+
+````
+
+````{py:method} generate(n: int, U: typing.Optional[numpy.ndarray] = None) -> pandas.DataFrame
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.generate
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.generate
+```
+
+````
+
+````{py:method} to_causal_data(n: int, confounders: typing.Optional[typing.Union[str, typing.List[str]]] = None) -> causalis.dgp.causaldata.CausalData
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.to_causal_data
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.to_causal_data
+```
+
+````
+
+````{py:method} oracle_nuisance(num_quad: int = 21)
+:canonical: causalis.dgp.causaldata.base.CausalDatasetGenerator.oracle_nuisance
+
+```{autodoc2-docstring} causalis.dgp.causaldata.base.CausalDatasetGenerator.oracle_nuisance
+```
+
+````
+
+`````

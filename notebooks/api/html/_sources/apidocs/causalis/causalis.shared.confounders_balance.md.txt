@@ -1,0 +1,31 @@
+# {py:mod}`causalis.shared.confounders_balance`
+
+```{py:module} causalis.shared.confounders_balance
+```
+
+```{autodoc2-docstring} causalis.shared.confounders_balance
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`confounders_balance <causalis.shared.confounders_balance.confounders_balance>`
+  - ```{autodoc2-docstring} causalis.shared.confounders_balance.confounders_balance
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} confounders_balance(data: causalis.dgp.causaldata.CausalData | causalis.dgp.multicausaldata.MultiCausalData, treatment_d_0: typing.Optional[str] = None, treatment_d_1: typing.Optional[str] = None) -> pandas.DataFrame
+:canonical: causalis.shared.confounders_balance.confounders_balance
+
+```{autodoc2-docstring} causalis.shared.confounders_balance.confounders_balance
+```
+````

@@ -1,0 +1,101 @@
+---
+orphan: true
+---
+
+# {py:mod}`causalis.scenarios.synthetic_control._utils`
+
+```{py:module} causalis.scenarios.synthetic_control._utils
+```
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control._utils
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`rmse <causalis.scenarios.synthetic_control._utils.rmse>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control._utils.rmse
+    :summary:
+    ```
+* - {py:obj}`project_to_simplex <causalis.scenarios.synthetic_control._utils.project_to_simplex>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control._utils.project_to_simplex
+    :summary:
+    ```
+* - {py:obj}`solve_linear_system <causalis.scenarios.synthetic_control._utils.solve_linear_system>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control._utils.solve_linear_system
+    :summary:
+    ```
+* - {py:obj}`circular_shift_indices <causalis.scenarios.synthetic_control._utils.circular_shift_indices>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control._utils.circular_shift_indices
+    :summary:
+    ```
+* - {py:obj}`cwz_stat_from_residuals <causalis.scenarios.synthetic_control._utils.cwz_stat_from_residuals>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control._utils.cwz_stat_from_residuals
+    :summary:
+    ```
+* - {py:obj}`accepted_segments <causalis.scenarios.synthetic_control._utils.accepted_segments>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control._utils.accepted_segments
+    :summary:
+    ```
+* - {py:obj}`build_average_att_blocks <causalis.scenarios.synthetic_control._utils.build_average_att_blocks>`
+  - ```{autodoc2-docstring} causalis.scenarios.synthetic_control._utils.build_average_att_blocks
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} rmse(values: numpy.ndarray) -> float
+:canonical: causalis.scenarios.synthetic_control._utils.rmse
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control._utils.rmse
+```
+````
+
+````{py:function} project_to_simplex(values: numpy.ndarray) -> numpy.ndarray
+:canonical: causalis.scenarios.synthetic_control._utils.project_to_simplex
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control._utils.project_to_simplex
+```
+````
+
+````{py:function} solve_linear_system(a: numpy.ndarray, b: numpy.ndarray) -> numpy.ndarray
+:canonical: causalis.scenarios.synthetic_control._utils.solve_linear_system
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control._utils.solve_linear_system
+```
+````
+
+````{py:function} circular_shift_indices(n_total: int) -> list[numpy.ndarray]
+:canonical: causalis.scenarios.synthetic_control._utils.circular_shift_indices
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control._utils.circular_shift_indices
+```
+````
+
+````{py:function} cwz_stat_from_residuals(residuals: numpy.ndarray, *, n_pre: int) -> float
+:canonical: causalis.scenarios.synthetic_control._utils.cwz_stat_from_residuals
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control._utils.cwz_stat_from_residuals
+```
+````
+
+````{py:function} accepted_segments(grid: numpy.ndarray, accepted_mask: numpy.ndarray) -> list[tuple[float, float]]
+:canonical: causalis.scenarios.synthetic_control._utils.accepted_segments
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control._utils.accepted_segments
+```
+````
+
+````{py:function} build_average_att_blocks(*, n_pre: int, n_post: int, n_folds: int) -> tuple[list[numpy.ndarray], int, int]
+:canonical: causalis.scenarios.synthetic_control._utils.build_average_att_blocks
+
+```{autodoc2-docstring} causalis.scenarios.synthetic_control._utils.build_average_att_blocks
+```
+````
