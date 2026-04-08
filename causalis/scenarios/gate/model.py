@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import warnings
+from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
 import numpy as np
@@ -23,16 +24,26 @@ _GATE_GROUPS_ALIGNMENT_MSG = (
     "when that row-to-observation-id mapping is still unchanged. "
     "Fit the IRM with a stable DataFrame index or CausalData.user_id, and preserve that indexing on groups."
 )
+_FIT_INDEX_SOURCE_USER_ID = "user_id"
+_FIT_INDEX_SOURCE_ROW_INDEX = "row_index"
+
+
+@dataclass(frozen=True)
+class _GatePartition:
+    """Compact representation of a strict GATE partition."""
+
+    group_names: list[str]
+    codes: np.ndarray
 
 
 def _validate_gate_inputs(
     *,
     irm_model: Any,
-    groups: Optional[pd.DataFrame | pd.Series],
+    groups: Optional[pd.DataFrame | pd.Series | np.ndarray],
     alpha: float,
     cov_type: str,
     cov_kwds: Optional[Dict[str, Any]],
-) -> tuple[pd.DataFrame | pd.Series, str]:
+) -> tuple[pd.DataFrame | pd.Series | np.ndarray, str]:
     """Validate GATE estimation request and resolve fallback groups source."""
     check_is_fitted(irm_model, attributes=["g0_hat_", "g1_hat_", "m_hat_"])
 
@@ -80,43 +91,67 @@ def _resolve_fit_observation_index(
     *,
     irm_model: Any,
     n_obs: int,
-) -> pd.Index:
+) -> tuple[pd.Index, str]:
     """Resolve stable fit-time observation ids used to align group labels."""
+    data_obj = getattr(irm_model, "data", None)
+    user_id_name = getattr(data_obj, "user_id_name", None) if data_obj is not None else None
     fit_index = getattr(irm_model, "_fit_index_", None)
     if fit_index is not None:
         fit_index_resolved = pd.Index(fit_index).copy()
+        fit_index_source = (
+            _FIT_INDEX_SOURCE_USER_ID
+            if getattr(irm_model, "_fit_row_index_", None) is not None or fit_index_resolved.name == user_id_name
+            else _FIT_INDEX_SOURCE_ROW_INDEX
+        )
     else:
-        data_obj = getattr(irm_model, "data", None)
         if data_obj is None:
             raise RuntimeError(
                 "IRM does not expose fit-time observation ids required for GATE group alignment. "
                 "Refit the model with the current version."
             )
-        user_id_name = getattr(data_obj, "user_id_name", None)
         if user_id_name:
             fit_index_resolved = pd.Index(data_obj.user_id.copy(), name=user_id_name)
+            fit_index_source = _FIT_INDEX_SOURCE_USER_ID
         else:
             fit_index_resolved = pd.Index(data_obj.df.index.copy())
+            fit_index_source = _FIT_INDEX_SOURCE_ROW_INDEX
 
     if len(fit_index_resolved) != n_obs:
         raise RuntimeError("Stored fit-time observation ids have inconsistent length; refit the model.")
 
-    if _is_default_positional_index(fit_index_resolved, n_obs=n_obs):
+    if fit_index_source == _FIT_INDEX_SOURCE_ROW_INDEX and _is_default_positional_index(fit_index_resolved, n_obs=n_obs):
         raise ValueError(
             f"{_GATE_GROUPS_ALIGNMENT_MSG} "
             "The fitted sample currently only has a default positional index (0..n-1), which is ambiguous."
         )
 
-    return fit_index_resolved
+    return fit_index_resolved, fit_index_source
 
 
 def _align_groups_to_fit_observations(
-    groups: pd.DataFrame | pd.Series,
+    groups: pd.DataFrame | pd.Series | np.ndarray,
     *,
     irm_model: Any,
     n_obs: int,
 ) -> pd.DataFrame | pd.Series:
     """Align group labels to fit-time observation ids and reject ambiguous positional inputs."""
+    if isinstance(groups, np.ndarray):
+        # When groups is a raw numpy array, we assume it is already aligned with
+        # the original fit-time row index. We wrap it in a Series using that index
+        # so the downstream alignment logic can correctly map it to the fit-time ids.
+        fit_row_index = getattr(irm_model, "_fit_row_index_", None)
+        if fit_row_index is None:
+            data_obj = getattr(irm_model, "data", None)
+            fit_row_index = getattr(data_obj.df, "index", None) if data_obj is not None else None
+
+        if fit_row_index is not None and len(fit_row_index) == n_obs:
+            groups = pd.Series(groups, index=fit_row_index)
+        else:
+            # If we can't find a reliable row index, we wrap it with the fit_index directly
+            # assuming the user knows what they are doing (alignment by position).
+            fit_index, _ = _resolve_fit_observation_index(irm_model=irm_model, n_obs=n_obs)
+            groups = pd.Series(groups, index=fit_index)
+
     if isinstance(groups, pd.Series):
         groups_df = groups.to_frame()
         original_is_series = True
@@ -126,12 +161,12 @@ def _align_groups_to_fit_observations(
         original_is_series = False
         original_name = None
     else:
-        raise TypeError("groups must be a pandas Series or DataFrame.")
+        raise TypeError("groups must be a pandas Series, DataFrame or numpy array.")
 
     if groups_df.shape[0] != n_obs:
         raise ValueError(f"groups must have {n_obs} rows, got {groups_df.shape[0]}.")
 
-    fit_index = _resolve_fit_observation_index(irm_model=irm_model, n_obs=n_obs)
+    fit_index, _ = _resolve_fit_observation_index(irm_model=irm_model, n_obs=n_obs)
 
     if not groups_df.index.is_unique:
         raise ValueError("groups index must be unique so rows can be aligned to the fit-time sample.")
@@ -198,8 +233,77 @@ def _align_groups_via_fit_row_index(
     return aligned
 
 
+def _coerce_groups_to_partition(
+    groups: pd.DataFrame | pd.Series | np.ndarray,
+    *,
+    n_obs: int,
+) -> _GatePartition:
+    """Convert user-supplied groups into compact partition codes for strict GATE."""
+    if isinstance(groups, np.ndarray):
+        groups_df = pd.DataFrame(groups)
+    elif isinstance(groups, pd.Series):
+        groups_df = groups.to_frame()
+    elif isinstance(groups, pd.DataFrame):
+        groups_df = groups.copy()
+    else:
+        raise TypeError("groups must be a pandas Series, DataFrame or numpy array.")
+
+    if groups_df.shape[0] != n_obs:
+        raise ValueError(f"groups must have {n_obs} rows, got {groups_df.shape[0]}.")
+    if groups_df.shape[1] == 0:
+        raise ValueError("groups must contain at least one column.")
+    if not groups_df.columns.is_unique:
+        raise ValueError("groups columns must be unique.")
+
+    if groups_df.shape[1] == 1:
+        group_col = groups_df.iloc[:, 0]
+        if group_col.isna().any():
+            raise ValueError("groups contains missing values; every observation must belong to exactly one group.")
+
+        prefix = str(group_col.name) if group_col.name is not None else "group"
+        if isinstance(group_col.dtype, pd.CategoricalDtype):
+            codes = group_col.cat.codes.to_numpy(dtype=int, copy=True)
+            group_names = [f"{prefix}={category}" for category in group_col.cat.categories]
+            group_counts = np.bincount(codes, minlength=len(group_names)).astype(int, copy=False)
+            if np.any(group_counts == 0):
+                empty_cols = [group_names[idx] for idx in np.flatnonzero(group_counts == 0)]
+                raise ValueError(f"Group indicator columns without observations are not estimable: {empty_cols}.")
+        else:
+            codes, uniques = pd.factorize(group_col, sort=True)
+            codes = np.asarray(codes, dtype=int)
+            group_names = [f"{prefix}={value}" for value in uniques.tolist()]
+    else:
+        basis_numeric = groups_df.copy()
+        for col in basis_numeric.columns:
+            basis_numeric[col] = pd.to_numeric(basis_numeric[col], errors="coerce")
+        if basis_numeric.isna().any().any():
+            raise ValueError("Multi-column groups must be binary indicators with values in {0,1}.")
+
+        basis_arr = basis_numeric.to_numpy(dtype=float)
+        if not np.isfinite(basis_arr).all():
+            raise ValueError("Multi-column groups must contain finite values.")
+        if not np.all((basis_arr == 0.0) | (basis_arr == 1.0)):
+            raise ValueError("Multi-column groups must be binary indicators with values in {0,1}.")
+
+        row_sums = basis_arr.sum(axis=1)
+        if not np.all(row_sums == 1.0):
+            raise ValueError(
+                "Multi-column groups must be mutually exclusive and exhaustive (each row sum must equal 1). "
+                "Overlapping basis columns correspond to generic BLP, not strict GATE."
+            )
+
+        group_names = [str(col) for col in basis_numeric.columns]
+        group_counts = basis_arr.sum(axis=0).astype(int, copy=False)
+        if np.any(group_counts == 0):
+            empty_cols = [group_names[idx] for idx in np.flatnonzero(group_counts == 0)]
+            raise ValueError(f"Group indicator columns without observations are not estimable: {empty_cols}.")
+        codes = np.argmax(basis_arr, axis=1).astype(int, copy=False)
+
+    return _GatePartition(group_names=list(group_names), codes=np.asarray(codes, dtype=int))
+
+
 def _coerce_groups_to_basis(
-    groups: pd.DataFrame | pd.Series,
+    groups: pd.DataFrame | pd.Series | np.ndarray,
     *,
     n_obs: int,
 ) -> pd.DataFrame:
@@ -208,12 +312,14 @@ def _coerce_groups_to_basis(
 
     For strict GATE, the resulting basis must be mutually exclusive and exhaustive.
     """
-    if isinstance(groups, pd.Series):
+    if isinstance(groups, np.ndarray):
+        groups_df = pd.DataFrame(groups)
+    elif isinstance(groups, pd.Series):
         groups_df = groups.to_frame()
     elif isinstance(groups, pd.DataFrame):
         groups_df = groups.copy()
     else:
-        raise TypeError("groups must be a pandas Series or DataFrame.")
+        raise TypeError("groups must be a pandas Series, DataFrame or numpy array.")
 
     if groups_df.shape[0] != n_obs:
         raise ValueError(f"groups must have {n_obs} rows, got {groups_df.shape[0]}.")
@@ -427,9 +533,126 @@ def _estimate_gate_groupwise_inference(
     )
 
 
+def _estimate_gate_groupwise_summary_from_partition(
+    *,
+    phi: np.ndarray,
+    d: np.ndarray,
+    m_hat: np.ndarray,
+    partition: _GatePartition,
+    cov_type: str,
+    alpha: float,
+) -> dict[str, Any]:
+    """Compute strict GATE estimates and diagnostics from compact group codes."""
+    group_names = list(partition.group_names)
+    codes = np.asarray(partition.codes, dtype=int).reshape(-1)
+    n_obs = int(phi.shape[0])
+    k = len(group_names)
+
+    if codes.shape[0] != n_obs:
+        raise RuntimeError("Stored group partition has inconsistent length; recompute groups.")
+    if k == 0:
+        raise RuntimeError("Group partition must contain at least one group.")
+    if np.any((codes < 0) | (codes >= k)):
+        raise RuntimeError("Group partition contains invalid group codes.")
+
+    n_group = np.bincount(codes, minlength=k).astype(int, copy=False)
+    n_treated = np.rint(np.bincount(codes, weights=np.asarray(d, dtype=float), minlength=k)).astype(int)
+    n_control = n_group - n_treated
+
+    invalid_mask = (n_treated == 0) | (n_control == 0)
+    if invalid_mask.any():
+        invalid_groups = [group_names[idx] for idx in np.flatnonzero(invalid_mask)]
+        raise ValueError(
+            "Each GATE group must contain at least one treated and one control observation. "
+            f"Invalid groups: {invalid_groups}. "
+            "Treatment-defined partitions such as groups=data['d'] are not valid GATE inputs."
+        )
+
+    hc1_scale = np.nan
+    if cov_type == "HC1":
+        denom = n_obs - k
+        if denom <= 0:
+            warnings.warn(
+                "HC1 covariance scaling n/(n-k) is undefined because n <= k; falling back to HC0 scaling.",
+                RuntimeWarning,
+            )
+            hc1_scale = 1.0
+        else:
+            hc1_scale = float(n_obs / denom)
+
+    n_group_f = n_group.astype(float, copy=False)
+    sum_phi = np.bincount(codes, weights=phi, minlength=k)
+    sum_phi2 = np.bincount(codes, weights=np.square(phi), minlength=k)
+    values = sum_phi / n_group_f
+    sse = sum_phi2 - (np.square(sum_phi) / n_group_f)
+    tiny_negative_mask = np.isfinite(sse) & (sse < 0.0) & (np.abs(sse) < 1e-12)
+    if tiny_negative_mask.any():
+        sse[tiny_negative_mask] = 0.0
+    if np.any(np.isfinite(sse) & (sse < 0.0)):
+        raise RuntimeError("Computed negative within-group sum of squares; check GATE signal stability.")
+
+    variances = np.full(k, np.nan, dtype=float)
+    estimable_mask = n_group > 1
+    hc0_var = np.full(k, np.nan, dtype=float)
+    hc0_var[estimable_mask] = sse[estimable_mask] / np.square(n_group_f[estimable_mask])
+
+    if cov_type == "HC0":
+        variances[estimable_mask] = hc0_var[estimable_mask]
+    elif cov_type == "HC1":
+        variances[estimable_mask] = hc0_var[estimable_mask] * hc1_scale
+    elif cov_type == "HC2":
+        leverage = 1.0 - (1.0 / n_group_f[estimable_mask])
+        variances[estimable_mask] = hc0_var[estimable_mask] / leverage
+    elif cov_type == "HC3":
+        leverage = 1.0 - (1.0 / n_group_f[estimable_mask])
+        variances[estimable_mask] = hc0_var[estimable_mask] / np.square(leverage)
+    else:
+        raise ValueError(f"Unsupported cov_type: {cov_type!r}")
+
+    std_errors = np.sqrt(variances)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        wald_stats = values / std_errors
+    p_values = 2.0 * norm.sf(np.abs(wald_stats))
+    z_crit = float(norm.ppf(1.0 - (alpha / 2.0)))
+    ci_lower = values - z_crit * std_errors
+    ci_upper = values + z_crit * std_errors
+
+    share_treated = n_treated / n_group_f
+    std_phi = np.full(k, np.nan, dtype=float)
+    std_phi[estimable_mask] = np.sqrt(sse[estimable_mask] / (n_group_f[estimable_mask] - 1.0))
+
+    mean_propensity = np.bincount(codes, weights=m_hat, minlength=k) / n_group_f
+    min_propensity = np.full(k, np.inf, dtype=float)
+    max_propensity = np.full(k, -np.inf, dtype=float)
+    np.minimum.at(min_propensity, codes, m_hat)
+    np.maximum.at(max_propensity, codes, m_hat)
+
+    covariance = pd.DataFrame(np.diag(variances), index=group_names, columns=group_names)
+
+    return {
+        "group_names": group_names,
+        "values": values,
+        "std_errors": std_errors,
+        "wald_stats": wald_stats,
+        "p_values": p_values,
+        "ci_lower": ci_lower,
+        "ci_upper": ci_upper,
+        "covariance": covariance,
+        "n_group": n_group,
+        "n_treated": n_treated,
+        "n_control": n_control,
+        "share_treated": share_treated,
+        "mean_phi": values.copy(),
+        "std_phi": std_phi,
+        "mean_propensity": mean_propensity,
+        "min_propensity": min_propensity,
+        "max_propensity": max_propensity,
+    }
+
+
 def estimate_gate_from_irm(
     irm_model: Any,
-    groups: Optional[pd.DataFrame | pd.Series],
+    groups: Optional[pd.DataFrame | pd.Series | np.ndarray],
     alpha: float = 0.05,
     cov_type: str = "HC3",
     cov_kwds: Optional[Dict[str, Any]] = None,
@@ -442,12 +665,13 @@ def estimate_gate_from_irm(
         Interactive Regression Model with stored cross-fitted nuisance predictions
         :math:`\hat g_0(X)`, :math:`\hat g_1(X)`, and :math:`\hat m(X)`.
         The model must already be fitted.
-    groups : Optional[pd.DataFrame or pd.Series]
+    groups : Optional[pd.DataFrame, pd.Series, or np.ndarray]
         Pre-specified subgroup definition.
 
         Accepted forms are:
         - A single Series / one-column DataFrame of group labels.
         - A multi-column dummy basis with binary indicators.
+        - A numpy array of group labels (assumed aligned with fit-time rows).
 
         For strict GATE, groups must define a mutually exclusive and exhaustive
         partition of the fitted sample. Each group must contain at least one
@@ -569,68 +793,47 @@ def estimate_gate_from_irm(
 
     phi, d, m_hat = _compute_gate_signal_from_irm(irm_model)
     groups_aligned = _align_groups_to_fit_observations(groups_resolved, irm_model=irm_model, n_obs=phi.shape[0])
-    basis = _coerce_groups_to_basis(groups_aligned, n_obs=phi.shape[0])
-    _validate_gate_group_support(basis=basis, treatment=d)
-
-    (
-        group_names,
-        values,
-        std_errors,
-        wald_stats,
-        p_values,
-        ci_lower,
-        ci_upper,
-        covariance,
-    ) = _estimate_gate_groupwise_inference(
+    partition = _coerce_groups_to_partition(groups_aligned, n_obs=phi.shape[0])
+    gate_stats = _estimate_gate_groupwise_summary_from_partition(
         phi=phi,
-        basis=basis,
+        d=d,
+        m_hat=m_hat,
+        partition=partition,
         cov_type=cov_type_u,
         alpha=alpha,
     )
 
-    n_group_list = []
-    n_treated_list = []
-    n_control_list = []
-    share_treated_list = []
-    mean_phi_list = []
-    std_phi_list = []
-    mean_propensity_list = []
-    min_propensity_list = []
-    max_propensity_list = []
+    group_names = gate_stats["group_names"]
+    values = gate_stats["values"]
+    std_errors = gate_stats["std_errors"]
+    wald_stats = gate_stats["wald_stats"]
+    p_values = gate_stats["p_values"]
+    ci_lower = gate_stats["ci_lower"]
+    ci_upper = gate_stats["ci_upper"]
+    covariance = gate_stats["covariance"]
+    n_group = gate_stats["n_group"]
+    n_treated = gate_stats["n_treated"]
+    n_control = gate_stats["n_control"]
+    share_treated = gate_stats["share_treated"]
+    mean_phi = gate_stats["mean_phi"]
+    std_phi = gate_stats["std_phi"]
+    mean_propensity = gate_stats["mean_propensity"]
+    min_propensity = gate_stats["min_propensity"]
+    max_propensity = gate_stats["max_propensity"]
+
     group_warning_messages: list[str] = []
 
-    for group_name in group_names:
-        mask = basis[group_name].to_numpy(dtype=bool)
-        n_group = int(np.sum(mask))
-        n_treated = int(np.sum(d[mask] == 1))
-        n_control = int(np.sum(d[mask] == 0))
-        share_treated = float(n_treated / n_group) if n_group > 0 else np.nan
-        mean_phi = float(np.mean(phi[mask])) if n_group > 0 else np.nan
-        std_phi = float(np.std(phi[mask], ddof=1)) if n_group > 1 else np.nan
-        mean_prop = float(np.mean(m_hat[mask])) if n_group > 0 else np.nan
-        min_prop = float(np.min(m_hat[mask])) if n_group > 0 else np.nan
-        max_prop = float(np.max(m_hat[mask])) if n_group > 0 else np.nan
-
-        if n_treated == 0 or n_control == 0:
+    for idx, group_name in enumerate(group_names):
+        if n_group[idx] < 10:
+            group_warning_messages.append(f"GATE group '{group_name}' has small support (n={int(n_group[idx])}).")
+        if np.isfinite(min_propensity[idx]) and np.isfinite(max_propensity[idx]) and (
+            min_propensity[idx] < 0.05 or max_propensity[idx] > 0.95
+        ):
             group_warning_messages.append(
-                f"GATE group '{group_name}' has no treated or no control observations; inference may be unstable."
+                "GATE group "
+                f"'{group_name}' has extreme propensity support "
+                f"(min={min_propensity[idx]:.3f}, max={max_propensity[idx]:.3f})."
             )
-        if n_group < 10:
-            group_warning_messages.append(f"GATE group '{group_name}' has small support (n={n_group}).")
-        if np.isfinite(min_prop) and np.isfinite(max_prop) and (min_prop < 0.05 or max_prop > 0.95):
-            group_warning_messages.append(
-                f"GATE group '{group_name}' has extreme propensity support (min={min_prop:.3f}, max={max_prop:.3f})."
-            )
-
-        n_group_list.append(n_group)
-        n_treated_list.append(n_treated)
-        n_control_list.append(n_control)
-        share_treated_list.append(share_treated)
-        mean_phi_list.append(mean_phi)
-        std_phi_list.append(std_phi)
-        mean_propensity_list.append(mean_prop)
-        min_propensity_list.append(min_prop)
-        max_propensity_list.append(max_prop)
 
     summary_table = pd.DataFrame(
         {
@@ -642,15 +845,15 @@ def estimate_gate_from_irm(
             "is_significant": p_values < float(alpha),
             "ci_lower": ci_lower,
             "ci_upper": ci_upper,
-            "n_group": n_group_list,
-            "n_treated": n_treated_list,
-            "n_control": n_control_list,
-            "share_treated": share_treated_list,
-            "mean_phi": mean_phi_list,
-            "std_phi": std_phi_list,
-            "mean_propensity": mean_propensity_list,
-            "min_propensity": min_propensity_list,
-            "max_propensity": max_propensity_list,
+            "n_group": n_group,
+            "n_treated": n_treated,
+            "n_control": n_control,
+            "share_treated": share_treated,
+            "mean_phi": mean_phi,
+            "std_phi": std_phi,
+            "mean_propensity": mean_propensity,
+            "min_propensity": min_propensity,
+            "max_propensity": max_propensity,
         },
         index=group_names,
     )
@@ -658,12 +861,14 @@ def estimate_gate_from_irm(
 
     model_options = {
         "cov_type": cov_type_u,
+        "covariance_structure": "diagonal",
         "cov_kwds": {},
         "cov_kwds_requested": {} if cov_kwds is None else dict(cov_kwds),
         "trimming_threshold": float(getattr(irm_model, "trimming_threshold", np.nan)),
         "normalize_ipw_requested": normalize_ipw_requested,
         "normalize_ipw_effective": False,
         "se_approx_hajek": False,
+        "group_representation": "compact_codes",
         "n_folds": int(getattr(irm_model, "n_folds", -1)),
         "random_state": getattr(irm_model, "random_state", None),
     }
@@ -672,7 +877,8 @@ def estimate_gate_from_irm(
     if bool(getattr(irm_model, "store_diagnostics", True)):
         diagnostic_payload = {
             "orthogonal_signal": phi.copy(),
-            "basis": basis.copy(),
+            "group_codes": partition.codes.copy(),
+            "group_names": list(group_names),
             "group_diagnostics": summary_table[
                 [
                     "n_group",
@@ -703,14 +909,14 @@ def estimate_gate_from_irm(
         covariance=covariance,
         summary_table=summary_table,
         model_options=model_options,
-        n_group=np.asarray(n_group_list, dtype=int),
-        n_treated=np.asarray(n_treated_list, dtype=int),
-        n_control=np.asarray(n_control_list, dtype=int),
-        share_treated=np.asarray(share_treated_list, dtype=float),
-        mean_phi=np.asarray(mean_phi_list, dtype=float),
-        std_phi=np.asarray(std_phi_list, dtype=float),
-        mean_propensity=np.asarray(mean_propensity_list, dtype=float),
-        min_propensity=np.asarray(min_propensity_list, dtype=float),
-        max_propensity=np.asarray(max_propensity_list, dtype=float),
+        n_group=np.asarray(n_group, dtype=int),
+        n_treated=np.asarray(n_treated, dtype=int),
+        n_control=np.asarray(n_control, dtype=int),
+        share_treated=np.asarray(share_treated, dtype=float),
+        mean_phi=np.asarray(mean_phi, dtype=float),
+        std_phi=np.asarray(std_phi, dtype=float),
+        mean_propensity=np.asarray(mean_propensity, dtype=float),
+        min_propensity=np.asarray(min_propensity, dtype=float),
+        max_propensity=np.asarray(max_propensity, dtype=float),
         diagnostic_data=diagnostic_payload,
     )

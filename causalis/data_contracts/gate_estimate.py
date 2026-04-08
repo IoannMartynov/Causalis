@@ -269,13 +269,19 @@ class GateEstimate(BaseModel):
 
     def _compute_pairwise_stats(self, *, left_idx: int, right_idx: int) -> tuple[float, float, float, float]:
         values = np.asarray(self.values, dtype=float).reshape(-1)
-        covariance = self.covariance.loc[self.group_names, self.group_names].to_numpy(dtype=float)
-        contrast_vector = np.zeros(len(self.group_names), dtype=float)
-        contrast_vector[left_idx] = 1.0
-        contrast_vector[right_idx] = -1.0
 
         diff = float(values[left_idx] - values[right_idx])
-        variance = float(contrast_vector @ covariance @ contrast_vector)
+        if self.model_options.get("covariance_structure") == "diagonal":
+            variances = np.square(np.asarray(self.std_errors, dtype=float).reshape(-1))
+            left_var = variances[left_idx]
+            right_var = variances[right_idx]
+            variance = float(left_var + right_var) if np.isfinite(left_var) and np.isfinite(right_var) else np.nan
+        else:
+            covariance = self.covariance.loc[self.group_names, self.group_names].to_numpy(dtype=float)
+            contrast_vector = np.zeros(len(self.group_names), dtype=float)
+            contrast_vector[left_idx] = 1.0
+            contrast_vector[right_idx] = -1.0
+            variance = float(contrast_vector @ covariance @ contrast_vector)
         if np.isfinite(variance) and variance < 0.0 and abs(variance) < 1e-12:
             variance = 0.0
         if np.isfinite(variance) and variance < 0.0:

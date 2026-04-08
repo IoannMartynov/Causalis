@@ -23,7 +23,7 @@
 
 ### API
 
-````{py:function} estimate_gate_from_irm(irm_model: typing.Any, groups: typing.Optional[pandas.DataFrame | pandas.Series], alpha: float = 0.05, cov_type: str = 'HC3', cov_kwds: typing.Optional[typing.Dict[str, typing.Any]] = None) -> causalis.data_contracts.gate_estimate.GateEstimate
+````{py:function} estimate_gate_from_irm(irm_model: typing.Any, groups: typing.Optional[pandas.DataFrame | pandas.Series | numpy.ndarray], alpha: float = 0.05, cov_type: str = 'HC3', cov_kwds: typing.Optional[typing.Dict[str, typing.Any]] = None) -> causalis.data_contracts.gate_estimate.GateEstimate
 :canonical: causalis.scenarios.gate.model.estimate_gate_from_irm
 
 ```{autodoc2-docstring} causalis.scenarios.gate.model.estimate_gate_from_irm
