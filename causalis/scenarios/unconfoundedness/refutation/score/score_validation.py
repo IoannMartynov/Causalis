@@ -10,40 +10,14 @@ import pandas as pd
 
 from causalis.data_contracts.causal_estimate import CausalEstimate
 from causalis.dgp.causaldata import CausalData
-
-
-def _normalize_score(score: Any) -> str:
-    """Normalize supported score aliases to ``ATE`` or ``ATTE``."""
-    score_u = str(score or "ATE").upper()
-    if "ATT" in score_u:
-        return "ATTE"
-    if score_u == "ATE":
-        return "ATE"
-    raise ValueError(f"score must be 'ATE' or 'ATTE'. Got {score!r}.")
-
-
-def _validate_estimate_matches_data(data: CausalData, estimate: CausalEstimate) -> None:
-    """Ensure an estimate is aligned with the supplied causal dataset."""
-    df = data.get_df()
-
-    if str(estimate.treatment) != str(data.treatment_name):
-        raise ValueError(
-            "estimate.treatment must match data.treatment_name "
-            f"({estimate.treatment!r} != {data.treatment_name!r})."
-        )
-
-    if str(estimate.outcome) != str(data.outcome_name):
-        raise ValueError(
-            "estimate.outcome must match data.outcome_name "
-            f"({estimate.outcome!r} != {data.outcome_name!r})."
-        )
-
-    missing_confounders = [name for name in estimate.confounders if name not in df.columns]
-    if missing_confounders:
-        raise ValueError(
-            "estimate.confounders are missing in data.get_df(): "
-            + ", ".join(sorted(map(str, missing_confounders)))
-        )
+from causalis.scenarios.unconfoundedness._score_utils import (
+    _normalize_ipw_terms,
+    _resolve_ate_weights,
+)
+from causalis.scenarios.unconfoundedness.refutation._shared import (
+    _normalize_score,
+    _validate_estimate_matches_data,
+)
 
 
 def _resolve_trimming_threshold(
@@ -71,50 +45,6 @@ def _resolve_normalize_ipw(score: str, diagnostic_data: Any, estimate: CausalEst
     if score == "ATTE":
         return False
     return bool(normalize_ipw)
-
-
-def _normalize_ipw_terms(
-    d: np.ndarray,
-    m: np.ndarray,
-    *,
-    normalize_ipw: bool,
-) -> Tuple[np.ndarray, np.ndarray]:
-    """Build treated and control IPW terms with optional mean normalization."""
-    h1 = d / m
-    h0 = (1.0 - d) / (1.0 - m)
-    if normalize_ipw:
-        h1_mean = float(np.mean(h1))
-        h0_mean = float(np.mean(h0))
-        h1 = h1 / (h1_mean if h1_mean != 0.0 else 1.0)
-        h0 = h0 / (h0_mean if h0_mean != 0.0 else 1.0)
-    return h1, h0
-
-
-def _resolve_ate_weights(
-    n: int,
-    w_raw: Optional[np.ndarray],
-    w_bar_raw: Optional[np.ndarray],
-) -> Tuple[np.ndarray, np.ndarray]:
-    """Resolve ATE weight vectors from diagnostic payloads."""
-    if w_raw is None:
-        w = np.ones(n, dtype=float)
-    else:
-        w = np.asarray(w_raw, dtype=float).ravel()
-        if w.size != n:
-            raise ValueError(f"diagnostic_data.w must have length n={n}, got {w.size}.")
-        if not np.all(np.isfinite(w)):
-            raise ValueError("diagnostic_data.w must contain finite values.")
-
-    if w_bar_raw is None:
-        w_bar = w
-    else:
-        w_bar = np.asarray(w_bar_raw, dtype=float).ravel()
-        if w_bar.size != n:
-            raise ValueError(f"diagnostic_data.w_bar must have length n={n}, got {w_bar.size}.")
-        if not np.all(np.isfinite(w_bar)):
-            raise ValueError("diagnostic_data.w_bar must contain finite values.")
-
-    return w, w_bar
 
 
 def _aipw_score_ate(
@@ -449,7 +379,7 @@ def run_score_diagnostics(
     ValueError
         If required diagnostic arrays are missing or have incompatible shapes.
     """
-    _validate_estimate_matches_data(data=data, estimate=estimate)
+    _validate_estimate_matches_data(data=data, estimate=estimate, require_confounders=True)
 
     diagnostic_data = estimate.diagnostic_data
     if diagnostic_data is None:
