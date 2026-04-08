@@ -3,13 +3,19 @@ import pandas as pd
 import pytest
 import warnings
 from scipy.stats import norm
+from sklearn.base import BaseEstimator
 from sklearn.exceptions import NotFittedError
 from sklearn.linear_model import LinearRegression, LogisticRegression
+from statsmodels.regression.linear_model import OLS
 
 from causalis.data_contracts.gate_contrast_estimate import GateContrastEstimate
 from causalis.data_contracts.gate_estimate import GateEstimate
 from causalis.dgp.causaldata import CausalData
-from causalis.scenarios.gate.model import _coerce_groups_to_basis, _compute_gate_signal_from_irm
+from causalis.scenarios.gate.model import (
+    _coerce_groups_to_basis,
+    _compute_gate_signal_from_irm,
+    estimate_gate_from_irm,
+)
 from causalis.scenarios.unconfoundedness.model import IRM
 
 
@@ -46,6 +52,49 @@ def _fit_irm(
     )
     irm.fit(store_diagnostics=store_diagnostics)
     return irm
+
+
+def _make_mock_gate_irm(n: int = 20000, k: int = 64, seed: int = 77):
+    rng = np.random.default_rng(seed)
+    user_id = pd.Index([f"u_{i:06d}" for i in range(n)], name="user_id")
+    x1 = rng.normal(size=n)
+    x2 = rng.normal(size=n)
+    m_hat = 1.0 / (1.0 + np.exp(-(0.4 * x1 - 0.3 * x2)))
+    d = rng.binomial(1, m_hat)
+    tau = 0.7 + 0.2 * (x1 > 0.0).astype(float)
+    g0_hat = 0.3 + 0.4 * x1 - 0.2 * x2
+    g1_hat = g0_hat + tau
+    y = g0_hat + tau * d + rng.normal(scale=1.0, size=n)
+
+    df = pd.DataFrame({"user_id": user_id, "y": y, "d": d, "x1": x1, "x2": x2})
+    cd = CausalData(df=df, treatment="d", outcome="y", confounders=["x1", "x2"], user_id="user_id")
+    groups = pd.Series(np.arange(n) % k, index=user_id, name="segment")
+
+    class _MockIRM(BaseEstimator):
+        def __init__(self):
+            self.data = cd
+            self._y = np.asarray(y, dtype=float)
+            self._d = np.asarray(d, dtype=int)
+            self.g0_hat_ = np.asarray(g0_hat, dtype=float)
+            self.g1_hat_ = np.asarray(g1_hat, dtype=float)
+            self.m_hat_ = np.asarray(m_hat, dtype=float)
+            self._fit_index_ = pd.Index(cd.user_id.copy(), name=cd.user_id_name)
+            self._fit_row_index_ = cd.df.index.copy()
+            self.store_diagnostics = True
+            self.trimming_threshold = 1e-3
+            self.n_folds = 2
+            self.random_state = seed
+
+        def fit(self):
+            return self
+
+        def _use_normalized_ipw(self, score: str = "ATE", warn: bool = False) -> bool:
+            return False
+
+        def _resolve_estimation_targets(self):
+            return self._y, self._d
+
+    return _MockIRM(), groups
 
 
 def _groups_from_df(df: pd.DataFrame) -> pd.Series:
@@ -187,6 +236,27 @@ def test_gate_inference_covariance_options_and_se_validity():
     assert np.all(res_hc1.std_errors >= 0.0)
 
 
+def test_gate_matches_statsmodels_no_intercept_ols_for_hcx_covariances():
+    cd, df = _make_synthetic_data(n=320, seed=4)
+    irm = _fit_irm(cd, random_state=19)
+    groups = _quantile_groups_from_df(df, q=4)
+
+    phi, _, _ = _compute_gate_signal_from_irm(irm)
+    basis = _coerce_groups_to_basis(groups, n_obs=phi.shape[0])
+    design = basis.to_numpy(dtype=float)
+
+    for cov_type in ("HC0", "HC1", "HC2", "HC3"):
+        res = irm.estimate(score="GATE", groups=groups, cov_type=cov_type)
+        fit = OLS(phi, design).fit(cov_type=cov_type)
+
+        np.testing.assert_allclose(res.values, np.asarray(fit.params, dtype=float), atol=1e-10)
+        np.testing.assert_allclose(
+            res.covariance.to_numpy(dtype=float),
+            np.asarray(fit.cov_params(), dtype=float),
+            atol=1e-10,
+        )
+
+
 def test_gate_summary_includes_is_significant_column():
     cd, df = _make_synthetic_data(n=300, seed=40)
     irm = _fit_irm(cd)
@@ -226,8 +296,24 @@ def test_gate_payload_follows_fit_store_diagnostics_setting():
     irm_diag = _fit_irm(cd, store_diagnostics=True)
     irm_light = _fit_irm(cd, store_diagnostics=False)
 
-    assert irm_diag.estimate(score="GATE", groups=groups).diagnostic_data is not None
+    diagnostic_payload = irm_diag.estimate(score="GATE", groups=groups).diagnostic_data
+    assert diagnostic_payload is not None
+    assert "basis" not in diagnostic_payload
+    assert "group_codes" in diagnostic_payload
     assert irm_light.estimate(score="GATE", groups=groups).diagnostic_data is None
+
+
+def test_gate_large_label_path_uses_compact_diagnostics():
+    irm, groups = _make_mock_gate_irm(n=20000, k=64, seed=81)
+
+    res = estimate_gate_from_irm(irm, groups=groups, cov_type="HC2")
+
+    assert res.diagnostic_data is not None
+    assert "basis" not in res.diagnostic_data
+    assert res.diagnostic_data["group_codes"].shape == (20000,)
+    assert np.issubdtype(res.diagnostic_data["group_codes"].dtype, np.integer)
+    assert res.diagnostic_data["group_names"] == res.group_names
+    assert len(np.unique(res.diagnostic_data["group_codes"])) == 64
 
 
 def test_gate_lightweight_mode_uses_cached_targets_without_reloading_dataframe(monkeypatch):
@@ -277,6 +363,33 @@ def test_gate_reorders_groups_to_fit_time_user_ids():
 
     np.testing.assert_allclose(second.values, first.values, atol=1e-12)
     np.testing.assert_allclose(second.std_errors, first.std_errors, atol=1e-12)
+
+
+def test_gate_accepts_explicit_sequential_integer_user_ids():
+    rng = np.random.default_rng(52)
+    n = 240
+    x1 = rng.normal(size=n)
+    x2 = rng.normal(size=n)
+    p = 1.0 / (1.0 + np.exp(-(0.6 * x1 - 0.4 * x2)))
+    d = rng.binomial(1, p)
+    tau = 1.2 + 0.5 * (x1 > 0.0).astype(float)
+    y = 1.0 + 0.4 * x1 - 0.2 * x2 + tau * d + rng.normal(scale=1.0, size=n)
+    user_id = np.arange(n)
+
+    df = pd.DataFrame({"user_id": user_id, "y": y, "d": d, "x1": x1, "x2": x2})
+    cd = CausalData(df=df, treatment="d", outcome="y", confounders=["x1", "x2"], user_id="user_id")
+    irm = _fit_irm(cd, store_diagnostics=False)
+    groups = pd.Series(
+        np.where(df["x1"] >= 0.0, "high_x1", "low_x1"),
+        index=pd.Index(df["user_id"], name="user_id"),
+        name="segment",
+    )
+
+    res = irm.estimate(score="GATE", groups=groups)
+
+    assert isinstance(res, GateEstimate)
+    assert sorted(res.group_names) == ["segment=high_x1", "segment=low_x1"]
+    assert np.all(np.isfinite(res.values))
 
 
 def test_gate_row_index_groups_match_user_id_groups_for_qcut_notebook_pattern():
