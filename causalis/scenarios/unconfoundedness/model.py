@@ -2,6 +2,7 @@ r"""
 IRM estimator consuming CausalData.
 
 Implements cross-fitted nuisance estimation for g0, g1 and m, and supports ATE/ATTE/GATE scores.
+https://github.com/DoubleML/doubleml-for-py/blob/main/doubleml/irm/irm.py
 """
 from __future__ import annotations
 
@@ -25,9 +26,17 @@ except ImportError:
 
 from causalis.dgp.causaldata import CausalData
 from causalis.data_contracts.causal_estimate import CausalEstimate
-from causalis.data_contracts.causal_diagnostic_data import UnconfoundednessDiagnosticData
 from causalis.data_contracts.gate_estimate import GateEstimate
 from causalis.scenarios.gate.model import estimate_gate_from_irm
+from causalis.scenarios.unconfoundedness._diagnostic_utils import (
+    _build_irm_estimate_diagnostic_data,
+)
+from causalis.scenarios.unconfoundedness._score_utils import (
+    _compute_ipw_components as _compute_irm_ipw_components,
+    _normalize_ipw_terms as _normalize_irm_ipw_terms,
+    _resolve_irm_weights,
+    _use_normalized_ipw as _use_normalized_irm_ipw,
+)
 from causalis.scenarios.unconfoundedness._utils import (
     _clip_propensity,
     _is_binary,
@@ -199,7 +208,7 @@ class IRM(BaseEstimator):
 
         w = \bar w = 1 \quad \text{for unweighted ATE},
 
-    while for ATTE this implementation uses normalized treated weights
+    while for ATTE` this implementation uses normalized treated weights
 
     .. math::
 
@@ -251,6 +260,8 @@ class IRM(BaseEstimator):
         self._X = None
         self._y = None
         self._d = None
+        self._fit_index_ = None
+        self._fit_row_index_ = None
         self._fit_store_diagnostics_ = bool(store_diagnostics)
         self._fit_sample_fingerprint_ = None
         self.folds_ = None
@@ -483,24 +494,13 @@ class IRM(BaseEstimator):
         warn: bool = True,
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """Compute IPW terms plus Riesz-compatible inverse propensity factors."""
-        with np.errstate(divide="ignore", invalid="ignore"):
-            inv_m = 1.0 / m_hat
-            inv_1m = 1.0 / (1.0 - m_hat)
-
-        h1 = d * inv_m
-        h0 = (1.0 - d) * inv_1m
-
-        if self._use_normalized_ipw(score=score, warn=warn):
-            h1_mean = np.mean(h1)
-            h0_mean = np.mean(h0)
-            c1 = h1_mean if h1_mean != 0 else 1.0
-            c0 = h0_mean if h0_mean != 0 else 1.0
-            h1 = h1 / c1
-            h0 = h0 / c0
-            inv_m = inv_m / c1
-            inv_1m = inv_1m / c0
-
-        return h1, h0, inv_m, inv_1m
+        return _compute_irm_ipw_components(
+            d=d,
+            m_hat=m_hat,
+            normalize_ipw=self.normalize_ipw,
+            score=score,
+            warn=warn,
+        )
 
     def _fit_outcome_nuisance_for_treatment(
         self,
@@ -654,6 +654,12 @@ class IRM(BaseEstimator):
     def _store_fit_sample(self, X: np.ndarray, y: np.ndarray, d: np.ndarray) -> None:
         """Persist immutable fit-time targets and optional diagnostic covariates."""
         self._fit_sample_fingerprint_ = self._compute_sample_fingerprint(X=X, y=y, d=d)
+        if getattr(self.data, "user_id_name", None):
+            self._fit_index_ = pd.Index(self.data.user_id.copy(), name=self.data.user_id_name)
+            self._fit_row_index_ = self.data.df.index.copy()
+        else:
+            self._fit_index_ = self.data.df.index.copy()
+            self._fit_row_index_ = None
         self._y = np.asarray(y, dtype=float).copy()
         self._d = np.asarray(d, dtype=int).copy()
         if self.store_diagnostics:
@@ -714,91 +720,21 @@ class IRM(BaseEstimator):
         w_bar : np.ndarray
             Weights for the representer terms.
         """
-        if score is None:
-            score = self.score
-        score = score.upper()
-
-        if self.weights is not None and score != "ATE":
-            raise ValueError(f"weights are only supported for score='ATE', but got score='{score}'")
-
-        def _to_1d(arr: Any, *, name: str) -> np.ndarray:
-            """Validate and coerce weight-like inputs to a finite 1D vector."""
-            vec = np.asarray(arr, dtype=float)
-            if vec.ndim == 1:
-                pass
-            elif vec.ndim == 2 and 1 in vec.shape:
-                vec = vec.reshape(-1)
-            else:
-                raise ValueError(f"{name} must be 1D with shape (n,), got shape {vec.shape}.")
-            if vec.shape[0] != n:
-                raise ValueError(f"{name} must have shape (n,) with n={n}, got shape {vec.shape}.")
-            if not np.all(np.isfinite(vec)):
-                raise ValueError(f"{name} must contain only finite values.")
-            return vec
-
-        # Standard ATE
-        if score == "ATE":
-            if self.weights is None:
-                w = np.ones(n, dtype=float)
-            elif isinstance(self.weights, np.ndarray):
-                w = _to_1d(self.weights, name="weights")
-            elif isinstance(self.weights, dict):
-                if "weights" not in self.weights:
-                    raise ValueError("weights dict must contain key 'weights'.")
-                w = _to_1d(self.weights["weights"], name="weights['weights']")
-            else:
-                raise TypeError("weights must be None, np.ndarray, or dict")
-            # By default, use w as its own conditional expectation proxy in EIF terms.
-            w_bar = w
-            if isinstance(self.weights, dict) and "weights_bar" in self.weights:
-                w_bar_arr = np.asarray(self.weights["weights_bar"], dtype=float)
-                if w_bar_arr.ndim == 2:
-                    if w_bar_arr.shape[0] == n and w_bar_arr.shape[1] >= 1:
-                        if w_bar_arr.shape[1] > 1:
-                            warnings.warn(
-                                "weights['weights_bar'] has multiple columns; using the first column.",
-                                RuntimeWarning,
-                            )
-                        w_bar = w_bar_arr[:, 0]
-                    elif w_bar_arr.shape == (1, n):
-                        w_bar = w_bar_arr.reshape(-1)
-                    else:
-                        raise ValueError(
-                            "weights['weights_bar'] must be shape (n,), (n,1), (1,n), or (n,r) for r>=1."
-                        )
-                else:
-                    w_bar = _to_1d(w_bar_arr, name="weights['weights_bar']")
-                if not np.all(np.isfinite(w_bar)):
-                    raise ValueError("weights['weights_bar'] must contain only finite values.")
-        # ATTE requires m_hat
-        elif score == "ATTE":
-            if m_hat_adj is None:
-                raise ValueError("m_hat required for ATTE weights computation")
-            w = d.astype(float)
-            w_bar = m_hat_adj.astype(float)
-        else:
-            raise ValueError("score must be 'ATE' or 'ATTE'")
-
-        # Normalize by E_n[w] so effect, orthogonal score, and sensitivity pieces
-        # all use the same weight scale.
-        mean_w = float(np.mean(w))
-        if not np.isfinite(mean_w) or mean_w <= 1e-12:
-            raise ValueError("weights must have a strictly positive finite mean.")
-        w = w / mean_w
-        w_bar = w_bar / mean_w
-        return w, w_bar
+        return _resolve_irm_weights(
+            n=n,
+            m_hat_adj=m_hat_adj,
+            d=d,
+            score=self.score if score is None else score,
+            weights=self.weights,
+        )
 
     def _use_normalized_ipw(self, score: Optional[str] = None, *, warn: bool = False) -> bool:
         """Return whether Hájek normalization is active for a given score."""
-        score_u = (self.score if score is None else str(score)).upper()
-        if self.normalize_ipw and score_u == "ATTE":
-            if warn:
-                warnings.warn(
-                    "normalize_ipw=True is ignored for ATTE to preserve the canonical ATTE EIF.",
-                    RuntimeWarning,
-                )
-            return False
-        return bool(self.normalize_ipw)
+        return _use_normalized_irm_ipw(
+            normalize_ipw=self.normalize_ipw,
+            score=self.score if score is None else score,
+            warn=warn,
+        )
 
     def _normalize_ipw_terms(
         self,
@@ -824,8 +760,13 @@ class IRM(BaseEstimator):
         h0 : np.ndarray
             IPW term for control units ((1 - d) / (1 - m_hat)).
         """
-        h1, h0, _, _ = self._compute_ipw_components(d=d, m_hat=m_hat, score=score, warn=warn)
-        return h1, h0
+        return _normalize_irm_ipw_terms(
+            d,
+            m_hat,
+            normalize_ipw=self.normalize_ipw,
+            score=self.score if score is None else score,
+            warn=warn,
+        )
 
     def _compute_estimate_components(
         self,
@@ -1069,115 +1010,25 @@ class IRM(BaseEstimator):
         x: Optional[np.ndarray],
         inv_m: np.ndarray,
         inv_1m: np.ndarray,
-    ) -> Optional[UnconfoundednessDiagnosticData]:
+    ) -> Optional[Any]:
         """Build optional diagnostics payload for CausalEstimate."""
-        if not self.store_diagnostics:
-            return None
-        if x is None:
-            raise RuntimeError("Diagnostic payloads require cached confounders. Refit with store_diagnostics=True.")
-
-        sens_elements = self._sensitivity_element_est(
+        return _build_irm_estimate_diagnostic_data(
+            model=self,
             y=y,
             d=d,
-            g0=g0_hat,
-            g1=g1_hat,
+            g0_hat=g0_hat,
+            g1_hat=g1_hat,
             m_hat=m_hat,
             w=w,
             w_bar=w_bar,
-            psi=IF,
+            IF=IF,
+            psi_b=psi_b,
+            score=score,
+            normalize_ipw_effective=normalize_ipw_effective,
+            x=x,
             inv_m=inv_m,
             inv_1m=inv_1m,
         )
-
-        score_plot_cache = self._build_score_plot_cache(
-            d=d,
-            m_hat=m_hat,
-            psi=IF,
-            score=score,
-            normalize_ipw_effective=normalize_ipw_effective,
-        )
-        residual_plot_cache = self._build_residual_plot_cache(
-            y=y,
-            d=d,
-            g0_hat=g0_hat,
-            g1_hat=g1_hat,
-            m_hat=m_hat,
-        )
-
-        diag = UnconfoundednessDiagnosticData(
-            m_hat=m_hat,
-            m_hat_raw=getattr(self, "m_hat_raw_", None),
-            d=d,
-            y=y,
-            x=np.asarray(x, dtype=float),
-            g0_hat=g0_hat,
-            g1_hat=g1_hat,
-            w=w,
-            w_bar=w_bar,
-            psi_b=psi_b,
-            folds=getattr(self, "folds_", None),
-            trimming_threshold=self.trimming_threshold,
-            normalize_ipw=normalize_ipw_effective,
-            score=score,
-            score_plot_cache=score_plot_cache,
-            residual_plot_cache=residual_plot_cache,
-            **sens_elements
-        )
-        diag._model = self
-        return diag
-
-    def _build_score_plot_cache(
-        self,
-        *,
-        d: np.ndarray,
-        m_hat: np.ndarray,
-        psi: np.ndarray,
-        score: str,
-        normalize_ipw_effective: bool,
-    ) -> Dict[str, Any]:
-        """Build cached arrays used by score influence plots."""
-        m_clipped = np.clip(m_hat, self.trimming_threshold, 1.0 - self.trimming_threshold)
-        if score == "ATE":
-            ipw_t, ipw_c = self._normalize_ipw_terms(d, m_clipped, score=score, warn=False)
-            ipw_t_label = r"$D/m$"
-            ipw_c_label = r"$(1-D)/(1-m)$"
-        else:
-            p_treated = float(np.mean(d))
-            ipw_t = d / (p_treated + 1e-12)
-            ipw_c = ((1.0 - d) * (m_clipped / (1.0 - m_clipped))) / (p_treated + 1e-12)
-            ipw_t_label = r"$D/\mathbb{E}[D]$"
-            ipw_c_label = r"$(1-D)\cdot m/(1-m)/\mathbb{E}[D]$"
-
-        return {
-            "score": str(score),
-            "trimming_threshold": float(self.trimming_threshold),
-            "normalize_ipw": bool(normalize_ipw_effective),
-            "d": np.asarray(d, dtype=float).ravel(),
-            "m_clipped": np.asarray(m_clipped, dtype=float).ravel(),
-            "psi": np.asarray(psi, dtype=float).ravel(),
-            "ipw_t": np.asarray(ipw_t, dtype=float).ravel(),
-            "ipw_c": np.asarray(ipw_c, dtype=float).ravel(),
-            "ipw_t_label": ipw_t_label,
-            "ipw_c_label": ipw_c_label,
-        }
-
-    def _build_residual_plot_cache(
-        self,
-        *,
-        y: np.ndarray,
-        d: np.ndarray,
-        g0_hat: np.ndarray,
-        g1_hat: np.ndarray,
-        m_hat: np.ndarray,
-    ) -> Dict[str, np.ndarray]:
-        """Build cached arrays used by residual diagnostic plots."""
-        return {
-            "y": np.asarray(y, dtype=float).ravel(),
-            "d": np.asarray(d, dtype=float).ravel(),
-            "g0": np.asarray(g0_hat, dtype=float).ravel(),
-            "g1": np.asarray(g1_hat, dtype=float).ravel(),
-            "m": np.asarray(m_hat, dtype=float).ravel(),
-        }
 
     def _build_causal_estimate(
         self,
@@ -1279,15 +1130,24 @@ class IRM(BaseEstimator):
         groups : Optional[pd.DataFrame | pd.Series], default None
             Group labels/indicators for ``score="GATE"``.
             If None, fallback to ``self.data.gate_groups`` when present.
+            GATE requires ``CausalData.user_id`` and aligns groups to those
+            fit-time observation ids. Row-indexed groups are also accepted only
+            when the fit-time row-to-``user_id`` mapping is still unchanged.
         cov_type : {"HC0", "HC1", "HC2", "HC3"}, default "HC3"
             Robust covariance type for ``score="GATE"`` inference.
         cov_kwds : Optional[Dict[str, Any]], default None
-            Additional covariance keyword arguments passed to statsmodels for ``score="GATE"``.
+            Additional covariance keyword arguments requested for ``score="GATE"``.
+            These are currently ignored because GATE uses closed-form HCx
+            covariance formulas rather than delegating to statsmodels.
 
         Returns
         -------
         CausalEstimate or GateEstimate
-            Result container for the estimated effect.
+            Result container for the estimated effect. For ``score="GATE"``,
+            the returned ``GateEstimate`` supports ``summary()`` for
+            subgroup-vs-zero inference, ``contrast(...)`` for formal
+            group-vs-group tests, and ``pairwise_summary(...)`` for a
+            broader comparison table.
         """
         check_is_fitted(self, attributes=["g0_hat_", "g1_hat_", "m_hat_"])
         score = self._validate_estimate_request(score=score, alpha=alpha)
@@ -1472,7 +1332,29 @@ class IRM(BaseEstimator):
         cov_type: str = "HC3",
         cov_kwds: Optional[Dict[str, Any]] = None,
     ) -> GateEstimate:
-        """Convenience wrapper for ``estimate(score=\"GATE\", ...)``."""
+        """Convenience wrapper for ``estimate(score="GATE", ...)``.
+
+        Parameters
+        ----------
+        groups : pd.DataFrame or pd.Series
+            Subgroup labels or a strict dummy basis. GATE requires
+            ``CausalData.user_id`` and aligns groups to those fit-time
+            observation ids.
+        alpha : float, default 0.05
+            Significance level for confidence intervals.
+        cov_type : {"HC0", "HC1", "HC2", "HC3"}, default "HC3"
+            Robust covariance type for subgroup inference.
+        cov_kwds : Optional[Dict[str, Any]], default None
+            Additional covariance keyword arguments requested by the caller.
+            These are currently ignored by the closed-form GATE implementation.
+
+        Returns
+        -------
+        GateEstimate
+            Estimated subgroup effects and diagnostics. The returned result
+            also supports ``contrast(...)`` and ``pairwise_summary(...)``
+            for formal post-estimation group comparisons.
+        """
         return self.estimate(
             score="GATE",
             groups=groups,
@@ -1549,42 +1431,24 @@ class IRM(BaseEstimator):
         if g1 is None:
             g1 = np.asarray(self.g1_hat_, dtype=float)
 
-        if w is None or w_bar is None:
-            w, w_bar = self._get_weights(n=len(y), m_hat_adj=m_hat, d=d)
+        from causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity import (
+            compute_irm_sensitivity_elements,
+        )
 
-        if psi is None:
-            psi = self.psi_
-
-        # Residual variance component used in sensitivity bounds.
-        sigma2_score_element = np.square(y - d * g1 - (1.0 - d) * g0)
-        sigma2 = float(np.mean(sigma2_score_element))
-        psi_sigma2 = sigma2_score_element - sigma2
-
-        if inv_m is None or inv_1m is None:
-            _, _, inv_m, inv_1m = self._compute_ipw_components(
-                d=d,
-                m_hat=m_hat,
-                score=getattr(self, "score", "ATE"),
-                warn=False,
-            )
-        # rr is the Riesz representer; m_alpha enters the nu^2 sensitivity term.
-        m_alpha = (w_bar ** 2) * (inv_m + inv_1m)
-        rr = w_bar * (d * inv_m - (1.0 - d) * inv_1m)
-
-        # nu^2 component from the score decomposition in the sensitivity bound.
-        nu2_score_element = 2.0 * m_alpha - np.square(rr)
-        nu2 = float(np.mean(nu2_score_element))
-        psi_nu2 = nu2_score_element - nu2
-
-        return {
-            "sigma2": sigma2,
-            "nu2": nu2,
-            "psi_sigma2": psi_sigma2,
-            "psi_nu2": psi_nu2,
-            "riesz_rep": rr,
-            "m_alpha": m_alpha,
-            "psi": psi,
-        }
+        return compute_irm_sensitivity_elements(
+            model=self,
+            y=np.asarray(y, dtype=float),
+            d=np.asarray(d, dtype=int),
+            g0=np.asarray(g0, dtype=float),
+            g1=np.asarray(g1, dtype=float),
+            m_hat=np.asarray(m_hat, dtype=float),
+            w=w,
+            w_bar=w_bar,
+            psi=psi,
+            inv_m=inv_m,
+            inv_1m=inv_1m,
+            score=getattr(self, "score", "ATE"),
+        )
 
     def sensitivity_analysis(self, r2_y: float, r2_d: float, rho: float = 1.0, H0: float = 0.0, alpha: float = 0.05) -> "IRM":
         """Compute a sensitivity analysis following Chernozhukov et al. (2022).

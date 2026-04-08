@@ -9,6 +9,9 @@ import pandas as pd
 
 from causalis.data_contracts.causal_estimate import CausalEstimate
 from causalis.dgp.causaldata import CausalData
+from causalis.scenarios.unconfoundedness.refutation._shared import (
+    _validate_estimate_matches_data,
+)
 
 _DEFAULT_THRESHOLDS: Dict[str, float] = {
     "edge_mass_warn_001": 0.02,
@@ -36,23 +39,6 @@ _DEFAULT_THRESHOLDS: Dict[str, float] = {
     "intercept_warn": 0.2,
     "intercept_strong": 0.4,
 }
-
-
-def _validate_estimate_matches_data(data: CausalData, estimate: CausalEstimate) -> None:
-    """Ensure an estimate is aligned with the supplied causal dataset."""
-    if str(estimate.treatment) != str(data.treatment_name):
-        raise ValueError(
-            "estimate.treatment must match data.treatment_name "
-            f"({estimate.treatment!r} != {data.treatment_name!r})."
-        )
-
-    if str(estimate.outcome) != str(data.outcome_name):
-        raise ValueError(
-            "estimate.outcome must match data.outcome_name "
-            f"({estimate.outcome!r} != {data.outcome_name!r})."
-        )
-
-
 def _mask_finite_pairs(p: np.ndarray, y: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """Drop rows with non-finite values from aligned score/label arrays."""
     p = np.asarray(p, dtype=float).ravel()

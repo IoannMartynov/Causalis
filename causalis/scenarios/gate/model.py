@@ -15,6 +15,14 @@ _SUPPORTED_COV_TYPES = {"HC0", "HC1", "HC2", "HC3"}
 _GATE_GROUPS_REQUIRED_MSG = (
     "GATE requires pre-defined groups. Pass groups=... to estimate() or store gate_groups in CausalData."
 )
+_GATE_USER_ID_REQUIRED_MSG = (
+    "GATE requires CausalData.user_id so subgroup definitions can be aligned to the fit-time observations."
+)
+_GATE_GROUPS_ALIGNMENT_MSG = (
+    "GATE groups must be indexed by the fit-time observation ids, or by the original fit-time row index "
+    "when that row-to-observation-id mapping is still unchanged. "
+    "Fit the IRM with a stable DataFrame index or CausalData.user_id, and preserve that indexing on groups."
+)
 
 
 def _validate_gate_inputs(
@@ -49,7 +57,145 @@ def _validate_gate_inputs(
     if groups_resolved is None:
         raise ValueError(_GATE_GROUPS_REQUIRED_MSG)
 
+    data_obj = getattr(irm_model, "data", None)
+    if data_obj is None or not getattr(data_obj, "user_id_name", None):
+        raise ValueError(_GATE_USER_ID_REQUIRED_MSG)
+
     return groups_resolved, cov_type_u
+
+
+def _is_default_positional_index(index: pd.Index, *, n_obs: int) -> bool:
+    """Return whether an index is the default positional 0..n-1 labeling."""
+    if len(index) != n_obs:
+        return False
+    if isinstance(index, pd.RangeIndex):
+        return index.start == 0 and index.stop == n_obs and index.step == 1
+    if not pd.api.types.is_integer_dtype(index.dtype):
+        return False
+    index_values = index.to_numpy(copy=False)
+    return bool(np.array_equal(index_values, np.arange(n_obs, dtype=index_values.dtype)))
+
+
+def _resolve_fit_observation_index(
+    *,
+    irm_model: Any,
+    n_obs: int,
+) -> pd.Index:
+    """Resolve stable fit-time observation ids used to align group labels."""
+    fit_index = getattr(irm_model, "_fit_index_", None)
+    if fit_index is not None:
+        fit_index_resolved = pd.Index(fit_index).copy()
+    else:
+        data_obj = getattr(irm_model, "data", None)
+        if data_obj is None:
+            raise RuntimeError(
+                "IRM does not expose fit-time observation ids required for GATE group alignment. "
+                "Refit the model with the current version."
+            )
+        user_id_name = getattr(data_obj, "user_id_name", None)
+        if user_id_name:
+            fit_index_resolved = pd.Index(data_obj.user_id.copy(), name=user_id_name)
+        else:
+            fit_index_resolved = pd.Index(data_obj.df.index.copy())
+
+    if len(fit_index_resolved) != n_obs:
+        raise RuntimeError("Stored fit-time observation ids have inconsistent length; refit the model.")
+
+    if _is_default_positional_index(fit_index_resolved, n_obs=n_obs):
+        raise ValueError(
+            f"{_GATE_GROUPS_ALIGNMENT_MSG} "
+            "The fitted sample currently only has a default positional index (0..n-1), which is ambiguous."
+        )
+
+    return fit_index_resolved
+
+
+def _align_groups_to_fit_observations(
+    groups: pd.DataFrame | pd.Series,
+    *,
+    irm_model: Any,
+    n_obs: int,
+) -> pd.DataFrame | pd.Series:
+    """Align group labels to fit-time observation ids and reject ambiguous positional inputs."""
+    if isinstance(groups, pd.Series):
+        groups_df = groups.to_frame()
+        original_is_series = True
+        original_name = groups.name
+    elif isinstance(groups, pd.DataFrame):
+        groups_df = groups.copy()
+        original_is_series = False
+        original_name = None
+    else:
+        raise TypeError("groups must be a pandas Series or DataFrame.")
+
+    if groups_df.shape[0] != n_obs:
+        raise ValueError(f"groups must have {n_obs} rows, got {groups_df.shape[0]}.")
+
+    fit_index = _resolve_fit_observation_index(irm_model=irm_model, n_obs=n_obs)
+
+    if not groups_df.index.is_unique:
+        raise ValueError("groups index must be unique so rows can be aligned to the fit-time sample.")
+
+    if groups_df.index.equals(fit_index):
+        aligned = groups_df
+    elif fit_index.is_unique and set(groups_df.index) == set(fit_index):
+        aligned = groups_df.reindex(fit_index)
+    else:
+        aligned = _align_groups_via_fit_row_index(groups_df=groups_df, irm_model=irm_model, fit_index=fit_index)
+        if aligned is None:
+            raise ValueError(
+                f"{_GATE_GROUPS_ALIGNMENT_MSG} "
+                "groups.index must either match the fit-time ids (or a permutation of them), "
+                "or match the original fit-time row index while the current row-to-id mapping remains unchanged."
+            )
+
+    if original_is_series:
+        return aligned.iloc[:, 0].rename(original_name)
+    return aligned
+
+
+def _align_groups_via_fit_row_index(
+    *,
+    groups_df: pd.DataFrame,
+    irm_model: Any,
+    fit_index: pd.Index,
+) -> Optional[pd.DataFrame]:
+    """Map row-indexed groups to fit-time observation ids when the row->id mapping is unchanged."""
+    fit_row_index = getattr(irm_model, "_fit_row_index_", None)
+    data_obj = getattr(irm_model, "data", None)
+    user_id_name = getattr(data_obj, "user_id_name", None) if data_obj is not None else None
+
+    if fit_row_index is None or data_obj is None or user_id_name is None:
+        return None
+
+    fit_row_index_resolved = pd.Index(fit_row_index).copy()
+    if len(fit_row_index_resolved) != len(fit_index):
+        raise RuntimeError("Stored fit-time row index has inconsistent length; refit the model.")
+    if not fit_row_index_resolved.is_unique:
+        return None
+
+    if groups_df.index.equals(fit_row_index_resolved):
+        groups_by_row = groups_df
+    elif set(groups_df.index) == set(fit_row_index_resolved):
+        groups_by_row = groups_df.reindex(fit_row_index_resolved)
+    else:
+        return None
+
+    current_row_index = pd.Index(data_obj.df.index.copy())
+    current_fit_ids = pd.Index(data_obj.user_id.copy(), name=user_id_name)
+    if len(current_row_index) != len(fit_index) or len(current_fit_ids) != len(fit_index):
+        return None
+    if not current_row_index.is_unique:
+        return None
+
+    fit_mapping = pd.Series(np.asarray(fit_index, dtype=object), index=fit_row_index_resolved)
+    current_mapping = pd.Series(np.asarray(current_fit_ids, dtype=object), index=current_row_index)
+    if not current_mapping.reindex(fit_row_index_resolved).equals(fit_mapping):
+        return None
+
+    aligned = groups_by_row.copy()
+    aligned.index = fit_index
+    return aligned
 
 
 def _coerce_groups_to_basis(
@@ -288,9 +434,118 @@ def estimate_gate_from_irm(
     cov_type: str = "HC3",
     cov_kwds: Optional[Dict[str, Any]] = None,
 ) -> GateEstimate:
-    """Estimate strict GATEs from a fitted IRM via groupwise closed-form robust inference.
+    r"""Estimate Group Average Treatment Effects (GATEs) from a fitted IRM.
 
-    Groups are assumed to be pre-specified, pre-treatment, mutually exclusive, and exhaustive.
+    Parameters
+    ----------
+    irm_model : fitted IRM
+        Interactive Regression Model with stored cross-fitted nuisance predictions
+        :math:`\hat g_0(X)`, :math:`\hat g_1(X)`, and :math:`\hat m(X)`.
+        The model must already be fitted.
+    groups : Optional[pd.DataFrame or pd.Series]
+        Pre-specified subgroup definition.
+
+        Accepted forms are:
+        - A single Series / one-column DataFrame of group labels.
+        - A multi-column dummy basis with binary indicators.
+
+        For strict GATE, groups must define a mutually exclusive and exhaustive
+        partition of the fitted sample. Each group must contain at least one
+        treated and one control observation.
+
+        GATE requires the fitted ``CausalData`` to define ``user_id``.
+        Group rows are aligned to the IRM fit-time sample using those fit-time
+        observation ids. In practice, ``groups.index`` must either exactly match
+        those ids or be a permutation of them. As a convenience, when the model
+        was fitted with ``user_id``, GATE also accepts groups indexed by the
+        original fit-time row index if the current row-to-``user_id`` mapping is
+        still unchanged.
+
+        If None, falls back to ``irm_model.data.gate_groups`` when present.
+    alpha : float, default 0.05
+        Significance level for two-sided confidence intervals.
+    cov_type : {"HC0", "HC1", "HC2", "HC3"}, default "HC3"
+        Heteroskedasticity-robust covariance estimator used for subgroup
+        inference. The implementation uses a closed-form saturated dummy-model
+        covariance, equivalent to a no-intercept OLS regression on the GATE basis.
+    cov_kwds : Optional[Dict[str, Any]], default None
+        Additional covariance options requested by the caller.
+        These are currently ignored because GATE uses the closed-form HCx
+        covariance formulas implemented in this module.
+
+    Returns
+    -------
+    GateEstimate
+        Result contract containing subgroup effects, standard errors,
+        Wald statistics, confidence intervals, covariance matrix, and
+        group-level diagnostics. The returned object also supports
+        ``contrast(...)`` and ``pairwise_summary(...)`` for formal
+        post-estimation group comparisons.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+    >>> from causalis.dgp import obs_linear_26_dataset
+    >>> from causalis.scenarios.unconfoundedness.model import IRM
+    >>> data = obs_linear_26_dataset(
+    ...     n=1000,
+    ...     seed=3141,
+    ...     include_oracle=False,
+    ...     return_causal_data=True,
+    ... )
+    >>> groups = pd.Series(
+    ...     (data.df["x1"] >= 0).map({True: "high_x1", False: "low_x1"}),
+    ...     index=data.df["user_id"],
+    ...     name="segment",
+    ... )
+    >>> irm = IRM(
+    ...     data=data,
+    ...     ml_g=RandomForestRegressor(n_estimators=200, max_depth=6, random_state=3141),
+    ...     ml_m=RandomForestClassifier(n_estimators=200, max_depth=6, random_state=3141),
+    ...     n_folds=3,
+    ...     random_state=3141,
+    ... )
+    >>> irm.fit()
+    >>> gate = estimate_gate_from_irm(irm, groups=groups)
+    >>> gate.summary()  # doctest: +SKIP
+
+    Notes
+    -----
+    This implementation targets strict subgroup effects under the same
+    unconfoundedness and overlap assumptions used by IRM, with an additional
+    requirement that subgroup membership is pre-treatment.
+
+    Let :math:`G` denote a finite partition of the sample space and let
+    :math:`\phi(W; \hat\eta)` be the cross-fitted doubly robust signal
+
+    .. math::
+
+        \phi =
+        \hat g_1(X) - \hat g_0(X)
+        + (Y - \hat g_1(X)) \frac{D}{\hat m(X)}
+        - (Y - \hat g_0(X)) \frac{1-D}{1-\hat m(X)}.
+
+    For a subgroup :math:`g`, the target estimand is
+
+    .. math::
+
+        \theta_g = \mathbb{E}[\phi(W; \eta_0) \mid G=g].
+
+    With a mutually exclusive and exhaustive dummy basis, the estimator reduces
+    to the groupwise sample mean of the orthogonal score:
+
+    .. math::
+
+        \hat\theta_g = \frac{1}{n_g} \sum_{i : G_i = g} \hat\phi_i.
+
+    Inference is computed from the equivalent saturated no-intercept linear
+    regression of :math:`\hat\phi` on the subgroup dummies. Because the design
+    is block-diagonal, the covariance matrix is diagonal and each subgroup
+    variance is available in closed form under HC0/HC1/HC2/HC3.
+
+    ``normalize_ipw=True`` on the IRM is intentionally ignored for GATE so the
+    estimator uses the canonical unnormalized orthogonal signal above.
     """
     groups_resolved, cov_type_u = _validate_gate_inputs(
         irm_model=irm_model,
@@ -313,7 +568,8 @@ def estimate_gate_from_irm(
         )
 
     phi, d, m_hat = _compute_gate_signal_from_irm(irm_model)
-    basis = _coerce_groups_to_basis(groups_resolved, n_obs=phi.shape[0])
+    groups_aligned = _align_groups_to_fit_observations(groups_resolved, irm_model=irm_model, n_obs=phi.shape[0])
+    basis = _coerce_groups_to_basis(groups_aligned, n_obs=phi.shape[0])
     _validate_gate_group_support(basis=basis, treatment=d)
 
     (
@@ -383,6 +639,7 @@ def estimate_gate_from_irm(
             "wald_stat": wald_stats,
             "test_stat": wald_stats,
             "p_value": p_values,
+            "is_significant": p_values < float(alpha),
             "ci_lower": ci_lower,
             "ci_upper": ci_upper,
             "n_group": n_group_list,
@@ -401,7 +658,8 @@ def estimate_gate_from_irm(
 
     model_options = {
         "cov_type": cov_type_u,
-        "cov_kwds": {} if cov_kwds is None else dict(cov_kwds),
+        "cov_kwds": {},
+        "cov_kwds_requested": {} if cov_kwds is None else dict(cov_kwds),
         "trimming_threshold": float(getattr(irm_model, "trimming_threshold", np.nan)),
         "normalize_ipw_requested": normalize_ipw_requested,
         "normalize_ipw_effective": False,

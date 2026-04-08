@@ -10,6 +10,10 @@ import pandas as pd
 
 from causalis.data_contracts.causal_estimate import CausalEstimate
 from causalis.dgp.causaldata import CausalData
+from causalis.scenarios.unconfoundedness.refutation._shared import (
+    _normalize_score,
+    _validate_estimate_matches_data,
+)
 
 
 @dataclass
@@ -22,18 +26,6 @@ class _BalanceInputs:
     names: List[str]
     score: str
     normalize: bool
-
-
-def _normalize_score(score: Any) -> str:
-    """Normalize supported score aliases to ``ATE`` or ``ATTE``."""
-    score_u = str(score or "ATE").upper()
-    if "ATT" in score_u:
-        return "ATTE"
-    if score_u == "ATE":
-        return "ATE"
-    raise ValueError(f"score must be 'ATE' or 'ATTE'. Got {score!r}.")
-
-
 def _resolve_feature_names(names: Optional[List[str]], p: int) -> List[str]:
     """Return feature names or generate fallback labels for balance tables."""
     if names is not None:
@@ -41,32 +33,6 @@ def _resolve_feature_names(names: Optional[List[str]], p: int) -> List[str]:
         if len(names_list) == p:
             return names_list
     return [f"x{j + 1}" for j in range(p)]
-
-
-def _validate_estimate_matches_data(data: CausalData, estimate: CausalEstimate) -> None:
-    """Ensure an estimate is aligned with the supplied causal dataset."""
-    df = data.get_df()
-
-    if str(estimate.treatment) != str(data.treatment_name):
-        raise ValueError(
-            "estimate.treatment must match data.treatment_name "
-            f"({estimate.treatment!r} != {data.treatment_name!r})."
-        )
-
-    if str(estimate.outcome) != str(data.outcome_name):
-        raise ValueError(
-            "estimate.outcome must match data.outcome_name "
-            f"({estimate.outcome!r} != {data.outcome_name!r})."
-        )
-
-    missing_confounders = [name for name in estimate.confounders if name not in df.columns]
-    if missing_confounders:
-        raise ValueError(
-            "estimate.confounders are missing in data.get_df(): "
-            + ", ".join(sorted(map(str, missing_confounders)))
-        )
-
-
 def _extract_balance_inputs(
     *,
     data: CausalData,
@@ -74,7 +40,7 @@ def _extract_balance_inputs(
     normalize: Optional[bool],
 ) -> _BalanceInputs:
     """Extract and validate balance-diagnostic arrays from estimate metadata."""
-    _validate_estimate_matches_data(data=data, estimate=estimate)
+    _validate_estimate_matches_data(data=data, estimate=estimate, require_confounders=True)
 
     diagnostic_data = estimate.diagnostic_data
     if diagnostic_data is None:

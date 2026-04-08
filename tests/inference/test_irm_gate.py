@@ -2,9 +2,11 @@ import numpy as np
 import pandas as pd
 import pytest
 import warnings
+from scipy.stats import norm
 from sklearn.exceptions import NotFittedError
 from sklearn.linear_model import LinearRegression, LogisticRegression
 
+from causalis.data_contracts.gate_contrast_estimate import GateContrastEstimate
 from causalis.data_contracts.gate_estimate import GateEstimate
 from causalis.dgp.causaldata import CausalData
 from causalis.scenarios.gate.model import _coerce_groups_to_basis, _compute_gate_signal_from_irm
@@ -19,9 +21,10 @@ def _make_synthetic_data(n: int = 500, seed: int = 7) -> tuple[CausalData, pd.Da
     d = rng.binomial(1, p)
     tau = 1.2 + 0.5 * (x1 > 0.0).astype(float)
     y = 1.0 + 0.4 * x1 - 0.2 * x2 + tau * d + rng.normal(scale=1.0, size=n)
+    user_id = pd.Index([f"u_{i:04d}" for i in range(n)], name="user_id")
 
-    df = pd.DataFrame({"y": y, "d": d, "x1": x1, "x2": x2})
-    cd = CausalData(df=df, treatment="d", outcome="y", confounders=["x1", "x2"])
+    df = pd.DataFrame({"user_id": user_id, "y": y, "d": d, "x1": x1, "x2": x2})
+    cd = CausalData(df=df, treatment="d", outcome="y", confounders=["x1", "x2"], user_id="user_id")
     return cd, df
 
 
@@ -46,7 +49,40 @@ def _fit_irm(
 
 
 def _groups_from_df(df: pd.DataFrame) -> pd.Series:
-    return pd.Series(np.where(df["x1"] >= 0.0, "high_x1", "low_x1"), name="segment")
+    return pd.Series(
+        np.where(df["x1"] >= 0.0, "high_x1", "low_x1"),
+        index=pd.Index(df["user_id"], name="user_id"),
+        name="segment",
+    )
+
+
+def _groups_from_row_index(df: pd.DataFrame) -> pd.Series:
+    return pd.Series(np.where(df["x1"] >= 0.0, "high_x1", "low_x1"), index=df.index, name="segment")
+
+
+def _quantile_groups_from_df(df: pd.DataFrame, q: int = 4) -> pd.Series:
+    groups = pd.qcut(df["x1"], q=q, duplicates="drop").rename("x1_bin")
+    groups.index = pd.Index(df["user_id"], name="user_id")
+    return groups
+
+
+def _holm_adjust(p_values: np.ndarray) -> np.ndarray:
+    p_values = np.asarray(p_values, dtype=float).reshape(-1)
+    adjusted = np.full(p_values.shape, np.nan, dtype=float)
+    valid = np.isfinite(p_values)
+    valid_p = p_values[valid]
+    if valid_p.size == 0:
+        return adjusted
+
+    order = np.argsort(valid_p)
+    sorted_p = valid_p[order]
+    m = sorted_p.size
+    holm_sorted = np.maximum.accumulate((m - np.arange(m)) * sorted_p)
+    holm_sorted = np.minimum(holm_sorted, 1.0)
+    holm_adjusted = np.empty_like(sorted_p)
+    holm_adjusted[order] = holm_sorted
+    adjusted[valid] = holm_adjusted
+    return adjusted
 
 
 def test_irm_estimate_gate_dispatches_to_new_module(monkeypatch):
@@ -82,6 +118,7 @@ def test_gate_basis_handling_inputs():
     cd, df = _make_synthetic_data(n=260, seed=2)
     irm = _fit_irm(cd)
     groups_series = _groups_from_df(df)
+    groups_row = _groups_from_row_index(df)
     groups_df_1col = groups_series.to_frame()
     groups_dummy = pd.DataFrame(
         {
@@ -91,13 +128,16 @@ def test_gate_basis_handling_inputs():
     )
 
     res_series = irm.estimate(score="GATE", groups=groups_series)
+    res_row = irm.estimate(score="GATE", groups=groups_row)
     res_df = irm.estimate(score="GATE", groups=groups_df_1col)
     res_dummy = irm.estimate(score="GATE", groups=groups_dummy)
 
     assert isinstance(res_series, GateEstimate)
+    assert isinstance(res_row, GateEstimate)
     assert isinstance(res_df, GateEstimate)
     assert isinstance(res_dummy, GateEstimate)
     assert sorted(res_series.group_names) == ["segment=high_x1", "segment=low_x1"]
+    np.testing.assert_allclose(np.sort(res_series.values), np.sort(res_row.values), atol=1e-10)
     np.testing.assert_allclose(np.sort(res_series.values), np.sort(res_df.values), atol=1e-10)
 
     overlap = groups_dummy.copy()
@@ -147,6 +187,38 @@ def test_gate_inference_covariance_options_and_se_validity():
     assert np.all(res_hc1.std_errors >= 0.0)
 
 
+def test_gate_summary_includes_is_significant_column():
+    cd, df = _make_synthetic_data(n=300, seed=40)
+    irm = _fit_irm(cd)
+    groups = _groups_from_df(df)
+
+    res = irm.estimate(score="GATE", groups=groups)
+    summary = res.summary()
+
+    assert list(summary.columns[:6]) == [
+        "value",
+        "std_error",
+        "wald_stat",
+        "test_stat",
+        "p_value",
+        "is_significant",
+    ]
+    np.testing.assert_array_equal(summary["is_significant"].to_numpy(dtype=bool), res.p_values < res.alpha)
+    np.testing.assert_array_equal(res.summary_table["is_significant"].to_numpy(dtype=bool), res.p_values < res.alpha)
+
+
+def test_gate_cov_kwds_are_recorded_as_ignored_request():
+    cd, df = _make_synthetic_data(n=240, seed=24)
+    irm = _fit_irm(cd)
+    groups = _groups_from_df(df)
+
+    with pytest.warns(RuntimeWarning, match="cov_kwds are ignored for GATE"):
+        res = irm.estimate(score="GATE", groups=groups, cov_kwds={"use_correction": True})
+
+    assert res.model_options["cov_kwds"] == {}
+    assert res.model_options["cov_kwds_requested"] == {"use_correction": True}
+
+
 def test_gate_payload_follows_fit_store_diagnostics_setting():
     cd, df = _make_synthetic_data(n=220, seed=14)
     groups = _groups_from_df(df)
@@ -194,6 +266,43 @@ def test_gate_lightweight_mode_is_stable_after_data_reordering():
     np.testing.assert_allclose(second.values, first.values, atol=1e-12)
 
 
+def test_gate_reorders_groups_to_fit_time_user_ids():
+    cd, df = _make_synthetic_data(n=260, seed=26)
+    groups = _groups_from_df(df)
+    irm = _fit_irm(cd, store_diagnostics=False)
+
+    first = irm.estimate(score="GATE", groups=groups)
+    shuffled_groups = groups.sample(frac=1.0, random_state=41)
+    second = irm.estimate(score="GATE", groups=shuffled_groups)
+
+    np.testing.assert_allclose(second.values, first.values, atol=1e-12)
+    np.testing.assert_allclose(second.std_errors, first.std_errors, atol=1e-12)
+
+
+def test_gate_row_index_groups_match_user_id_groups_for_qcut_notebook_pattern():
+    cd, df = _make_synthetic_data(n=220, seed=27)
+    irm = _fit_irm(cd, store_diagnostics=False)
+    groups_row = pd.qcut(df["x1"], q=5, duplicates="drop")
+    groups_user_id = groups_row.copy()
+    groups_user_id.index = pd.Index(df["user_id"], name="user_id")
+
+    res_row = irm.estimate(score="GATE", groups=groups_row)
+    res_user_id = irm.estimate(score="GATE", groups=groups_user_id)
+
+    np.testing.assert_allclose(res_row.values, res_user_id.values, atol=1e-12)
+    np.testing.assert_allclose(res_row.std_errors, res_user_id.std_errors, atol=1e-12)
+
+
+def test_gate_rejects_row_index_groups_after_row_to_user_id_mapping_changes():
+    cd, df = _make_synthetic_data(n=220, seed=27)
+    irm = _fit_irm(cd, store_diagnostics=False)
+    cd.df = cd.df.sample(frac=1.0, random_state=43).reset_index(drop=True)
+    groups_row = pd.qcut(cd.df["x1"], q=5, duplicates="drop")
+
+    with pytest.raises(ValueError, match="row-to-id mapping remains unchanged"):
+        irm.estimate(score="GATE", groups=groups_row)
+
+
 def test_gate_requires_fitted_model():
     cd, df = _make_synthetic_data(n=120, seed=5)
     irm = IRM(
@@ -220,6 +329,24 @@ def test_gate_groups_fallback_uses_causaldata_attribute():
     assert len(res.group_names) == 2
 
 
+def test_gate_requires_user_id_on_causaldata():
+    rng = np.random.default_rng(28)
+    n = 180
+    x1 = rng.normal(size=n)
+    x2 = rng.normal(size=n)
+    p = 1.0 / (1.0 + np.exp(-(0.6 * x1 - 0.4 * x2)))
+    d = rng.binomial(1, p)
+    tau = 1.2 + 0.5 * (x1 > 0.0).astype(float)
+    y = 1.0 + 0.4 * x1 - 0.2 * x2 + tau * d + rng.normal(scale=1.0, size=n)
+    df = pd.DataFrame({"y": y, "d": d, "x1": x1, "x2": x2}, index=pd.Index([f"row_{i}" for i in range(n)]))
+    cd = CausalData(df=df, treatment="d", outcome="y", confounders=["x1", "x2"])
+    irm = _fit_irm(cd, store_diagnostics=False)
+    groups = pd.Series(np.where(df["x1"] >= 0.0, "high_x1", "low_x1"), name="segment")
+
+    with pytest.raises(ValueError, match="requires CausalData.user_id"):
+        irm.estimate(score="GATE", groups=groups)
+
+
 def test_gate_raises_when_groups_missing_and_no_fallback():
     cd, _ = _make_synthetic_data(n=180, seed=8)
     irm = _fit_irm(cd)
@@ -241,6 +368,155 @@ def test_gate_method_is_thin_wrapper_over_estimate():
     assert res_gate.model_options["cov_type"] == "HC2"
 
 
+def test_gate_contrast_matches_manual_formula():
+    cd, df = _make_synthetic_data(n=320, seed=41)
+    irm = _fit_irm(cd, random_state=44)
+    groups = _groups_from_df(df)
+    res = irm.estimate(score="GATE", groups=groups, cov_type="HC2")
+
+    contrast = res.contrast("segment=high_x1", "segment=low_x1")
+
+    assert isinstance(contrast, GateContrastEstimate)
+    left_idx = res.group_names.index("segment=high_x1")
+    right_idx = res.group_names.index("segment=low_x1")
+    contrast_vector = np.zeros(len(res.group_names), dtype=float)
+    contrast_vector[left_idx] = 1.0
+    contrast_vector[right_idx] = -1.0
+    covariance = res.covariance.loc[res.group_names, res.group_names].to_numpy(dtype=float)
+
+    manual_value = float(res.values[left_idx] - res.values[right_idx])
+    manual_se = float(np.sqrt(contrast_vector @ covariance @ contrast_vector))
+    manual_test = float(manual_value / manual_se)
+    manual_p = float(2.0 * norm.sf(abs(manual_test)))
+    z_crit = float(norm.ppf(1.0 - (contrast.alpha / 2.0)))
+
+    assert contrast.contrast_label == "segment=high_x1 - segment=low_x1"
+    assert contrast.left_value == pytest.approx(res.values[left_idx])
+    assert contrast.right_value == pytest.approx(res.values[right_idx])
+    assert contrast.n_left == int(res.n_group[left_idx])
+    assert contrast.n_right == int(res.n_group[right_idx])
+    assert contrast.value == pytest.approx(manual_value)
+    assert contrast.std_error == pytest.approx(manual_se)
+    assert contrast.test_stat == pytest.approx(manual_test)
+    assert contrast.p_value == pytest.approx(manual_p)
+    assert contrast.ci_lower == pytest.approx(manual_value - z_crit * manual_se)
+    assert contrast.ci_upper == pytest.approx(manual_value + z_crit * manual_se)
+    assert bool(contrast.summary().loc["is_significant", "value"]) == (contrast.p_value < contrast.alpha)
+
+
+def test_gate_contrast_one_sided_alternatives_behave_correctly():
+    cd, df = _make_synthetic_data(n=320, seed=42)
+    irm = _fit_irm(cd, random_state=45)
+    groups = _groups_from_df(df)
+    res = irm.estimate(score="GATE", groups=groups, cov_type="HC3")
+
+    two_sided = res.contrast("segment=high_x1", "segment=low_x1", alternative="two-sided")
+    greater = res.contrast("segment=high_x1", "segment=low_x1", alternative="greater")
+    less = res.contrast("segment=high_x1", "segment=low_x1", alternative="less")
+
+    assert two_sided.value > 0.0
+    assert greater.ci_lower is None
+    assert greater.ci_upper is None
+    assert less.ci_lower is None
+    assert less.ci_upper is None
+    assert greater.p_value == pytest.approx(norm.sf(two_sided.test_stat))
+    assert less.p_value == pytest.approx(norm.cdf(two_sided.test_stat))
+    assert greater.p_value < two_sided.p_value
+    assert less.p_value > 0.5
+
+
+def test_gate_pairwise_summary_supports_reference_and_p_adjustments():
+    cd, df = _make_synthetic_data(n=360, seed=43)
+    irm = _fit_irm(cd, random_state=46)
+    groups = _quantile_groups_from_df(df, q=4)
+    res = irm.estimate(score="GATE", groups=groups, cov_type="HC2")
+    k = len(res.group_names)
+
+    pairwise_none = res.pairwise_summary()
+    assert pairwise_none.shape[0] == k * (k - 1) // 2
+    assert list(pairwise_none.columns) == [
+        "left_group",
+        "right_group",
+        "contrast_label",
+        "left_value",
+        "right_value",
+        "estimate_diff",
+        "std_error",
+        "test_stat",
+        "p_value",
+        "p_value_adj",
+        "ci_lower",
+        "ci_upper",
+        "is_significant",
+        "is_significant_adj",
+        "n_left",
+        "n_right",
+        "alpha",
+        "p_adjust",
+    ]
+    np.testing.assert_allclose(
+        pairwise_none["p_value_adj"].to_numpy(dtype=float),
+        pairwise_none["p_value"].to_numpy(dtype=float),
+        equal_nan=True,
+    )
+
+    reference = res.group_names[-1]
+    pairwise_ref = res.pairwise_summary(reference=reference)
+    assert pairwise_ref.shape[0] == k - 1
+    assert set(pairwise_ref["right_group"]) == {reference}
+    for _, row in pairwise_ref.iterrows():
+        assert row["contrast_label"] == f"{row['left_group']} - {row['right_group']}"
+        assert row["estimate_diff"] == pytest.approx(row["left_value"] - row["right_value"])
+
+    pairwise_bonferroni = res.pairwise_summary(p_adjust="bonferroni")
+    m = pairwise_bonferroni.shape[0]
+    np.testing.assert_allclose(
+        pairwise_bonferroni["p_value_adj"].to_numpy(dtype=float),
+        np.minimum(pairwise_none["p_value"].to_numpy(dtype=float) * m, 1.0),
+        equal_nan=True,
+    )
+
+    pairwise_holm = res.pairwise_summary(p_adjust="holm")
+    expected_holm = _holm_adjust(pairwise_none["p_value"].to_numpy(dtype=float))
+    np.testing.assert_allclose(
+        pairwise_holm["p_value_adj"].to_numpy(dtype=float),
+        expected_holm,
+        equal_nan=True,
+    )
+    assert np.all(pairwise_holm["p_value_adj"].to_numpy(dtype=float) >= pairwise_none["p_value"].to_numpy(dtype=float))
+
+
+def test_gate_contrast_and_pairwise_validation_errors():
+    cd, df = _make_synthetic_data(n=280, seed=44)
+    irm = _fit_irm(cd, random_state=47)
+    groups = _groups_from_df(df)
+    res = irm.estimate(score="GATE", groups=groups)
+
+    with pytest.raises(ValueError, match="Unknown left_group"):
+        res.contrast("missing_group", "segment=low_x1")
+    with pytest.raises(ValueError, match="Unknown right_group"):
+        res.contrast("segment=high_x1", "missing_group")
+    with pytest.raises(ValueError, match="must be different"):
+        res.contrast("segment=high_x1", "segment=high_x1")
+    with pytest.raises(ValueError, match="alternative must be one of"):
+        res.contrast("segment=high_x1", "segment=low_x1", alternative="up")
+    with pytest.raises(ValueError, match="Unknown reference"):
+        res.pairwise_summary(reference="missing_group")
+    with pytest.raises(ValueError, match="p_adjust must be one of"):
+        res.pairwise_summary(p_adjust="bh")
+
+
+def test_gate_pairwise_summary_requires_at_least_two_groups():
+    cd, df = _make_synthetic_data(n=260, seed=45)
+    irm = _fit_irm(cd, random_state=48)
+    groups = pd.Series("all_users", index=pd.Index(df["user_id"], name="user_id"), name="segment")
+    res = irm.estimate(score="GATE", groups=groups)
+
+    assert res.group_names == ["segment=all_users"]
+    with pytest.raises(ValueError, match="at least two estimable GATE groups"):
+        res.pairwise_summary()
+
+
 def test_gate_deterministic_with_fixed_random_state():
     cd1, df1 = _make_synthetic_data(n=300, seed=9)
     groups1 = _groups_from_df(df1)
@@ -260,7 +536,7 @@ def test_gate_deterministic_with_fixed_random_state():
 def test_gate_raises_for_groups_without_treated_and_control_support():
     cd, df = _make_synthetic_data(n=240, seed=15)
     irm = _fit_irm(cd, random_state=33)
-    groups = pd.Series(df["d"].to_numpy(dtype=float), name="d")
+    groups = pd.Series(df["d"].to_numpy(dtype=float), index=pd.Index(df["user_id"], name="user_id"), name="d")
 
     irm.m_hat_ = np.where(irm._d == 1.0, 0.965, 0.010)
 

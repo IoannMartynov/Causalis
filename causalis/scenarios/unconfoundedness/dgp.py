@@ -228,6 +228,7 @@ def generate_obs_hte_26(
     )
 
     df = gen.generate(n)
+    df.insert(0, "user_id", np.arange(1, n + 1))
 
     if not return_causal_data:
         return df
@@ -523,6 +524,7 @@ def generate_obs_hte_26_rich(
     )
 
     df = gen.generate(n)
+    df.insert(0, "user_id", np.arange(1, n + 1))
     if include_oracle and {"g0", "g1"}.issubset(df.columns):
         # Keep oracle CATE definition explicit on natural scale for this scenario.
         df["cate"] = df["g1"] - df["g0"]

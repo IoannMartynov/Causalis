@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 
 from causalis.data_contracts.causal_diagnostic_data import UnconfoundednessDiagnosticData
+from causalis.scenarios.unconfoundedness._score_utils import _compute_ipw_components
 
 __all__ = [
     "sensitivity_analysis",
@@ -64,6 +65,83 @@ def _resolve_sensitivity_score(effect_estimation: Any, model: Any, explicit_scor
             continue
 
     return "ATE"
+
+
+def compute_irm_sensitivity_elements(
+    *,
+    model: Any,
+    y: np.ndarray,
+    d: np.ndarray,
+    g0: np.ndarray,
+    g1: np.ndarray,
+    m_hat: np.ndarray,
+    w: Optional[np.ndarray] = None,
+    w_bar: Optional[np.ndarray] = None,
+    psi: Optional[np.ndarray] = None,
+    inv_m: Optional[np.ndarray] = None,
+    inv_1m: Optional[np.ndarray] = None,
+    score: Any = "ATE",
+) -> dict[str, Any]:
+    """Compute DoubleML-style sensitivity elements for binary-treatment IRM."""
+    y_arr = np.asarray(y, dtype=float).ravel()
+    d_arr = np.asarray(d, dtype=int).ravel()
+    g0_arr = np.asarray(g0, dtype=float).ravel()
+    g1_arr = np.asarray(g1, dtype=float).ravel()
+    m_hat_arr = np.asarray(m_hat, dtype=float).ravel()
+
+    n = y_arr.size
+    if any(arr.size != n for arr in (d_arr, g0_arr, g1_arr, m_hat_arr)):
+        raise ValueError("y, d, g0, g1, and m_hat must share the same sample size.")
+
+    if w is None or w_bar is None:
+        if model is None or not hasattr(model, "_get_weights"):
+            raise RuntimeError("IRM sensitivity elements require model._get_weights when weights are omitted.")
+        w, w_bar = model._get_weights(n=n, m_hat_adj=m_hat_arr, d=d_arr, score=score)
+
+    w_arr = np.asarray(w, dtype=float).ravel()
+    w_bar_arr = np.asarray(w_bar, dtype=float).ravel()
+    if w_arr.size != n or w_bar_arr.size != n:
+        raise ValueError("w and w_bar must share the same sample size as y.")
+
+    if psi is None and model is not None:
+        psi = getattr(model, "psi_", None)
+    psi_arr = None if psi is None else np.asarray(psi, dtype=float)
+
+    if inv_m is None or inv_1m is None:
+        normalize_ipw = bool(getattr(model, "normalize_ipw", False)) if model is not None else False
+        _, _, inv_m_arr, inv_1m_arr = _compute_ipw_components(
+            d=d_arr,
+            m_hat=m_hat_arr,
+            normalize_ipw=normalize_ipw,
+            score=score,
+            warn=False,
+        )
+    else:
+        inv_m_arr = np.asarray(inv_m, dtype=float).ravel()
+        inv_1m_arr = np.asarray(inv_1m, dtype=float).ravel()
+
+    if inv_m_arr.size != n or inv_1m_arr.size != n:
+        raise ValueError("inv_m and inv_1m must share the same sample size as y.")
+
+    sigma2_score_element = np.square(y_arr - d_arr * g1_arr - (1.0 - d_arr) * g0_arr)
+    sigma2 = float(np.mean(sigma2_score_element))
+    psi_sigma2 = sigma2_score_element - sigma2
+
+    m_alpha = (w_bar_arr ** 2) * (inv_m_arr + inv_1m_arr)
+    rr = w_bar_arr * (d_arr * inv_m_arr - (1.0 - d_arr) * inv_1m_arr)
+    nu2_score_element = 2.0 * m_alpha - np.square(rr)
+    nu2 = float(np.mean(nu2_score_element))
+    psi_nu2 = nu2_score_element - nu2
+
+    return {
+        "sigma2": sigma2,
+        "nu2": nu2,
+        "psi_sigma2": psi_sigma2,
+        "psi_nu2": psi_nu2,
+        "riesz_rep": rr,
+        "m_alpha": m_alpha,
+        "psi": psi_arr,
+    }
 
 
 # ---------------- Core sensitivity primitives (public, legacy-compatible) ----------------
