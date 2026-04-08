@@ -15,6 +15,10 @@
 :class: autosummary longtable
 :align: left
 
+* - {py:obj}`compute_irm_sensitivity_elements <causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.compute_irm_sensitivity_elements>`
+  - ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.compute_irm_sensitivity_elements
+    :summary:
+    ```
 * - {py:obj}`compute_bias_aware_ci <causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.compute_bias_aware_ci>`
   - ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.compute_bias_aware_ci
     :summary:
@@ -63,6 +67,13 @@
 ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.__all__
 ```
 
+````
+
+````{py:function} compute_irm_sensitivity_elements(*, model: typing.Any, y: numpy.ndarray, d: numpy.ndarray, g0: numpy.ndarray, g1: numpy.ndarray, m_hat: numpy.ndarray, w: typing.Optional[numpy.ndarray] = None, w_bar: typing.Optional[numpy.ndarray] = None, psi: typing.Optional[numpy.ndarray] = None, inv_m: typing.Optional[numpy.ndarray] = None, inv_1m: typing.Optional[numpy.ndarray] = None, score: typing.Any = 'ATE') -> dict[str, typing.Any]
+:canonical: causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.compute_irm_sensitivity_elements
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.compute_irm_sensitivity_elements
+```
 ````
 
 ````{py:function} compute_bias_aware_ci(effect_estimation: typing.Dict[str, typing.Any] | typing.Any, *, r2_y: float, r2_d: float, rho: float = 1.0, H0: float = 0.0, alpha: float = 0.05, use_signed_rr: bool = False) -> typing.Dict[str, typing.Any]

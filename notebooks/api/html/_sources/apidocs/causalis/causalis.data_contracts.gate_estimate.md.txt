@@ -319,4 +319,20 @@ Bases: {py:obj}`pydantic.BaseModel`
 
 ````
 
+````{py:method} contrast(left_group: str, right_group: str, *, alpha: typing.Optional[float] = None, alternative: str = 'two-sided') -> causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate.contrast
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.contrast
+```
+
+````
+
+````{py:method} pairwise_summary(*, reference: typing.Optional[str] = None, alpha: typing.Optional[float] = None, p_adjust: str = 'none') -> pandas.DataFrame
+:canonical: causalis.data_contracts.gate_estimate.GateEstimate.pairwise_summary
+
+```{autodoc2-docstring} causalis.data_contracts.gate_estimate.GateEstimate.pairwise_summary
+```
+
+````
+
 `````

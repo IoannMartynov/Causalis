@@ -36,7 +36,8 @@
   <section id="module-causalis.scenarios.unconfoundedness.model">
 <span id="causalis-scenarios-unconfoundedness-model"></span><h1><a class="reference internal" href="#module-causalis.scenarios.unconfoundedness.model" title="causalis.scenarios.unconfoundedness.model"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.unconfoundedness.model</span></code></a><a class="headerlink" href="#module-causalis.scenarios.unconfoundedness.model" title="Link to this heading">¶</a></h1>
 <p>IRM estimator consuming CausalData.</p>
-<p>Implements cross-fitted nuisance estimation for g0, g1 and m, and supports ATE/ATTE/GATE scores.</p>
+<p>Implements cross-fitted nuisance estimation for g0, g1 and m, and supports ATE/ATTE/GATE scores.
+https://github.com/DoubleML/doubleml-for-py/blob/main/doubleml/irm/irm.py</p>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
 <section id="classes">
@@ -203,7 +204,7 @@ w \, (\hat g_1(X) - \hat g_0(X))
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>w = \bar w = 1 \quad \text{for unweighted ATE},
 </pre></div>
 </div>
-<p>while for ATTE this implementation uses normalized treated weights</p>
+<p>while for ATTE` this implementation uses normalized treated weights</p>
 <p>.. math::</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>w_i = \frac{D_i}{\mathbb{E}_n[D]}, \qquad
 \bar w_i = \frac{\tilde m(X_i)}{\mathbb{E}_n[D]}.
@@ -247,13 +248,22 @@ Diagnostic payloads are included only when the model was fitted with
 groups : Optional[pd.DataFrame | pd.Series], default None
 Group labels/indicators for <code class="docutils literal notranslate"><span class="pre">score=&quot;GATE&quot;</span></code>.
 If None, fallback to <code class="docutils literal notranslate"><span class="pre">self.data.gate_groups</span></code> when present.
+GATE requires <code class="docutils literal notranslate"><span class="pre">CausalData.user_id</span></code> and aligns groups to those
+fit-time observation ids. Row-indexed groups are also accepted only
+when the fit-time row-to-<code class="docutils literal notranslate"><span class="pre">user_id</span></code> mapping is still unchanged.
 cov_type : {“HC0”, “HC1”, “HC2”, “HC3”}, default “HC3”
 Robust covariance type for <code class="docutils literal notranslate"><span class="pre">score=&quot;GATE&quot;</span></code> inference.
 cov_kwds : Optional[Dict[str, Any]], default None
-Additional covariance keyword arguments passed to statsmodels for <code class="docutils literal notranslate"><span class="pre">score=&quot;GATE&quot;</span></code>.</p>
+Additional covariance keyword arguments requested for <code class="docutils literal notranslate"><span class="pre">score=&quot;GATE&quot;</span></code>.
+These are currently ignored because GATE uses closed-form HCx
+covariance formulas rather than delegating to statsmodels.</p>
 <p class="rubric" id="id6">Returns</p>
 <p>CausalEstimate or GateEstimate
-Result container for the estimated effect.</p>
+Result container for the estimated effect. For <code class="docutils literal notranslate"><span class="pre">score=&quot;GATE&quot;</span></code>,
+the returned <code class="docutils literal notranslate"><span class="pre">GateEstimate</span></code> supports <code class="docutils literal notranslate"><span class="pre">summary()</span></code> for
+subgroup-vs-zero inference, <code class="docutils literal notranslate"><span class="pre">contrast(...)</span></code> for formal
+group-vs-group tests, and <code class="docutils literal notranslate"><span class="pre">pairwise_summary(...)</span></code> for a
+broader comparison table.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -314,13 +324,30 @@ The orthogonal signal.</p>
 <dt class="sig sig-object py" id="causalis.scenarios.unconfoundedness.model.IRM.gate">
 <span class="sig-name descname"><span class="pre">gate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">pandas.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'HC3'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov_kwds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="causalis.data_contracts.gate_estimate.html#causalis.data_contracts.gate_estimate.GateEstimate" title="causalis.data_contracts.gate_estimate.GateEstimate"><span class="pre">causalis.data_contracts.gate_estimate.GateEstimate</span></a></span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.model.IRM.gate" title="Link to this definition">¶</a></dt>
 <dd><p>Convenience wrapper for <code class="docutils literal notranslate"><span class="pre">estimate(score=&quot;GATE&quot;,</span> <span class="pre">...)</span></code>.</p>
+<p class="rubric" id="id13">Parameters</p>
+<p>groups : pd.DataFrame or pd.Series
+Subgroup labels or a strict dummy basis. GATE requires
+<code class="docutils literal notranslate"><span class="pre">CausalData.user_id</span></code> and aligns groups to those fit-time
+observation ids.
+alpha : float, default 0.05
+Significance level for confidence intervals.
+cov_type : {“HC0”, “HC1”, “HC2”, “HC3”}, default “HC3”
+Robust covariance type for subgroup inference.
+cov_kwds : Optional[Dict[str, Any]], default None
+Additional covariance keyword arguments requested by the caller.
+These are currently ignored by the closed-form GATE implementation.</p>
+<p class="rubric" id="id14">Returns</p>
+<p>GateEstimate
+Estimated subgroup effects and diagnostics. The returned result
+also supports <code class="docutils literal notranslate"><span class="pre">contrast(...)</span></code> and <code class="docutils literal notranslate"><span class="pre">pairwise_summary(...)</span></code>
+for formal post-estimation group comparisons.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="causalis.scenarios.unconfoundedness.model.IRM.sensitivity_analysis">
 <span class="sig-name descname"><span class="pre">sensitivity_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r2_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r2_d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#causalis.scenarios.unconfoundedness.model.IRM" title="causalis.scenarios.unconfoundedness.model.IRM"><span class="pre">causalis.scenarios.unconfoundedness.model.IRM</span></a></span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.model.IRM.sensitivity_analysis" title="Link to this definition">¶</a></dt>
 <dd><p>Compute a sensitivity analysis following Chernozhukov et al. (2022).</p>
-<p class="rubric" id="id13">Parameters</p>
+<p class="rubric" id="id15">Parameters</p>
 <p>r2_y : float
 Sensitivity parameter for outcome equation (R^2 form, R_Y^2; converted to odds form internally).
 r2_d : float
@@ -337,10 +364,10 @@ Significance level for CI bounds.</p>
 <dt class="sig sig-object py" id="causalis.scenarios.unconfoundedness.model.IRM.confint">
 <span class="sig-name descname"><span class="pre">confint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.model.IRM.confint" title="Link to this definition">¶</a></dt>
 <dd><p>Compute confidence intervals for the estimated coefficient.</p>
-<p class="rubric" id="id14">Parameters</p>
+<p class="rubric" id="id16">Parameters</p>
 <p>alpha : float, default 0.05
 Significance level.</p>
-<p class="rubric" id="id15">Returns</p>
+<p class="rubric" id="id17">Returns</p>
 <p>pd.DataFrame
 DataFrame with confidence intervals.</p>
 </dd></dl>
