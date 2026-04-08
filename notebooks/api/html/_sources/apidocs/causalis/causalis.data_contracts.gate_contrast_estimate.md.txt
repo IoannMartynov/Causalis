@@ -1,0 +1,289 @@
+# {py:mod}`causalis.data_contracts.gate_contrast_estimate`
+
+```{py:module} causalis.data_contracts.gate_contrast_estimate
+```
+
+```{autodoc2-docstring} causalis.data_contracts.gate_contrast_estimate
+:allowtitles:
+```
+
+## Module Contents
+
+### Classes
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`GateContrastEstimate <causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate>`
+  - ```{autodoc2-docstring} causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate
+    :summary:
+    ```
+````
+
+### API
+
+`````{py:class} GateContrastEstimate(/, **data: typing.Any)
+:canonical: causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate
+
+Bases: {py:obj}`pydantic.BaseModel`
+
+```{autodoc2-docstring} causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate
+```
+
+```{rubric} Initialization
+```
+
+```{autodoc2-docstring} causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.__init__
+```
+
+````{py:attribute} model_config
+:canonical: causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.model_config
+:value: >
+   'ConfigDict(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.model_config
+```
+
+````
+
+````{py:attribute} estimand
+:canonical: causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.estimand
+:type: str
+:value: >
+   'GATE_CONTRAST'
+
+```{autodoc2-docstring} causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.estimand
+```
+
+````
+
+````{py:attribute} model
+:canonical: causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.model
+:type: str
+:value: >
+   'IRM'
+
+```{autodoc2-docstring} causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.model
+```
+
+````
+
+````{py:attribute} model_options
+:canonical: causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.model_options
+:type: typing.Dict[str, typing.Any]
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.model_options
+```
+
+````
+
+````{py:attribute} left_group
+:canonical: causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.left_group
+:type: str
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.left_group
+```
+
+````
+
+````{py:attribute} right_group
+:canonical: causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.right_group
+:type: str
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.right_group
+```
+
+````
+
+````{py:attribute} contrast_label
+:canonical: causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.contrast_label
+:type: str
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.contrast_label
+```
+
+````
+
+````{py:attribute} value
+:canonical: causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.value
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.value
+```
+
+````
+
+````{py:attribute} std_error
+:canonical: causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.std_error
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.std_error
+```
+
+````
+
+````{py:attribute} test_stat
+:canonical: causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.test_stat
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.test_stat
+```
+
+````
+
+````{py:attribute} p_value
+:canonical: causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.p_value
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.p_value
+```
+
+````
+
+````{py:attribute} ci_lower
+:canonical: causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.ci_lower
+:type: typing.Optional[float]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.ci_lower
+```
+
+````
+
+````{py:attribute} ci_upper
+:canonical: causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.ci_upper
+:type: typing.Optional[float]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.ci_upper
+```
+
+````
+
+````{py:attribute} alpha
+:canonical: causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.alpha
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.alpha
+```
+
+````
+
+````{py:attribute} alternative
+:canonical: causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.alternative
+:type: str
+:value: >
+   'two-sided'
+
+```{autodoc2-docstring} causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.alternative
+```
+
+````
+
+````{py:attribute} is_significant
+:canonical: causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.is_significant
+:type: bool
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.is_significant
+```
+
+````
+
+````{py:attribute} left_value
+:canonical: causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.left_value
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.left_value
+```
+
+````
+
+````{py:attribute} right_value
+:canonical: causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.right_value
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.right_value
+```
+
+````
+
+````{py:attribute} n_left
+:canonical: causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.n_left
+:type: int
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.n_left
+```
+
+````
+
+````{py:attribute} n_right
+:canonical: causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.n_right
+:type: int
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.n_right
+```
+
+````
+
+````{py:attribute} time
+:canonical: causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.time
+:type: str
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.time
+```
+
+````
+
+````{py:attribute} diagnostic_data
+:canonical: causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.diagnostic_data
+:type: typing.Optional[typing.Dict[str, typing.Any]]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.diagnostic_data
+```
+
+````
+
+````{py:method} summary() -> pandas.DataFrame
+:canonical: causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.summary
+
+```{autodoc2-docstring} causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.summary
+```
+
+````
+
+`````

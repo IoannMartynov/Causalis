@@ -25,6 +25,7 @@ except ImportError:
     HAS_CATBOOST = False
 
 from causalis.dgp.causaldata import CausalData
+from causalis.data_contracts.causal_diagnostic_data import UnconfoundednessDiagnosticData
 from causalis.data_contracts.causal_estimate import CausalEstimate
 from causalis.data_contracts.gate_estimate import GateEstimate
 from causalis.scenarios.gate.model import estimate_gate_from_irm
