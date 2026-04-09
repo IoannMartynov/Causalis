@@ -1,3 +1,29 @@
+"""
+High-level generators for multi-arm treatment datasets.
+
+The helpers in this module build datasets where treatment assignment is a full
+one-hot encoding over multiple arms, with arm-specific structural effects and
+optional oracle columns.
+
+Notes
+-----
+The first treatment column is treated as the control arm by convention. When
+``return_causal_data=True``, the returned :class:`MultiCausalData` object uses
+that first arm as ``control_treatment``.
+
+Examples
+--------
+>>> from causalis.dgp.multicausaldata.functional import generate_multitreatment
+>>> data = generate_multitreatment(
+...     n=1000,
+...     n_treatments=3,
+...     theta=[0.0, 0.5, 1.0],
+...     return_causal_data=True,
+... )
+>>> data.treatment_names
+['d_0', 'd_1', 'd_2']
+"""
+
 from __future__ import annotations
 
 import pandas as pd
@@ -79,6 +105,28 @@ def generate_multitreatment(
     Returns
     -------
     pd.DataFrame or MultiCausalData
+
+    Notes
+    -----
+    Treatment columns form a mutually exclusive one-hot representation:
+
+    - exactly one treatment column equals ``1`` for each row;
+    - ``d_names[0]`` is the control arm;
+    - arm-specific structural effects are defined on the outcome link scale and
+      are mapped back to the natural outcome scale in oracle outputs.
+
+    Examples
+    --------
+    >>> from causalis.dgp.multicausaldata.functional import generate_multitreatment
+    >>> df = generate_multitreatment(
+    ...     n=500,
+    ...     n_treatments=4,
+    ...     outcome_type="continuous",
+    ...     theta=[0.0, 0.2, 0.5, 0.8],
+    ... )
+    >>> treatment_cols = ["d_0", "d_1", "d_2", "d_3"]
+    >>> int(df[treatment_cols].sum(axis=1).eq(1).all())
+    1
     """
     gen = MultiCausalDatasetGenerator(
         n_treatments=n_treatments,

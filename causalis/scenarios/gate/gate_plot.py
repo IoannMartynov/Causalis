@@ -19,7 +19,7 @@ def _extract_plot_payload(
         values = np.asarray(estimate.values, dtype=float)
         ci_lower = np.asarray(estimate.ci_lower, dtype=float)
         ci_upper = np.asarray(estimate.ci_upper, dtype=float)
-        title = "GATE Estimates and Confidence Intervals"
+        title = f"{estimate.estimand} Estimates and Confidence Intervals"
         return values, ci_lower, ci_upper, labels, title
 
     if isinstance(estimate, CausalEstimate):
@@ -52,13 +52,15 @@ def gate_plot(
     transparent: bool = False,
 ) -> plt.Figure:
     """
-    Plot effect estimates with confidence intervals for a single estimate or GATE groups.
+    Plot effect estimates with confidence intervals for a single estimate or
+    group-level estimates such as GATE/GATET.
 
     Parameters
     ----------
     estimate : CausalEstimate or GateEstimate
         Estimate object to visualize. ``GateEstimate`` produces one point per
-        group; ``CausalEstimate`` produces a single-row forest plot.
+        group regardless of whether the estimand is ``GATE`` or ``GATET``;
+        ``CausalEstimate`` produces a single-row forest plot.
     ax : matplotlib.axes.Axes, optional
         Existing axes to draw on.
     figsize : tuple of float, optional

@@ -36,7 +36,7 @@
   <section id="module-causalis.scenarios.unconfoundedness.model">
 <span id="causalis-scenarios-unconfoundedness-model"></span><h1><a class="reference internal" href="#module-causalis.scenarios.unconfoundedness.model" title="causalis.scenarios.unconfoundedness.model"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.unconfoundedness.model</span></code></a><a class="headerlink" href="#module-causalis.scenarios.unconfoundedness.model" title="Link to this heading">¶</a></h1>
 <p>IRM estimator consuming CausalData.</p>
-<p>Implements cross-fitted nuisance estimation for g0, g1 and m, and supports ATE/ATTE/GATE scores.
+<p>Implements cross-fitted nuisance estimation for g0, g1 and m, and supports ATE/ATTE/GATE/GATET scores.
 https://github.com/DoubleML/doubleml-for-py/blob/main/doubleml/irm/irm.py</p>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
@@ -239,27 +239,27 @@ Fitted estimator.</p>
 <span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">score</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ATE'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">pandas.Series</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'HC3'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov_kwds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="causalis.data_contracts.causal_estimate.html#causalis.data_contracts.causal_estimate.CausalEstimate" title="causalis.data_contracts.causal_estimate.CausalEstimate"><span class="pre">causalis.data_contracts.causal_estimate.CausalEstimate</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="causalis.data_contracts.gate_estimate.html#causalis.data_contracts.gate_estimate.GateEstimate" title="causalis.data_contracts.gate_estimate.GateEstimate"><span class="pre">causalis.data_contracts.gate_estimate.GateEstimate</span></a></span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.model.IRM.estimate" title="Link to this definition">¶</a></dt>
 <dd><p>Compute treatment effects using stored nuisance predictions.</p>
 <p class="rubric" id="id5">Parameters</p>
-<p>score : {“ATE”, “ATTE”, “GATE”}, default “ATE”
+<p>score : {“ATE”, “ATTE”, “GATE”, “GATET”}, default “ATE”
 Target estimand.
 alpha : float, default 0.05
 Significance level for intervals.
 Diagnostic payloads are included only when the model was fitted with
 <code class="docutils literal notranslate"><span class="pre">store_diagnostics=True</span></code>.
 groups : Optional[pd.DataFrame | pd.Series], default None
-Group labels/indicators for <code class="docutils literal notranslate"><span class="pre">score=&quot;GATE&quot;</span></code>.
+Group labels/indicators for <code class="docutils literal notranslate"><span class="pre">score=&quot;GATE&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">score=&quot;GATET&quot;</span></code>.
 If None, fallback to <code class="docutils literal notranslate"><span class="pre">self.data.gate_groups</span></code> when present.
-GATE requires <code class="docutils literal notranslate"><span class="pre">CausalData.user_id</span></code> and aligns groups to those
+GATE/GATET requires <code class="docutils literal notranslate"><span class="pre">CausalData.user_id</span></code> and aligns groups to those
 fit-time observation ids. Row-indexed groups are also accepted only
 when the fit-time row-to-<code class="docutils literal notranslate"><span class="pre">user_id</span></code> mapping is still unchanged.
 cov_type : {“HC0”, “HC1”, “HC2”, “HC3”}, default “HC3”
-Robust covariance type for <code class="docutils literal notranslate"><span class="pre">score=&quot;GATE&quot;</span></code> inference.
+Robust covariance type for <code class="docutils literal notranslate"><span class="pre">score=&quot;GATE&quot;</span></code> / <code class="docutils literal notranslate"><span class="pre">score=&quot;GATET&quot;</span></code> inference.
 cov_kwds : Optional[Dict[str, Any]], default None
-Additional covariance keyword arguments requested for <code class="docutils literal notranslate"><span class="pre">score=&quot;GATE&quot;</span></code>.
-These are currently ignored because GATE uses closed-form HCx
+Additional covariance keyword arguments requested for subgroup inference.
+These are currently ignored because GATE/GATET use closed-form HCx
 covariance formulas rather than delegating to statsmodels.</p>
 <p class="rubric" id="id6">Returns</p>
 <p>CausalEstimate or GateEstimate
-Result container for the estimated effect. For <code class="docutils literal notranslate"><span class="pre">score=&quot;GATE&quot;</span></code>,
+Result container for the estimated effect. For subgroup scores,
 the returned <code class="docutils literal notranslate"><span class="pre">GateEstimate</span></code> supports <code class="docutils literal notranslate"><span class="pre">summary()</span></code> for
 subgroup-vs-zero inference, <code class="docutils literal notranslate"><span class="pre">contrast(...)</span></code> for formal
 group-vs-group tests, and <code class="docutils literal notranslate"><span class="pre">pairwise_summary(...)</span></code> for a
@@ -341,6 +341,12 @@ These are currently ignored by the closed-form GATE implementation.</p>
 Estimated subgroup effects and diagnostics. The returned result
 also supports <code class="docutils literal notranslate"><span class="pre">contrast(...)</span></code> and <code class="docutils literal notranslate"><span class="pre">pairwise_summary(...)</span></code>
 for formal post-estimation group comparisons.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.scenarios.unconfoundedness.model.IRM.gatet">
+<span class="sig-name descname"><span class="pre">gatet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">pandas.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'HC3'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov_kwds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="causalis.data_contracts.gate_estimate.html#causalis.data_contracts.gate_estimate.GateEstimate" title="causalis.data_contracts.gate_estimate.GateEstimate"><span class="pre">causalis.data_contracts.gate_estimate.GateEstimate</span></a></span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.model.IRM.gatet" title="Link to this definition">¶</a></dt>
+<dd><p>Convenience wrapper for <code class="docutils literal notranslate"><span class="pre">estimate(score=&quot;GATET&quot;,</span> <span class="pre">...)</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">

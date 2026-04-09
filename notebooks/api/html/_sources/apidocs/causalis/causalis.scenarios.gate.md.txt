@@ -48,7 +48,7 @@ causalis.scenarios.gate.model
 ````{py:data} __all__
 :canonical: causalis.scenarios.gate.__all__
 :value: >
-   ['estimate_gate_from_irm', 'gate_plot', 'plot_gate_estimate']
+   ['estimate_gate_from_irm', 'estimate_gatet_from_irm', 'gate_plot', 'plot_gate_estimate']
 
 ```{autodoc2-docstring} causalis.scenarios.gate.__all__
 ```

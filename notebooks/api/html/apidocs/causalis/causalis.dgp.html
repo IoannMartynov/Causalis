@@ -35,6 +35,58 @@
             
   <section id="module-causalis.dgp">
 <span id="causalis-dgp"></span><h1><a class="reference internal" href="#module-causalis.dgp" title="causalis.dgp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.dgp</span></code></a><a class="headerlink" href="#module-causalis.dgp" title="Link to this heading">¶</a></h1>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading">¶</a></h2>
+<p>Across the package, generators follow a few conventions:</p>
+<ul class="simple">
+<li><p>Outcomes are typically stored in <code class="docutils literal notranslate"><span class="pre">y</span></code>.</p></li>
+<li><p>Binary treatment indicators are typically stored in <code class="docutils literal notranslate"><span class="pre">d</span></code>.</p></li>
+<li><p>Confounders are returned as <code class="docutils literal notranslate"><span class="pre">x1</span></code>, <code class="docutils literal notranslate"><span class="pre">x2</span></code>, … unless explicit names are
+provided in the generator configuration.</p></li>
+<li><p>When <code class="docutils literal notranslate"><span class="pre">include_oracle=True</span></code>, many generators also expose ground-truth
+columns such as propensities or potential-outcome means. These oracle columns
+are intended for benchmarking, diagnostics, and unit tests rather than as
+inputs to downstream estimators.</p></li>
+</ul>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.dgp import generate_rct, generate_scm_data, obs_linear_26_dataset
+rct = generate_rct(
+…     n=1000,
+…     outcome_type=”binary”,
+…     outcome_params={“p”: {“A”: 0.10, “B”: 0.12}},
+…     return_causal_data=True,
+… )
+rct.treatment, rct.outcome
+(‘d’, ‘y’)
+obs = obs_linear_26_dataset(n=1000, seed=3141, return_causal_data=True)
+sorted(col for col in [“m”, “g0”, “g1”, “cate”] if col in obs.df.columns)
+[‘cate’, ‘g0’, ‘g1’, ‘m’]
+panel = generate_scm_data(n_donors=5, n_pre_periods=24, n_post_periods=6)
+panel.df.shape[0] &gt; 0  # doctest: +SKIP
+True</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</section>
+<p>Synthetic data-generating processes (DGPs) for causal benchmarking and examples.</p>
+<p>This package collects the public dataset builders used across <code class="docutils literal notranslate"><span class="pre">causalis</span></code> for
+single-treatment tabular data, multi-treatment data, instrumental-variable
+placeholders, and synthetic-control style panel data.</p>
+<p>The most commonly used entry points are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">generate_rct</span></code> for randomized experiments with optional oracle columns and
+optional pre-period covariates.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">obs_linear_effect</span></code> and <code class="docutils literal notranslate"><span class="pre">obs_linear_26_dataset</span></code> for observational data
+with confounding and ground-truth nuisance objects.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">generate_scm_data</span></code> for synthetic panel data with one treated unit and a
+donor pool.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">generate_multitreatment</span></code> for one-hot multi-arm treatment assignment.</p></li>
+</ul>
 <section id="subpackages">
 <h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading">¶</a></h2>
 <div class="toctree-wrapper compound">

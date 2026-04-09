@@ -35,6 +35,33 @@
             
   <section id="module-causalis.dgp.causaldata.functional">
 <span id="causalis-dgp-causaldata-functional"></span><h1><a class="reference internal" href="#module-causalis.dgp.causaldata.functional" title="causalis.dgp.causaldata.functional"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.dgp.causaldata.functional</span></code></a><a class="headerlink" href="#module-causalis.dgp.causaldata.functional" title="Link to this heading">¶</a></h1>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading">¶</a></h2>
+<p>Use this module when you want a ready-made synthetic dataset without specifying
+every structural component manually. For finer control over the DGP, instantiate
+<code class="docutils literal notranslate"><span class="pre">CausalDatasetGenerator</span></code> directly instead.</p>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.dgp.causaldata.functional import generate_rct, obs_linear_effect
+rct = generate_rct(n=500, outcome_type=”normal”, return_causal_data=True)
+rct.outcome, rct.treatment
+(‘y’, ‘d’)
+obs = obs_linear_effect(n=500, theta=1.0, target_d_rate=0.3)
+{“y”, “d”}.issubset(obs.columns)
+True</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</section>
+<p>High-level helpers for single-treatment synthetic causal datasets.</p>
+<p>This module provides convenient wrappers around
+:class:<code class="docutils literal notranslate"><span class="pre">causalis.dgp.causaldata.base.CausalDatasetGenerator</span></code> for common
+benchmarking setups such as classic A/B tests, observational confounding, and
+CUPED-oriented examples with pre-period covariates.</p>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
 <section id="functions">
@@ -85,7 +112,7 @@ Specifically designed for benchmarking variance reduction techniques like CUPED.
 </ul>
 <p>Ancillary columns (if add_ancillary=True) are generated from baseline confounders X only,
 avoiding outcome leakage and post-treatment adjustment issues.</p>
-<p class="rubric" id="id11">Parameters</p>
+<p class="rubric" id="id14">Parameters</p>
 <p>n : int, default=20_000
 Number of samples to generate.
 split : float, default=0.5
@@ -120,9 +147,30 @@ include_oracle : bool, default=True
 Whether to include oracle ground-truth columns like ‘cate’, ‘m’, etc.
 return_causal_data : bool, default=False
 Whether to return a <code class="docutils literal notranslate"><span class="pre">CausalData</span></code> object instead of a <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code>.</p>
-<p class="rubric" id="id12">Returns</p>
+<p class="rubric" id="id15">Returns</p>
 <p>pandas.DataFrame or CausalData
 Synthetic RCT dataset.</p>
+<p class="rubric" id="id16">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.dgp.causaldata.functional import generate_rct
+data = generate_rct(
+…     n=1000,
+…     outcome_type=”binary”,
+…     outcome_params={“p”: {“A”: 0.10, “B”: 0.12}},
+…     add_pre=True,
+…     return_causal_data=True,
+… )
+data.treatment, data.outcome
+(‘d’, ‘y’)
+“y_pre” in data.df.columns
+True
+{“g0”, “g1”, “cate”}.issubset(data.df.columns)
+True</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
@@ -130,7 +178,7 @@ Synthetic RCT dataset.</p>
 <span class="sig-prename descclassname"><span class="pre">causalis.dgp.causaldata.functional.</span></span><span class="sig-name descname"><span class="pre">generate_classic_rct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_pre</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome_depends_on_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prognostic_scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_corr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_causal_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_ancillary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deterministic_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_oracle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">causalis.dgp.causaldata.CausalData</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.dgp.causaldata.functional.generate_classic_rct" title="Link to this definition">¶</a></dt>
 <dd><p>Generate a classic RCT dataset with three binary confounders:
 platform_ios, country_usa, and source_paid.</p>
-<p class="rubric" id="id13">Parameters</p>
+<p class="rubric" id="id17">Parameters</p>
 <p>n : int, default=10_000
 Number of samples to generate.
 split : float, default=0.5
@@ -160,7 +208,7 @@ include_oracle : bool, default=True
 Whether to include oracle ground-truth columns like ‘cate’, ‘propensity’, etc.
 **kwargs :
 Additional arguments passed to <code class="docutils literal notranslate"><span class="pre">generate_rct</span></code>.</p>
-<p class="rubric" id="id14">Returns</p>
+<p class="rubric" id="id18">Returns</p>
 <p>pandas.DataFrame or CausalData
 Synthetic classic RCT dataset.</p>
 </dd></dl>
@@ -172,7 +220,7 @@ Synthetic classic RCT dataset.</p>
 <p>The gamma outcome uses a log-mean link, so treatment effects are multiplicative
 on the mean scale. The default parameters are chosen to resemble a skewed
 real-world metric (e.g., spend or revenue).</p>
-<p class="rubric" id="id15">Parameters</p>
+<p class="rubric" id="id19">Parameters</p>
 <p>n : int, default=10_000
 Number of samples to generate.
 split : float, default=0.5
@@ -202,7 +250,7 @@ return_causal_data : bool, default=False
 Whether to return a <code class="docutils literal notranslate"><span class="pre">CausalData</span></code> object instead of a <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code>.
 **kwargs :
 Additional arguments passed to <code class="docutils literal notranslate"><span class="pre">generate_rct</span></code> (e.g., pre_name, g_y, use_prognostic).</p>
-<p class="rubric" id="id16">Returns</p>
+<p class="rubric" id="id20">Returns</p>
 <p>pandas.DataFrame or CausalData
 Synthetic classic RCT dataset with gamma outcome.</p>
 </dd></dl>
@@ -211,7 +259,7 @@ Synthetic classic RCT dataset with gamma outcome.</p>
 <dt class="sig sig-object py" id="causalis.dgp.causaldata.functional.obs_linear_effect">
 <span class="sig-prename descclassname"><span class="pre">causalis.dgp.causaldata.functional.</span></span><span class="sig-name descname"><span class="pre">obs_linear_effect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'continuous'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_d_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confounder_specs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_sampler</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_oracle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_ancillary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deterministic_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.dgp.causaldata.functional.obs_linear_effect" title="Link to this definition">¶</a></dt>
 <dd><p>Generate an observational dataset with linear effects of confounders and a constant treatment effect.</p>
-<p class="rubric" id="id17">Parameters</p>
+<p class="rubric" id="id21">Parameters</p>
 <p>n : int, default=10_000
 Number of samples to generate.
 theta : float, default=1.0
@@ -240,9 +288,36 @@ add_ancillary : bool, default=False
 If True, adds standard ancillary columns (age, platform, etc.).
 deterministic_ids : bool, default=False
 If True, generates deterministic user IDs.</p>
-<p class="rubric" id="id18">Returns</p>
+<p class="rubric" id="id22">Returns</p>
 <p>pandas.DataFrame
 Synthetic observational dataset.</p>
+<p class="rubric" id="id23">Notes</p>
+<p>This helper is a lightweight observational benchmark:</p>
+<ul class="simple">
+<li><p>treatment is not randomized unless <code class="docutils literal notranslate"><span class="pre">beta_d</span></code> is zero and
+<code class="docutils literal notranslate"><span class="pre">target_d_rate</span></code> forces a near-constant propensity;</p></li>
+<li><p>oracle columns such as <code class="docutils literal notranslate"><span class="pre">m</span></code> and <code class="docutils literal notranslate"><span class="pre">cate</span></code> are available when
+<code class="docutils literal notranslate"><span class="pre">include_oracle=True</span></code>;</p></li>
+<li><p>the treatment effect is constant on the structural link scale, so
+heterogeneity only enters through the outcome family transformation.</p></li>
+</ul>
+<p class="rubric" id="id24">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.dgp.causaldata.functional import obs_linear_effect
+df = obs_linear_effect(
+…     n=1000,
+…     theta=1.0,
+…     target_d_rate=0.35,
+…     k=3,
+…     random_state=3141,
+… )
+sorted(col for col in [“y”, “d”, “m”, “cate”] if col in df.columns)
+[‘cate’, ‘d’, ‘m’, ‘y’]</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
@@ -250,7 +325,7 @@ Synthetic observational dataset.</p>
 <span class="sig-prename descclassname"><span class="pre">causalis.dgp.causaldata.functional.</span></span><span class="sig-name descname"><span class="pre">make_cuped_tweedie</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_pre</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'y_pre'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_target_corr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="causalis.dgp.causaldata.preperiod.html#causalis.dgp.causaldata.preperiod.PreCorrSpec" title="causalis.dgp.causaldata.preperiod.PreCorrSpec"><span class="pre">causalis.dgp.causaldata.preperiod.PreCorrSpec</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_oracle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_causal_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_log</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">causalis.dgp.causaldata.CausalData</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.dgp.causaldata.functional.make_cuped_tweedie" title="Link to this definition">¶</a></dt>
 <dd><p>Tweedie-like DGP with mixed marginals and structured HTE.
 Features many zeros and a heavy right tail. Suitable for CUPED benchmarking.</p>
-<p class="rubric" id="id19">Parameters</p>
+<p class="rubric" id="id25">Parameters</p>
 <p>n : int, default=10000
 Number of samples to generate.
 seed : int, default=42
@@ -270,7 +345,7 @@ return_causal_data : bool, default=True
 Whether to return a CausalData object.
 theta_log : float, default=0.2
 The log-uplift theta parameter for the treatment effect.</p>
-<p class="rubric" id="id20">Returns</p>
+<p class="rubric" id="id26">Returns</p>
 <p>pd.DataFrame or CausalData</p>
 </dd></dl>
 
@@ -280,7 +355,7 @@ The log-uplift theta parameter for the treatment effect.</p>
 <dd><p>Binary CUPED-oriented DGP with richer confounders and structured HTE.</p>
 <p>Designed for CUPED benchmarking with randomized treatment and a calibrated
 pre-period covariate while preserving exact oracle cate under include_oracle.</p>
-<p class="rubric" id="id21">Parameters</p>
+<p class="rubric" id="id27">Parameters</p>
 <p>n : int, default=10000
 Number of samples to generate.
 seed : int, default=42
@@ -300,7 +375,7 @@ return_causal_data : bool, default=True
 Whether to return a CausalData object.
 theta_logit : float, default=0.38
 Baseline log-odds uplift scale for heterogeneous treatment effects.</p>
-<p class="rubric" id="id22">Returns</p>
+<p class="rubric" id="id28">Returns</p>
 <p>pd.DataFrame or CausalData</p>
 </dd></dl>
 

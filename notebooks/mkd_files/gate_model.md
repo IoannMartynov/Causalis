@@ -1,35 +1,11 @@
-# GATE (from IRM)
+# GATE / GATET (from IRM)
+
+This note documents the strict subgroup estimators implemented on top of a fitted IRM.
+Sections 0-8 describe **GATE**. Section 9 adds the implemented **GATET**
+variant, which targets treatment effects among treated units inside each
+pre-treatment subgroup.
 
 # 0) Assumptions
-
-## Implementation / observed-data requirements
-
-* A fitted IRM object is required, with stored cross-fitted nuisance predictions
-  $$
-  \hat g_0(X_i), \qquad \hat g_1(X_i), \qquad \hat m(X_i).
-  $$
-* The IRM must also retain the estimate-time outcome and treatment arrays used to build the orthogonal score.
-* GATE requires pre-defined groups, passed either as `groups=...` or stored in `irm_model.data.gate_groups`.
-* The fitted `CausalData` must define `user_id`; group rows are aligned to the fit-time observations through those ids.
-* `groups.index` must match the fit-time observation ids exactly, be a permutation of them, or match the original fit-time row index when that row-to-`user_id` mapping has not changed.
-* If the fit-time ids are only the default positional index $0,\dots,n-1$, alignment is treated as ambiguous and estimation is rejected.
-* `groups` must have exactly one row per fit-time observation.
-* If `groups` is a single Series / one-column DataFrame, it is converted into a dummy basis with one column per subgroup.
-* If `groups` is a multi-column DataFrame, columns must already be binary indicators in $\{0,1\}$.
-* The resulting subgroup basis must be **mutually exclusive and exhaustive**, so for every observation $i$,
-  $$
-  \sum_{g=1}^K B_{ig} = 1.
-  $$
-* Every group must contain at least one treated and at least one control observation.
-* Group indicator columns with zero observations are not estimable.
-* If a group has only one observation, the point estimate exists but inference is set to `NaN`.
-* `alpha` must satisfy
-  $$
-  0 < \alpha < 1,
-  $$
-  and `cov_type` must be one of `HC0`, `HC1`, `HC2`, `HC3`.
-
-## Identification / modeling assumptions
 
 * **SUTVA / consistency:** observed outcomes correspond to the realized treatment, with no interference across units.
 * **Unconfoundedness:** conditional on observed covariates $X$,
@@ -500,3 +476,197 @@ Input:
 
 7. Return GateEstimate
 ```
+
+---
+
+# 9) GATET (group average treatment effect on the treated)
+
+GATET uses the **same subgroup alignment and strict partition logic** as GATE,
+but it changes the target estimand, the orthogonal score, and the support
+requirements.
+
+## 9.1 Target estimand
+
+For subgroup $g$,
+$$
+\theta_g^{\mathrm{GATET}}
+=
+\mathbb{E}[Y(1)-Y(0)\mid G=g,\ D=1].
+$$
+
+So GATET answers:
+"among the treated units inside subgroup $g$, what is the average causal
+effect?"
+
+When the groups form an exhaustive partition, ATTE is the treated-share mixture
+of subgroup GATETs:
+$$
+\mathrm{ATTE}
+=
+\sum_g \Pr(G=g\mid D=1)\,\theta_g^{\mathrm{GATET}}.
+$$
+
+Empirically, this is the weighted average of subgroup estimates using
+within-sample treated shares:
+$$
+\widehat{\mathrm{ATTE}}
+=
+\sum_g
+\frac{n_{\mathrm{treated},g}}{\sum_h n_{\mathrm{treated},h}}
+\hat\theta_g^{\mathrm{GATET}}.
+$$
+
+## 9.2 Orthogonal signal used by the implementation
+
+Unlike ordinary GATE, GATET does **not** reuse the ATE-style score
+$$
+\hat\phi_i = \hat g_1(X_i) - \hat g_0(X_i) + \bigl(Y_i - \hat g_1(X_i)\bigr)\frac{D_i}{\hat m(X_i)}- \bigl(Y_i - \hat g_0(X_i)\bigr)\frac{1-D_i}{1-\hat m(X_i)}.
+$$
+
+Instead it builds the canonical ATT-style subgroup signal
+$$
+z_i
+=
+D_i\bigl(Y_i-\hat g_0(X_i)\bigr) - \hat m(X_i)(1-D_i)\frac{Y_i-\hat g_0(X_i)}{1-\hat m(X_i)}.
+$$
+
+Only $\hat g_0(X)$ and $\hat m(X)$ enter this score. As with GATE,
+`normalize_ipw=True` on the fitted IRM is intentionally ignored so the
+estimator uses the canonical unnormalized orthogonal signal above.
+
+This matters because, in general,
+$$
+\hat\theta_g^{\mathrm{GATET}}
+\ne
+\frac{1}{n_{\mathrm{treated},g}}
+\sum_{i:G_i=g,\ D_i=1}\hat\phi_i^{\mathrm{GATE}}.
+$$
+
+So GATET is **not** "GATE restricted to treated rows." It is a different
+orthogonal score matched to the subgroup ATT estimand.
+
+## 9.3 Point estimation
+
+Let
+$$
+n_{\mathrm{treated},g}
+=
+\sum_{i=1}^n \mathbf{1}\{G_i=g\}D_i.
+$$
+
+Then the implementation estimates subgroup ATT as
+$$
+\hat\theta_g^{\mathrm{GATET}}
+=
+\frac{1}{n_{\mathrm{treated},g}}
+\sum_{i:G_i=g} z_i.
+$$
+
+Equivalently, it solves the groupwise moment condition
+$$
+\sum_{i:G_i=g} \bigl(z_i - D_i\theta_g\bigr) = 0.
+$$
+
+## 9.4 Closed-form HCx inference
+
+Define the subgroup residual
+$$
+u_{ig}
+=
+\mathbf{1}\{G_i=g\}\bigl(z_i - D_i\hat\theta_g^{\mathrm{GATET}}\bigr).
+$$
+
+Let
+$$
+U_g
+=
+\sum_{i:G_i=g}\bigl(z_i - D_i\hat\theta_g^{\mathrm{GATET}}\bigr)^2.
+$$
+
+Write $n_g$ for total subgroup size and $K$ for the number of groups. Then the
+closed-form robust variances implemented in code are:
+
+**HC0**
+$$
+\widehat{\mathrm{Var}}_{HC0}(\hat\theta_g)
+=
+\frac{U_g}{n_{\mathrm{treated},g}^2}.
+$$
+
+**HC1**
+$$
+\widehat{\mathrm{Var}}_{HC1}(\hat\theta_g)
+=
+\frac{n}{n-K}
+\cdot
+\frac{U_g}{n_{\mathrm{treated},g}^2},
+$$
+with fallback to HC0 scaling if $n \le K$.
+
+**HC2**
+$$
+\widehat{\mathrm{Var}}_{HC2}(\hat\theta_g)
+=
+\frac{U_g}{n_{\mathrm{treated},g}^2\left(1-\frac{1}{n_g}\right)}.
+$$
+
+**HC3**
+$$
+\widehat{\mathrm{Var}}_{HC3}(\hat\theta_g)
+=
+\frac{U_g}{n_{\mathrm{treated},g}^2\left(1-\frac{1}{n_g}\right)^2}.
+$$
+
+The same normal-reference Wald inference is then used:
+$$
+z_g=\frac{\hat\theta_g}{\widehat{SE}(\hat\theta_g)},
+\qquad
+p_g = 2\Phi(-|z_g|),
+$$
+with confidence interval
+$$
+\hat\theta_g \pm z_{1-\alpha/2}\widehat{SE}(\hat\theta_g).
+$$
+
+## 9.5 Support rules
+
+GATET uses the same strict partition requirement as GATE:
+every observation must belong to exactly one subgroup.
+
+But the support checks are different:
+
+* Every GATET group must contain **at least one treated observation**.
+* A group with **zero treated units** is rejected.
+* A group with **zero control units** is still accepted, but the code emits a
+  warning because within-group overlap is degenerate and identification relies
+  on $\hat g_0(X)$ and $\hat m(X)$ learned outside that subgroup.
+* If a group has only one total observation (`n_group = 1`), standard errors
+  and interval-based inference are returned as `NaN`.
+
+## 9.6 Output and diagnostics
+
+The return type is still `GateEstimate`, but with
+`estimand="GATET"`. The same helper surface is available:
+```text
+irm.estimate(score="GATET", groups=groups)
+irm.gatet(groups=groups)
+gatet.summary()
+gatet.contrast("group_A", "group_B")
+gatet.pairwise_summary()
+```
+
+Interpretation of the main columns:
+* `value`: estimated treatment effect among treated units in the subgroup.
+* `n_treated`: treated support actually identifying that subgroup ATT.
+* `n_control`: controls available in the subgroup; may be zero for GATET.
+* `share_treated`: empirical treated share in the subgroup.
+
+When diagnostics are stored, the payload includes:
+* `orthogonal_signal`: the transformed subgroup signal used for diagnostics,
+  whose within-group mean equals the reported GATET estimate.
+* `raw_treated_signal`: the raw ATT-style score $z_i$ before subgroup scaling.
+
+So the practical distinction is:
+* **GATE:** average treatment effect within subgroup $g$.
+* **GATET:** average treatment effect among the treated units within subgroup
+  $g$.

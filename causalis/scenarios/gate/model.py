@@ -1,3 +1,9 @@
+"""Utilities for group-level IRM estimands such as GATE and GATET.
+
+The public entry points in this module estimate subgroup effects from a fitted
+binary-treatment IRM using pre-defined groups aligned to the fit-time sample.
+"""
+
 from __future__ import annotations
 
 import warnings
@@ -13,27 +19,32 @@ from causalis.data_contracts.gate_estimate import GateEstimate
 
 
 _SUPPORTED_COV_TYPES = {"HC0", "HC1", "HC2", "HC3"}
-_GATE_GROUPS_REQUIRED_MSG = (
-    "GATE requires pre-defined groups. Pass groups=... to estimate() or store gate_groups in CausalData."
-)
-_GATE_USER_ID_REQUIRED_MSG = (
-    "GATE requires CausalData.user_id so subgroup definitions can be aligned to the fit-time observations."
-)
-_GATE_GROUPS_ALIGNMENT_MSG = (
-    "GATE groups must be indexed by the fit-time observation ids, or by the original fit-time row index "
-    "when that row-to-observation-id mapping is still unchanged. "
-    "Fit the IRM with a stable DataFrame index or CausalData.user_id, and preserve that indexing on groups."
-)
 _FIT_INDEX_SOURCE_USER_ID = "user_id"
 _FIT_INDEX_SOURCE_ROW_INDEX = "row_index"
 
 
 @dataclass(frozen=True)
 class _GatePartition:
-    """Compact representation of a strict GATE partition."""
+    """Compact representation of a strict subgroup partition."""
 
     group_names: list[str]
     codes: np.ndarray
+
+
+def _groups_required_msg(estimand: str) -> str:
+    return f"{estimand} requires pre-defined groups. Pass groups=... to estimate() or store gate_groups in CausalData."
+
+
+def _user_id_required_msg(estimand: str) -> str:
+    return f"{estimand} requires CausalData.user_id so subgroup definitions can be aligned to the fit-time observations."
+
+
+def _groups_alignment_msg(estimand: str) -> str:
+    return (
+        f"{estimand} groups must be indexed by the fit-time observation ids, or by the original fit-time row index "
+        "when that row-to-observation-id mapping is still unchanged. "
+        "Fit the IRM with a stable DataFrame index or CausalData.user_id, and preserve that indexing on groups."
+    )
 
 
 def _validate_gate_inputs(
@@ -43,8 +54,9 @@ def _validate_gate_inputs(
     alpha: float,
     cov_type: str,
     cov_kwds: Optional[Dict[str, Any]],
+    estimand: str = "GATE",
 ) -> tuple[pd.DataFrame | pd.Series | np.ndarray, str]:
-    """Validate GATE estimation request and resolve fallback groups source."""
+    """Validate a subgroup-estimation request and resolve fallback groups."""
     check_is_fitted(irm_model, attributes=["g0_hat_", "g1_hat_", "m_hat_"])
 
     if not hasattr(irm_model, "_y") or not hasattr(irm_model, "_d"):
@@ -66,11 +78,11 @@ def _validate_gate_inputs(
         data_obj = getattr(irm_model, "data", None)
         groups_resolved = getattr(data_obj, "gate_groups", None) if data_obj is not None else None
     if groups_resolved is None:
-        raise ValueError(_GATE_GROUPS_REQUIRED_MSG)
+        raise ValueError(_groups_required_msg(estimand))
 
     data_obj = getattr(irm_model, "data", None)
     if data_obj is None or not getattr(data_obj, "user_id_name", None):
-        raise ValueError(_GATE_USER_ID_REQUIRED_MSG)
+        raise ValueError(_user_id_required_msg(estimand))
 
     return groups_resolved, cov_type_u
 
@@ -91,6 +103,7 @@ def _resolve_fit_observation_index(
     *,
     irm_model: Any,
     n_obs: int,
+    estimand: str = "GATE",
 ) -> tuple[pd.Index, str]:
     """Resolve stable fit-time observation ids used to align group labels."""
     data_obj = getattr(irm_model, "data", None)
@@ -106,7 +119,7 @@ def _resolve_fit_observation_index(
     else:
         if data_obj is None:
             raise RuntimeError(
-                "IRM does not expose fit-time observation ids required for GATE group alignment. "
+                f"IRM does not expose fit-time observation ids required for {estimand} group alignment. "
                 "Refit the model with the current version."
             )
         if user_id_name:
@@ -121,7 +134,7 @@ def _resolve_fit_observation_index(
 
     if fit_index_source == _FIT_INDEX_SOURCE_ROW_INDEX and _is_default_positional_index(fit_index_resolved, n_obs=n_obs):
         raise ValueError(
-            f"{_GATE_GROUPS_ALIGNMENT_MSG} "
+            f"{_groups_alignment_msg(estimand)} "
             "The fitted sample currently only has a default positional index (0..n-1), which is ambiguous."
         )
 
@@ -133,6 +146,7 @@ def _align_groups_to_fit_observations(
     *,
     irm_model: Any,
     n_obs: int,
+    estimand: str = "GATE",
 ) -> pd.DataFrame | pd.Series:
     """Align group labels to fit-time observation ids and reject ambiguous positional inputs."""
     if isinstance(groups, np.ndarray):
@@ -149,7 +163,7 @@ def _align_groups_to_fit_observations(
         else:
             # If we can't find a reliable row index, we wrap it with the fit_index directly
             # assuming the user knows what they are doing (alignment by position).
-            fit_index, _ = _resolve_fit_observation_index(irm_model=irm_model, n_obs=n_obs)
+            fit_index, _ = _resolve_fit_observation_index(irm_model=irm_model, n_obs=n_obs, estimand=estimand)
             groups = pd.Series(groups, index=fit_index)
 
     if isinstance(groups, pd.Series):
@@ -166,7 +180,7 @@ def _align_groups_to_fit_observations(
     if groups_df.shape[0] != n_obs:
         raise ValueError(f"groups must have {n_obs} rows, got {groups_df.shape[0]}.")
 
-    fit_index, _ = _resolve_fit_observation_index(irm_model=irm_model, n_obs=n_obs)
+    fit_index, _ = _resolve_fit_observation_index(irm_model=irm_model, n_obs=n_obs, estimand=estimand)
 
     if not groups_df.index.is_unique:
         raise ValueError("groups index must be unique so rows can be aligned to the fit-time sample.")
@@ -179,7 +193,7 @@ def _align_groups_to_fit_observations(
         aligned = _align_groups_via_fit_row_index(groups_df=groups_df, irm_model=irm_model, fit_index=fit_index)
         if aligned is None:
             raise ValueError(
-                f"{_GATE_GROUPS_ALIGNMENT_MSG} "
+                f"{_groups_alignment_msg(estimand)} "
                 "groups.index must either match the fit-time ids (or a permutation of them), "
                 "or match the original fit-time row index while the current row-to-id mapping remains unchanged."
             )
@@ -238,7 +252,7 @@ def _coerce_groups_to_partition(
     *,
     n_obs: int,
 ) -> _GatePartition:
-    """Convert user-supplied groups into compact partition codes for strict GATE."""
+    """Convert user-supplied groups into compact codes for a strict subgroup partition."""
     if isinstance(groups, np.ndarray):
         groups_df = pd.DataFrame(groups)
     elif isinstance(groups, pd.Series):
@@ -308,9 +322,9 @@ def _coerce_groups_to_basis(
     n_obs: int,
 ) -> pd.DataFrame:
     """
-    Convert user-supplied groups into a full GATE dummy basis.
+    Convert user-supplied groups into a full strict subgroup dummy basis.
 
-    For strict GATE, the resulting basis must be mutually exclusive and exhaustive.
+    For strict GATE/GATET, the resulting basis must be mutually exclusive and exhaustive.
     """
     if isinstance(groups, np.ndarray):
         groups_df = pd.DataFrame(groups)
@@ -392,6 +406,20 @@ def _validate_gate_group_support(
 
 def _compute_gate_signal_from_irm(irm_model: Any) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Compute canonical (unnormalized) cross-fitted orthogonal GATE signal from fitted IRM nuisances."""
+    y, d, g0_hat, g1_hat, m_hat = _resolve_irm_signal_inputs(irm_model)
+    # Canonical DR signal for subgroup effects uses Horvitz-Thompson IPW terms.
+    with np.errstate(divide="ignore", invalid="ignore"):
+        h1 = d / m_hat
+        h0 = (1.0 - d) / (1.0 - m_hat)
+        phi = (g1_hat - g0_hat) + (y - g1_hat) * h1 - (y - g0_hat) * h0
+    if not np.all(np.isfinite(phi)):
+        raise RuntimeError("Computed GATE orthogonal signal contains non-finite values.")
+
+    return phi, d, m_hat
+
+
+def _resolve_irm_signal_inputs(irm_model: Any) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Resolve aligned outcome, treatment, and nuisance arrays used by subgroup scores."""
     if hasattr(irm_model, "_resolve_estimation_targets"):
         y_raw, d_raw = irm_model._resolve_estimation_targets()
     elif hasattr(irm_model, "_resolve_estimation_sample"):
@@ -414,15 +442,32 @@ def _compute_gate_signal_from_irm(irm_model: Any) -> tuple[np.ndarray, np.ndarra
     if not (d.shape[0] == n == g0_hat.shape[0] == g1_hat.shape[0] == m_hat.shape[0]):
         raise RuntimeError("Stored IRM arrays have inconsistent lengths; refit the model.")
 
-    # Canonical DR signal for subgroup effects uses Horvitz-Thompson IPW terms.
-    with np.errstate(divide="ignore", invalid="ignore"):
-        h1 = d / m_hat
-        h0 = (1.0 - d) / (1.0 - m_hat)
-        phi = (g1_hat - g0_hat) + (y - g1_hat) * h1 - (y - g0_hat) * h0
-    if not np.all(np.isfinite(phi)):
-        raise RuntimeError("Computed GATE orthogonal signal contains non-finite values.")
+    return y, d, g0_hat, g1_hat, m_hat
 
-    return phi, d, m_hat
+
+def _compute_gatet_signal_from_irm(irm_model: Any) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    r"""Compute the canonical subgroup-ATT signal used by GATET.
+
+    The signal is
+
+    .. math::
+
+        z =
+        D \cdot (Y - \hat g_0(X))
+        - \hat m(X) (1-D) \frac{Y - \hat g_0(X)}{1-\hat m(X)}.
+
+    For pre-treatment groups :math:`G`, GATET is then identified by averaging
+    :math:`z` over treated units within each subgroup. This is the subgroup ATT
+    score, not the ordinary GATE score restricted to treated observations.
+    """
+    y, d, g0_hat, _, m_hat = _resolve_irm_signal_inputs(irm_model)
+    u0 = y - g0_hat
+    with np.errstate(divide="ignore", invalid="ignore"):
+        z = d * u0 - (m_hat * (1.0 - d) * u0) / (1.0 - m_hat)
+    if not np.all(np.isfinite(z)):
+        raise RuntimeError("Computed GATET orthogonal signal contains non-finite values.")
+
+    return z, d, m_hat
 
 
 def _estimate_gate_groupwise_inference(
@@ -650,6 +695,303 @@ def _estimate_gate_groupwise_summary_from_partition(
     }
 
 
+def _estimate_gatet_groupwise_summary_from_partition(
+    *,
+    z: np.ndarray,
+    d: np.ndarray,
+    m_hat: np.ndarray,
+    partition: _GatePartition,
+    cov_type: str,
+    alpha: float,
+) -> dict[str, Any]:
+    """Compute strict GATET estimates and diagnostics from compact group codes."""
+    group_names = list(partition.group_names)
+    codes = np.asarray(partition.codes, dtype=int).reshape(-1)
+    n_obs = int(z.shape[0])
+    k = len(group_names)
+
+    if codes.shape[0] != n_obs:
+        raise RuntimeError("Stored group partition has inconsistent length; recompute groups.")
+    if k == 0:
+        raise RuntimeError("Group partition must contain at least one group.")
+    if np.any((codes < 0) | (codes >= k)):
+        raise RuntimeError("Group partition contains invalid group codes.")
+
+    d_float = np.asarray(d, dtype=float)
+    n_group = np.bincount(codes, minlength=k).astype(int, copy=False)
+    n_treated = np.rint(np.bincount(codes, weights=d_float, minlength=k)).astype(int)
+    n_control = n_group - n_treated
+
+    zero_treated_mask = n_treated == 0
+    if zero_treated_mask.any():
+        invalid_groups = [group_names[idx] for idx in np.flatnonzero(zero_treated_mask)]
+        raise ValueError(
+            "Each GATET group must contain at least one treated observation. "
+            f"Invalid groups: {invalid_groups}. "
+            "GATET targets treated-within-group effects, so zero-treated groups are not estimable."
+        )
+
+    zero_control_mask = n_control == 0
+    group_warning_messages: list[str] = []
+    if zero_control_mask.any():
+        treated_only_groups = [group_names[idx] for idx in np.flatnonzero(zero_control_mask)]
+        warning_msg = (
+            "GATET groups "
+            f"{treated_only_groups} have no control observations. "
+            "Estimation remains defined because controls are borrowed through g0_hat and m_hat, "
+            "but within-group overlap is degenerate."
+        )
+        warnings.warn(warning_msg, RuntimeWarning)
+        group_warning_messages.append(warning_msg)
+
+    singleton_mask = n_group == 1
+    if singleton_mask.any():
+        singleton_names = [group_names[idx] for idx in np.flatnonzero(singleton_mask)]
+        if cov_type in {"HC2", "HC3"}:
+            warnings.warn(
+                f"GATET groups {singleton_names} have only one observation (n=1). "
+                f"{cov_type} covariance is undefined for singleton groups; their inference is set to NaN.",
+                RuntimeWarning,
+            )
+        else:
+            warnings.warn(
+                f"GATET groups {singleton_names} have only one observation (n=1); "
+                "their inference is set to NaN.",
+                RuntimeWarning,
+            )
+
+    hc1_scale = np.nan
+    if cov_type == "HC1":
+        denom = n_obs - k
+        if denom <= 0:
+            warnings.warn(
+                "HC1 covariance scaling n/(n-k) is undefined because n <= k; falling back to HC0 scaling.",
+                RuntimeWarning,
+            )
+            hc1_scale = 1.0
+        else:
+            hc1_scale = float(n_obs / denom)
+
+    n_group_f = n_group.astype(float, copy=False)
+    n_treated_f = n_treated.astype(float, copy=False)
+    share_treated = n_treated_f / n_group_f
+
+    sum_z = np.bincount(codes, weights=z, minlength=k)
+    values = sum_z / n_treated_f
+
+    transformed_signal = z / share_treated[codes]
+    sum_phi = np.bincount(codes, weights=transformed_signal, minlength=k)
+    sum_phi2 = np.bincount(codes, weights=np.square(transformed_signal), minlength=k)
+    sse_phi = sum_phi2 - (np.square(sum_phi) / n_group_f)
+    tiny_negative_mask = np.isfinite(sse_phi) & (sse_phi < 0.0) & (np.abs(sse_phi) < 1e-12)
+    if tiny_negative_mask.any():
+        sse_phi[tiny_negative_mask] = 0.0
+    if np.any(np.isfinite(sse_phi) & (sse_phi < 0.0)):
+        raise RuntimeError("Computed negative within-group sum of squares; check GATET signal stability.")
+
+    group_coef = values[codes]
+    residual = z - (d_float * group_coef)
+    u = residual
+    sum_u2 = np.bincount(codes, weights=np.square(u), minlength=k)
+
+    variances = np.full(k, np.nan, dtype=float)
+    estimable_mask = n_group > 1
+    hc0_var = np.full(k, np.nan, dtype=float)
+    hc0_var[estimable_mask] = sum_u2[estimable_mask] / np.square(n_treated_f[estimable_mask])
+
+    if cov_type == "HC0":
+        variances[estimable_mask] = hc0_var[estimable_mask]
+    elif cov_type == "HC1":
+        variances[estimable_mask] = hc0_var[estimable_mask] * hc1_scale
+    elif cov_type == "HC2":
+        leverage = 1.0 - (1.0 / n_group_f[estimable_mask])
+        variances[estimable_mask] = hc0_var[estimable_mask] / leverage
+    elif cov_type == "HC3":
+        leverage = 1.0 - (1.0 / n_group_f[estimable_mask])
+        variances[estimable_mask] = hc0_var[estimable_mask] / np.square(leverage)
+    else:
+        raise ValueError(f"Unsupported cov_type: {cov_type!r}")
+
+    std_errors = np.sqrt(variances)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        wald_stats = values / std_errors
+    p_values = 2.0 * norm.sf(np.abs(wald_stats))
+    z_crit = float(norm.ppf(1.0 - (alpha / 2.0)))
+    ci_lower = values - z_crit * std_errors
+    ci_upper = values + z_crit * std_errors
+
+    std_phi = np.full(k, np.nan, dtype=float)
+    std_phi[estimable_mask] = np.sqrt(sse_phi[estimable_mask] / (n_group_f[estimable_mask] - 1.0))
+
+    mean_propensity = np.bincount(codes, weights=m_hat, minlength=k) / n_group_f
+    min_propensity = np.full(k, np.inf, dtype=float)
+    max_propensity = np.full(k, -np.inf, dtype=float)
+    np.minimum.at(min_propensity, codes, m_hat)
+    np.maximum.at(max_propensity, codes, m_hat)
+
+    covariance = pd.DataFrame(np.diag(variances), index=group_names, columns=group_names)
+
+    return {
+        "group_names": group_names,
+        "values": values,
+        "std_errors": std_errors,
+        "wald_stats": wald_stats,
+        "p_values": p_values,
+        "ci_lower": ci_lower,
+        "ci_upper": ci_upper,
+        "covariance": covariance,
+        "n_group": n_group,
+        "n_treated": n_treated,
+        "n_control": n_control,
+        "share_treated": share_treated,
+        "mean_phi": sum_phi / n_group_f,
+        "std_phi": std_phi,
+        "mean_propensity": mean_propensity,
+        "min_propensity": min_propensity,
+        "max_propensity": max_propensity,
+        "group_warning_messages": group_warning_messages,
+        "orthogonal_signal": transformed_signal,
+        "raw_signal": z,
+    }
+
+
+def _build_gate_estimate(
+    *,
+    estimand: str,
+    irm_model: Any,
+    alpha: float,
+    cov_type_u: str,
+    cov_kwds: Optional[Dict[str, Any]],
+    partition: _GatePartition,
+    stats: dict[str, Any],
+    orthogonal_signal: np.ndarray,
+    diagnostic_extra: Optional[Dict[str, Any]] = None,
+) -> GateEstimate:
+    """Build a GateEstimate result payload shared by GATE and GATET."""
+    group_names = stats["group_names"]
+    values = stats["values"]
+    std_errors = stats["std_errors"]
+    wald_stats = stats["wald_stats"]
+    p_values = stats["p_values"]
+    ci_lower = stats["ci_lower"]
+    ci_upper = stats["ci_upper"]
+    covariance = stats["covariance"]
+    n_group = stats["n_group"]
+    n_treated = stats["n_treated"]
+    n_control = stats["n_control"]
+    share_treated = stats["share_treated"]
+    mean_phi = stats["mean_phi"]
+    std_phi = stats["std_phi"]
+    mean_propensity = stats["mean_propensity"]
+    min_propensity = stats["min_propensity"]
+    max_propensity = stats["max_propensity"]
+
+    group_warning_messages = list(stats.get("group_warning_messages", []))
+    for idx, group_name in enumerate(group_names):
+        if n_group[idx] < 10:
+            group_warning_messages.append(f"{estimand} group '{group_name}' has small support (n={int(n_group[idx])}).")
+        if np.isfinite(min_propensity[idx]) and np.isfinite(max_propensity[idx]) and (
+            min_propensity[idx] < 0.05 or max_propensity[idx] > 0.95
+        ):
+            group_warning_messages.append(
+                f"{estimand} group '{group_name}' has extreme propensity support "
+                f"(min={min_propensity[idx]:.3f}, max={max_propensity[idx]:.3f})."
+            )
+
+    summary_table = pd.DataFrame(
+        {
+            "value": values,
+            "std_error": std_errors,
+            "wald_stat": wald_stats,
+            "test_stat": wald_stats,
+            "p_value": p_values,
+            "is_significant": p_values < float(alpha),
+            "ci_lower": ci_lower,
+            "ci_upper": ci_upper,
+            "n_group": n_group,
+            "n_treated": n_treated,
+            "n_control": n_control,
+            "share_treated": share_treated,
+            "mean_phi": mean_phi,
+            "std_phi": std_phi,
+            "mean_propensity": mean_propensity,
+            "min_propensity": min_propensity,
+            "max_propensity": max_propensity,
+        },
+        index=group_names,
+    )
+    summary_table.index.name = "group"
+
+    normalize_ipw_requested = bool(getattr(irm_model, "normalize_ipw", False))
+    model_options = {
+        "cov_type": cov_type_u,
+        "covariance_structure": "diagonal",
+        "cov_kwds": {},
+        "cov_kwds_requested": {} if cov_kwds is None else dict(cov_kwds),
+        "trimming_threshold": float(getattr(irm_model, "trimming_threshold", np.nan)),
+        "normalize_ipw_requested": normalize_ipw_requested,
+        "normalize_ipw_effective": False,
+        "se_approx_hajek": False,
+        "group_representation": "compact_codes",
+        "n_folds": int(getattr(irm_model, "n_folds", -1)),
+        "random_state": getattr(irm_model, "random_state", None),
+    }
+
+    diagnostic_payload: Optional[Dict[str, Any]] = None
+    if bool(getattr(irm_model, "store_diagnostics", True)):
+        diagnostic_payload = {
+            "orthogonal_signal": np.asarray(orthogonal_signal, dtype=float).copy(),
+            "group_codes": partition.codes.copy(),
+            "group_names": list(group_names),
+            "group_diagnostics": summary_table[
+                [
+                    "n_group",
+                    "n_treated",
+                    "n_control",
+                    "share_treated",
+                    "mean_phi",
+                    "std_phi",
+                    "mean_propensity",
+                    "min_propensity",
+                    "max_propensity",
+                ]
+            ].copy(),
+            "group_warning_messages": list(group_warning_messages),
+        }
+        if diagnostic_extra:
+            for key, value in diagnostic_extra.items():
+                if isinstance(value, np.ndarray):
+                    diagnostic_payload[key] = value.copy()
+                else:
+                    diagnostic_payload[key] = value
+
+    return GateEstimate(
+        estimand=estimand,
+        model="IRM",
+        group_names=group_names,
+        values=values,
+        std_errors=std_errors,
+        test_stats=wald_stats,
+        p_values=p_values,
+        ci_lower=ci_lower,
+        ci_upper=ci_upper,
+        alpha=float(alpha),
+        covariance=covariance,
+        summary_table=summary_table,
+        model_options=model_options,
+        n_group=np.asarray(n_group, dtype=int),
+        n_treated=np.asarray(n_treated, dtype=int),
+        n_control=np.asarray(n_control, dtype=int),
+        share_treated=np.asarray(share_treated, dtype=float),
+        mean_phi=np.asarray(mean_phi, dtype=float),
+        std_phi=np.asarray(std_phi, dtype=float),
+        mean_propensity=np.asarray(mean_propensity, dtype=float),
+        min_propensity=np.asarray(min_propensity, dtype=float),
+        max_propensity=np.asarray(max_propensity, dtype=float),
+        diagnostic_data=diagnostic_payload,
+    )
+
+
 def estimate_gate_from_irm(
     irm_model: Any,
     groups: Optional[pd.DataFrame | pd.Series | np.ndarray],
@@ -777,9 +1119,10 @@ def estimate_gate_from_irm(
         alpha=alpha,
         cov_type=cov_type,
         cov_kwds=cov_kwds,
+        estimand="GATE",
     )
 
-    normalize_ipw_requested = bool(irm_model._use_normalized_ipw(score="ATE", warn=False))
+    normalize_ipw_requested = bool(getattr(irm_model, "normalize_ipw", False))
     if normalize_ipw_requested:
         warnings.warn(
             "normalize_ipw=True is ignored for GATE to preserve canonical unnormalized orthogonal signals.",
@@ -792,9 +1135,14 @@ def estimate_gate_from_irm(
         )
 
     phi, d, m_hat = _compute_gate_signal_from_irm(irm_model)
-    groups_aligned = _align_groups_to_fit_observations(groups_resolved, irm_model=irm_model, n_obs=phi.shape[0])
+    groups_aligned = _align_groups_to_fit_observations(
+        groups_resolved,
+        irm_model=irm_model,
+        n_obs=phi.shape[0],
+        estimand="GATE",
+    )
     partition = _coerce_groups_to_partition(groups_aligned, n_obs=phi.shape[0])
-    gate_stats = _estimate_gate_groupwise_summary_from_partition(
+    stats = _estimate_gate_groupwise_summary_from_partition(
         phi=phi,
         d=d,
         m_hat=m_hat,
@@ -803,120 +1151,223 @@ def estimate_gate_from_irm(
         alpha=alpha,
     )
 
-    group_names = gate_stats["group_names"]
-    values = gate_stats["values"]
-    std_errors = gate_stats["std_errors"]
-    wald_stats = gate_stats["wald_stats"]
-    p_values = gate_stats["p_values"]
-    ci_lower = gate_stats["ci_lower"]
-    ci_upper = gate_stats["ci_upper"]
-    covariance = gate_stats["covariance"]
-    n_group = gate_stats["n_group"]
-    n_treated = gate_stats["n_treated"]
-    n_control = gate_stats["n_control"]
-    share_treated = gate_stats["share_treated"]
-    mean_phi = gate_stats["mean_phi"]
-    std_phi = gate_stats["std_phi"]
-    mean_propensity = gate_stats["mean_propensity"]
-    min_propensity = gate_stats["min_propensity"]
-    max_propensity = gate_stats["max_propensity"]
-
-    group_warning_messages: list[str] = []
-
-    for idx, group_name in enumerate(group_names):
-        if n_group[idx] < 10:
-            group_warning_messages.append(f"GATE group '{group_name}' has small support (n={int(n_group[idx])}).")
-        if np.isfinite(min_propensity[idx]) and np.isfinite(max_propensity[idx]) and (
-            min_propensity[idx] < 0.05 or max_propensity[idx] > 0.95
-        ):
-            group_warning_messages.append(
-                "GATE group "
-                f"'{group_name}' has extreme propensity support "
-                f"(min={min_propensity[idx]:.3f}, max={max_propensity[idx]:.3f})."
-            )
-
-    summary_table = pd.DataFrame(
-        {
-            "value": values,
-            "std_error": std_errors,
-            "wald_stat": wald_stats,
-            "test_stat": wald_stats,
-            "p_value": p_values,
-            "is_significant": p_values < float(alpha),
-            "ci_lower": ci_lower,
-            "ci_upper": ci_upper,
-            "n_group": n_group,
-            "n_treated": n_treated,
-            "n_control": n_control,
-            "share_treated": share_treated,
-            "mean_phi": mean_phi,
-            "std_phi": std_phi,
-            "mean_propensity": mean_propensity,
-            "min_propensity": min_propensity,
-            "max_propensity": max_propensity,
-        },
-        index=group_names,
-    )
-    summary_table.index.name = "group"
-
-    model_options = {
-        "cov_type": cov_type_u,
-        "covariance_structure": "diagonal",
-        "cov_kwds": {},
-        "cov_kwds_requested": {} if cov_kwds is None else dict(cov_kwds),
-        "trimming_threshold": float(getattr(irm_model, "trimming_threshold", np.nan)),
-        "normalize_ipw_requested": normalize_ipw_requested,
-        "normalize_ipw_effective": False,
-        "se_approx_hajek": False,
-        "group_representation": "compact_codes",
-        "n_folds": int(getattr(irm_model, "n_folds", -1)),
-        "random_state": getattr(irm_model, "random_state", None),
-    }
-
-    diagnostic_payload: Optional[Dict[str, Any]] = None
-    if bool(getattr(irm_model, "store_diagnostics", True)):
-        diagnostic_payload = {
-            "orthogonal_signal": phi.copy(),
-            "group_codes": partition.codes.copy(),
-            "group_names": list(group_names),
-            "group_diagnostics": summary_table[
-                [
-                    "n_group",
-                    "n_treated",
-                    "n_control",
-                    "share_treated",
-                    "mean_phi",
-                    "std_phi",
-                    "mean_propensity",
-                    "min_propensity",
-                    "max_propensity",
-                ]
-            ].copy(),
-            "group_warning_messages": list(group_warning_messages),
-        }
-
-    return GateEstimate(
+    return _build_gate_estimate(
         estimand="GATE",
-        model="IRM",
-        group_names=group_names,
-        values=values,
-        std_errors=std_errors,
-        test_stats=wald_stats,
-        p_values=p_values,
-        ci_lower=ci_lower,
-        ci_upper=ci_upper,
-        alpha=float(alpha),
-        covariance=covariance,
-        summary_table=summary_table,
-        model_options=model_options,
-        n_group=np.asarray(n_group, dtype=int),
-        n_treated=np.asarray(n_treated, dtype=int),
-        n_control=np.asarray(n_control, dtype=int),
-        share_treated=np.asarray(share_treated, dtype=float),
-        mean_phi=np.asarray(mean_phi, dtype=float),
-        std_phi=np.asarray(std_phi, dtype=float),
-        mean_propensity=np.asarray(mean_propensity, dtype=float),
-        min_propensity=np.asarray(min_propensity, dtype=float),
-        max_propensity=np.asarray(max_propensity, dtype=float),
-        diagnostic_data=diagnostic_payload,
+        irm_model=irm_model,
+        alpha=alpha,
+        cov_type_u=cov_type_u,
+        cov_kwds=cov_kwds,
+        partition=partition,
+        stats=stats,
+        orthogonal_signal=phi,
+    )
+
+
+def estimate_gatet_from_irm(
+    irm_model: Any,
+    groups: Optional[pd.DataFrame | pd.Series | np.ndarray],
+    alpha: float = 0.05,
+    cov_type: str = "HC3",
+    cov_kwds: Optional[Dict[str, Any]] = None,
+) -> GateEstimate:
+    r"""Estimate Group Average Treatment Effects on the Treated (GATETs) from a fitted IRM.
+
+    Parameters
+    ----------
+    irm_model : fitted IRM
+        Interactive Regression Model with stored cross-fitted nuisance predictions
+        :math:`\hat g_0(X)`, :math:`\hat g_1(X)`, and :math:`\hat m(X)`.
+        The model must already be fitted.
+    groups : Optional[pd.DataFrame, pd.Series, or np.ndarray]
+        Pre-specified subgroup definition.
+
+        Accepted forms are:
+        - A single Series / one-column DataFrame of group labels.
+        - A multi-column dummy basis with binary indicators.
+        - A numpy array of group labels (assumed aligned with fit-time rows).
+
+        For strict GATET, groups must define a mutually exclusive and exhaustive
+        partition of the fitted sample. Each group must contain at least one
+        treated observation. Groups with no controls are still accepted for
+        GATET, but a warning is emitted because within-group overlap is
+        degenerate and identification relies on :math:`\hat g_0(X)` and
+        :math:`\hat m(X)` learned outside the subgroup.
+
+        GATET requires the fitted ``CausalData`` to define ``user_id``.
+        Group rows are aligned to the IRM fit-time sample using those fit-time
+        observation ids. In practice, ``groups.index`` must either exactly match
+        those ids or be a permutation of them. As a convenience, when the model
+        was fitted with ``user_id``, GATET also accepts groups indexed by the
+        original fit-time row index if the current row-to-``user_id`` mapping is
+        still unchanged.
+
+        If None, falls back to ``irm_model.data.gate_groups`` when present.
+    alpha : float, default 0.05
+        Significance level for two-sided confidence intervals.
+    cov_type : {"HC0", "HC1", "HC2", "HC3"}, default "HC3"
+        Heteroskedasticity-robust covariance estimator used for subgroup
+        inference. The implementation uses a closed-form subgroupwise sandwich
+        covariance equivalent to a no-intercept regression on subgroup dummies
+        scaled by within-group treated shares.
+    cov_kwds : Optional[Dict[str, Any]], default None
+        Additional covariance options requested by the caller.
+        These are currently ignored because GATET uses the closed-form HCx
+        covariance formulas implemented in this module.
+
+    Returns
+    -------
+    GateEstimate
+        Result contract containing subgroup-treated effects, standard errors,
+        confidence intervals, covariance matrix, and group-level diagnostics.
+        The returned object also supports ``contrast(...)`` and
+        ``pairwise_summary(...)`` for formal post-estimation group comparisons.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+    >>> from causalis.dgp import obs_linear_26_dataset
+    >>> from causalis.scenarios.unconfoundedness.model import IRM
+    >>> data = obs_linear_26_dataset(
+    ...     n=1000,
+    ...     seed=3141,
+    ...     include_oracle=False,
+    ...     return_causal_data=True,
+    ... )
+    >>> groups = pd.Series(
+    ...     (data.df["x1"] >= 0).map({True: "high_x1", False: "low_x1"}),
+    ...     index=data.df["user_id"],
+    ...     name="segment",
+    ... )
+    >>> irm = IRM(
+    ...     data=data,
+    ...     ml_g=RandomForestRegressor(n_estimators=200, max_depth=6, random_state=3141),
+    ...     ml_m=RandomForestClassifier(n_estimators=200, max_depth=6, random_state=3141),
+    ...     n_folds=3,
+    ...     random_state=3141,
+    ... )
+    >>> irm.fit()
+    >>> gatet = estimate_gatet_from_irm(irm, groups=groups)
+    >>> gatet.summary()  # doctest: +SKIP
+
+    Notes
+    -----
+    This implementation targets subgroup ATT under the same unconfoundedness
+    and overlap assumptions used by IRM, with the additional requirement that
+    subgroup membership is pre-treatment.
+
+    Let :math:`G` denote a finite partition of the sample space. For subgroup
+    :math:`g`, the target estimand is
+
+    .. math::
+
+        \theta_g^{\mathrm{GATET}}
+        = \mathbb{E}[Y(1)-Y(0)\mid G=g, D=1].
+
+    Equivalently, for a strict subgroup partition,
+
+    .. math::
+
+        \theta_g^{\mathrm{GATET}}
+        = \mathbb{E}\left[
+            \frac{D \mathbf{1}\{G=g\}}{\mathbb{P}(D=1, G=g)}
+            (Y(1)-Y(0))
+          \right].
+
+    Using the fitted nuisances :math:`\hat g_0(X)` and :math:`\hat m(X)`, define
+    the ATT-style orthogonal signal
+
+    .. math::
+
+        z =
+        D \cdot (Y - \hat g_0(X))
+        - \hat m(X)(1-D)\frac{Y-\hat g_0(X)}{1-\hat m(X)}.
+
+    Then the subgroup ATT can be written as
+
+    .. math::
+
+        \hat\theta_g^{\mathrm{GATET}}
+        = \frac{1}{n_{\mathrm{treated}, g}}
+          \sum_{i:G_i=g} z_i,
+
+    where :math:`n_{\mathrm{treated}, g}` is the number of treated observations
+    in subgroup :math:`g`. In particular, the implementation changes the score
+    itself to the subgroup-ATT signal above; it is not computed by first
+    building ordinary GATE scores and then averaging them only over treated
+    units in subgroup :math:`g`.
+
+    Inference is based on the subgroup moment residual
+
+    .. math::
+
+        u_{ig} = \mathbf{1}\{G_i=g\}\,(z_i - D_i \hat\theta_g),
+
+    with diagonal HC0/HC1/HC2/HC3 covariance formulas computed in closed form.
+
+    As a sanity check, when the groups form an exhaustive partition,
+
+    .. math::
+
+        \mathrm{ATTE}
+        = \sum_g \mathbb{P}(G=g \mid D=1)\,
+          \theta_g^{\mathrm{GATET}}.
+
+    ``normalize_ipw=True`` on the IRM is intentionally ignored for GATET so the
+    estimator uses the canonical unnormalized subgroup-ATT signal above.
+    """
+    groups_resolved, cov_type_u = _validate_gate_inputs(
+        irm_model=irm_model,
+        groups=groups,
+        alpha=alpha,
+        cov_type=cov_type,
+        cov_kwds=cov_kwds,
+        estimand="GATET",
+    )
+
+    normalize_ipw_requested = bool(getattr(irm_model, "normalize_ipw", False))
+    if normalize_ipw_requested:
+        warnings.warn(
+            "normalize_ipw=True is ignored for GATET to preserve canonical unnormalized orthogonal signals.",
+            RuntimeWarning,
+        )
+    if cov_kwds:
+        warnings.warn(
+            "cov_kwds are ignored for GATET; closed-form groupwise HCx covariance has no cov_kwds options.",
+            RuntimeWarning,
+        )
+
+    z, d, m_hat = _compute_gatet_signal_from_irm(irm_model)
+    groups_aligned = _align_groups_to_fit_observations(
+        groups_resolved,
+        irm_model=irm_model,
+        n_obs=z.shape[0],
+        estimand="GATET",
+    )
+    partition = _coerce_groups_to_partition(groups_aligned, n_obs=z.shape[0])
+    stats = _estimate_gatet_groupwise_summary_from_partition(
+        z=z,
+        d=d,
+        m_hat=m_hat,
+        partition=partition,
+        cov_type=cov_type_u,
+        alpha=alpha,
+    )
+
+    orthogonal_signal = np.asarray(stats["orthogonal_signal"], dtype=float)
+    raw_signal = np.asarray(stats["raw_signal"], dtype=float)
+    stats = dict(stats)
+    stats.pop("orthogonal_signal", None)
+    stats.pop("raw_signal", None)
+
+    return _build_gate_estimate(
+        estimand="GATET",
+        irm_model=irm_model,
+        alpha=alpha,
+        cov_type_u=cov_type_u,
+        cov_kwds=cov_kwds,
+        partition=partition,
+        stats=stats,
+        orthogonal_signal=orthogonal_signal,
+        diagnostic_extra={"raw_treated_signal": raw_signal},
     )
