@@ -16,7 +16,7 @@ _SUPPORTED_P_ADJUST = {"none", "holm", "bonferroni"}
 
 
 class GateEstimate(BaseModel):
-    """Result contract for Group Average Treatment Effects (GATE)."""
+    """Result contract for group-level treatment-effect estimates."""
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -103,8 +103,27 @@ class GateEstimate(BaseModel):
         return self
 
     def summary(self) -> pd.DataFrame:
-        """Return per-group GATE summary table."""
-        return self.summary_table.copy()
+        """Return per-group subgroup-effect summary table."""
+        summary = self.summary_table.copy().reset_index()
+        summary = summary.drop(columns=["wald_stat"], errors="ignore")
+
+        for rounded_col in ("share_treated", "p_value"):
+            if rounded_col in summary.columns:
+                summary[rounded_col] = summary[rounded_col].round(5)
+
+        preferred_order = [
+            "group",
+            "value",
+            "is_significant",
+            "ci_lower",
+            "ci_upper",
+            "n_group",
+            "n_treated",
+            "n_control",
+            "share_treated",
+        ]
+        remaining_cols = [col for col in summary.columns if col not in preferred_order]
+        return summary[preferred_order + remaining_cols].copy()
 
     def contrast(
         self,
@@ -114,7 +133,7 @@ class GateEstimate(BaseModel):
         alpha: Optional[float] = None,
         alternative: str = "two-sided",
     ) -> GateContrastEstimate:
-        """Construct a formal post-estimation contrast between two GATE groups."""
+        """Construct a formal post-estimation contrast between two groups."""
         left_idx = self._resolve_group_position(group_name=left_group)
         right_idx = self._resolve_group_position(group_name=right_group, argument_name="right_group")
         if left_idx == right_idx:
@@ -132,7 +151,7 @@ class GateEstimate(BaseModel):
         )
 
         return GateContrastEstimate(
-            estimand="GATE_CONTRAST",
+            estimand=f"{self.estimand}_CONTRAST",
             model=self.model,
             model_options=dict(self.model_options),
             left_group=self.group_names[left_idx],
@@ -160,9 +179,9 @@ class GateEstimate(BaseModel):
         alpha: Optional[float] = None,
         p_adjust: str = "none",
     ) -> pd.DataFrame:
-        """Return a long-form table of formal pairwise GATE contrasts."""
+        """Return a long-form table of formal pairwise subgroup contrasts."""
         if len(self.group_names) < 2:
-            raise ValueError("pairwise_summary requires at least two estimable GATE groups.")
+            raise ValueError(f"pairwise_summary requires at least two estimable {self.estimand} groups.")
 
         alpha_resolved = self._resolve_alpha(alpha)
         p_adjust_resolved = self._resolve_p_adjust(p_adjust)
@@ -285,7 +304,7 @@ class GateEstimate(BaseModel):
         if np.isfinite(variance) and variance < 0.0 and abs(variance) < 1e-12:
             variance = 0.0
         if np.isfinite(variance) and variance < 0.0:
-            raise RuntimeError("Stored GATE covariance produced a negative contrast variance.")
+            raise RuntimeError(f"Stored {self.estimand} covariance produced a negative contrast variance.")
 
         std_error = float(np.sqrt(variance)) if np.isfinite(variance) else np.nan
         with np.errstate(divide="ignore", invalid="ignore"):

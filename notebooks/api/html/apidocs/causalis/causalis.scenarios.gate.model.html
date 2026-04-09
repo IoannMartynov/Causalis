@@ -35,6 +35,9 @@
             
   <section id="module-causalis.scenarios.gate.model">
 <span id="causalis-scenarios-gate-model"></span><h1><a class="reference internal" href="#module-causalis.scenarios.gate.model" title="causalis.scenarios.gate.model"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.gate.model</span></code></a><a class="headerlink" href="#module-causalis.scenarios.gate.model" title="Link to this heading">¶</a></h1>
+<p>Utilities for group-level IRM estimands such as GATE and GATET.</p>
+<p>The public entry points in this module estimate subgroup effects from a fitted
+binary-treatment IRM using pre-defined groups aligned to the fit-time sample.</p>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
 <section id="functions">
@@ -43,6 +46,9 @@
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.gate.model.estimate_gate_from_irm" title="causalis.scenarios.gate.model.estimate_gate_from_irm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">estimate_gate_from_irm</span></code></a></p></td>
 <td><p>Estimate Group Average Treatment Effects (GATEs) from a fitted IRM.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.gate.model.estimate_gatet_from_irm" title="causalis.scenarios.gate.model.estimate_gatet_from_irm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">estimate_gatet_from_irm</span></code></a></p></td>
+<td><p>Estimate Group Average Treatment Effects on the Treated (GATETs) from a fitted IRM.</p></td>
 </tr>
 </tbody>
 </table>
@@ -53,7 +59,7 @@
 <dt class="sig sig-object py" id="causalis.scenarios.gate.model.estimate_gate_from_irm">
 <span class="sig-prename descclassname"><span class="pre">causalis.scenarios.gate.model.</span></span><span class="sig-name descname"><span class="pre">estimate_gate_from_irm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">irm_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">pandas.Series</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'HC3'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov_kwds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="causalis.data_contracts.gate_estimate.html#causalis.data_contracts.gate_estimate.GateEstimate" title="causalis.data_contracts.gate_estimate.GateEstimate"><span class="pre">causalis.data_contracts.gate_estimate.GateEstimate</span></a></span></span><a class="headerlink" href="#causalis.scenarios.gate.model.estimate_gate_from_irm" title="Link to this definition">¶</a></dt>
 <dd><p>Estimate Group Average Treatment Effects (GATEs) from a fitted IRM.</p>
-<p class="rubric" id="id1">Parameters</p>
+<p class="rubric" id="id5">Parameters</p>
 <p>irm_model : fitted IRM
 Interactive Regression Model with stored cross-fitted nuisance predictions
 :math:<code class="docutils literal notranslate"><span class="pre">\hat</span> <span class="pre">g_0(X)</span></code>, :math:<code class="docutils literal notranslate"><span class="pre">\hat</span> <span class="pre">g_1(X)</span></code>, and :math:<code class="docutils literal notranslate"><span class="pre">\hat</span> <span class="pre">m(X)</span></code>.
@@ -90,14 +96,14 @@ cov_kwds : Optional[Dict[str, Any]], default None
 Additional covariance options requested by the caller.
 These are currently ignored because GATE uses the closed-form HCx
 covariance formulas implemented in this module.</p>
-<p class="rubric" id="id2">Returns</p>
+<p class="rubric" id="id6">Returns</p>
 <p>GateEstimate
 Result contract containing subgroup effects, standard errors,
 Wald statistics, confidence intervals, covariance matrix, and
 group-level diagnostics. The returned object also supports
 <code class="docutils literal notranslate"><span class="pre">contrast(...)</span></code> and <code class="docutils literal notranslate"><span class="pre">pairwise_summary(...)</span></code> for formal
 post-estimation group comparisons.</p>
-<p class="rubric" id="id3">Examples</p>
+<p class="rubric" id="id7">Examples</p>
 <blockquote>
 <div><blockquote>
 <div><blockquote>
@@ -129,7 +135,7 @@ gate.summary()  # doctest: +SKIP</p>
 </div></blockquote>
 </div></blockquote>
 </div></blockquote>
-<p class="rubric" id="id4">Notes</p>
+<p class="rubric" id="id8">Notes</p>
 <p>This implementation targets strict subgroup effects under the same
 unconfoundedness and overlap assumptions used by IRM, with an additional
 requirement that subgroup membership is pre-treatment.</p>
@@ -159,6 +165,146 @@ is block-diagonal, the covariance matrix is diagonal and each subgroup
 variance is available in closed form under HC0/HC1/HC2/HC3.</p>
 <p><code class="docutils literal notranslate"><span class="pre">normalize_ipw=True</span></code> on the IRM is intentionally ignored for GATE so the
 estimator uses the canonical unnormalized orthogonal signal above.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.gate.model.estimate_gatet_from_irm">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.gate.model.</span></span><span class="sig-name descname"><span class="pre">estimate_gatet_from_irm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">irm_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">pandas.Series</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'HC3'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov_kwds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="causalis.data_contracts.gate_estimate.html#causalis.data_contracts.gate_estimate.GateEstimate" title="causalis.data_contracts.gate_estimate.GateEstimate"><span class="pre">causalis.data_contracts.gate_estimate.GateEstimate</span></a></span></span><a class="headerlink" href="#causalis.scenarios.gate.model.estimate_gatet_from_irm" title="Link to this definition">¶</a></dt>
+<dd><p>Estimate Group Average Treatment Effects on the Treated (GATETs) from a fitted IRM.</p>
+<p class="rubric" id="id9">Parameters</p>
+<p>irm_model : fitted IRM
+Interactive Regression Model with stored cross-fitted nuisance predictions
+:math:<code class="docutils literal notranslate"><span class="pre">\hat</span> <span class="pre">g_0(X)</span></code>, :math:<code class="docutils literal notranslate"><span class="pre">\hat</span> <span class="pre">g_1(X)</span></code>, and :math:<code class="docutils literal notranslate"><span class="pre">\hat</span> <span class="pre">m(X)</span></code>.
+The model must already be fitted.
+groups : Optional[pd.DataFrame, pd.Series, or np.ndarray]
+Pre-specified subgroup definition.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Accepted forms are:
+- A single Series / one-column DataFrame of group labels.
+- A multi-column dummy basis with binary indicators.
+- A numpy array of group labels (assumed aligned with fit-time rows).
+
+For strict GATET, groups must define a mutually exclusive and exhaustive
+partition of the fitted sample. Each group must contain at least one
+treated observation. Groups with no controls are still accepted for
+GATET, but a warning is emitted because within-group overlap is
+degenerate and identification relies on :math:`\hat g_0(X)` and
+:math:`\hat m(X)` learned outside the subgroup.
+
+GATET requires the fitted ``CausalData`` to define ``user_id``.
+Group rows are aligned to the IRM fit-time sample using those fit-time
+observation ids. In practice, ``groups.index`` must either exactly match
+those ids or be a permutation of them. As a convenience, when the model
+was fitted with ``user_id``, GATET also accepts groups indexed by the
+original fit-time row index if the current row-to-``user_id`` mapping is
+still unchanged.
+
+If None, falls back to ``irm_model.data.gate_groups`` when present.
+</pre></div>
+</div>
+<p>alpha : float, default 0.05
+Significance level for two-sided confidence intervals.
+cov_type : {“HC0”, “HC1”, “HC2”, “HC3”}, default “HC3”
+Heteroskedasticity-robust covariance estimator used for subgroup
+inference. The implementation uses a closed-form subgroupwise sandwich
+covariance equivalent to a no-intercept regression on subgroup dummies
+scaled by within-group treated shares.
+cov_kwds : Optional[Dict[str, Any]], default None
+Additional covariance options requested by the caller.
+These are currently ignored because GATET uses the closed-form HCx
+covariance formulas implemented in this module.</p>
+<p class="rubric" id="id10">Returns</p>
+<p>GateEstimate
+Result contract containing subgroup-treated effects, standard errors,
+confidence intervals, covariance matrix, and group-level diagnostics.
+The returned object also supports <code class="docutils literal notranslate"><span class="pre">contrast(...)</span></code> and
+<code class="docutils literal notranslate"><span class="pre">pairwise_summary(...)</span></code> for formal post-estimation group comparisons.</p>
+<p class="rubric" id="id11">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>import pandas as pd
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from causalis.dgp import obs_linear_26_dataset
+from causalis.scenarios.unconfoundedness.model import IRM
+data = obs_linear_26_dataset(
+…     n=1000,
+…     seed=3141,
+…     include_oracle=False,
+…     return_causal_data=True,
+… )
+groups = pd.Series(
+…     (data.df[“x1”] &gt;= 0).map({True: “high_x1”, False: “low_x1”}),
+…     index=data.df[“user_id”],
+…     name=”segment”,
+… )
+irm = IRM(
+…     data=data,
+…     ml_g=RandomForestRegressor(n_estimators=200, max_depth=6, random_state=3141),
+…     ml_m=RandomForestClassifier(n_estimators=200, max_depth=6, random_state=3141),
+…     n_folds=3,
+…     random_state=3141,
+… )
+irm.fit()
+gatet = estimate_gatet_from_irm(irm, groups=groups)
+gatet.summary()  # doctest: +SKIP</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+<p class="rubric" id="id12">Notes</p>
+<p>This implementation targets subgroup ATT under the same unconfoundedness
+and overlap assumptions used by IRM, with the additional requirement that
+subgroup membership is pre-treatment.</p>
+<p>Let :math:<code class="docutils literal notranslate"><span class="pre">G</span></code> denote a finite partition of the sample space. For subgroup
+:math:<code class="docutils literal notranslate"><span class="pre">g</span></code>, the target estimand is</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\theta_g^{\mathrm{GATET}}
+= \mathbb{E}[Y(1)-Y(0)\mid G=g, D=1].
+</pre></div>
+</div>
+<p>Equivalently, for a strict subgroup partition,</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\theta_g^{\mathrm{GATET}}
+= \mathbb{E}\left[
+    \frac{D \mathbf{1}\{G=g\}}{\mathbb{P}(D=1, G=g)}
+    (Y(1)-Y(0))
+  \right].
+</pre></div>
+</div>
+<p>Using the fitted nuisances :math:<code class="docutils literal notranslate"><span class="pre">\hat</span> <span class="pre">g_0(X)</span></code> and :math:<code class="docutils literal notranslate"><span class="pre">\hat</span> <span class="pre">m(X)</span></code>, define
+the ATT-style orthogonal signal</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>z =
+D \cdot (Y - \hat g_0(X))
+- \hat m(X)(1-D)\frac{Y-\hat g_0(X)}{1-\hat m(X)}.
+</pre></div>
+</div>
+<p>Then the subgroup ATT can be written as</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\hat\theta_g^{\mathrm{GATET}}
+= \frac{1}{n_{\mathrm{treated}, g}}
+  \sum_{i:G_i=g} z_i,
+</pre></div>
+</div>
+<p>where :math:<code class="docutils literal notranslate"><span class="pre">n_{\mathrm{treated},</span> <span class="pre">g}</span></code> is the number of treated observations
+in subgroup :math:<code class="docutils literal notranslate"><span class="pre">g</span></code>. In particular, the implementation changes the score
+itself to the subgroup-ATT signal above; it is not computed by first
+building ordinary GATE scores and then averaging them only over treated
+units in subgroup :math:<code class="docutils literal notranslate"><span class="pre">g</span></code>.</p>
+<p>Inference is based on the subgroup moment residual</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>u_{ig} = \mathbf{1}\{G_i=g\}\,(z_i - D_i \hat\theta_g),
+</pre></div>
+</div>
+<p>with diagonal HC0/HC1/HC2/HC3 covariance formulas computed in closed form.</p>
+<p>As a sanity check, when the groups form an exhaustive partition,</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\mathrm{ATTE}
+= \sum_g \mathbb{P}(G=g \mid D=1)\,
+  \theta_g^{\mathrm{GATET}}.
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">normalize_ipw=True</span></code> on the IRM is intentionally ignored for GATET so the
+estimator uses the canonical unnormalized subgroup-ATT signal above.</p>
 </dd></dl>
 
 </section>

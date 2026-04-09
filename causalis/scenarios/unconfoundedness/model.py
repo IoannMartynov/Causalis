@@ -1,7 +1,7 @@
 r"""
 IRM estimator consuming CausalData.
 
-Implements cross-fitted nuisance estimation for g0, g1 and m, and supports ATE/ATTE/GATE scores.
+Implements cross-fitted nuisance estimation for g0, g1 and m, and supports ATE/ATTE/GATE/GATET scores.
 https://github.com/DoubleML/doubleml-for-py/blob/main/doubleml/irm/irm.py
 """
 from __future__ import annotations
@@ -28,7 +28,7 @@ from causalis.dgp.causaldata import CausalData
 from causalis.data_contracts.causal_diagnostic_data import UnconfoundednessDiagnosticData
 from causalis.data_contracts.causal_estimate import CausalEstimate
 from causalis.data_contracts.gate_estimate import GateEstimate
-from causalis.scenarios.gate.model import estimate_gate_from_irm
+from causalis.scenarios.gate.model import estimate_gate_from_irm, estimate_gatet_from_irm
 from causalis.scenarios.unconfoundedness._diagnostic_utils import (
     _build_irm_estimate_diagnostic_data,
 )
@@ -862,8 +862,8 @@ class IRM(BaseEstimator):
         score_u = str(score).upper()
         if score_u == "CATE":
             raise NotImplementedError("score='CATE' is not supported.")
-        if score_u not in {"ATE", "ATTE", "GATE"}:
-            raise ValueError("score must be 'ATE', 'ATTE', or 'GATE'")
+        if score_u not in {"ATE", "ATTE", "GATE", "GATET"}:
+            raise ValueError("score must be 'ATE', 'ATTE', 'GATE', or 'GATET'")
         return score_u
 
     def _estimate_inference_approx_flags(self, score: str, normalize_ipw_effective: bool) -> Dict[str, bool]:
@@ -1122,29 +1122,29 @@ class IRM(BaseEstimator):
 
         Parameters
         ----------
-        score : {"ATE", "ATTE", "GATE"}, default "ATE"
+        score : {"ATE", "ATTE", "GATE", "GATET"}, default "ATE"
             Target estimand.
         alpha : float, default 0.05
             Significance level for intervals.
             Diagnostic payloads are included only when the model was fitted with
             ``store_diagnostics=True``.
         groups : Optional[pd.DataFrame | pd.Series], default None
-            Group labels/indicators for ``score="GATE"``.
+            Group labels/indicators for ``score="GATE"`` or ``score="GATET"``.
             If None, fallback to ``self.data.gate_groups`` when present.
-            GATE requires ``CausalData.user_id`` and aligns groups to those
+            GATE/GATET requires ``CausalData.user_id`` and aligns groups to those
             fit-time observation ids. Row-indexed groups are also accepted only
             when the fit-time row-to-``user_id`` mapping is still unchanged.
         cov_type : {"HC0", "HC1", "HC2", "HC3"}, default "HC3"
-            Robust covariance type for ``score="GATE"`` inference.
+            Robust covariance type for ``score="GATE"`` / ``score="GATET"`` inference.
         cov_kwds : Optional[Dict[str, Any]], default None
-            Additional covariance keyword arguments requested for ``score="GATE"``.
-            These are currently ignored because GATE uses closed-form HCx
+            Additional covariance keyword arguments requested for subgroup inference.
+            These are currently ignored because GATE/GATET use closed-form HCx
             covariance formulas rather than delegating to statsmodels.
 
         Returns
         -------
         CausalEstimate or GateEstimate
-            Result container for the estimated effect. For ``score="GATE"``,
+            Result container for the estimated effect. For subgroup scores,
             the returned ``GateEstimate`` supports ``summary()`` for
             subgroup-vs-zero inference, ``contrast(...)`` for formal
             group-vs-group tests, and ``pairwise_summary(...)`` for a
@@ -1154,8 +1154,9 @@ class IRM(BaseEstimator):
         score = self._validate_estimate_request(score=score, alpha=alpha)
         self.score = score
 
-        if score == "GATE":
-            return estimate_gate_from_irm(
+        if score in {"GATE", "GATET"}:
+            subgroup_estimator = estimate_gate_from_irm if score == "GATE" else estimate_gatet_from_irm
+            return subgroup_estimator(
                 irm_model=self,
                 groups=groups,
                 alpha=alpha,
@@ -1358,6 +1359,22 @@ class IRM(BaseEstimator):
         """
         return self.estimate(
             score="GATE",
+            groups=groups,
+            alpha=alpha,
+            cov_type=cov_type,
+            cov_kwds=cov_kwds,
+        )
+
+    def gatet(
+        self,
+        groups: pd.DataFrame | pd.Series,
+        alpha: float = 0.05,
+        cov_type: str = "HC3",
+        cov_kwds: Optional[Dict[str, Any]] = None,
+    ) -> GateEstimate:
+        """Convenience wrapper for ``estimate(score="GATET", ...)``."""
+        return self.estimate(
+            score="GATET",
             groups=groups,
             alpha=alpha,
             cov_type=cov_type,

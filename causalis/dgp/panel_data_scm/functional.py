@@ -1,3 +1,29 @@
+"""
+Panel-data DGP wrappers for synthetic control and SCM-style benchmarks.
+
+This module exposes high-level functions that build donor-pool panel datasets
+with one treated unit, a pre/post intervention split, and optional oracle
+counterfactual paths.
+
+Notes
+-----
+Use ``generate_scm_data`` for Gaussian outcomes and the Gamma/Poisson wrappers
+when you want strictly positive or count-like panels. All public wrappers can
+return either a raw ``DataFrame`` or a :class:`PanelDataSCM` container.
+
+Examples
+--------
+>>> from causalis.dgp.panel_data_scm.functional import generate_scm_data
+>>> panel = generate_scm_data(
+...     n_donors=5,
+...     n_pre_periods=24,
+...     n_post_periods=6,
+...     return_panel_data=True,
+... )
+>>> panel.unit_col, panel.time_col
+('unit_id', 'calendar_time')
+"""
+
 from __future__ import annotations
 
 from typing import Any, Hashable, Literal, Optional, Union
@@ -178,6 +204,21 @@ def generate_scm_data(
     The Gaussian treated counterfactual path is exact SCM only when both
     `treated_noise_std=0.0` and `prefit_mismatch_std=0.0`. With either term
     non-zero, the generator intentionally produces an approximate-SCM fit path.
+
+    Examples
+    --------
+    >>> from causalis.dgp.panel_data_scm.functional import generate_scm_data
+    >>> panel = generate_scm_data(
+    ...     n_donors=4,
+    ...     n_pre_periods=18,
+    ...     n_post_periods=6,
+    ...     treatment_effect=3.0,
+    ...     return_panel_data=True,
+    ... )
+    >>> panel.treated_unit
+    'treated'
+    >>> {"y", "y_cf"}.issubset(panel.df.columns)
+    True
     """
     config = PanelSCMGeneratorConfig(
         outcome_distribution="gaussian",
@@ -229,6 +270,19 @@ def generate_scm_gamma_data(
     effective relative lift is
     `treatment_effect_rate * (1 - exp(-1 / 2.5))` (about 0.33x of the parameter
     when slope is zero).
+
+    Examples
+    --------
+    >>> from causalis.dgp.panel_data_scm.functional import generate_scm_gamma_data
+    >>> panel = generate_scm_gamma_data(
+    ...     n_donors=6,
+    ...     n_pre_periods=24,
+    ...     n_post_periods=6,
+    ...     treatment_effect_rate=0.12,
+    ...     return_panel_data=True,
+    ... )
+    >>> "tau_mean_true" in panel.df.columns
+    True
     """
     n_pre_periods, n_post_periods = _resolve_pre_post_periods(
         n=n,
@@ -276,6 +330,19 @@ def generate_scm_poisson_data(
     effective relative lift is
     `treatment_effect_rate * (1 - exp(-1 / 2.5))` (about 0.33x of the parameter
     when slope is zero).
+
+    Examples
+    --------
+    >>> from causalis.dgp.panel_data_scm.functional import generate_scm_poisson_data
+    >>> panel = generate_scm_poisson_data(
+    ...     n_donors=6,
+    ...     n_pre_periods=24,
+    ...     n_post_periods=6,
+    ...     treatment_effect_rate=0.10,
+    ...     return_panel_data=True,
+    ... )
+    >>> panel.df["y"].ge(0).all()
+    True
     """
     n_pre_periods, n_post_periods = _resolve_pre_post_periods(
         n=n,

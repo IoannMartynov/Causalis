@@ -1,3 +1,28 @@
+"""
+High-level helpers for single-treatment synthetic causal datasets.
+
+This module provides convenient wrappers around
+:class:`causalis.dgp.causaldata.base.CausalDatasetGenerator` for common
+benchmarking setups such as classic A/B tests, observational confounding, and
+CUPED-oriented examples with pre-period covariates.
+
+Notes
+-----
+Use this module when you want a ready-made synthetic dataset without specifying
+every structural component manually. For finer control over the DGP, instantiate
+``CausalDatasetGenerator`` directly instead.
+
+Examples
+--------
+>>> from causalis.dgp.causaldata.functional import generate_rct, obs_linear_effect
+>>> rct = generate_rct(n=500, outcome_type="normal", return_causal_data=True)
+>>> rct.outcome, rct.treatment
+('y', 'd')
+>>> obs = obs_linear_effect(n=500, theta=1.0, target_d_rate=0.3)
+>>> {"y", "d"}.issubset(obs.columns)
+True
+"""
+
 from __future__ import annotations
 import numpy as np
 import pandas as pd
@@ -154,6 +179,23 @@ def generate_rct(
     -------
     pandas.DataFrame or CausalData
         Synthetic RCT dataset.
+
+    Examples
+    --------
+    >>> from causalis.dgp.causaldata.functional import generate_rct
+    >>> data = generate_rct(
+    ...     n=1000,
+    ...     outcome_type="binary",
+    ...     outcome_params={"p": {"A": 0.10, "B": 0.12}},
+    ...     add_pre=True,
+    ...     return_causal_data=True,
+    ... )
+    >>> data.treatment, data.outcome
+    ('d', 'y')
+    >>> "y_pre" in data.df.columns
+    True
+    >>> {"g0", "g1", "cate"}.issubset(data.df.columns)
+    True
     """
     # RNG for ancillary generation
     rng = np.random.default_rng(random_state)
@@ -605,6 +647,30 @@ def obs_linear_effect(
     -------
     pandas.DataFrame
         Synthetic observational dataset.
+
+    Notes
+    -----
+    This helper is a lightweight observational benchmark:
+
+    - treatment is not randomized unless ``beta_d`` is zero and
+      ``target_d_rate`` forces a near-constant propensity;
+    - oracle columns such as ``m`` and ``cate`` are available when
+      ``include_oracle=True``;
+    - the treatment effect is constant on the structural link scale, so
+      heterogeneity only enters through the outcome family transformation.
+
+    Examples
+    --------
+    >>> from causalis.dgp.causaldata.functional import obs_linear_effect
+    >>> df = obs_linear_effect(
+    ...     n=1000,
+    ...     theta=1.0,
+    ...     target_d_rate=0.35,
+    ...     k=3,
+    ...     random_state=3141,
+    ... )
+    >>> sorted(col for col in ["y", "d", "m", "cate"] if col in df.columns)
+    ['cate', 'd', 'm', 'y']
     """
     gen = CausalDatasetGenerator(
         theta=theta,

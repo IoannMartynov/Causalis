@@ -265,14 +265,18 @@ def test_gate_summary_includes_is_significant_column():
     res = irm.estimate(score="GATE", groups=groups)
     summary = res.summary()
 
-    assert list(summary.columns[:6]) == [
+    assert list(summary.columns[:9]) == [
+        "group",
         "value",
-        "std_error",
-        "wald_stat",
-        "test_stat",
-        "p_value",
         "is_significant",
+        "ci_lower",
+        "ci_upper",
+        "n_group",
+        "n_treated",
+        "n_control",
+        "share_treated",
     ]
+    assert "wald_stat" not in summary.columns
     np.testing.assert_array_equal(summary["is_significant"].to_numpy(dtype=bool), res.p_values < res.alpha)
     np.testing.assert_array_equal(res.summary_table["is_significant"].to_numpy(dtype=bool), res.p_values < res.alpha)
 

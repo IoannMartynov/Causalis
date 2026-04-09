@@ -35,7 +35,18 @@
             
   <section id="module-causalis.scenarios.gate">
 <span id="causalis-scenarios-gate"></span><h1><a class="reference internal" href="#module-causalis.scenarios.gate" title="causalis.scenarios.gate"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.gate</span></code></a><a class="headerlink" href="#module-causalis.scenarios.gate" title="Link to this heading">¶</a></h1>
-<p>Group Average Treatment Effect (GATE) estimation utilities.</p>
+<p>Group-level treatment effect estimation utilities for fitted IRM models.</p>
+<p>This submodule exposes:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">estimate_gate_from_irm</span></code> for
+:math:<code class="docutils literal notranslate"><span class="pre">\theta_g^{\mathrm{GATE}}</span> <span class="pre">=</span> <span class="pre">\mathbb{E}[Y(1)-Y(0)\mid</span> <span class="pre">G=g]</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">estimate_gatet_from_irm</span></code> for
+:math:<code class="docutils literal notranslate"><span class="pre">\theta_g^{\mathrm{GATET}}</span> <span class="pre">=</span> <span class="pre">\mathbb{E}[Y(1)-Y(0)\mid</span> <span class="pre">G=g,</span> <span class="pre">D=1]</span></code></p></li>
+</ul>
+<p>The first estimand is a subgroup ATE. The second is a subgroup ATT among the
+treated inside subgroup :math:<code class="docutils literal notranslate"><span class="pre">g</span></code>, not a treated-only average of the ordinary
+GATE score. Both estimands assume subgroup membership is a pre-treatment
+partition.</p>
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
 <div class="toctree-wrapper compound">
@@ -72,7 +83,7 @@
 <dl class="py data">
 <dt class="sig sig-object py" id="causalis.scenarios.gate.__all__">
 <span class="sig-prename descclassname"><span class="pre">causalis.scenarios.gate.</span></span><span class="sig-name descname"><span class="pre">__all__</span></span><a class="headerlink" href="#causalis.scenarios.gate.__all__" title="Link to this definition">¶</a></dt>
-<dd><p>[‘estimate_gate_from_irm’, ‘gate_plot’, ‘plot_gate_estimate’]</p>
+<dd><p>[‘estimate_gate_from_irm’, ‘estimate_gatet_from_irm’, ‘gate_plot’, ‘plot_gate_estimate’]</p>
 </dd></dl>
 
 <dl class="py function">

@@ -35,6 +35,34 @@
             
   <section id="module-causalis.dgp.multicausaldata.functional">
 <span id="causalis-dgp-multicausaldata-functional"></span><h1><a class="reference internal" href="#module-causalis.dgp.multicausaldata.functional" title="causalis.dgp.multicausaldata.functional"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.dgp.multicausaldata.functional</span></code></a><a class="headerlink" href="#module-causalis.dgp.multicausaldata.functional" title="Link to this heading">¶</a></h1>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading">¶</a></h2>
+<p>The first treatment column is treated as the control arm by convention. When
+<code class="docutils literal notranslate"><span class="pre">return_causal_data=True</span></code>, the returned :class:<code class="docutils literal notranslate"><span class="pre">MultiCausalData</span></code> object uses
+that first arm as <code class="docutils literal notranslate"><span class="pre">control_treatment</span></code>.</p>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.dgp.multicausaldata.functional import generate_multitreatment
+data = generate_multitreatment(
+…     n=1000,
+…     n_treatments=3,
+…     theta=[0.0, 0.5, 1.0],
+…     return_causal_data=True,
+… )
+data.treatment_names
+[‘d_0’, ‘d_1’, ‘d_2’]</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</section>
+<p>High-level generators for multi-arm treatment datasets.</p>
+<p>The helpers in this module build datasets where treatment assignment is a full
+one-hot encoding over multiple arms, with arm-specific structural effects and
+optional oracle columns.</p>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
 <section id="functions">
@@ -53,7 +81,7 @@
 <dt class="sig sig-object py" id="causalis.dgp.multicausaldata.functional.generate_multitreatment">
 <span class="sig-prename descclassname"><span class="pre">causalis.dgp.multicausaldata.functional.</span></span><span class="sig-name descname"><span class="pre">generate_multitreatment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_treatments</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'continuous'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_d_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confounder_specs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_sampler</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_copula</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copula_corr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_oracle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_causal_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="causalis.data_contracts.multicausaldata.html#causalis.data_contracts.multicausaldata.MultiCausalData" title="causalis.data_contracts.multicausaldata.MultiCausalData"><span class="pre">causalis.data_contracts.multicausaldata.MultiCausalData</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.dgp.multicausaldata.functional.generate_multitreatment" title="Link to this definition">¶</a></dt>
 <dd><p>Generate a multi-treatment dataset using MultiCausalDatasetGenerator.</p>
-<p class="rubric" id="id1">Parameters</p>
+<p class="rubric" id="id3">Parameters</p>
 <p>n : int, default=10_000
 Number of samples.
 n_treatments : int, default=3
@@ -95,8 +123,33 @@ return_causal_data : bool, default=False
 Whether to return a MultiCausalData object.
 d_names : list of str, optional
 Names of treatment columns.</p>
-<p class="rubric" id="id2">Returns</p>
+<p class="rubric" id="id4">Returns</p>
 <p>pd.DataFrame or MultiCausalData</p>
+<p class="rubric" id="id5">Notes</p>
+<p>Treatment columns form a mutually exclusive one-hot representation:</p>
+<ul class="simple">
+<li><p>exactly one treatment column equals <code class="docutils literal notranslate"><span class="pre">1</span></code> for each row;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">d_names[0]</span></code> is the control arm;</p></li>
+<li><p>arm-specific structural effects are defined on the outcome link scale and
+are mapped back to the natural outcome scale in oracle outputs.</p></li>
+</ul>
+<p class="rubric" id="id6">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.dgp.multicausaldata.functional import generate_multitreatment
+df = generate_multitreatment(
+…     n=500,
+…     n_treatments=4,
+…     outcome_type=”continuous”,
+…     theta=[0.0, 0.2, 0.5, 0.8],
+… )
+treatment_cols = [“d_0”, “d_1”, “d_2”, “d_3”]
+int(df[treatment_cols].sum(axis=1).eq(1).all())
+1</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
 </dd></dl>
 
 </section>

@@ -1,3 +1,36 @@
+"""
+Low-level generators for single-treatment synthetic causal datasets.
+
+The central class in this module is :class:`CausalDatasetGenerator`, which
+builds observational or randomized-style data with binary treatment and
+optionally exposes oracle quantities such as propensities and potential-outcome
+means.
+
+Notes
+-----
+This module is the lowest-level tabular DGP layer used by higher-level helpers
+in :mod:`causalis.dgp.causaldata.functional` and scenario-specific wrappers.
+Reach for it when you want direct control over the structural equations rather
+than a pre-packaged example dataset.
+
+Examples
+--------
+>>> import numpy as np
+>>> from causalis.dgp.causaldata.base import CausalDatasetGenerator
+>>> gen = CausalDatasetGenerator(
+...     theta=1.5,
+...     beta_y=np.array([0.7, -0.4]),
+...     beta_d=np.array([1.0, 0.5]),
+...     target_d_rate=0.35,
+...     seed=3141,
+...     include_oracle=True,
+...     k=2,
+... )
+>>> df = gen.generate(200)
+>>> sorted(col for col in ["y", "d", "m", "cate"] if col in df.columns)
+['cate', 'd', 'm', 'y']
+"""
+
 from __future__ import annotations
 import numpy as np
 import pandas as pd
@@ -98,6 +131,35 @@ class CausalDatasetGenerator:
     ----------
     rng : numpy.random.Generator
         Internal RNG seeded from `seed`.
+
+    Notes
+    -----
+    Oracle outputs are reported on the natural outcome scale:
+
+    - ``m`` is the treatment propensity marginalized over latent noise.
+    - ``g0`` and ``g1`` are mean potential outcomes on the observed outcome
+      scale.
+    - ``cate`` is always ``g1 - g0`` on that same natural scale, even when the
+      structural treatment effect is specified on a link scale such as log-odds
+      or log-mean.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> gen = CausalDatasetGenerator(
+    ...     theta=0.8,
+    ...     beta_y=np.array([0.5, -0.2, 0.1]),
+    ...     beta_d=np.array([0.8, 0.4, -0.3]),
+    ...     target_d_rate=0.4,
+    ...     outcome_type="continuous",
+    ...     seed=123,
+    ...     k=3,
+    ... )
+    >>> df = gen.generate(1000)
+    >>> float(df["d"].mean()) > 0.0
+    True
+    >>> "cate" in df.columns
+    True
     """
     # Core knobs
     theta: float = 1.0                            # constant treatment effect (ATE) if tau is None

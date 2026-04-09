@@ -35,6 +35,41 @@
             
   <section id="module-causalis.dgp.causaldata.base">
 <span id="causalis-dgp-causaldata-base"></span><h1><a class="reference internal" href="#module-causalis.dgp.causaldata.base" title="causalis.dgp.causaldata.base"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.dgp.causaldata.base</span></code></a><a class="headerlink" href="#module-causalis.dgp.causaldata.base" title="Link to this heading">¶</a></h1>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading">¶</a></h2>
+<p>This module is the lowest-level tabular DGP layer used by higher-level helpers
+in :mod:<code class="docutils literal notranslate"><span class="pre">causalis.dgp.causaldata.functional</span></code> and scenario-specific wrappers.
+Reach for it when you want direct control over the structural equations rather
+than a pre-packaged example dataset.</p>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>import numpy as np
+from causalis.dgp.causaldata.base import CausalDatasetGenerator
+gen = CausalDatasetGenerator(
+…     theta=1.5,
+…     beta_y=np.array([0.7, -0.4]),
+…     beta_d=np.array([1.0, 0.5]),
+…     target_d_rate=0.35,
+…     seed=3141,
+…     include_oracle=True,
+…     k=2,
+… )
+df = gen.generate(200)
+sorted(col for col in [“y”, “d”, “m”, “cate”] if col in df.columns)
+[‘cate’, ‘d’, ‘m’, ‘y’]</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</section>
+<p>Low-level generators for single-treatment synthetic causal datasets.</p>
+<p>The central class in this module is :class:<code class="docutils literal notranslate"><span class="pre">CausalDatasetGenerator</span></code>, which
+builds observational or randomized-style data with binary treatment and
+optionally exposes oracle quantities such as propensities and potential-outcome
+means.</p>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
 <section id="classes">
@@ -90,7 +125,7 @@ where f_y(X) = X &#64; beta_y + g_y(X), and tau(X) is either constant <code clas
 <li><p>For “binary”, tau acts on the <em>log-odds</em> scale. <code class="docutils literal notranslate"><span class="pre">cate</span></code> is reported as a risk difference.</p></li>
 <li><p>For “poisson” and “gamma”, tau acts on the <em>log-mean</em> scale. <code class="docutils literal notranslate"><span class="pre">cate</span></code> is reported on the mean scale.</p></li>
 </ul>
-<p class="rubric" id="id1">Parameters</p>
+<p class="rubric" id="id3">Parameters</p>
 <p>theta : float, default=1.0
 Constant treatment effect used if <code class="docutils literal notranslate"><span class="pre">tau</span></code> is None.
 tau : callable, optional
@@ -131,9 +166,41 @@ propensity_sharpness : float, default=1.0
 Scales the X-driven treatment score to adjust positivity difficulty.
 seed : int, optional
 Random seed for reproducibility.</p>
-<p class="rubric" id="id2">Attributes</p>
+<p class="rubric" id="id4">Attributes</p>
 <p>rng : numpy.random.Generator
 Internal RNG seeded from <code class="docutils literal notranslate"><span class="pre">seed</span></code>.</p>
+<p class="rubric" id="id5">Notes</p>
+<p>Oracle outputs are reported on the natural outcome scale:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">m</span></code> is the treatment propensity marginalized over latent noise.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">g0</span></code> and <code class="docutils literal notranslate"><span class="pre">g1</span></code> are mean potential outcomes on the observed outcome
+scale.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cate</span></code> is always <code class="docutils literal notranslate"><span class="pre">g1</span> <span class="pre">-</span> <span class="pre">g0</span></code> on that same natural scale, even when the
+structural treatment effect is specified on a link scale such as log-odds
+or log-mean.</p></li>
+</ul>
+<p class="rubric" id="id6">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>import numpy as np
+gen = CausalDatasetGenerator(
+…     theta=0.8,
+…     beta_y=np.array([0.5, -0.2, 0.1]),
+…     beta_d=np.array([0.8, 0.4, -0.3]),
+…     target_d_rate=0.4,
+…     outcome_type=”continuous”,
+…     seed=123,
+…     k=3,
+… )
+df = gen.generate(1000)
+float(df[“d”].mean()) &gt; 0.0
+True
+“cate” in df.columns
+True</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.theta">
 <span class="sig-name descname"><span class="pre">theta</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.theta" title="Link to this definition">¶</a></dt>
@@ -330,7 +397,7 @@ Internal RNG seeded from <code class="docutils literal notranslate"><span class=
 <dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.generate">
 <span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">U</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.generate" title="Link to this definition">¶</a></dt>
 <dd><p>Draw a synthetic dataset of size <code class="docutils literal notranslate"><span class="pre">n</span></code>.</p>
-<p class="rubric" id="id3">Parameters</p>
+<p class="rubric" id="id7">Parameters</p>
 <p>n : int
 Number of samples to generate.
 U : numpy.ndarray, optional
@@ -345,12 +412,12 @@ and oracle ground-truth columns.</p>
 <dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.to_causal_data">
 <span class="sig-name descname"><span class="pre">to_causal_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confounders</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">causalis.dgp.causaldata.CausalData</span></span></span><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.to_causal_data" title="Link to this definition">¶</a></dt>
 <dd><p>Generate a dataset and convert it to a CausalData object.</p>
-<p class="rubric" id="id4">Parameters</p>
+<p class="rubric" id="id8">Parameters</p>
 <p>n : int
 Number of samples to generate.
 confounders : str or list of str, optional
 List of confounder column names to include. If None, automatically detects numeric confounders.</p>
-<p class="rubric" id="id5">Returns</p>
+<p class="rubric" id="id9">Returns</p>
 <p>CausalData
 A CausalData object containing the generated dataset.</p>
 </dd></dl>
@@ -359,10 +426,10 @@ A CausalData object containing the generated dataset.</p>
 <dt class="sig sig-object py" id="causalis.dgp.causaldata.base.CausalDatasetGenerator.oracle_nuisance">
 <span class="sig-name descname"><span class="pre">oracle_nuisance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_quad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">21</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#causalis.dgp.causaldata.base.CausalDatasetGenerator.oracle_nuisance" title="Link to this definition">¶</a></dt>
 <dd><p>Return nuisance functions (m(x), g0(x), g1(x)) compatible with IRM.</p>
-<p class="rubric" id="id6">Parameters</p>
+<p class="rubric" id="id10">Parameters</p>
 <p>num_quad : int, default=21
 Number of quadrature points for marginalizing over U.</p>
-<p class="rubric" id="id7">Returns</p>
+<p class="rubric" id="id11">Returns</p>
 <p>dict
 Dictionary of callables mapping X to nuisance values.</p>
 </dd></dl>

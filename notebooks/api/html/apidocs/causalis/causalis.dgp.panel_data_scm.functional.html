@@ -35,6 +35,34 @@
             
   <section id="module-causalis.dgp.panel_data_scm.functional">
 <span id="causalis-dgp-panel-data-scm-functional"></span><h1><a class="reference internal" href="#module-causalis.dgp.panel_data_scm.functional" title="causalis.dgp.panel_data_scm.functional"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.dgp.panel_data_scm.functional</span></code></a><a class="headerlink" href="#module-causalis.dgp.panel_data_scm.functional" title="Link to this heading">¶</a></h1>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading">¶</a></h2>
+<p>Use <code class="docutils literal notranslate"><span class="pre">generate_scm_data</span></code> for Gaussian outcomes and the Gamma/Poisson wrappers
+when you want strictly positive or count-like panels. All public wrappers can
+return either a raw <code class="docutils literal notranslate"><span class="pre">DataFrame</span></code> or a :class:<code class="docutils literal notranslate"><span class="pre">PanelDataSCM</span></code> container.</p>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.dgp.panel_data_scm.functional import generate_scm_data
+panel = generate_scm_data(
+…     n_donors=5,
+…     n_pre_periods=24,
+…     n_post_periods=6,
+…     return_panel_data=True,
+… )
+panel.unit_col, panel.time_col
+(‘unit_id’, ‘calendar_time’)</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</section>
+<p>Panel-data DGP wrappers for synthetic control and SCM-style benchmarks.</p>
+<p>This module exposes high-level functions that build donor-pool panel datasets
+with one treated unit, a pre/post intervention split, and optional oracle
+counterfactual paths.</p>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
 <section id="functions">
@@ -81,10 +109,29 @@
 <dt class="sig sig-object py" id="causalis.dgp.panel_data_scm.functional.generate_scm_data">
 <span class="sig-prename descclassname"><span class="pre">causalis.dgp.panel_data_scm.functional.</span></span><span class="sig-name descname"><span class="pre">generate_scm_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_donors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_pre_periods</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_post_periods</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment_effect</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment_effect_slope</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">donor_noise_std</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treated_noise_std</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">common_factor_std</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treated_unit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Hashable</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'treated'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">donor_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'donor_'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_panel_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirichlet_alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho_common</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho_donor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_latent_factors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latent_factor_std</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latent_loading_std</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.35</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho_latent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefit_mismatch_std</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho_prefit_mismatch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment_effect_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">additive</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">multiplicative</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'additive'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">causalis.dgp.panel_data_scm.functional.PanelOutput</span></span></span><a class="headerlink" href="#causalis.dgp.panel_data_scm.functional.generate_scm_data" title="Link to this definition">¶</a></dt>
 <dd><p>Medium-level wrapper for Gaussian SCM panel generation.</p>
-<p class="rubric" id="id1">Notes</p>
+<p class="rubric" id="id5">Notes</p>
 <p>The Gaussian treated counterfactual path is exact SCM only when both
 <code class="docutils literal notranslate"><span class="pre">treated_noise_std=0.0</span></code> and <code class="docutils literal notranslate"><span class="pre">prefit_mismatch_std=0.0</span></code>. With either term
 non-zero, the generator intentionally produces an approximate-SCM fit path.</p>
+<p class="rubric" id="id6">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.dgp.panel_data_scm.functional import generate_scm_data
+panel = generate_scm_data(
+…     n_donors=4,
+…     n_pre_periods=18,
+…     n_post_periods=6,
+…     treatment_effect=3.0,
+…     return_panel_data=True,
+… )
+panel.treated_unit
+‘treated’
+{“y”, “y_cf”}.issubset(panel.df.columns)
+True</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
@@ -97,6 +144,23 @@ The post-treatment effect path uses a ramp-in: at the first post period, the
 effective relative lift is
 <code class="docutils literal notranslate"><span class="pre">treatment_effect_rate</span> <span class="pre">*</span> <span class="pre">(1</span> <span class="pre">-</span> <span class="pre">exp(-1</span> <span class="pre">/</span> <span class="pre">2.5))</span></code> (about 0.33x of the parameter
 when slope is zero).</p>
+<p class="rubric" id="id7">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.dgp.panel_data_scm.functional import generate_scm_gamma_data
+panel = generate_scm_gamma_data(
+…     n_donors=6,
+…     n_pre_periods=24,
+…     n_post_periods=6,
+…     treatment_effect_rate=0.12,
+…     return_panel_data=True,
+… )
+“tau_mean_true” in panel.df.columns
+True</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
@@ -109,6 +173,23 @@ The post-treatment effect path uses a ramp-in: at the first post period, the
 effective relative lift is
 <code class="docutils literal notranslate"><span class="pre">treatment_effect_rate</span> <span class="pre">*</span> <span class="pre">(1</span> <span class="pre">-</span> <span class="pre">exp(-1</span> <span class="pre">/</span> <span class="pre">2.5))</span></code> (about 0.33x of the parameter
 when slope is zero).</p>
+<p class="rubric" id="id8">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.dgp.panel_data_scm.functional import generate_scm_poisson_data
+panel = generate_scm_poisson_data(
+…     n_donors=6,
+…     n_pre_periods=24,
+…     n_post_periods=6,
+…     treatment_effect_rate=0.10,
+…     return_panel_data=True,
+… )
+panel.df[“y”].ge(0).all()
+True</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">

@@ -35,6 +35,29 @@
             
   <section id="module-causalis.dgp.causaldata_instrumental.functional">
 <span id="causalis-dgp-causaldata-instrumental-functional"></span><h1><a class="reference internal" href="#module-causalis.dgp.causaldata_instrumental.functional" title="causalis.dgp.causaldata_instrumental.functional"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.dgp.causaldata_instrumental.functional</span></code></a><a class="headerlink" href="#module-causalis.dgp.causaldata_instrumental.functional" title="Link to this heading">¶</a></h1>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading">¶</a></h2>
+<p>At the moment <code class="docutils literal notranslate"><span class="pre">generate_iv_data()</span></code> returns an empty <code class="docutils literal notranslate"><span class="pre">DataFrame</span></code> because the
+underlying :class:<code class="docutils literal notranslate"><span class="pre">InstrumentalGenerator</span></code> is a stub. The docstring is kept
+explicit so users do not mistake the current behavior for a full IV benchmark.</p>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.dgp.causaldata_instrumental.functional import generate_iv_data
+df = generate_iv_data(n=100)
+df.empty
+True</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</section>
+<p>Instrumental-variable DGP helpers.</p>
+<p>This module currently exposes a placeholder IV generator so downstream code can
+import a stable public entry point while the richer IV DGP is still under
+construction.</p>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
 <section id="functions">
@@ -54,12 +77,26 @@
 <span class="sig-prename descclassname"><span class="pre">causalis.dgp.causaldata_instrumental.functional.</span></span><span class="sig-name descname"><span class="pre">generate_iv_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.dgp.causaldata_instrumental.functional.generate_iv_data" title="Link to this definition">¶</a></dt>
 <dd><p>Generate synthetic dataset with instrumental variables.</p>
 <p>Placeholder implementation.</p>
-<p class="rubric" id="id1">Parameters</p>
+<p class="rubric" id="id3">Parameters</p>
 <p>n : int, default=1000
 Number of samples to generate.</p>
-<p class="rubric" id="id2">Returns</p>
+<p class="rubric" id="id4">Returns</p>
 <p>pandas.DataFrame
 Synthetic IV dataset.</p>
+<p class="rubric" id="id5">Notes</p>
+<p>This function is intentionally a placeholder. It returns the current output
+of :class:<code class="docutils literal notranslate"><span class="pre">InstrumentalGenerator</span></code>, which is an empty <code class="docutils literal notranslate"><span class="pre">DataFrame</span></code> until the
+structural IV generator is implemented.</p>
+<p class="rubric" id="id6">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.dgp.causaldata_instrumental.functional import generate_iv_data
+generate_iv_data(10).shape
+(0, 0)</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
 </dd></dl>
 
 </section>

@@ -115,6 +115,14 @@ Bases: {py:obj}`sklearn.base.BaseEstimator`
 
 ````
 
+````{py:method} gatet(groups: pandas.DataFrame | pandas.Series, alpha: float = 0.05, cov_type: str = 'HC3', cov_kwds: typing.Optional[typing.Dict[str, typing.Any]] = None) -> causalis.data_contracts.gate_estimate.GateEstimate
+:canonical: causalis.scenarios.unconfoundedness.model.IRM.gatet
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.model.IRM.gatet
+```
+
+````
+
 ````{py:method} sensitivity_analysis(r2_y: float, r2_d: float, rho: float = 1.0, H0: float = 0.0, alpha: float = 0.05) -> causalis.scenarios.unconfoundedness.model.IRM
 :canonical: causalis.scenarios.unconfoundedness.model.IRM.sensitivity_analysis
 

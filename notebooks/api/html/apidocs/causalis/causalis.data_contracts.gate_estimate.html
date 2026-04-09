@@ -42,7 +42,7 @@
 <table class="autosummary longtable docutils align-left">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#causalis.data_contracts.gate_estimate.GateEstimate" title="causalis.data_contracts.gate_estimate.GateEstimate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GateEstimate</span></code></a></p></td>
-<td><p>Result contract for Group Average Treatment Effects (GATE).</p></td>
+<td><p>Result contract for group-level treatment-effect estimates.</p></td>
 </tr>
 </tbody>
 </table>
@@ -53,7 +53,7 @@
 <dt class="sig sig-object py" id="causalis.data_contracts.gate_estimate.GateEstimate">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">causalis.data_contracts.gate_estimate.</span></span><span class="sig-name descname"><span class="pre">GateEstimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data:</span> <span class="pre">typing.Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#causalis.data_contracts.gate_estimate.GateEstimate" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">pydantic.BaseModel</span></code></p>
-<p>Result contract for Group Average Treatment Effects (GATE).</p>
+<p>Result contract for group-level treatment-effect estimates.</p>
 <p class="rubric">Initialization</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<code class="docutils literal notranslate"><span class="pre">ValidationError</span></code>][pydantic_core.ValidationError] if the input data cannot be
@@ -212,19 +212,19 @@ validated to form a valid model.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="causalis.data_contracts.gate_estimate.GateEstimate.summary">
 <span class="sig-name descname"><span class="pre">summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.data_contracts.gate_estimate.GateEstimate.summary" title="Link to this definition">¶</a></dt>
-<dd><p>Return per-group GATE summary table.</p>
+<dd><p>Return per-group subgroup-effect summary table.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="causalis.data_contracts.gate_estimate.GateEstimate.contrast">
 <span class="sig-name descname"><span class="pre">contrast</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left_group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alternative</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'two-sided'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="causalis.data_contracts.gate_contrast_estimate.html#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate" title="causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate"><span class="pre">causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate</span></a></span></span><a class="headerlink" href="#causalis.data_contracts.gate_estimate.GateEstimate.contrast" title="Link to this definition">¶</a></dt>
-<dd><p>Construct a formal post-estimation contrast between two GATE groups.</p>
+<dd><p>Construct a formal post-estimation contrast between two groups.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="causalis.data_contracts.gate_estimate.GateEstimate.pairwise_summary">
 <span class="sig-name descname"><span class="pre">pairwise_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_adjust</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'none'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.data_contracts.gate_estimate.GateEstimate.pairwise_summary" title="Link to this definition">¶</a></dt>
-<dd><p>Return a long-form table of formal pairwise GATE contrasts.</p>
+<dd><p>Return a long-form table of formal pairwise subgroup contrasts.</p>
 </dd></dl>
 
 </dd></dl>

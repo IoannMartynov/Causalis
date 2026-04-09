@@ -11,7 +11,7 @@ _SUPPORTED_ALTERNATIVES = {"two-sided", "greater", "less"}
 
 
 class GateContrastEstimate(BaseModel):
-    """Result contract for a post-estimation GATE contrast."""
+    """Result contract for a post-estimation subgroup-effect contrast."""
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -56,7 +56,8 @@ class GateContrastEstimate(BaseModel):
             raise ValueError("left_group and right_group must be different.")
 
         if alternative != "two-sided" and (self.ci_lower is not None or self.ci_upper is not None):
-            raise ValueError("One-sided GATE contrasts must not report ci_lower/ci_upper.")
+            contrast_family = str(self.estimand).replace("_CONTRAST", "")
+            raise ValueError(f"One-sided {contrast_family} contrasts must not report ci_lower/ci_upper.")
 
         return self
 
