@@ -85,3 +85,7 @@ Bugs: GitHub Issues (include minimal repro + versions)
 # License
 
 MIT (see LICENSE).
+
+# Acknowledgements
+
+https://github.com/DoubleML/doubleml-for-py
