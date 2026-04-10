@@ -7,6 +7,7 @@ import pandas as pd
 from scipy.stats import norm
 
 from causalis.data_contracts.multicausaldata import MultiCausalData
+from causalis.data_contracts.sensitivity_analysis_result import SensitivityAnalysisResult
 
 __all__ = [
     "sensitivity_analysis",
@@ -778,101 +779,83 @@ def _labels_from_result(res: Dict[str, Any], j: int) -> List[str]:
     return [f"contrast_{idx + 1}" for idx in range(j)]
 
 
-def format_bias_aware_summary(res: Dict[str, Any], label: str | None = None) -> str:
+def _summary_dataframe_from_result(res: Dict[str, Any]) -> pd.DataFrame:
+    """Build a simple two-column sensitivity summary."""
+    def _round_value(value: Any) -> Any:
+        if isinstance(value, list):
+            return [round(float(item), 4) if pd.notna(item) else None for item in value]
+        if pd.isna(value):
+            return np.nan
+        return round(float(value), 4)
+
     theta_arr = _to_1d_float(res.get("theta", 0.0), name="theta")
     j = theta_arr.size
     se_arr = _broadcast_to_length(res.get("se", 0.0), j, name="se")
     max_bias_arr = _broadcast_to_length(res.get("max_bias", 0.0), j, name="max_bias")
-    nu2_arr = _broadcast_to_length(res.get("nu2", np.nan), j, name="nu2")
     max_bias_base_arr = _broadcast_to_length(res.get("max_bias_base", np.nan), j, name="max_bias_base")
     bound_width_arr = _broadcast_to_length(
         res.get("bound_width", max_bias_arr), j, name="bound_width"
     )
+    nu2_arr = _broadcast_to_length(res.get("nu2", np.nan), j, name="nu2")
+    rv_arr = _broadcast_to_length(res.get("rv", np.nan), j, name="rv")
+    rva_arr = _broadcast_to_length(res.get("rva", np.nan), j, name="rva")
 
     sampling_ci = _ci_to_2d(res.get("sampling_ci", (0.0, 0.0)), j)
     theta_bounds = _ci_to_2d(res.get("theta_bounds_cofounding", (0.0, 0.0)), j)
     bias_aware_ci = _ci_to_2d(res.get("bias_aware_ci", (0.0, 0.0)), j)
-    params = res.get("params", {})
-
-    if j == 1:
-        row_label = label or _labels_from_result(res, 1)[0]
-        lines = []
-        lines.append("================== Bias-aware Interval ==================")
-        lines.append("")
-        lines.append("------------------ Scenario          ------------------")
-        lines.append(f"Significance Level: alpha={res.get('alpha', 0.05)}")
-        lines.append(f"Null Hypothesis: H0={res.get('H0', 0.0)}")
-        lines.append(
-            "Sensitivity parameters: "
-            f"cf_y={params.get('cf_y', 0.0)}; "
-            f"r2_d={params.get('r2_d', 0.0)}, "
-            f"rho={params.get('rho', 0.0)}, "
-            f"use_signed_rr={params.get('use_signed_rr', False)}"
-        )
-        lines.append("")
-        lines.append("------------------ Components        ------------------")
-        lines.append(
-            f"{'':>12} {'theta':>11} {'se':>11} {'z':>8} {'max_bias':>12} {'sigma2':>12} {'nu2':>12}"
-        )
-        lines.append(
-            f"{row_label:>12} {theta_arr[0]:11.6f} {se_arr[0]:11.6f} {float(res.get('z', np.nan)):8.4f} "
-            f"{max_bias_arr[0]:12.6f} {float(res.get('sigma2', np.nan)):12.6f} {nu2_arr[0]:12.6f}"
-        )
-        lines.append(f"Bound width (theta +/-): {bound_width_arr[0]:.6f}")
-        if np.isfinite(max_bias_base_arr[0]):
-            lines.append(f"Base sqrt(sigma2*nu2): {max_bias_base_arr[0]:.6f}")
-        lines.append("")
-        lines.append("------------------ Intervals         ------------------")
-        lines.append(
-            f"{'':>12} {'Sampling CI l':>14} {'Conf. θ l':>12} {'Bias-aware l':>14} "
-            f"{'Bias-aware u':>14} {'Conf. θ u':>12} {'Sampling CI u':>14}"
-        )
-        lines.append(
-            f"{row_label:>12} {sampling_ci[0, 0]:14.6f} {theta_bounds[0, 0]:12.6f} "
-            f"{bias_aware_ci[0, 0]:14.6f} {bias_aware_ci[0, 1]:14.6f} "
-            f"{theta_bounds[0, 1]:12.6f} {sampling_ci[0, 1]:14.6f}"
-        )
-
-        if "rv" in res and "rva" in res:
-            rv_val = float(np.asarray(res["rv"], dtype=float).reshape(-1)[0])
-            rva_val = float(np.asarray(res["rva"], dtype=float).reshape(-1)[0])
-            lines.append("")
-            lines.append("------------------ Robustness Values ------------------")
-            lines.append(f"{'':>12} {'RV (%)':>15} {'RVa (%)':>15}")
-            lines.append(f"{row_label:>12} {rv_val*100:15.6f} {rva_val*100:15.6f}")
-
-        return "\n".join(lines)
-
     labels = _labels_from_result(res, j)
-    df = pd.DataFrame(
-        {
-            "theta": theta_arr,
-            "se": se_arr,
-            "max_bias": max_bias_arr,
-            "max_bias_base": max_bias_base_arr,
-            "bound_width": bound_width_arr,
-            "sigma2": float(res.get("sigma2", np.nan)),
-            "nu2": nu2_arr,
-            "sampling_ci_l": sampling_ci[:, 0],
-            "sampling_ci_u": sampling_ci[:, 1],
-            "theta_l": theta_bounds[:, 0],
-            "theta_u": theta_bounds[:, 1],
-            "bias_aware_ci_l": bias_aware_ci[:, 0],
-            "bias_aware_ci_u": bias_aware_ci[:, 1],
-        },
-        index=labels,
+    rows: list[dict[str, Any]] = []
+    for idx, row_label in enumerate(labels):
+        prefix = f"{row_label} | "
+        rows.extend(
+            [
+                {"statistics": f"{prefix}bias_aware_ci", "value": _round_value([bias_aware_ci[idx, 0], bias_aware_ci[idx, 1]])},
+                {"statistics": f"{prefix}theta", "value": _round_value([theta_bounds[idx, 0], theta_arr[idx], theta_bounds[idx, 1]])},
+                {"statistics": f"{prefix}sampling_ci", "value": _round_value([sampling_ci[idx, 0], sampling_ci[idx, 1]])},
+                {"statistics": f"{prefix}rv", "value": _round_value(rv_arr[idx])},
+                {"statistics": f"{prefix}rva", "value": _round_value(rva_arr[idx])},
+                {"statistics": f"{prefix}se", "value": _round_value(se_arr[idx])},
+                {"statistics": f"{prefix}max_bias", "value": _round_value(max_bias_arr[idx])},
+                {"statistics": f"{prefix}max_bias_base", "value": _round_value(max_bias_base_arr[idx])},
+                {"statistics": f"{prefix}bound_width", "value": _round_value(bound_width_arr[idx])},
+                {"statistics": f"{prefix}sigma2", "value": _round_value(float(res.get("sigma2", np.nan)))},
+                {"statistics": f"{prefix}nu2", "value": _round_value(nu2_arr[idx])},
+            ]
+        )
+
+    return pd.DataFrame(rows, columns=["statistics", "value"])
+
+
+def _format_summary_table(df: pd.DataFrame) -> str:
+    """Render summary tables while formatting floats inside scalar/list values."""
+    display_df = df.copy().astype(object)
+
+    def _fmt(value: Any) -> Any:
+        if isinstance(value, list):
+            return [round(float(item), 6) if pd.notna(item) else None for item in value]
+        if pd.isna(value):
+            return ""
+        if isinstance(value, (int, float, np.floating)):
+            return f"{float(value):.6f}"
+        return value
+
+    for col in display_df.columns:
+        display_df[col] = display_df[col].map(_fmt)
+    return display_df.to_string()
+
+
+def _wrap_sensitivity_result(res: Dict[str, Any]) -> SensitivityAnalysisResult:
+    """Attach rich summary behavior to a dict-compatible multi-treatment result."""
+    return SensitivityAnalysisResult(
+        res,
+        summary_builder=_summary_dataframe_from_result,
+        text_summary_builder=format_bias_aware_summary,
     )
 
-    rv_raw = res.get("rv")
-    rva_raw = res.get("rva")
-    if rv_raw is not None and rva_raw is not None:
-        try:
-            rv_arr = _broadcast_to_length(rv_raw, j, name="rv")
-            rva_arr = _broadcast_to_length(rva_raw, j, name="rva")
-            df["rv"] = rv_arr
-            df["rva"] = rva_arr
-        except Exception:
-            pass
+
+def format_bias_aware_summary(res: Dict[str, Any], label: str | None = None) -> str:
+    params = res.get("params", {})
+    summary_df = _summary_dataframe_from_result(res)
 
     lines = []
     lines.append("================== Bias-aware Interval ==================")
@@ -890,7 +873,7 @@ def format_bias_aware_summary(res: Dict[str, Any], label: str | None = None) -> 
         f"use_signed_rr={params.get('use_signed_rr', False)}"
     )
     lines.append("")
-    lines.append(df.to_string(float_format=lambda value: f"{value: .6f}"))
+    lines.append(_format_summary_table(summary_df))
     return "\n".join(lines)
 
 
@@ -899,6 +882,9 @@ def get_sensitivity_summary(
     _=None,
     label: Optional[str] = None,
 ) -> Optional[str]:
+    if isinstance(effect_estimation, SensitivityAnalysisResult):
+        return effect_estimation.text_summary()
+
     ctx = _resolve_input_context(effect_estimation, context=_)
     estimate = ctx["estimate"]
     model = ctx["model"]
@@ -964,6 +950,35 @@ def sensitivity_benchmark(
     benchmarking_set: List[str],
     fit_args: Optional[Dict[str, Any]] = None,
 ) -> pd.DataFrame:
+    """
+    Benchmark multi-treatment sensitivity by comparing the fitted long model to
+    a genuinely refit short model with the benchmarking covariates removed.
+
+    This function intentionally performs the short-model refit because
+    ``theta_short`` and ``delta`` are defined by that re-estimation step.
+    The residual-based strengths alone are not enough to recover those values.
+
+    Parameters
+    ----------
+    effect_estimation : dict or Any
+        Estimate/model container exposing a fitted ``MultiTreatmentIRM``-like
+        model.
+    benchmarking_set : list[str]
+        Confounders to remove from the short model.
+    fit_args : dict, optional
+        Additional keyword arguments passed to ``MultiTreatmentIRM.estimate(...)``
+        on the short model. Runtime is typically dominated by the short-model
+        ``fit()`` rather than the residual-regression calculations below. To
+        reduce wall-clock time without changing semantics, fit the original long
+        model with a suitable ``n_jobs`` value; that setting is forwarded into
+        the short refit.
+
+    Returns
+    -------
+    pandas.DataFrame
+        A contrast-indexed DataFrame containing ``cf_y``, ``r2_y``, ``r2_d``,
+        ``rho``, ``theta_long``, ``theta_short``, and ``delta``.
+    """
     model = None
     if isinstance(effect_estimation, dict):
         model = effect_estimation.get("model")
@@ -1032,6 +1047,8 @@ def sensitivity_benchmark(
         user_id=data_long.user_id,
     )
 
+    # This refit is required because theta_short / delta are defined by the
+    # re-estimated short model, not by the long-model residual strengths alone.
     irm_short = MultiTreatmentIRM(
         data=data_short,
         ml_g=model.ml_g,
@@ -1205,7 +1222,7 @@ def sensitivity_analysis(
 ) -> Dict[str, Any]:
     cf_y_resolved = _resolve_cf_y_alias(cf_y=cf_y, r2_y=r2_y)
 
-    res = compute_bias_aware_ci(
+    raw_res = compute_bias_aware_ci(
         effect_estimation,
         _=_,
         cf_y=cf_y_resolved,
@@ -1215,6 +1232,7 @@ def sensitivity_analysis(
         alpha=alpha,
         use_signed_rr=use_signed_rr,
     )
+    res = _wrap_sensitivity_result(raw_res)
 
     ctx = _resolve_input_context(effect_estimation, context=_)
     diag = ctx["diag"]

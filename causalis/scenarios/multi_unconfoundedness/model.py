@@ -1047,6 +1047,7 @@ class MultiTreatmentIRM(BaseEstimator):
 
         res = sa_fn(self, cf_y=cf_y, r2_y=r2_y, r2_d=r2_d, rho=rho, H0=H0, alpha=alpha)
 
+        self.sensitivity_result = res
         self.sensitivity_summary = get_sensitivity_summary({"model": self, "bias_aware": res})
 
         return self

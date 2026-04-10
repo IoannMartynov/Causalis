@@ -8,6 +8,7 @@ from sklearn.linear_model import LinearRegression, LogisticRegression
 from causalis.dgp.causaldata import CausalData
 from causalis.scenarios.unconfoundedness.model import IRM
 from causalis.scenarios.unconfoundedness.refutation import (
+    love_plot,
     run_overlap_diagnostics,
     run_score_diagnostics,
     run_unconfoundedness_diagnostics,
@@ -42,6 +43,7 @@ def test_refutation_namespace_exposes_current_diagnostics():
     assert hasattr(ref, "run_overlap_diagnostics")
     assert hasattr(ref, "run_score_diagnostics")
     assert hasattr(ref, "run_unconfoundedness_diagnostics")
+    assert hasattr(ref, "love_plot")
 
 
 def test_overlap_diagnostics_runs_with_causal_estimate():
@@ -76,6 +78,15 @@ def test_unconfoundedness_diagnostics_runs_with_causal_estimate():
     assert "smd" in report["balance"]
     assert "smd_unweighted" in report["balance"]
     assert "pass" in report["balance"]
+
+
+def test_love_plot_runs_with_causal_estimate():
+    data = _make_data(seed=19)
+    estimate = _make_estimate(data)
+
+    fig = love_plot(data, estimate)
+    assert fig is not None
+    assert len(fig.axes) == 1
 
 
 def test_score_diagnostics_fallback_when_y_d_missing():

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import math
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
@@ -258,6 +258,38 @@ def _two_sided_pvalue_from_t(t_stat: float) -> float:
     return float(math.erfc(abs(float(t_stat)) / math.sqrt(2.0)))
 
 
+_SUMMARY_METRICS: Tuple[str, ...] = (
+    "se_plugin",
+    "psi_p99_over_med",
+    "psi_kurtosis",
+    "max_|t|_g1",
+    "max_|t|_g0",
+    "max_|t|_m",
+    "oos_tstat_fold",
+    "oos_tstat_strict",
+)
+
+
+def _normalize_summary_metrics(summary_metrics: Optional[Sequence[str]]) -> Optional[Tuple[str, ...]]:
+    """Validate and normalize optional summary metric selection."""
+    if summary_metrics is None:
+        return None
+
+    if isinstance(summary_metrics, str):
+        requested = (summary_metrics,)
+    else:
+        requested = tuple(str(metric) for metric in summary_metrics)
+
+    invalid = [metric for metric in requested if metric not in _SUMMARY_METRICS]
+    if invalid:
+        raise ValueError(
+            "Unknown summary_metrics values: "
+            f"{invalid}. Available metrics are {list(_SUMMARY_METRICS)}."
+        )
+
+    return tuple(dict.fromkeys(requested))
+
+
 def _oos_moment_test_from_psi(
     psi_a: np.ndarray,
     psi_b: np.ndarray,
@@ -349,6 +381,7 @@ def run_score_diagnostics(
     trimming_threshold: Optional[float] = None,
     n_basis_funcs: Optional[int] = None,
     return_summary: bool = True,
+    summary_metrics: Optional[Sequence[str]] = None,
 ) -> Dict[str, Any]:
     """Run orthogonality and influence diagnostics for ATE or ATTE scores.
 
@@ -367,6 +400,9 @@ def run_score_diagnostics(
         to one intercept plus all available confounders.
     return_summary : bool, default True
         Include a compact summary table in the returned payload.
+    summary_metrics : sequence of str, optional
+        Filter ``report["summary"]`` to the requested metric names. This only
+        changes the returned summary table; all diagnostics are still computed.
 
     Returns
     -------
@@ -379,6 +415,8 @@ def run_score_diagnostics(
     ValueError
         If required diagnostic arrays are missing or have incompatible shapes.
     """
+    selected_summary_metrics = _normalize_summary_metrics(summary_metrics)
+
     _validate_estimate_matches_data(data=data, estimate=estimate, require_confounders=True)
 
     diagnostic_data = estimate.diagnostic_data
@@ -658,6 +696,8 @@ def run_score_diagnostics(
                 },
             ]
         )
+        if selected_summary_metrics is not None:
+            summary = summary.loc[summary["metric"].isin(selected_summary_metrics)].reset_index(drop=True)
         report["summary"] = summary
 
     return report

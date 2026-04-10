@@ -6,12 +6,14 @@ entry points used by refutation utilities for unconfoundedness.
 """
 from __future__ import annotations
 
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Literal
 
 import numpy as np
 import pandas as pd
 
 from causalis.data_contracts.causal_diagnostic_data import UnconfoundednessDiagnosticData
+from causalis.data_contracts.sensitivity_analysis_result import SensitivityAnalysisResult
+from causalis.dgp.causaldata import CausalData
 from causalis.scenarios.unconfoundedness._score_utils import _compute_ipw_components
 
 __all__ = [
@@ -24,6 +26,32 @@ __all__ = [
 # ---------------- Internals ----------------
 
 _ESSENTIALLY_ZERO = 1e-32
+
+
+def _resolve_sensitivity_label(
+    effect_estimation: Dict[str, Any] | Any,
+    *,
+    model: Any | None = None,
+) -> str:
+    """Resolve the row label used for single-treatment sensitivity summaries."""
+    treatment = getattr(effect_estimation, "treatment", None)
+    if isinstance(treatment, str):
+        return treatment
+
+    if isinstance(effect_estimation, dict):
+        estimate = effect_estimation.get("estimate")
+        treatment = getattr(estimate, "treatment", None)
+        if isinstance(treatment, str):
+            return treatment
+        model = effect_estimation.get("model", model)
+
+    data_obj = getattr(model, "data", getattr(model, "data_contracts", None))
+    treatment = getattr(data_obj, "treatment", None)
+    if hasattr(treatment, "name"):
+        return str(treatment.name)
+    if isinstance(treatment, str):
+        return treatment
+    return "theta"
 
 
 def _normalize_ate_atte_score(score: Any) -> str:
@@ -643,6 +671,72 @@ def compute_bias_aware_ci(
     )
 
 
+def _summary_dataframe_from_result(
+    res: Dict[str, Any],
+    *,
+    label: str | None = None,
+) -> pd.DataFrame:
+    """Build a simple two-column sensitivity summary."""
+    def _round_value(value: Any) -> Any:
+        if isinstance(value, list):
+            return [round(float(item), 4) if pd.notna(item) else None for item in value]
+        if pd.isna(value):
+            return np.nan
+        return round(float(value), 4)
+
+    sampling_ci = tuple(map(float, res.get("sampling_ci", (np.nan, np.nan))))
+    theta_bounds = tuple(map(float, res.get("theta_bounds_cofounding", (np.nan, np.nan))))
+    bias_aware_ci = tuple(map(float, res.get("bias_aware_ci", (np.nan, np.nan))))
+    return pd.DataFrame(
+        {
+            "statistics": [
+                "bias_aware_ci",
+                "theta",
+                "sampling_ci",
+                "rv",
+                "rva",
+                "se",
+                "max_bias",
+                "max_bias_base",
+                "bound_width",
+                "sigma2",
+                "nu2",
+            ],
+            "value": [
+                _round_value([bias_aware_ci[0], bias_aware_ci[1]]),
+                _round_value([theta_bounds[0], float(res.get("theta", np.nan)), theta_bounds[1]]),
+                _round_value([sampling_ci[0], sampling_ci[1]]),
+                _round_value(float(res.get("rv", np.nan))),
+                _round_value(float(res.get("rva", np.nan))),
+                _round_value(float(res.get("se", np.nan))),
+                _round_value(float(res.get("max_bias", np.nan))),
+                _round_value(float(res.get("max_bias_base", np.nan))),
+                _round_value(float(res.get("bound_width", np.nan))),
+                _round_value(float(res.get("sigma2", np.nan))),
+                _round_value(float(res.get("nu2", np.nan))),
+            ],
+        }
+    )
+
+
+def _format_summary_table(df: pd.DataFrame) -> str:
+    """Render summary tables while formatting floats inside scalar/list values."""
+    display_df = df.copy().astype(object)
+
+    def _fmt(value: Any) -> Any:
+        if isinstance(value, list):
+            return [round(float(item), 6) if pd.notna(item) else None for item in value]
+        if pd.isna(value):
+            return ""
+        if isinstance(value, (int, float, np.floating)):
+            return f"{float(value):.6f}"
+        return value
+
+    for col in display_df.columns:
+        display_df[col] = display_df[col].map(_fmt)
+    return display_df.to_string()
+
+
 def format_bias_aware_summary(res: Dict[str, Any], label: str | None = None) -> str:
     """Render a single, unified bias-aware summary string.
 
@@ -658,15 +752,9 @@ def format_bias_aware_summary(res: Dict[str, Any], label: str | None = None) -> 
     str
         Formatted summary string.
     """
-    lbl = (label or 'theta').rjust(6)
-    ci_l, ci_u = res['sampling_ci']
-    th_l, th_u = res['theta_bounds_cofounding']
-    bci_l, bci_u = res['bias_aware_ci']
-    theta = res['theta']; se = res['se']
-    alpha = res['alpha']; z = res['z']
+    alpha = res['alpha']
     cf = res['params']
-    bound_width = float(res.get('bound_width', res.get('max_bias', 0.0)))
-    max_bias_base = float(res.get('max_bias_base', np.nan))
+    summary_df = _summary_dataframe_from_result(res, label=label)
 
     lines = []
     lines.append("================== Bias-aware Interval ==================")
@@ -676,24 +764,23 @@ def format_bias_aware_summary(res: Dict[str, Any], label: str | None = None) -> 
     lines.append(f"Null Hypothesis: H0={res.get('H0', 0.0)}")
     lines.append(f"Sensitivity parameters: r2_y={cf['r2_y']}; r2_d={cf['r2_d']}, rho={cf['rho']}, use_signed_rr={cf['use_signed_rr']}")
     lines.append("")
-    lines.append("------------------ Components        ------------------")
-    lines.append(f"{'':>6} {'theta':>11} {'se':>11} {'z':>8} {'max_bias':>12} {'sigma2':>12} {'nu2':>12}")
-    lines.append(f"{lbl} {theta:11.6f} {se:11.6f} {z:8.4f} {res['max_bias']:12.6f} {res['sigma2']:12.6f} {res['nu2']:12.6f}")
-    lines.append(f"Bound width (theta +/-): {bound_width:.6f}")
-    if np.isfinite(max_bias_base):
-        lines.append(f"Base sqrt(sigma2*nu2): {max_bias_base:.6f}")
-    lines.append("")
-    lines.append("------------------ Intervals         ------------------")
-    lines.append(f"{'':>6} {'Sampling CI lower':>18} {'Conf. θ lower':>16} {'Bias-aware lower':>18} {'Bias-aware upper':>18} {'Conf. θ upper':>16} {'Sampling CI upper':>20}")
-    lines.append(f"{lbl} {ci_l:18.6f} {th_l:16.6f} {bci_l:18.6f} {bci_u:18.6f} {th_u:16.6f} {ci_u:20.6f}")
-    
-    if 'rv' in res and 'rva' in res:
-        lines.append("")
-        lines.append("------------------ Robustness Values ------------------")
-        lines.append(f"{'':>6} {'RV (%)':>15} {'RVa (%)':>15}")
-        lines.append(f"{lbl} {res['rv']*100:15.6f} {res['rva']*100:15.6f}")
-    
+    lines.append(_format_summary_table(summary_df))
+
     return "\n".join(lines)
+
+
+def _wrap_sensitivity_result(
+    res: Dict[str, Any],
+    *,
+    label: str | None = None,
+) -> SensitivityAnalysisResult:
+    """Attach rich summary behavior to a dict-compatible sensitivity result."""
+    return SensitivityAnalysisResult(
+        res,
+        summary_builder=_summary_dataframe_from_result,
+        text_summary_builder=format_bias_aware_summary,
+        summary_kwargs={"label": label},
+    )
 
 
 # ---------------- Human-facing wrappers and legacy formatting ----------------
@@ -811,6 +898,9 @@ def get_sensitivity_summary(
     Optional[str]
         Formatted summary string or None if extraction fails.
     """
+    if isinstance(effect_estimation, SensitivityAnalysisResult):
+        return effect_estimation.text_summary()
+
     if isinstance(effect_estimation, dict):
         if 'model' not in effect_estimation:
             return None
@@ -843,13 +933,7 @@ def get_sensitivity_summary(
 
     model = effect_dict['model']
     if label is None:
-        if hasattr(effect_estimation, 'treatment') and isinstance(effect_estimation.treatment, str):
-            label = effect_estimation.treatment
-        else:
-            # Check 'data' or 'data_contracts' for the treatment name
-            data_obj = getattr(model, 'data', getattr(model, 'data_contracts', None))
-            t = getattr(data_obj, 'treatment', None)
-            label = getattr(t, 'name', None) or 'theta'
+        label = _resolve_sensitivity_label(effect_estimation, model=model)
 
     res = effect_dict.get('bias_aware')
 
@@ -894,147 +978,174 @@ def get_sensitivity_summary(
 # ---------------- Benchmarking sensitivity (short vs long model) ----------------
 
 def sensitivity_benchmark(
-    effect_estimation: Dict[str, Any],
-    benchmarking_set: List[str],
+    effect_estimation: Dict[str, Any] | Any,
+    data: CausalData,
+    benchmarking_set: List[str] | Literal["all"],
     fit_args: Optional[Dict[str, Any]] = None,
 ) -> pd.DataFrame:
     """
-    Computes a benchmark for a given set of features by refitting a short IRM model
-    (excluding the provided features) and contrasting it with the original (long) model.
-    Returns a DataFrame containing r2_y, r2_d, rho and the change in estimates.
+    Benchmark confounders one by one by refitting a short IRM that excludes each
+    requested confounder from the supplied ``CausalData``.
+
+    This function intentionally performs a genuine short-model refit for every
+    benchmarked confounder because ``theta_short`` and ``delta`` are defined by
+    that re-estimation step. The residual-based strengths alone are not enough
+    to recover those values.
 
     Parameters
     ----------
-    effect_estimation : dict
-        A dictionary containing the fitted IRM model under the key 'model'.
-    benchmarking_set : list[str]
-        List of confounder names to be used for benchmarking (to be removed in the short model).
+    effect_estimation : dict or Any
+        Estimate/model container exposing a fitted IRM-like model.
+    data : CausalData
+        The causal dataset used for benchmarking. It must match the fitted long
+        model on treatment, outcome, confounders, and row order.
+    benchmarking_set : list[str] or "all"
+        Confounders to benchmark one by one. Passing ``"all"`` benchmarks every
+        confounder in ``data.confounders`` in that order.
     fit_args : dict, optional
-        Legacy name for additional keyword arguments passed to `IRM.estimate(...)`
-        on the short model. If `score` is omitted, ATE/ATTE is inferred from
-        the supplied estimate/model, and defaults to ATE.
-        If `store_diagnostics` or legacy `diagnostic_data` is omitted, the short
-        benchmark model defaults to `store_diagnostics=False` for faster benchmarking.
+        Additional keyword arguments passed to ``IRM.estimate(...)`` on each
+        short model. If ``score`` is omitted, ATE/ATTE is inferred from the
+        supplied estimate/model, and defaults to ATE. If ``store_diagnostics``
+        or legacy ``diagnostic_data`` is omitted, the short benchmark refits use
+        ``store_diagnostics=False`` by default.
 
     Returns
     -------
     pandas.DataFrame
-        A one-row DataFrame indexed by the treatment name with columns:
-        - r2_y, r2_d, rho: residual-based benchmarking strengths
-        - theta_long, theta_short, delta: effect estimates and their change (long - short)
+        A long-form DataFrame with one row per benchmarked confounder and
+        columns ``benchmark_confounder``, ``r2_y``, ``r2_d``, ``rho``,
+        ``theta_long``, ``theta_short``, and ``delta``.
     """
-    # Extract model from various possible inputs (dict, CausalEstimate, or DiagnosticData)
     model = None
     if isinstance(effect_estimation, dict):
-        model = effect_estimation.get('model')
+        model = effect_estimation.get("model")
     elif hasattr(effect_estimation, '_model'):
-        # DiagnosticData path (via private attribute)
         model = getattr(effect_estimation, '_model')
     elif hasattr(effect_estimation, 'diagnostic_data'):
-        # CausalEstimate path
         diag = getattr(effect_estimation, 'diagnostic_data')
         model = getattr(diag, '_model', None)
-
-    # Fallback: check if effect_estimation itself is the model
     if model is None and hasattr(effect_estimation, 'coef_'):
         model = effect_estimation
 
     if model is None:
-        raise TypeError("effect_estimation must be a dict with 'model', a CausalEstimate, "
-                        "or a diagnostic_data object with a model reference.")
+        raise TypeError(
+            "effect_estimation must be a dict with 'model', a CausalEstimate, "
+            "or a diagnostic_data object with a model reference."
+        )
 
-    # Validate model type by attribute presence (duck-typing IRM)
+    if not isinstance(data, CausalData):
+        raise TypeError(f"data must be a CausalData instance. Got {type(data)}.")
+
     required_attrs = ['data', 'coef_', 'se_', '_sensitivity_element_est']
     for attr in required_attrs:
         if not hasattr(model, attr):
-            # Fallback for data_contracts name
             if attr == 'data' and hasattr(model, 'data_contracts'):
                 continue
-            raise NotImplementedError(f"Sensitivity benchmarking requires a fitted IRM model with sensitivity elements. Missing: {attr}")
+            raise NotImplementedError(
+                "Sensitivity benchmarking requires a fitted IRM model with sensitivity elements. "
+                f"Missing: {attr}"
+            )
 
-    # Extract current confounders
-    try:
-        x_list_long = list(getattr(model.data, 'confounders', []))
-    except Exception as e:
-        raise RuntimeError(f"Failed to access model data_contracts confounders: {e}")
+    model_data = getattr(model, "data", getattr(model, "data_contracts", None))
+    if not isinstance(model_data, CausalData):
+        raise TypeError("effect_estimation must resolve to a fitted IRM model with CausalData in model.data.")
 
-    # input checks
-    if not isinstance(benchmarking_set, list):
-        raise TypeError(
-            f"benchmarking_set must be a list. {str(benchmarking_set)} of type {type(benchmarking_set)} was passed."
-        )
-    if len(benchmarking_set) == 0:
-        raise ValueError("benchmarking_set must not be empty.")
-    if not set(benchmarking_set) <= set(x_list_long):
-        raise ValueError(
-            f"benchmarking_set must be a subset of features {str(x_list_long)}. "
-            f"{str(benchmarking_set)} was passed."
-        )
     if fit_args is not None and not isinstance(fit_args, dict):
-        raise TypeError(f"fit_args must be a dict. {str(fit_args)} of type {type(fit_args)} was passed.")
+        raise TypeError(f"fit_args must be a dict. {fit_args} of type {type(fit_args)} was passed.")
 
-    # Build short data_contracts excluding benchmarking features
-    x_list_short = [x for x in x_list_long if x not in benchmarking_set]
-    if len(x_list_short) == 0:
-        raise ValueError("After removing benchmarking_set there are no confounders left to fit the short model.")
+    treatment_name = str(data.treatment_name)
+    outcome_name = str(data.outcome_name)
+    model_treatment_name = str(model_data.treatment_name)
+    model_outcome_name = str(model_data.outcome_name)
+    if treatment_name != model_treatment_name:
+        raise ValueError(
+            "data treatment column must match the fitted long model treatment column. "
+            f"Got {treatment_name!r} and {model_treatment_name!r}."
+        )
+    if outcome_name != model_outcome_name:
+        raise ValueError(
+            "data outcome column must match the fitted long model outcome column. "
+            f"Got {outcome_name!r} and {model_outcome_name!r}."
+        )
 
-    # Create a shallow copy of the underlying DataFrame and build a new CausalData
-    df_long = model.data.get_df()
-    treatment_name = model.data.treatment.name
-    outcome_name = model.data.outcome.name
+    x_list_long = list(getattr(model_data, "confounders", []))
+    data_confounders = list(data.confounders)
+    if len(data_confounders) == 0:
+        raise ValueError("data.confounders must not be empty.")
+    if set(data_confounders) != set(x_list_long):
+        raise ValueError(
+            "data.confounders must match the fitted long model confounders as a set. "
+            f"Got {data_confounders} and {x_list_long}."
+        )
 
-    # Prefer in-scope names; fallback to import to avoid fragile self-import patterns
-    try:
-        CausalData  # type: ignore[name-defined]
-        IRM  # type: ignore[name-defined]
-    except NameError:
-        from causalis.dgp.causaldata import CausalData
-        from causalis.scenarios.unconfoundedness.model import IRM
+    if benchmarking_set == "all":
+        benchmark_confounders = list(data_confounders)
+    elif isinstance(benchmarking_set, list):
+        if len(benchmarking_set) == 0:
+            raise ValueError("benchmarking_set must not be empty.")
+        deduped: list[str] = []
+        seen: set[str] = set()
+        for item in benchmarking_set:
+            if not isinstance(item, str):
+                raise TypeError(
+                    "benchmarking_set must contain only strings. "
+                    f"Found {type(item)}: {item!r}."
+                )
+            if item not in seen:
+                deduped.append(item)
+                seen.add(item)
+        benchmark_confounders = deduped
+    else:
+        raise TypeError(
+            "benchmarking_set must be a list of confounder names or the string 'all'. "
+            f"Got {benchmarking_set!r} of type {type(benchmarking_set)}."
+        )
 
-    data_short = CausalData(df=df_long, treatment=treatment_name, outcome=outcome_name, confounders=x_list_short)
+    if not set(benchmark_confounders) <= set(data_confounders):
+        raise ValueError(
+            f"benchmarking_set must be a subset of data.confounders {data_confounders}. "
+            f"{benchmark_confounders} was passed."
+        )
+    if not set(benchmark_confounders) <= set(x_list_long):
+        raise ValueError(
+            f"benchmarking_set must be a subset of long-model confounders {x_list_long}. "
+            f"{benchmark_confounders} was passed."
+        )
 
-    # Clone/construct a short IRM with same hyperparameters/learners
-    irm_short = IRM(
-        data=data_short,
-        ml_g=model.ml_g,
-        ml_m=model.ml_m,
-        n_folds=getattr(model, 'n_folds', 4),
-        n_rep=getattr(model, 'n_rep', 1),
-        normalize_ipw=getattr(
-            model,
-            'normalize_ipw_effective_',
-            getattr(model, 'normalize_ipw', False),
-        ),
-        trimming_rule=getattr(model, 'trimming_rule', 'truncate'),
-        trimming_threshold=getattr(model, 'trimming_threshold', 1e-2),
-        weights=getattr(model, 'weights', None),
-        random_state=getattr(model, 'random_state', None),
-        n_jobs=getattr(model, 'n_jobs', 1),
-    )
+    if len(x_list_long) <= 1:
+        raise ValueError("Benchmarking requires at least two confounders in the long model.")
 
-    estimate_args: Dict[str, Any] = dict(fit_args or {})
+    compare_cols = [outcome_name, treatment_name] + x_list_long
+    input_cols = list(compare_cols)
+    if data.user_id_name is not None:
+        input_cols.append(str(data.user_id_name))
+    df_long = model_data.get_df(columns=compare_cols)
+    df_input = data.get_df(columns=input_cols)
+    if df_input.shape[0] != df_long.shape[0]:
+        raise ValueError(
+            "data must have the same number of rows as the fitted long model. "
+            f"Got {df_input.shape[0]} and {df_long.shape[0]}."
+        )
+    if not np.array_equal(
+        df_input[compare_cols].to_numpy(dtype=object, copy=False),
+        df_long.to_numpy(dtype=object, copy=False),
+    ):
+        raise ValueError("data must match the fitted long model sample and row order exactly.")
+
+    from causalis.scenarios.unconfoundedness.model import IRM
+
+    estimate_args_base: Dict[str, Any] = dict(fit_args or {})
     store_diagnostics_short = bool(
-        estimate_args.pop("store_diagnostics", estimate_args.pop("diagnostic_data", False))
+        estimate_args_base.pop("store_diagnostics", estimate_args_base.pop("diagnostic_data", False))
     )
-
-    # Fit short model.
-    irm_short.fit(store_diagnostics=store_diagnostics_short)
-
-    # Estimate score for short model (ATE/ATTE only, independent of model.score=GATE state).
-    estimate_args["score"] = _resolve_sensitivity_score(
+    resolved_score = _resolve_sensitivity_score(
         effect_estimation=effect_estimation,
         model=model,
-        explicit_score=estimate_args.get("score"),
+        explicit_score=estimate_args_base.get("score"),
     )
-    irm_short.estimate(**estimate_args)
+    estimate_args_base["score"] = resolved_score
 
-    # Long model stats
     theta_long = float(model.coef_[0])
-
-    # Short model stats
-    theta_short = float(irm_short.coef_[0])
-
-    # Compute residual-based strengths on the long model
     y_cached = getattr(model, "_y", None)
     d_cached = getattr(model, "_d", None)
     y = np.asarray(
@@ -1048,16 +1159,16 @@ def sensitivity_benchmark(
     m_hat = np.asarray(model.m_hat_, dtype=float)
     g0 = np.asarray(model.g0_hat_, dtype=float)
     g1 = np.asarray(model.g1_hat_, dtype=float)
-
     r_y = y - (d * g1 + (1.0 - d) * g0)
     r_d = d - m_hat
+    p = float(np.mean(d)) if (np.isfinite(np.mean(d)) and np.mean(d) > 0.0) else 1.0
+    w_att = np.where(d > 0.5, 1.0 / max(p, 1e-12), 0.0)
+    weights = w_att if resolved_score.upper().startswith("ATT") else None
 
     def _center(a: np.ndarray) -> np.ndarray:
-        """Center an array by its arithmetic mean."""
         return a - np.mean(a)
 
     def _center_w(a: np.ndarray, w: np.ndarray) -> np.ndarray:
-        """Center an array by its weighted mean."""
         w = np.asarray(w, float)
         a = np.asarray(a, float)
         sw = float(np.sum(w))
@@ -1065,12 +1176,10 @@ def sensitivity_benchmark(
         return a - mu
 
     def _ols_r2_and_fit(yv: np.ndarray, Z: np.ndarray, w: Optional[np.ndarray] = None) -> tuple[float, np.ndarray]:
-        """Stable (weighted) OLS on centered & standardized vars for R^2 and fitted component."""
         Z = np.asarray(Z, dtype=float)
         if Z.ndim == 1:
             Z = Z.reshape(-1, 1)
         if w is None:
-            # Unweighted
             yv_c = _center(yv)
             Zc = Z - np.nanmean(Z, axis=0, keepdims=True)
             col_std = np.nanstd(Zc, axis=0, ddof=0)
@@ -1091,61 +1200,43 @@ def sensitivity_benchmark(
                 return 0.0, np.zeros_like(yv_c)
             r2 = float(np.clip(num / denom, 0.0, 1.0))
             return r2, yhat
-        else:
-            # Weighted
-            w = np.asarray(w, float)
-            # sanitize weights and features to avoid NaN/inf propagation
-            w = np.nan_to_num(w, nan=0.0, posinf=0.0, neginf=0.0)
-            Z = np.asarray(Z, float)
-            Z = np.nan_to_num(Z, nan=0.0, posinf=0.0, neginf=0.0)
-            sw = float(np.sum(w))
-            if not np.isfinite(sw) or sw <= 1e-12:
-                return 0.0, np.zeros_like(yv, dtype=float)
-            yv_c = _center_w(yv, w)
-            # Weighted column means
-            muZ = (w[:, None] * Z).sum(axis=0) / sw
-            Zc = Z - muZ
-            # Weighted std per column
-            var = (w[:, None] * (Zc * Zc)).sum(axis=0) / sw
-            std = np.sqrt(np.maximum(var, 0.0))
-            valid = np.isfinite(std) & (std > 1e-12)
-            if not np.any(valid):
-                return 0.0, np.zeros_like(yv_c)
-            Zcs = Zc[:, valid] / std[valid]
-            Zcs = np.nan_to_num(Zcs, nan=0.0, posinf=0.0, neginf=0.0)
-            yv_c = np.nan_to_num(np.asarray(yv_c, float), nan=0.0, posinf=0.0, neginf=0.0)
-            # Weighted least squares via sqrt(w)
-            swr = np.sqrt(np.clip(w, 0.0, np.inf))
-            Zsw = Zcs * swr[:, None]
-            ysw = yv_c * swr
-            from numpy.linalg import lstsq
-            beta, *_ = lstsq(Zsw, ysw, rcond=1e-12)
-            yhat = Zcs @ beta
-            denom = float(np.dot(ysw, ysw))
-            if not np.isfinite(denom) or denom <= 1e-12:
-                return 0.0, np.zeros_like(yv_c)
-            num = float(np.dot(swr * yhat, swr * yhat))
-            if not np.isfinite(num) or num < 0.0:
-                return 0.0, np.zeros_like(yv_c)
-            r2 = float(np.clip(num / denom, 0.0, 1.0))
-            return r2, yhat
-
-    Z = df_long[benchmarking_set].to_numpy(dtype=float)
-    # ATT weighting if applicable
-    p = float(np.mean(d)) if (np.isfinite(np.mean(d)) and np.mean(d) > 0.0) else 1.0
-    w_att = np.where(d > 0.5, 1.0 / max(p, 1e-12), 0.0)
-    is_att = str(estimate_args["score"]).upper().startswith('ATT')
-    weights = w_att if is_att else None
-
-    R2y, yhat_u = _ols_r2_and_fit(r_y, Z, w=weights)
-    R2d, dhat_u = _ols_r2_and_fit(r_d, Z, w=weights)
-    r2_y = float(R2y)
-    r2_d = float(R2d)
+        w = np.asarray(w, float)
+        w = np.nan_to_num(w, nan=0.0, posinf=0.0, neginf=0.0)
+        Z = np.asarray(Z, float)
+        Z = np.nan_to_num(Z, nan=0.0, posinf=0.0, neginf=0.0)
+        sw = float(np.sum(w))
+        if not np.isfinite(sw) or sw <= 1e-12:
+            return 0.0, np.zeros_like(yv, dtype=float)
+        yv_c = _center_w(yv, w)
+        muZ = (w[:, None] * Z).sum(axis=0) / sw
+        Zc = Z - muZ
+        var = (w[:, None] * (Zc * Zc)).sum(axis=0) / sw
+        std = np.sqrt(np.maximum(var, 0.0))
+        valid = np.isfinite(std) & (std > 1e-12)
+        if not np.any(valid):
+            return 0.0, np.zeros_like(yv_c)
+        Zcs = Zc[:, valid] / std[valid]
+        Zcs = np.nan_to_num(Zcs, nan=0.0, posinf=0.0, neginf=0.0)
+        yv_c = np.nan_to_num(np.asarray(yv_c, float), nan=0.0, posinf=0.0, neginf=0.0)
+        swr = np.sqrt(np.clip(w, 0.0, np.inf))
+        Zsw = Zcs * swr[:, None]
+        ysw = yv_c * swr
+        from numpy.linalg import lstsq
+        beta, *_ = lstsq(Zsw, ysw, rcond=1e-12)
+        yhat = Zcs @ beta
+        denom = float(np.dot(ysw, ysw))
+        if not np.isfinite(denom) or denom <= 1e-12:
+            return 0.0, np.zeros_like(yv_c)
+        num = float(np.dot(swr * yhat, swr * yhat))
+        if not np.isfinite(num) or num < 0.0:
+            return 0.0, np.zeros_like(yv_c)
+        r2 = float(np.clip(num / denom, 0.0, 1.0))
+        return r2, yhat
 
     def _safe_corr(u: np.ndarray, v: np.ndarray, w: Optional[np.ndarray] = None) -> float:
-        """Compute a bounded correlation with optional weighting."""
         if w is None:
-            u = _center(u); v = _center(v)
+            u = _center(u)
+            v = _center(v)
             su, sv = np.std(u), np.std(v)
             if not (np.isfinite(su) and np.isfinite(sv)) or su <= 0 or sv <= 0:
                 return 0.0
@@ -1162,22 +1253,71 @@ def sensitivity_benchmark(
         val = cov / (su * sv)
         return float(np.clip(val, -1.0, 1.0))
 
-    rho = _safe_corr(yhat_u, dhat_u, w=weights)
+    rows: list[dict[str, Any]] = []
+    for confounder in benchmark_confounders:
+        x_list_short = [x for x in data_confounders if x != confounder]
+        if len(x_list_short) == 0:
+            raise ValueError(
+                f"Benchmarking confounder {confounder!r} would leave no confounders for the short model."
+            )
 
-    delta = theta_long - theta_short
+        data_short = CausalData(
+            df=df_input,
+            treatment=treatment_name,
+            outcome=outcome_name,
+            confounders=x_list_short,
+            user_id=data.user_id_name,
+        )
+        irm_short = IRM(
+            data=data_short,
+            ml_g=model.ml_g,
+            ml_m=model.ml_m,
+            n_folds=getattr(model, 'n_folds', 4),
+            n_rep=getattr(model, 'n_rep', 1),
+            normalize_ipw=getattr(
+                model,
+                'normalize_ipw_effective_',
+                getattr(model, 'normalize_ipw', False),
+            ),
+            trimming_rule=getattr(model, 'trimming_rule', 'truncate'),
+            trimming_threshold=getattr(model, 'trimming_threshold', 1e-2),
+            weights=getattr(model, 'weights', None),
+            random_state=getattr(model, 'random_state', None),
+            n_jobs=getattr(model, 'n_jobs', 1),
+        )
+        irm_short.fit(store_diagnostics=store_diagnostics_short)
+        irm_short.estimate(**dict(estimate_args_base))
 
-    df_benchmark = pd.DataFrame(
-        {
-            "r2_y": [r2_y],
-            "r2_d": [r2_d],
-            "rho": [rho],
-            "theta_long": [theta_long],
-            "theta_short": [theta_short],
-            "delta": [delta],
-        },
-        index=[treatment_name],
+        Z = df_input[[confounder]].to_numpy(dtype=float)
+        r2_y, yhat_u = _ols_r2_and_fit(r_y, Z, w=weights)
+        r2_d, dhat_u = _ols_r2_and_fit(r_d, Z, w=weights)
+        rho = _safe_corr(yhat_u, dhat_u, w=weights)
+        theta_short = float(irm_short.coef_[0])
+
+        rows.append(
+            {
+                "benchmark_confounder": confounder,
+                "r2_y": float(r2_y),
+                "r2_d": float(r2_d),
+                "rho": float(rho),
+                "theta_long": theta_long,
+                "theta_short": theta_short,
+                "delta": float(theta_long - theta_short),
+            }
+        )
+
+    return pd.DataFrame(
+        rows,
+        columns=[
+            "benchmark_confounder",
+            "r2_y",
+            "r2_d",
+            "rho",
+            "theta_long",
+            "theta_short",
+            "delta",
+        ],
     )
-    return df_benchmark
 
 
 # ---------------- Main entry for producing textual sensitivity summary ----------------
@@ -1224,7 +1364,7 @@ def sensitivity_analysis(
           - max_bias and components (sigma2, nu2)
           - params (r2_y, r2_d, rho, use_signed_rr)
     """
-    res = compute_bias_aware_ci(
+    raw_res = compute_bias_aware_ci(
         effect_estimation,
         r2_y=r2_y,
         r2_d=r2_d,
@@ -1233,6 +1373,12 @@ def sensitivity_analysis(
         alpha=alpha,
         use_signed_rr=use_signed_rr
     )
+
+    label = _resolve_sensitivity_label(
+        effect_estimation,
+        model=effect_estimation.get("model") if isinstance(effect_estimation, dict) else effect_estimation,
+    )
+    res = _wrap_sensitivity_result(raw_res, label=label)
 
     diag = None
     if isinstance(effect_estimation, dict):

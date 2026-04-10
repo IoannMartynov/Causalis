@@ -9,6 +9,7 @@ from .causal_estimate import CausalEstimate
 from .gate_estimate import GateEstimate
 from .gate_contrast_estimate import GateContrastEstimate
 from .causal_diagnostic_data import DiagnosticData, UnconfoundednessDiagnosticData, RegressionChecks
+from .sensitivity_analysis_result import SensitivityAnalysisResult
 
 _DGP_EXPORTS = {
     "generate_rct",
@@ -36,6 +37,7 @@ __all__ = [
     "DiagnosticData",
     "UnconfoundednessDiagnosticData",
     "RegressionChecks",
+    "SensitivityAnalysisResult",
     "generate_rct",
     "generate_classic_rct",
     "classic_rct_gamma",

@@ -12,6 +12,7 @@ from causalis.scenarios.multi_unconfoundedness.model import MultiTreatmentIRM
 from causalis.scenarios.multi_unconfoundedness.refutation.unconfoundedness.sensitivity import (
     sensitivity_analysis,
     sensitivity_benchmark,
+    get_sensitivity_summary,
 )
 
 
@@ -123,6 +124,8 @@ def test_multi_sensitivity_benchmark_basic_with_estimate_input():
     assert res.shape[0] == 2
     for col in ["cf_y", "r2_y", "r2_d", "rho", "theta_long", "theta_short", "delta"]:
         assert col in res.columns
+    assert np.all(np.isfinite(res["theta_short"].to_numpy(dtype=float)))
+    assert np.all(np.isfinite(res["delta"].to_numpy(dtype=float)))
     assert np.any(np.abs(res["delta"].to_numpy(dtype=float)) > 0.0)
 
 
@@ -166,6 +169,46 @@ def test_multi_sensitivity_analysis_accepts_r2_y_alias():
         atol=1e-12,
         rtol=0.0,
     )
+    summary_df = out.summary()
+    assert isinstance(summary_df, pd.DataFrame)
+    assert list(summary_df.columns) == ["statistics", "value"]
+    assert summary_df["statistics"].tolist() == [
+        "d1 vs d0 | bias_aware_ci",
+        "d1 vs d0 | theta",
+        "d1 vs d0 | sampling_ci",
+        "d1 vs d0 | rv",
+        "d1 vs d0 | rva",
+        "d1 vs d0 | se",
+        "d1 vs d0 | max_bias",
+        "d1 vs d0 | max_bias_base",
+        "d1 vs d0 | bound_width",
+        "d1 vs d0 | sigma2",
+        "d1 vs d0 | nu2",
+        "d2 vs d0 | bias_aware_ci",
+        "d2 vs d0 | theta",
+        "d2 vs d0 | sampling_ci",
+        "d2 vs d0 | rv",
+        "d2 vs d0 | rva",
+        "d2 vs d0 | se",
+        "d2 vs d0 | max_bias",
+        "d2 vs d0 | max_bias_base",
+        "d2 vs d0 | bound_width",
+        "d2 vs d0 | sigma2",
+        "d2 vs d0 | nu2",
+    ]
+    assert summary_df.iloc[1]["value"] == [
+        round(out["theta_bounds_cofounding"][0][0], 4),
+        round(out["theta"][0], 4),
+        round(out["theta_bounds_cofounding"][0][1], 4),
+    ]
+    assert summary_df.iloc[12]["value"] == [
+        round(out["theta_bounds_cofounding"][1][0], 4),
+        round(out["theta"][1], 4),
+        round(out["theta_bounds_cofounding"][1][1], 4),
+    ]
+    assert "Bias-aware Interval" in str(out)
+    assert "Bias-aware Interval" in repr(out)
+    assert isinstance(get_sensitivity_summary(out), str)
 
 
 def test_multi_sensitivity_analysis_rejects_conflicting_cf_y_and_r2_y():
@@ -189,6 +232,8 @@ def test_model_sensitivity_analysis_accepts_r2_y_alias():
     returned = model.sensitivity_analysis(r2_y=0.1, r2_d=0.1, rho=1.0, alpha=0.05)
     assert returned is model
     assert isinstance(model.sensitivity_summary, str)
+    assert isinstance(model.sensitivity_result, dict)
+    assert isinstance(model.sensitivity_result.summary(), pd.DataFrame)
 
 
 def test_multi_sensitivity_is_stored_on_diagnostic_data_only():

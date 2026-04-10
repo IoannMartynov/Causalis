@@ -16,6 +16,7 @@ from .overlap import *  # noqa: F401,F403
 from .score import *  # noqa: F401,F403
 
 # Unconfoundedness sensitivity and balance checks
+from .unconfoundedness.love_plot import *  # noqa: F401,F403
 from .unconfoundedness.unconfoundedness_validation import *  # noqa: F401,F403
 from .unconfoundedness.sensitivity import *  # noqa: F401,F403
 
@@ -34,6 +35,7 @@ __all_score = [
 ]
 
 __all_unconf = [
+    "love_plot",
     "sensitivity_analysis",
     "get_sensitivity_summary",
     "run_unconfoundedness_diagnostics",

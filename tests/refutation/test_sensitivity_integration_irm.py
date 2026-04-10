@@ -1,3 +1,5 @@
+import pandas as pd
+
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 
 from causalis.dgp.causaldata import CausalData
@@ -23,6 +25,27 @@ def test_sensitivity_with_dml_ate_runs_and_returns_dict():
     out = sensitivity_analysis(res, r2_y=0.02, r2_d=0.03, rho=1.0)
 
     assert isinstance(out, dict)
+    summary_df = out.summary()
+    assert isinstance(summary_df, pd.DataFrame)
+    assert list(summary_df.columns) == ["statistics", "value"]
+    assert summary_df["statistics"].tolist() == [
+        "bias_aware_ci",
+        "theta",
+        "sampling_ci",
+        "rv",
+        "rva",
+        "se",
+        "max_bias",
+        "max_bias_base",
+        "bound_width",
+        "sigma2",
+        "nu2",
+    ]
+    assert summary_df.iloc[0]["value"] == [round(out["bias_aware_ci"][0], 4), round(out["bias_aware_ci"][1], 4)]
+    assert summary_df.iloc[1]["value"] == [round(out["theta_bounds_cofounding"][0], 4), round(out["theta"], 4), round(out["theta_bounds_cofounding"][1], 4)]
+    assert "Bias-aware Interval" in str(out)
+    assert "Bias-aware Interval" in repr(out)
+    assert isinstance(get_sensitivity_summary(out), str)
     # Integration: summary should be retrievable via the getter
     summ = get_sensitivity_summary(res)
     assert isinstance(summ, str)
@@ -39,6 +62,7 @@ def test_sensitivity_with_dml_att_runs_and_returns_dict():
     out = sensitivity_analysis(res, r2_y=0.01, r2_d=0.04, rho=0.8)
 
     assert isinstance(out, dict)
+    assert isinstance(out.summary(), pd.DataFrame)
     summ = get_sensitivity_summary(res)
     assert isinstance(summ, str)
     assert "Bias-aware Interval" in summ
