@@ -49,3 +49,7 @@ docs = [
 
 [tool.setuptools.packages.find]
 include = ["causalis", "causalis.*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]

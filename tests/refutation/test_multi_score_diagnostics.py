@@ -99,3 +99,19 @@ def test_multi_score_diagnostics_warns_and_disables_hajek_for_orthogonality():
     assert report["params"]["normalize_ipw"] is True
     assert report["params"]["orthogonality_normalize_ipw"] is False
     assert report["meta"]["orthogonality_derivatives_use_score_normalization"] is False
+
+
+def test_multi_score_diagnostics_can_filter_summary_metrics():
+    data = _make_multi_causal_data(seed=91)
+    estimate = _make_estimate(data)
+
+    report = run_score_diagnostics(
+        data,
+        estimate,
+        return_summary=True,
+        summary_metrics=["psi_p99_over_med", "max_|t|"],
+    )
+
+    summary = report["summary"]
+    assert set(summary["metric"]) == {"psi_p99_over_med", "max_|t|"}
+    assert summary.shape[0] == 4

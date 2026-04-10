@@ -1493,6 +1493,7 @@ class IRM(BaseEstimator):
         # Execute sensitivity analysis using the centralized module logic
         res = sa_fn(self, r2_y=r2_y, r2_d=r2_d, rho=rho, H0=H0, alpha=alpha)
 
+        self.sensitivity_result = res
         # Cache the summary string for display
         self.sensitivity_summary = get_sensitivity_summary({"model": self, "bias_aware": res})
 
