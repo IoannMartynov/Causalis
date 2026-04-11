@@ -1,0 +1,12 @@
+# Keep GitHub language statistics focused on the library code.
+.github/** linguist-vendored
+.gitignore linguist-vendored
+.local/** linguist-vendored
+CONTRIBUTING.md linguist-vendored
+LICENSE linguist-vendored
+README.md linguist-vendored
+environment.yml linguist-vendored
+notebooks/** linguist-vendored
+pyproject.toml linguist-vendored
+scripts/** linguist-vendored
+tests/** linguist-vendored

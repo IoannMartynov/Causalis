@@ -37,6 +37,10 @@ causalis.dgp.multicausaldata.base
   - ```{autodoc2-docstring} causalis.dgp.multicausaldata.generate_multitreatment_irm_26
     :summary:
     ```
+* - {py:obj}`generate_multi_dml_cx_26 <causalis.dgp.multicausaldata.generate_multi_dml_cx_26>`
+  - ```{autodoc2-docstring} causalis.dgp.multicausaldata.generate_multi_dml_cx_26
+    :summary:
+    ```
 ````
 
 ### Data
@@ -71,6 +75,13 @@ causalis.dgp.multicausaldata.base
 :canonical: causalis.dgp.multicausaldata.generate_multitreatment_irm_26
 
 ```{autodoc2-docstring} causalis.dgp.multicausaldata.generate_multitreatment_irm_26
+```
+````
+
+````{py:function} generate_multi_dml_cx_26(*args, **kwargs)
+:canonical: causalis.dgp.multicausaldata.generate_multi_dml_cx_26
+
+```{autodoc2-docstring} causalis.dgp.multicausaldata.generate_multi_dml_cx_26
 ```
 ````
 

@@ -27,6 +27,22 @@
   - ```{autodoc2-docstring} causalis.scenarios.multi_unconfoundedness.dgp.generate_multitreatment_irm_26
     :summary:
     ```
+* - {py:obj}`generate_multi_dml_cx_26 <causalis.scenarios.multi_unconfoundedness.dgp.generate_multi_dml_cx_26>`
+  - ```{autodoc2-docstring} causalis.scenarios.multi_unconfoundedness.dgp.generate_multi_dml_cx_26
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`multi_dml_cx_26 <causalis.scenarios.multi_unconfoundedness.dgp.multi_dml_cx_26>`
+  - ```{autodoc2-docstring} causalis.scenarios.multi_unconfoundedness.dgp.multi_dml_cx_26
+    :summary:
+    ```
 ````
 
 ### API
@@ -50,4 +66,21 @@
 
 ```{autodoc2-docstring} causalis.scenarios.multi_unconfoundedness.dgp.generate_multitreatment_irm_26
 ```
+````
+
+````{py:function} generate_multi_dml_cx_26(n: int = 100000, seed: int = 42, include_oracle: bool = False, return_causal_data: bool = True) -> typing.Union[pandas.DataFrame, causalis.data_contracts.multicausaldata.MultiCausalData]
+:canonical: causalis.scenarios.multi_unconfoundedness.dgp.generate_multi_dml_cx_26
+
+```{autodoc2-docstring} causalis.scenarios.multi_unconfoundedness.dgp.generate_multi_dml_cx_26
+```
+````
+
+````{py:data} multi_dml_cx_26
+:canonical: causalis.scenarios.multi_unconfoundedness.dgp.multi_dml_cx_26
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.multi_unconfoundedness.dgp.multi_dml_cx_26
+```
+
 ````

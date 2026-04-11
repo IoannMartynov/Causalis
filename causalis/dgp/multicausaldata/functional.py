@@ -27,7 +27,9 @@ Examples
 from __future__ import annotations
 
 import pandas as pd
-from typing import Optional, Union, List, Dict, Any
+from typing import Optional, Union, List, Dict, Any, Callable
+
+import numpy as np
 
 from causalis.data_contracts.multicausaldata import MultiCausalData
 from .base import MultiCausalDatasetGenerator
@@ -44,7 +46,9 @@ def generate_multitreatment(
     target_d_rate: Optional[Union[List[float], Any]] = None,
     confounder_specs: Optional[List[Dict[str, Any]]] = None,
     beta_y: Optional[Any] = None,
+    g_y: Optional[Callable[[np.ndarray], np.ndarray]] = None,
     beta_d: Optional[Any] = None,
+    g_d: Optional[Any] = None,
     theta: Optional[Any] = None,
     random_state: Optional[int] = 42,
     k: int = 0,
@@ -81,8 +85,12 @@ def generate_multitreatment(
         Schema for confounder distributions.
     beta_y : array-like, optional
         Linear coefficients for outcome model.
+    g_y : callable, optional
+        Nonlinear baseline outcome function added on the link scale.
     beta_d : array-like, optional
         Linear coefficients for treatment model.
+    g_d : callable or list of callables, optional
+        Nonlinear treatment score function(s) added on the softmax-link scale.
     theta : float or array-like, optional
         Constant treatment effects per class (adds to `tau` when both are provided).
     random_state : int, optional
@@ -139,7 +147,9 @@ def generate_multitreatment(
         target_d_rate=target_d_rate,
         confounder_specs=confounder_specs,
         beta_y=beta_y,
+        g_y=g_y,
         beta_d=beta_d,
+        g_d=g_d,
         theta=theta,
         seed=random_state,
         k=int(k),
