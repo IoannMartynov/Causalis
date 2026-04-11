@@ -50,6 +50,19 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.multi_unconfoundedness.dgp.generate_multitreatment_irm_26" title="causalis.scenarios.multi_unconfoundedness.dgp.generate_multitreatment_irm_26"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_multitreatment_irm_26</span></code></a></p></td>
 <td></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.multi_unconfoundedness.dgp.generate_multi_dml_cx_26" title="causalis.scenarios.multi_unconfoundedness.dgp.generate_multi_dml_cx_26"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_multi_dml_cx_26</span></code></a></p></td>
+<td><p>CX-inspired four-arm binary-outcome benchmark based on <code class="docutils literal notranslate"><span class="pre">dgp--1163305488.ipynb</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="data">
+<h3>Data<a class="headerlink" href="#data" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.multi_unconfoundedness.dgp.multi_dml_cx_26" title="causalis.scenarios.multi_unconfoundedness.dgp.multi_dml_cx_26"><code class="xref py py-obj docutils literal notranslate"><span class="pre">multi_dml_cx_26</span></code></a></p></td>
+<td></td>
+</tr>
 </tbody>
 </table>
 </section>
@@ -60,11 +73,72 @@
 <span class="sig-prename descclassname"><span class="pre">causalis.scenarios.multi_unconfoundedness.dgp.</span></span><span class="sig-name descname"><span class="pre">generate_multitreatment_gamma_26</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_oracle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_causal_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="causalis.data_contracts.multicausaldata.html#causalis.data_contracts.multicausaldata.MultiCausalData" title="causalis.data_contracts.multicausaldata.MultiCausalData"><span class="pre">causalis.data_contracts.multicausaldata.MultiCausalData</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.multi_unconfoundedness.dgp.generate_multitreatment_gamma_26" title="Link to this definition">¶</a></dt>
 <dd><p>Pre-configured multi-treatment dataset with Gamma-distributed outcome.</p>
 <ul class="simple">
-<li><p>3 treatment classes: control + 2 treatments</p></li>
-<li><p>8 confounders with realistic marginals</p></li>
-<li><p>Gamma outcome with log-link linear confounding</p></li>
-<li><p>Heterogeneous treatment effects and correlated confounders via Gaussian copula</p></li>
+<li><p>3 treatment classes: <code class="docutils literal notranslate"><span class="pre">d_0</span></code> (control), <code class="docutils literal notranslate"><span class="pre">d_1</span></code>, <code class="docutils literal notranslate"><span class="pre">d_2</span></code></p></li>
+<li><p>8 confounders with realistic marginals sampled through a Gaussian copula</p></li>
+<li><p>Gamma outcome with log-link confounding and heterogeneous arm effects</p></li>
 </ul>
+<p class="rubric" id="id5">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>df = generate_multitreatment_gamma_26(n=256, seed=7, return_causal_data=False)
+bool(df[[“d_0”, “d_1”, “d_2”]].sum(axis=1).eq(1).all())
+True
+{“tenure_months”, “credit_utilization”, “y”}.issubset(df.columns)
+True</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+<p class="rubric" id="id6">Notes</p>
+<p>Let
+:math:<code class="docutils literal notranslate"><span class="pre">X</span> <span class="pre">=</span> <span class="pre">(\text{tenure},</span> <span class="pre">\text{sessions},</span> <span class="pre">\text{spend},</span> <span class="pre">\text{premium},</span> <span class="pre">\text{urban},</span> <span class="pre">\text{tickets},</span> <span class="pre">\text{discount},</span> <span class="pre">\text{credit})</span></code>
+denote the 8 observed confounders. The treatment assignment mechanism is a
+multinomial logit with calibrated marginal arm rates near
+:math:<code class="docutils literal notranslate"><span class="pre">(0.50,</span> <span class="pre">0.25,</span> <span class="pre">0.25)</span></code>:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>s_k(X) = \alpha_{d,k} + \beta_{d,k}^{\top} X, \qquad
+\Pr(D = k \mid X) = \frac{\exp(s_k(X))}{\sum_{j=0}^{2} \exp(s_j(X))}.
+</pre></div>
+</div>
+<p>The confounders are jointly sampled through a Toeplitz copula with
+:math:<code class="docutils literal notranslate"><span class="pre">\mathrm{Corr}(X_i,</span> <span class="pre">X_j)</span> <span class="pre">=</span> <span class="pre">0.3^{|i-j|}</span></code>.</p>
+<p>The outcome uses a log link. For arm :math:<code class="docutils literal notranslate"><span class="pre">k</span></code>,</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\log \mu_k(X) = \alpha_y + \beta_y^{\top} X + \theta_k + \tau_k(X),
+\qquad
+Y(k) \mid X \sim \Gamma(\text{shape}=2, \text{scale}=\mu_k(X)/2).
+</pre></div>
+</div>
+<p>This scenario fixes :math:<code class="docutils literal notranslate"><span class="pre">\theta</span> <span class="pre">=</span> <span class="pre">(0,</span> <span class="pre">-0.05,</span> <span class="pre">0.10)</span></code> and uses the
+heterogeneous shifts</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\tau_1(X) =
+\min \left\{
+-0.22
+- 0.0010 \, \text{tenure}
+- 0.006 \, \text{sessions}
+- 0.05 \, \text{premium}
+- 0.04 \, \text{discount}
+- 0.10 \, (\text{credit} - 0.45),
+-0.02
+\right\},
+</pre></div>
+</div>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\tau_2(X) =
+\max \left\{
+0.16
++ 0.014 \, \text{sessions}
++ 0.030 \, \log(1 + \text{spend})
++ 0.06 \, \text{urban}
+- 0.006 \, \text{tickets}
++ 0.12 \, (\text{credit} - 0.45),
+0.02
+\right\}.
+</pre></div>
+</div>
+<p>So <code class="docutils literal notranslate"><span class="pre">d_1</span></code> is always weakly worse than control on the log-mean scale, while
+<code class="docutils literal notranslate"><span class="pre">d_2</span></code> is always weakly better than control.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -72,17 +146,167 @@
 <span class="sig-prename descclassname"><span class="pre">causalis.scenarios.multi_unconfoundedness.dgp.</span></span><span class="sig-name descname"><span class="pre">generate_multitreatment_binary_26</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_oracle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_causal_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="causalis.data_contracts.multicausaldata.html#causalis.data_contracts.multicausaldata.MultiCausalData" title="causalis.data_contracts.multicausaldata.MultiCausalData"><span class="pre">causalis.data_contracts.multicausaldata.MultiCausalData</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.multi_unconfoundedness.dgp.generate_multitreatment_binary_26" title="Link to this definition">¶</a></dt>
 <dd><p>Pre-configured multi-treatment dataset with Binary outcome.</p>
 <ul class="simple">
-<li><p>3 treatment classes: control + 2 treatments</p></li>
-<li><p>8 confounders with realistic marginals</p></li>
-<li><p>Binary outcome with logistic-link linear confounding</p></li>
-<li><p>Heterogeneous treatment effects and correlated confounders via Gaussian copula</p></li>
+<li><p>3 treatment classes: <code class="docutils literal notranslate"><span class="pre">d_0</span></code> (control), <code class="docutils literal notranslate"><span class="pre">d_1</span></code>, <code class="docutils literal notranslate"><span class="pre">d_2</span></code></p></li>
+<li><p>8 confounders with realistic marginals sampled through a Gaussian copula</p></li>
+<li><p>Binary outcome with a logistic baseline and heterogeneous arm effects</p></li>
 </ul>
+<p class="rubric" id="id7">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>df = generate_multitreatment_binary_26(n=256, seed=7, return_causal_data=False)
+bool(df[[“d_0”, “d_1”, “d_2”]].sum(axis=1).eq(1).all())
+True
+{“weekly_active_days”, “engagement_score”, “y”}.issubset(df.columns)
+True</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+<p class="rubric" id="id8">Notes</p>
+<p>Let
+:math:<code class="docutils literal notranslate"><span class="pre">X</span> <span class="pre">=</span> <span class="pre">(\text{tenure},</span> <span class="pre">\text{active</span> <span class="pre">days},</span> <span class="pre">\text{income},</span> <span class="pre">\text{premium},</span> <span class="pre">\text{family},</span> <span class="pre">\text{complaints},</span> <span class="pre">\text{discount},</span> <span class="pre">\text{engagement})</span></code>
+denote the 8 confounders. Treatment assignment again follows a calibrated
+multinomial logit with target arm rates near :math:<code class="docutils literal notranslate"><span class="pre">(0.50,</span> <span class="pre">0.25,</span> <span class="pre">0.25)</span></code>:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>s_k(X) = \alpha_{d,k} + \beta_{d,k}^{\top} X, \qquad
+\Pr(D = k \mid X) = \frac{\exp(s_k(X))}{\sum_{j=0}^{2} \exp(s_j(X))}.
+</pre></div>
+</div>
+<p>The outcome uses a logistic link with <code class="docutils literal notranslate"><span class="pre">alpha_y</span> <span class="pre">=</span> <span class="pre">-1.1</span></code>:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\operatorname{logit}\Pr(Y(k)=1 \mid X)
+= -1.1 + \beta_y^{\top} X + \theta_k + \tau_k(X).
+</pre></div>
+</div>
+<p>This scenario fixes :math:<code class="docutils literal notranslate"><span class="pre">\theta</span> <span class="pre">=</span> <span class="pre">(0,</span> <span class="pre">-0.18,</span> <span class="pre">0.26)</span></code> and uses</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\tau_1(X) =
+\min \left\{
+-0.16
+- 0.0008 \, \text{tenure}
+- 0.020 \, \text{active days}
+- 0.08 \, \text{premium}
+- 0.03 \, \text{complaints}
+- 0.10 \, (\text{engagement} - 0.60),
+-0.02
+\right\},
+</pre></div>
+</div>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\tau_2(X) =
+\max \left\{
+0.14
++ 0.020 \, \text{active days}
++ 0.028 \, \log(1 + \text{income})
++ 0.05 \, \text{family}
+- 0.010 \, \text{complaints}
++ 0.12 \, (\text{engagement} - 0.60),
+0.02
+\right\}.
+</pre></div>
+</div>
+<p>The clipping keeps <code class="docutils literal notranslate"><span class="pre">d_1</span></code> uniformly below control and <code class="docutils literal notranslate"><span class="pre">d_2</span></code> uniformly
+above control on the log-odds scale, while the Gaussian copula with
+:math:<code class="docutils literal notranslate"><span class="pre">\mathrm{Corr}(X_i,</span> <span class="pre">X_j)</span> <span class="pre">=</span> <span class="pre">0.3^{|i-j|}</span></code> induces cross-feature
+dependence.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="causalis.scenarios.multi_unconfoundedness.dgp.generate_multitreatment_irm_26">
 <span class="sig-prename descclassname"><span class="pre">causalis.scenarios.multi_unconfoundedness.dgp.</span></span><span class="sig-name descname"><span class="pre">generate_multitreatment_irm_26</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_oracle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_causal_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="causalis.data_contracts.multicausaldata.html#causalis.data_contracts.multicausaldata.MultiCausalData" title="causalis.data_contracts.multicausaldata.MultiCausalData"><span class="pre">causalis.data_contracts.multicausaldata.MultiCausalData</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.multi_unconfoundedness.dgp.generate_multitreatment_irm_26" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.multi_unconfoundedness.dgp.generate_multi_dml_cx_26">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.multi_unconfoundedness.dgp.</span></span><span class="sig-name descname"><span class="pre">generate_multi_dml_cx_26</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_oracle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_causal_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="causalis.data_contracts.multicausaldata.html#causalis.data_contracts.multicausaldata.MultiCausalData" title="causalis.data_contracts.multicausaldata.MultiCausalData"><span class="pre">causalis.data_contracts.multicausaldata.MultiCausalData</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.multi_unconfoundedness.dgp.generate_multi_dml_cx_26" title="Link to this definition">¶</a></dt>
+<dd><p>CX-inspired four-arm binary-outcome benchmark based on <code class="docutils literal notranslate"><span class="pre">dgp--1163305488.ipynb</span></code>.</p>
+<p>The notebook simulates overlapping <code class="docutils literal notranslate"><span class="pre">contact</span></code> and <code class="docutils literal notranslate"><span class="pre">repeat</span></code> actions. This
+packaged DGP resolves them into a mutually exclusive one-hot treatment:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">control</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">neg_contact_flg</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">error_flg</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">neg_contact_flg_error_flg</span></code></p></li>
+</ul>
+<p>Treatment assignment matches the notebook’s independent Bernoulli contact
+and repeat mechanisms exactly after overlap-resolution, but is exposed
+through the shared multi-treatment generator so it integrates with
+<code class="docutils literal notranslate"><span class="pre">MultiCausalData</span></code> and the scenario tooling.</p>
+<p class="rubric" id="id9">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>df = generate_multi_dml_cx_26(n=256, seed=7, return_causal_data=False)
+treatment_cols = [“control”, “neg_contact_flg”, “error_flg”, “neg_contact_flg_error_flg”]
+bool(df[treatment_cols].sum(axis=1).eq(1).all())
+True
+{“age”, “prev_apps”, “csat_prev”, “y”}.issubset(df.columns)
+True</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+<p class="rubric" id="id10">Notes</p>
+<p>Write :math:<code class="docutils literal notranslate"><span class="pre">a(X)</span></code> for the contact logit and :math:<code class="docutils literal notranslate"><span class="pre">b(X)</span></code> for the repeat
+logit. The notebook first draws two conditionally independent Bernoulli
+actions,</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>C \mid X \sim \operatorname{Bernoulli}(\sigma(a(X))), \qquad
+R \mid X \sim \operatorname{Bernoulli}(\sigma(b(X))),
+</pre></div>
+</div>
+<p>where :math:<code class="docutils literal notranslate"><span class="pre">\sigma(z)</span> <span class="pre">=</span> <span class="pre">1</span> <span class="pre">/</span> <span class="pre">(1</span> <span class="pre">+</span> <span class="pre">e^{-z})</span></code>. In this packaged benchmark the
+pair :math:<code class="docutils literal notranslate"><span class="pre">(C,</span> <span class="pre">R)</span></code> is re-encoded as a one-hot treatment:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>D =
+\begin{cases}
+\text{control} &amp; (C, R) = (0, 0), \\
+\text{neg\_contact\_flg} &amp; (C, R) = (1, 0), \\
+\text{error\_flg} &amp; (C, R) = (0, 1), \\
+\text{neg\_contact\_flg\_error\_flg} &amp; (C, R) = (1, 1).
+\end{cases}
+</pre></div>
+</div>
+<p>Let :math:<code class="docutils literal notranslate"><span class="pre">p_c</span> <span class="pre">=</span> <span class="pre">\sigma(a(X))</span></code> and :math:<code class="docutils literal notranslate"><span class="pre">p_r</span> <span class="pre">=</span> <span class="pre">\sigma(b(X))</span></code>. Then the arm
+probabilities are</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\Pr(D=\text{control}\mid X) = (1-p_c)(1-p_r),
+</pre></div>
+</div>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\Pr(D=\text{neg\_contact\_flg}\mid X) = p_c (1-p_r),
+</pre></div>
+</div>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\Pr(D=\text{error\_flg}\mid X) = (1-p_c) p_r,
+</pre></div>
+</div>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\Pr(D=\text{neg\_contact\_flg\_error\_flg}\mid X) = p_c p_r.
+</pre></div>
+</div>
+<p>Equivalently, this is exactly the softmax model with class scores
+:math:<code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">a(X),</span> <span class="pre">b(X),</span> <span class="pre">a(X)+b(X))</span></code>, which is why the implementation passes
+<code class="docutils literal notranslate"><span class="pre">g_d=[None,</span> <span class="pre">_cx_contact_logit,</span> <span class="pre">_cx_repeat_logit,</span> <span class="pre">lambda</span> <span class="pre">x:</span> <span class="pre">_cx_contact_logit(x)</span> <span class="pre">+</span> <span class="pre">_cx_repeat_logit(x)]</span></code>.</p>
+<p>The observed outcome uses a binary logit baseline :math:<code class="docutils literal notranslate"><span class="pre">g_y(X)</span></code> plus a
+class effect</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\operatorname{logit}\Pr(Y=1 \mid X, D)
+= g_y(X) + \theta(D),
+</pre></div>
+</div>
+<p>with :math:<code class="docutils literal notranslate"><span class="pre">\theta(\text{control})</span> <span class="pre">=</span> <span class="pre">\theta(\text{neg\_contact\_flg})</span> <span class="pre">=</span> <span class="pre">0</span></code>
+and :math:<code class="docutils literal notranslate"><span class="pre">\theta(\text{error\_flg})</span> <span class="pre">=</span> <span class="pre">\theta(\text{neg\_contact\_flg\_error\_flg})</span> <span class="pre">=</span> <span class="pre">-0.65</span></code>.</p>
+<p>Worked overlap example: if :math:<code class="docutils literal notranslate"><span class="pre">a(X)=0.8</span></code> and :math:<code class="docutils literal notranslate"><span class="pre">b(X)=-0.2</span></code>, then
+:math:<code class="docutils literal notranslate"><span class="pre">p_c</span> <span class="pre">\approx</span> <span class="pre">0.690</span></code> and :math:<code class="docutils literal notranslate"><span class="pre">p_r</span> <span class="pre">\approx</span> <span class="pre">0.450</span></code>, giving arm
+probabilities approximately <code class="docutils literal notranslate"><span class="pre">(0.170,</span> <span class="pre">0.379,</span> <span class="pre">0.140,</span> <span class="pre">0.311)</span></code> for
+<code class="docutils literal notranslate"><span class="pre">(control,</span> <span class="pre">neg_contact_flg,</span> <span class="pre">error_flg,</span> <span class="pre">neg_contact_flg_error_flg)</span></code>.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="causalis.scenarios.multi_unconfoundedness.dgp.multi_dml_cx_26">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.multi_unconfoundedness.dgp.</span></span><span class="sig-name descname"><span class="pre">multi_dml_cx_26</span></span><a class="headerlink" href="#causalis.scenarios.multi_unconfoundedness.dgp.multi_dml_cx_26" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
 
 </section>
 </section>

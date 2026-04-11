@@ -77,3 +77,32 @@ def test_multi_plot_m_overlap_handles_large_pairwise_sample_kde_smoke():
     assert any("KDE" in label for label in labels)
 
     plt.close(fig)
+
+
+def test_multi_plot_m_overlap_wraps_long_panel_text():
+    rng = np.random.default_rng(777)
+    n = 5_000
+    logits = rng.normal(size=(n, 3))
+    logits -= logits.max(axis=1, keepdims=True)
+    probs = np.exp(logits)
+    probs /= probs.sum(axis=1, keepdims=True)
+
+    draws = rng.random(size=n)
+    labels = (draws[:, None] > np.cumsum(probs, axis=1)[:, :-1]).sum(axis=1)
+    d = np.eye(3, dtype=int)[labels]
+    diag = MultiUnconfoundednessDiagnosticData(m_hat=probs, d=d)
+
+    fig = plot_multi_overlap(
+        diag,
+        kde=True,
+        bins="fd",
+        treatment_names=["control", "neg_contact_flg", "neg_contact_flg_error_flg"],
+    )
+
+    assert fig is not None
+    wrapped_titles = [ax.get_title() for ax in fig.axes if ax.get_title()]
+    wrapped_xlabels = [ax.get_xlabel() for ax in fig.axes if ax.get_xlabel()]
+    assert any("\n" in title for title in wrapped_titles)
+    assert any("\n" in xlabel for xlabel in wrapped_xlabels)
+
+    plt.close(fig)

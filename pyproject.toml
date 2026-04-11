@@ -51,7 +51,8 @@ docs = [
 include = ["causalis", "causalis.*"]
 
 [tool.setuptools_scm]
-fallback_version = "0.2.7"
+fallback_version = "0.2.8"
+local_scheme = "no-local-version"
 tag_regex = "^v(?P<version>\\d+\\.\\d+\\.\\d+)$"
 version_file = "causalis/_version.py"
 
