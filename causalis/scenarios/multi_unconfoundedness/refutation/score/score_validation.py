@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import math
 import warnings
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -28,39 +28,6 @@ def _two_sided_pvalue_from_t(t_stat: float) -> float:
     if not np.isfinite(t_stat):
         return float("nan")
     return float(math.erfc(abs(float(t_stat)) / math.sqrt(2.0)))
-
-
-_SUMMARY_METRICS: Tuple[str, ...] = (
-    "se_plugin",
-    "psi_p99_over_med",
-    "psi_kurtosis",
-    "max_|t|_gk",
-    "max_|t|_g0",
-    "max_|t|_mk",
-    "max_|t|_m0",
-    "max_|t|",
-    "oos_tstat_fold",
-    "oos_tstat_strict",
-)
-
-
-def _normalize_summary_metrics(summary_metrics: Optional[Sequence[str]]) -> Optional[Tuple[str, ...]]:
-    if summary_metrics is None:
-        return None
-
-    if isinstance(summary_metrics, str):
-        requested = (summary_metrics,)
-    else:
-        requested = tuple(str(metric) for metric in summary_metrics)
-
-    invalid = [metric for metric in requested if metric not in _SUMMARY_METRICS]
-    if invalid:
-        raise ValueError(
-            "Unknown summary_metrics values: "
-            f"{invalid}. Available metrics are {list(_SUMMARY_METRICS)}."
-        )
-
-    return tuple(dict.fromkeys(requested))
 
 
 def _validate_estimate_matches_data(data: MultiCausalData, estimate: MultiCausalEstimate) -> None:
@@ -477,17 +444,8 @@ def run_score_diagnostics(
     trimming_threshold: Optional[float] = None,
     n_basis_funcs: Optional[int] = None,
     return_summary: bool = True,
-    summary_metrics: Optional[Sequence[str]] = None,
 ) -> Dict[str, Any]:
-    """Run score diagnostics for multi-treatment baseline contrasts.
-
-    Parameters
-    ----------
-    summary_metrics : sequence of str, optional
-        Filter ``report["summary"]`` to the requested metric names. This only
-        changes the returned summary table; all diagnostics are still computed.
-    """
-    selected_summary_metrics = _normalize_summary_metrics(summary_metrics)
+    """Run score diagnostics for multi-treatment baseline contrasts."""
 
     if not isinstance(data, MultiCausalData):
         raise TypeError(f"data must be MultiCausalData, got {type(data).__name__}.")
@@ -774,8 +732,6 @@ def run_score_diagnostics(
             summary_rows,
             columns=["comparison", "metric", "value", "flag"],
         )
-        if selected_summary_metrics is not None:
-            summary = summary.loc[summary["metric"].isin(selected_summary_metrics)].reset_index(drop=True)
         report["summary"] = summary
 
     return report

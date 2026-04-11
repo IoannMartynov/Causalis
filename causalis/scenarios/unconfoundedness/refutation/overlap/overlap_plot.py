@@ -90,6 +90,45 @@ def plot_m_overlap(
     -------
     matplotlib.figure.Figure
         The generated figure.
+
+    Notes
+    -----
+    This figure compares the treated and control distributions of
+    :math:`m(X) = \mathbb{P}(D=1 \mid X)`. Good overlap means both groups place
+    noticeable mass in the same regions of the unit interval. Clear separation
+    or strong piling-up near `0` and `1` is a warning sign for unstable
+    weighting.
+
+    Examples
+    --------
+    >>> from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+    >>> from causalis.dgp import obs_linear_26_dataset
+    >>> from causalis.scenarios.unconfoundedness.model import IRM
+    >>> data = obs_linear_26_dataset(
+    ...     n=1000,
+    ...     seed=3141,
+    ...     include_oracle=False,
+    ...     return_causal_data=True,
+    ... )
+    >>> irm = IRM(
+    ...     data=data,
+    ...     ml_g=RandomForestRegressor(
+    ...         n_estimators=200,
+    ...         max_depth=6,
+    ...         min_samples_leaf=5,
+    ...         random_state=3141,
+    ...     ),
+    ...     ml_m=RandomForestClassifier(
+    ...         n_estimators=200,
+    ...         max_depth=6,
+    ...         min_samples_leaf=5,
+    ...         random_state=3141,
+    ...     ),
+    ...     n_folds=3,
+    ...     random_state=3141,
+    ... )
+    >>> estimate = irm.fit().estimate(score="ATE")
+    >>> fig = plot_m_overlap(estimate)  # doctest: +SKIP
     """
 
     # ------- Helpers --------------------------------------------------------
@@ -106,8 +145,9 @@ def plot_m_overlap(
         return float(max(h, 0.02))
 
     def _kde_reflect(x, xs, h):
-        """Estimate a boundary-corrected KDE by reflecting samples at 0 and 1."""
+        """Estimate a boundary-corrected KDE on a regular grid for large-sample stability."""
         x = np.asarray(x, float)
+        xs = np.asarray(xs, float)
         if x.size == 0:
             return np.zeros_like(xs)
         if x.size < 2 or np.std(x) < 1e-8:
@@ -115,18 +155,26 @@ def plot_m_overlap(
             h0 = max(h, 0.02)
             z = (xs - mu) / h0
             return np.exp(-0.5 * z ** 2) / (np.sqrt(2 * np.pi) * h0)
-        xr = np.concatenate([x, -x, 2 - x])  # reflect at 0 and 1
-        density = np.zeros_like(xs, dtype=float)
-        norm = xr.size * np.sqrt(2 * np.pi) * h
-        chunk_size = max(256, int(np.ceil(2_000_000 / max(xs.size, 1))))
-        for start in range(0, xr.size, chunk_size):
-            stop = min(start + chunk_size, xr.size)
-            diff = (xs[None, :] - xr[start:stop, None]) / h
-            np.square(diff, out=diff)
-            diff *= -0.5
-            np.exp(diff, out=diff)
-            density += diff.sum(axis=0)
-        return density / norm
+
+        # Build the KDE from a bounded histogram so runtime stays practical even
+        # when the diagnostic payload contains hundreds of thousands of rows.
+        grid_size = int(min(2048, max(512, xs.size)))
+        edges = np.linspace(0.0, 1.0, grid_size + 1, dtype=float)
+        centers = 0.5 * (edges[:-1] + edges[1:])
+        dx = float(edges[1] - edges[0])
+
+        counts, _ = np.histogram(np.clip(x, 0.0, 1.0), bins=edges)
+        density = counts.astype(float) / (x.size * dx)
+
+        radius = max(1, int(np.ceil(4.0 * h / dx)))
+        offsets = np.arange(-radius, radius + 1, dtype=float)
+        kernel = np.exp(-0.5 * ((offsets * dx) / h) ** 2)
+        kernel /= np.sqrt(2 * np.pi) * h
+        kernel *= dx
+
+        padded = np.pad(density, pad_width=radius, mode="reflect")
+        smooth = np.convolve(padded, kernel, mode="same")[radius:-radius]
+        return np.interp(xs, centers, smooth, left=smooth[0], right=smooth[-1])
 
     def _patch_color(patches, fallback):
         """Return the first visible histogram patch color or a fallback color."""
@@ -139,18 +187,18 @@ def plot_m_overlap(
 
     # ------- Data -----------------------------------------------------------
     diag_resolved = _resolve_overlap_diag(diag)
-    d = np.asarray(diag_resolved.d).astype(int)
-    m = np.asarray(diag_resolved.m_hat, dtype=float)
+    d = np.asarray(diag_resolved.d).ravel()
+    m = np.asarray(diag_resolved.m_hat, dtype=float).ravel()
     mask = np.isfinite(m) & np.isfinite(d)
-    d, m = d[mask], m[mask]
-    mt = m[d == 1]
-    mc = m[d == 0]
+    d = d[mask] > 0.5
+    m = np.clip(m[mask], 0.0, 1.0)
+    mt = m[d]
+    mc = m[~d]
     if mt.size == 0 or mc.size == 0:
         raise ValueError("Both treated and control must have at least one observation after cleaning.")
 
-    # Clamp to [0,1] to keep plot stable and inside bounds
-    mtp = np.clip(mt, 0.0, 1.0)
-    mcp = np.clip(mc, 0.0, 1.0)
+    mtp = mt
+    mcp = mc
 
     # ------- Figure/axes with high DPI & scaled fonts ----------------------
     rc = {
@@ -190,7 +238,7 @@ def plot_m_overlap(
         # ------- KDE (stable NumPy implementation) -------------------------
         if kde:
             if clip:
-                lo, hi = np.quantile(np.clip(m, 0, 1), [clip[0], clip[1]])
+                lo, hi = np.quantile(m, [clip[0], clip[1]])
                 lo, hi = float(max(0.0, lo)), float(min(1.0, hi))
                 if not (hi > lo):
                     lo, hi = 0.0, 1.0

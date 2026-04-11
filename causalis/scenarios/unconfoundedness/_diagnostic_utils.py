@@ -8,8 +8,6 @@ import numpy as np
 
 from causalis.data_contracts.causal_diagnostic_data import UnconfoundednessDiagnosticData
 
-from ._score_utils import _normalize_ipw_terms
-
 
 def _build_score_plot_cache(
     *,
@@ -20,36 +18,17 @@ def _build_score_plot_cache(
     trimming_threshold: float,
     normalize_ipw_effective: bool,
 ) -> dict[str, Any]:
-    """Build cached arrays used by score influence plots."""
+    """Build cached arrays used by lightweight score influence plots."""
+    _ = normalize_ipw_effective
     m_clipped = np.clip(m_hat, trimming_threshold, 1.0 - trimming_threshold)
-    if score == "ATE":
-        ipw_t, ipw_c = _normalize_ipw_terms(
-            d,
-            m_clipped,
-            normalize_ipw=normalize_ipw_effective,
-            score=score,
-            warn=False,
-        )
-        ipw_t_label = r"$D/m$"
-        ipw_c_label = r"$(1-D)/(1-m)$"
-    else:
-        p_treated = float(np.mean(d))
-        ipw_t = d / (p_treated + 1e-12)
-        ipw_c = ((1.0 - d) * (m_clipped / (1.0 - m_clipped))) / (p_treated + 1e-12)
-        ipw_t_label = r"$D/\mathbb{E}[D]$"
-        ipw_c_label = r"$(1-D)\cdot m/(1-m)/\mathbb{E}[D]$"
 
     return {
         "score": str(score),
         "trimming_threshold": float(trimming_threshold),
-        "normalize_ipw": bool(normalize_ipw_effective),
         "d": np.asarray(d, dtype=float).ravel(),
         "m_clipped": np.asarray(m_clipped, dtype=float).ravel(),
         "psi": np.asarray(psi, dtype=float).ravel(),
-        "ipw_t": np.asarray(ipw_t, dtype=float).ravel(),
-        "ipw_c": np.asarray(ipw_c, dtype=float).ravel(),
-        "ipw_t_label": ipw_t_label,
-        "ipw_c_label": ipw_c_label,
+        "row_index": np.arange(np.asarray(d).size, dtype=int),
     }
 
 

@@ -1334,6 +1334,26 @@ def sensitivity_analysis(
 ) -> Dict[str, Any]:
     """Compute bias-aware components and cache them.
 
+    This function turns a fitted estimate into a simple hidden-confounding
+    stress test. In the default mode, the bound width is
+
+    .. math::
+
+        |\rho| \cdot \sqrt{\sigma^2 \nu^2}
+        \cdot
+        \sqrt{\frac{r2_y}{1-r2_y}\frac{r2_d}{1-r2_d}},
+
+    so the reported confounding interval is
+
+    .. math::
+
+        [\theta - \text{bound\_width}, \theta + \text{bound\_width}].
+
+    Here :math:`r2_y` controls how much residual outcome variation an omitted
+    confounder could explain, :math:`r2_d` does the same for treatment
+    assignment, and :math:`\rho` sets the sign and strength alignment between
+    the two channels.
+
     Parameters
     ----------
     effect_estimation : Dict[str, Any] or Any
@@ -1363,6 +1383,39 @@ def sensitivity_analysis(
           - bias_aware_ci = faithful CI for the bounds
           - max_bias and components (sigma2, nu2)
           - params (r2_y, r2_d, rho, use_signed_rr)
+
+    Examples
+    --------
+    >>> from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+    >>> from causalis.dgp import obs_linear_26_dataset
+    >>> from causalis.scenarios.unconfoundedness.model import IRM
+    >>> data = obs_linear_26_dataset(
+    ...     n=1000,
+    ...     seed=3141,
+    ...     include_oracle=False,
+    ...     return_causal_data=True,
+    ... )
+    >>> irm = IRM(
+    ...     data=data,
+    ...     ml_g=RandomForestRegressor(
+    ...         n_estimators=200,
+    ...         max_depth=6,
+    ...         min_samples_leaf=5,
+    ...         random_state=3141,
+    ...     ),
+    ...     ml_m=RandomForestClassifier(
+    ...         n_estimators=200,
+    ...         max_depth=6,
+    ...         min_samples_leaf=5,
+    ...         random_state=3141,
+    ...     ),
+    ...     n_folds=3,
+    ...     random_state=3141,
+    ... )
+    >>> estimate = irm.fit().estimate(score="ATE")
+    >>> out = sensitivity_analysis(estimate, r2_y=0.02, r2_d=0.02, rho=1.0)
+    >>> out["theta_bounds_cofounding"]  # doctest: +SKIP
+    >>> out["bias_aware_ci"]  # doctest: +SKIP
     """
     raw_res = compute_bias_aware_ci(
         effect_estimation,

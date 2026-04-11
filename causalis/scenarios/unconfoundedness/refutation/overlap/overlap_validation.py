@@ -39,6 +39,8 @@ _DEFAULT_THRESHOLDS: Dict[str, float] = {
     "intercept_warn": 0.2,
     "intercept_strong": 0.4,
 }
+
+
 def _mask_finite_pairs(p: np.ndarray, y: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """Drop rows with non-finite values from aligned score/label arrays."""
     p = np.asarray(p, dtype=float).ravel()
@@ -338,6 +340,30 @@ def run_overlap_diagnostics(
 ) -> Dict[str, Any]:
     """Run overlap and calibration diagnostics for an estimated propensity model.
 
+    The core overlap object is the propensity score
+
+    .. math::
+
+        m(X) = \mathbb{P}(D=1 \mid X).
+
+    This diagnostic checks whether estimated propensities stay away from the
+    edges and whether the implied weights are stable. For example, ATE weights
+    use
+
+    .. math::
+
+        w_i^{(1)} = \frac{D_i}{m(X_i)},
+        \qquad
+        w_i^{(0)} = \frac{1-D_i}{1-m(X_i)},
+
+    so very small :math:`m(X_i)` or very large :math:`m(X_i)` can create large
+    leverage points. The report combines:
+
+    - edge mass near `0` and `1`,
+    - treated/control separation in propensity space (`KS`, `AUC`),
+    - effective sample size and tail diagnostics for weights,
+    - calibration summaries such as `ECE`, recalibration slope, and intercept.
+
     Parameters
     ----------
     data : CausalData
@@ -367,6 +393,39 @@ def run_overlap_diagnostics(
     ------
     ValueError
         If required diagnostic arrays are missing or have incompatible shapes.
+
+    Examples
+    --------
+    >>> from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+    >>> from causalis.dgp import obs_linear_26_dataset
+    >>> from causalis.scenarios.unconfoundedness.model import IRM
+    >>> data = obs_linear_26_dataset(
+    ...     n=1000,
+    ...     seed=3141,
+    ...     include_oracle=False,
+    ...     return_causal_data=True,
+    ... )
+    >>> irm = IRM(
+    ...     data=data,
+    ...     ml_g=RandomForestRegressor(
+    ...         n_estimators=200,
+    ...         max_depth=6,
+    ...         min_samples_leaf=5,
+    ...         random_state=3141,
+    ...     ),
+    ...     ml_m=RandomForestClassifier(
+    ...         n_estimators=200,
+    ...         max_depth=6,
+    ...         min_samples_leaf=5,
+    ...         random_state=3141,
+    ...     ),
+    ...     n_folds=3,
+    ...     random_state=3141,
+    ... )
+    >>> estimate = irm.fit().estimate(score="ATE")
+    >>> report = run_overlap_diagnostics(data, estimate)
+    >>> report["summary"]  # doctest: +SKIP
+    >>> report["edge_mass"]  # doctest: +SKIP
     """
     _validate_estimate_matches_data(data=data, estimate=estimate)
 

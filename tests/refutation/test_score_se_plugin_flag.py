@@ -28,9 +28,7 @@ def test_se_plugin_metric_present_and_finite():
     report = run_score_diagnostics(data, estimate, return_summary=True)
 
     assert np.isfinite(float(report["influence_diagnostics"]["se_plugin"]))
-    se_row = report["summary"].loc[report["summary"]["metric"] == "se_plugin"]
-    assert not se_row.empty
-    assert se_row["flag"].iloc[0] == "NA"
+    assert "se_plugin" not in set(report["summary"]["metric"])
 
 
 def test_summary_contains_flag_column_and_expected_metrics():
@@ -39,4 +37,5 @@ def test_summary_contains_flag_column_and_expected_metrics():
 
     summary = report["summary"]
     assert "flag" in summary.columns
-    assert {"se_plugin", "psi_p99_over_med", "psi_kurtosis"}.issubset(set(summary["metric"]))
+    assert {"psi_p99_over_med", "psi_kurtosis"}.issubset(set(summary["metric"]))
+    assert "se_plugin" not in set(summary["metric"])

@@ -1,6 +1,4 @@
 import pandas as pd
-import pytest
-
 from sklearn.linear_model import LinearRegression, LogisticRegression
 
 from causalis.dgp import generate_rct
@@ -57,25 +55,3 @@ def test_score_diagnostics_flag_keys_are_present():
     assert "ortho_max_|t|_g0" in flags
     assert "ortho_max_|t|_m" in flags
     assert "oos_moment" in flags
-
-
-def test_score_diagnostics_can_filter_summary_metrics():
-    data = _make_data(seed=41)
-    estimate = _make_estimate(data)
-
-    report = run_score_diagnostics(
-        data,
-        estimate,
-        return_summary=True,
-        summary_metrics=["psi_p99_over_med", "max_|t|_m"],
-    )
-
-    assert report["summary"]["metric"].tolist() == ["psi_p99_over_med", "max_|t|_m"]
-
-
-def test_score_diagnostics_rejects_unknown_summary_metric():
-    data = _make_data(seed=43)
-    estimate = _make_estimate(data)
-
-    with pytest.raises(ValueError, match="Unknown summary_metrics values"):
-        run_score_diagnostics(data, estimate, summary_metrics=["not_a_metric"])

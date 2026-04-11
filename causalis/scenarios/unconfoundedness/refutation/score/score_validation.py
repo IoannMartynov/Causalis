@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import math
-from typing import Any, Dict, Optional, Sequence, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -258,38 +258,6 @@ def _two_sided_pvalue_from_t(t_stat: float) -> float:
     return float(math.erfc(abs(float(t_stat)) / math.sqrt(2.0)))
 
 
-_SUMMARY_METRICS: Tuple[str, ...] = (
-    "se_plugin",
-    "psi_p99_over_med",
-    "psi_kurtosis",
-    "max_|t|_g1",
-    "max_|t|_g0",
-    "max_|t|_m",
-    "oos_tstat_fold",
-    "oos_tstat_strict",
-)
-
-
-def _normalize_summary_metrics(summary_metrics: Optional[Sequence[str]]) -> Optional[Tuple[str, ...]]:
-    """Validate and normalize optional summary metric selection."""
-    if summary_metrics is None:
-        return None
-
-    if isinstance(summary_metrics, str):
-        requested = (summary_metrics,)
-    else:
-        requested = tuple(str(metric) for metric in summary_metrics)
-
-    invalid = [metric for metric in requested if metric not in _SUMMARY_METRICS]
-    if invalid:
-        raise ValueError(
-            "Unknown summary_metrics values: "
-            f"{invalid}. Available metrics are {list(_SUMMARY_METRICS)}."
-        )
-
-    return tuple(dict.fromkeys(requested))
-
-
 def _oos_moment_test_from_psi(
     psi_a: np.ndarray,
     psi_b: np.ndarray,
@@ -381,9 +349,30 @@ def run_score_diagnostics(
     trimming_threshold: Optional[float] = None,
     n_basis_funcs: Optional[int] = None,
     return_summary: bool = True,
-    summary_metrics: Optional[Sequence[str]] = None,
 ) -> Dict[str, Any]:
     """Run orthogonality and influence diagnostics for ATE or ATTE scores.
+
+    The main object is the per-observation score contribution. For ATE, this
+    diagnostic uses
+
+    .. math::
+
+        \hat\psi_i =
+        w_i(\hat g_1(X_i) - \hat g_0(X_i))
+        + \bar w_i
+        \left[
+        (Y_i - \hat g_1(X_i)) \frac{D_i}{\hat m_i}
+        -
+        (Y_i - \hat g_0(X_i)) \frac{1-D_i}{1-\hat m_i}
+        \right]
+        - \hat\theta.
+
+    Good score behavior means:
+
+    - the empirical score average is close to zero,
+    - finite-basis derivatives with respect to nuisance parts are small,
+    - the influence distribution is not driven by a tiny number of very large
+      :math:`|\hat\psi_i|`.
 
     Parameters
     ----------
@@ -400,9 +389,6 @@ def run_score_diagnostics(
         to one intercept plus all available confounders.
     return_summary : bool, default True
         Include a compact summary table in the returned payload.
-    summary_metrics : sequence of str, optional
-        Filter ``report["summary"]`` to the requested metric names. This only
-        changes the returned summary table; all diagnostics are still computed.
 
     Returns
     -------
@@ -414,9 +400,40 @@ def run_score_diagnostics(
     ------
     ValueError
         If required diagnostic arrays are missing or have incompatible shapes.
-    """
-    selected_summary_metrics = _normalize_summary_metrics(summary_metrics)
 
+    Examples
+    --------
+    >>> from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+    >>> from causalis.dgp import obs_linear_26_dataset
+    >>> from causalis.scenarios.unconfoundedness.model import IRM
+    >>> data = obs_linear_26_dataset(
+    ...     n=1000,
+    ...     seed=3141,
+    ...     include_oracle=False,
+    ...     return_causal_data=True,
+    ... )
+    >>> irm = IRM(
+    ...     data=data,
+    ...     ml_g=RandomForestRegressor(
+    ...         n_estimators=200,
+    ...         max_depth=6,
+    ...         min_samples_leaf=5,
+    ...         random_state=3141,
+    ...     ),
+    ...     ml_m=RandomForestClassifier(
+    ...         n_estimators=200,
+    ...         max_depth=6,
+    ...         min_samples_leaf=5,
+    ...         random_state=3141,
+    ...     ),
+    ...     n_folds=3,
+    ...     random_state=3141,
+    ... )
+    >>> estimate = irm.fit().estimate(score="ATE")
+    >>> report = run_score_diagnostics(data, estimate)
+    >>> report["summary"]  # doctest: +SKIP
+    >>> report["influence"]["top_influential"].head()  # doctest: +SKIP
+    """
     _validate_estimate_matches_data(data=data, estimate=estimate, require_confounders=True)
 
     diagnostic_data = estimate.diagnostic_data
@@ -668,36 +685,32 @@ def run_score_diagnostics(
     }
 
     if return_summary:
-        summary = pd.DataFrame(
+        summary_rows = [
+            {
+                "metric": "psi_p99_over_med",
+                "value": float(influence["p99_over_med"]),
+                "flag": flags["psi_tail_ratio"],
+            },
+            {
+                "metric": "psi_kurtosis",
+                "value": float(influence["kurtosis"]),
+                "flag": flags["psi_kurtosis"],
+            },
+        ]
+        if score == "ATE":
+            summary_rows.append({"metric": "max_|t|_g1", "value": max_t_g1, "flag": flags["ortho_max_|t|_g1"]})
+        summary_rows.extend(
             [
-                {"metric": "se_plugin", "value": float(influence["se_plugin"]), "flag": "NA"},
-                {
-                    "metric": "psi_p99_over_med",
-                    "value": float(influence["p99_over_med"]),
-                    "flag": flags["psi_tail_ratio"],
-                },
-                {
-                    "metric": "psi_kurtosis",
-                    "value": float(influence["kurtosis"]),
-                    "flag": flags["psi_kurtosis"],
-                },
-                {"metric": "max_|t|_g1", "value": max_t_g1, "flag": flags["ortho_max_|t|_g1"]},
                 {"metric": "max_|t|_g0", "value": max_t_g0, "flag": flags["ortho_max_|t|_g0"]},
                 {"metric": "max_|t|_m", "value": max_t_m, "flag": flags["ortho_max_|t|_m"]},
                 {
-                    "metric": "oos_tstat_fold",
-                    "value": float(oos_moment_test["oos_tstat_fold"]),
-                    "flag": flags["oos_moment"],
-                },
-                {
-                    "metric": "oos_tstat_strict",
-                    "value": float(oos_moment_test["oos_tstat_strict"]),
+                    "metric": "oos_max_abs_t",
+                    "value": oos_abs_t,
                     "flag": flags["oos_moment"],
                 },
             ]
         )
-        if selected_summary_metrics is not None:
-            summary = summary.loc[summary["metric"].isin(selected_summary_metrics)].reset_index(drop=True)
+        summary = pd.DataFrame(summary_rows)
         report["summary"] = summary
 
     return report

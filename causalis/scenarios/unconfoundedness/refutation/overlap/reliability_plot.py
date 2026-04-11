@@ -126,6 +126,14 @@ def plot_propensity_reliability(
     """
     Plot a propensity calibration reliability diagram.
 
+    The reliability plot groups observations into propensity bins and compares
+    predicted treatment probability with observed treatment frequency. In a
+    well-calibrated propensity model, points should stay near the diagonal:
+
+    .. math::
+
+        \mathbb{E}[D \mid m(X) \in b] \approx \mathbb{E}[m(X) \mid m(X) \in b].
+
     Parameters
     ----------
     estimate : CausalEstimate
@@ -168,6 +176,37 @@ def plot_propensity_reliability(
     -------
     matplotlib.figure.Figure
         The generated figure.
+
+    Examples
+    --------
+    >>> from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+    >>> from causalis.dgp import obs_linear_26_dataset
+    >>> from causalis.scenarios.unconfoundedness.model import IRM
+    >>> data = obs_linear_26_dataset(
+    ...     n=1000,
+    ...     seed=3141,
+    ...     include_oracle=False,
+    ...     return_causal_data=True,
+    ... )
+    >>> irm = IRM(
+    ...     data=data,
+    ...     ml_g=RandomForestRegressor(
+    ...         n_estimators=200,
+    ...         max_depth=6,
+    ...         min_samples_leaf=5,
+    ...         random_state=3141,
+    ...     ),
+    ...     ml_m=RandomForestClassifier(
+    ...         n_estimators=200,
+    ...         max_depth=6,
+    ...         min_samples_leaf=5,
+    ...         random_state=3141,
+    ...     ),
+    ...     n_folds=3,
+    ...     random_state=3141,
+    ... )
+    >>> estimate = irm.fit().estimate(score="ATE")
+    >>> fig = plot_propensity_reliability(estimate, data=data)  # doctest: +SKIP
     """
 
     payload = _resolve_calibration_payload(estimate=estimate, data=data, n_bins=int(n_bins))

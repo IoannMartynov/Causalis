@@ -88,6 +88,31 @@ def _binned_summary(
     return np.asarray(mids, dtype=float), np.asarray(means, dtype=float), np.asarray(counts, dtype=float)
 
 
+def _maybe_subsample_scatter(
+    x: np.ndarray,
+    y: np.ndarray,
+    *,
+    max_points: Optional[int],
+    rng: Optional[np.random.Generator],
+) -> tuple[np.ndarray, np.ndarray]:
+    """Optionally downsample scatter inputs without affecting summary overlays."""
+    x_arr = np.asarray(x, dtype=float).ravel()
+    y_arr = np.asarray(y, dtype=float).ravel()
+    if x_arr.size != y_arr.size:
+        raise ValueError("Scatter arrays must have matching sample size.")
+
+    if max_points is None or x_arr.size <= int(max_points):
+        return x_arr, y_arr
+
+    if int(max_points) <= 0:
+        raise ValueError("max_scatter_points must be a positive integer when provided.")
+
+    if rng is None:
+        rng = np.random.default_rng()
+    idx = np.asarray(rng.choice(x_arr.size, size=int(max_points), replace=False), dtype=int)
+    return x_arr[idx], y_arr[idx]
+
+
 def _resolve_residual_inputs(
     estimate: CausalEstimate,
     data: Optional[CausalData],
@@ -211,6 +236,8 @@ def plot_residual_diagnostics(
     n_bins: int = 20,
     marker_size: float = 12.0,
     alpha: float = 0.35,
+    max_scatter_points: Optional[int] = None,
+    random_state: Optional[int] = None,
     figsize: Tuple[float, float] = (14.0, 4.8),
     dpi: int = 220,
     font_scale: float = 1.10,
@@ -227,6 +254,19 @@ def plot_residual_diagnostics(
     2. Control-only: ``u0 = y - g0`` vs ``g0``.
     3. Binned calibration error: ``E[d - m | m in bin]`` vs binned ``m``.
 
+    Notes
+    -----
+    These plots check the nuisance pieces directly:
+
+    - outcome residuals :math:`u_1 = Y - \hat g_1(X)` and
+      :math:`u_0 = Y - \hat g_0(X)` should look roughly centered around zero
+      without strong patterns against fitted values,
+    - treatment residuals :math:`D - \hat m(X)` should average near zero within
+      propensity bins.
+
+    Clear trends usually mean the nuisance models still leave structure in the
+    data, which can show up later as unstable score diagnostics.
+
     Parameters
     ----------
     estimate : CausalEstimate
@@ -241,6 +281,12 @@ def plot_residual_diagnostics(
         Scatter marker size.
     alpha : float, default 0.35
         Scatter opacity.
+    max_scatter_points : int, optional
+        Maximum number of points drawn in each residual scatter panel. When set,
+        scatter points are sampled uniformly without replacement, while the
+        binned-mean overlays and calibration panel still use all observations.
+    random_state : int, optional
+        Random seed used when ``max_scatter_points`` triggers scatter sampling.
     figsize : tuple, default (14.0, 4.8)
         Figure size.
     dpi : int, default 220
@@ -258,6 +304,37 @@ def plot_residual_diagnostics(
     -------
     matplotlib.figure.Figure
         The generated figure.
+
+    Examples
+    --------
+    >>> from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+    >>> from causalis.dgp import obs_linear_26_dataset
+    >>> from causalis.scenarios.unconfoundedness.model import IRM
+    >>> data = obs_linear_26_dataset(
+    ...     n=1000,
+    ...     seed=3141,
+    ...     include_oracle=False,
+    ...     return_causal_data=True,
+    ... )
+    >>> irm = IRM(
+    ...     data=data,
+    ...     ml_g=RandomForestRegressor(
+    ...         n_estimators=200,
+    ...         max_depth=6,
+    ...         min_samples_leaf=5,
+    ...         random_state=3141,
+    ...     ),
+    ...     ml_m=RandomForestClassifier(
+    ...         n_estimators=200,
+    ...         max_depth=6,
+    ...         min_samples_leaf=5,
+    ...         random_state=3141,
+    ...     ),
+    ...     n_folds=3,
+    ...     random_state=3141,
+    ... )
+    >>> estimate = irm.fit().estimate(score="ATE")
+    >>> fig = plot_residual_diagnostics(estimate, data=data)  # doctest: +SKIP
     """
 
     resolved = _resolve_residual_inputs(
@@ -280,6 +357,11 @@ def plot_residual_diagnostics(
     if not np.any(mask_t) or not np.any(mask_c):
         raise ValueError("Both treated and control observations are required for residual plots.")
 
+    if max_scatter_points is not None and int(max_scatter_points) <= 0:
+        raise ValueError("max_scatter_points must be a positive integer when provided.")
+
+    rng = np.random.default_rng(random_state) if max_scatter_points is not None else None
+
     rc = {
         "font.size": 11 * font_scale,
         "axes.titlesize": 12.5 * font_scale,
@@ -296,7 +378,20 @@ def plot_residual_diagnostics(
         # 1) Treated: u1 vs g1
         x_t = g1[mask_t]
         y_t = u1[mask_t]
-        ax_t.scatter(x_t, y_t, s=marker_size, alpha=alpha, color="C0", linewidths=0.0)
+        x_t_scatter, y_t_scatter = _maybe_subsample_scatter(
+            x_t,
+            y_t,
+            max_points=max_scatter_points,
+            rng=rng,
+        )
+        ax_t.scatter(
+            x_t_scatter,
+            y_t_scatter,
+            s=marker_size,
+            alpha=alpha,
+            color="C0",
+            linewidths=0.0,
+        )
         xb_t, yb_t = _binned_mean_line(x_t, y_t, n_bins=int(n_bins))
         if xb_t.size > 0:
             ax_t.plot(xb_t, yb_t, color="black", linewidth=1.6, label="Binned mean")
@@ -310,7 +405,20 @@ def plot_residual_diagnostics(
         # 2) Control: u0 vs g0
         x_c = g0[mask_c]
         y_c = u0[mask_c]
-        ax_c.scatter(x_c, y_c, s=marker_size, alpha=alpha, color="C1", linewidths=0.0)
+        x_c_scatter, y_c_scatter = _maybe_subsample_scatter(
+            x_c,
+            y_c,
+            max_points=max_scatter_points,
+            rng=rng,
+        )
+        ax_c.scatter(
+            x_c_scatter,
+            y_c_scatter,
+            s=marker_size,
+            alpha=alpha,
+            color="C1",
+            linewidths=0.0,
+        )
         xb_c, yb_c = _binned_mean_line(x_c, y_c, n_bins=int(n_bins))
         if xb_c.size > 0:
             ax_c.plot(xb_c, yb_c, color="black", linewidth=1.6, label="Binned mean")

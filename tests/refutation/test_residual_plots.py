@@ -93,6 +93,26 @@ def test_plot_residual_diagnostics_fallback_for_y_d():
     plt.close(fig)
 
 
+def test_plot_residual_diagnostics_limits_scatter_points():
+    data, estimate = _build_data_and_estimate(include_yd_in_diag=True)
+    fig = plot_residual_diagnostics(
+        estimate=estimate,
+        data=data,
+        max_scatter_points=10,
+        random_state=7,
+    )
+
+    assert fig is not None
+    treated_offsets = fig.axes[0].collections[0].get_offsets()
+    control_offsets = fig.axes[1].collections[0].get_offsets()
+    assert treated_offsets.shape[0] == 10
+    assert control_offsets.shape[0] == 10
+    assert len(fig.axes[0].lines) >= 2
+    assert len(fig.axes[1].lines) >= 2
+
+    plt.close(fig)
+
+
 def test_plot_residual_diagnostics_uses_cached_inputs_without_data():
     _, estimate = _build_data_and_estimate(include_yd_in_diag=True)
     diag = estimate.diagnostic_data
