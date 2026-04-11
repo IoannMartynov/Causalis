@@ -1,0 +1,53 @@
+# {py:mod}`causalis.scenarios.unconfoundedness.refutation.unconfoundedness.love_plot`
+
+```{py:module} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.love_plot
+```
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.love_plot
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`love_plot <causalis.scenarios.unconfoundedness.refutation.unconfoundedness.love_plot.love_plot>`
+  - ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.love_plot.love_plot
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.scenarios.unconfoundedness.refutation.unconfoundedness.love_plot.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.love_plot.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} love_plot(data: causalis.dgp.causaldata.CausalData, estimate: causalis.data_contracts.causal_estimate.CausalEstimate, *, threshold: float = 0.1, figsize: typing.Optional[typing.Tuple[float, float]] = None, dpi: int = 220, font_scale: float = 1.1, save: typing.Optional[str] = None, save_dpi: typing.Optional[int] = None, transparent: bool = False) -> matplotlib.pyplot.Figure
+:canonical: causalis.scenarios.unconfoundedness.refutation.unconfoundedness.love_plot.love_plot
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.love_plot.love_plot
+```
+````
+
+````{py:data} __all__
+:canonical: causalis.scenarios.unconfoundedness.refutation.unconfoundedness.love_plot.__all__
+:value: >
+   ['love_plot']
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.love_plot.__all__
+```
+
+````
