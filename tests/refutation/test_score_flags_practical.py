@@ -47,13 +47,10 @@ def test_summary_flags_align_with_report_flags():
 
     row_tail = summary.loc[summary["metric"] == "psi_p99_over_med"]
     row_kurt = summary.loc[summary["metric"] == "psi_kurtosis"]
-    row_oos_fold = summary.loc[summary["metric"] == "oos_tstat_fold"]
-    row_oos_strict = summary.loc[summary["metric"] == "oos_tstat_strict"]
+    row_oos = summary.loc[summary["metric"] == "oos_max_abs_t"]
     assert not row_tail.empty
     assert not row_kurt.empty
-    assert not row_oos_fold.empty
-    assert not row_oos_strict.empty
+    assert not row_oos.empty
     assert row_tail["flag"].iloc[0] == out["flags"]["psi_tail_ratio"]
     assert row_kurt["flag"].iloc[0] == out["flags"]["psi_kurtosis"]
-    assert row_oos_fold["flag"].iloc[0] == out["flags"]["oos_moment"]
-    assert row_oos_strict["flag"].iloc[0] == out["flags"]["oos_moment"]
+    assert row_oos["flag"].iloc[0] == out["flags"]["oos_moment"]

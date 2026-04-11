@@ -26,6 +26,8 @@ class _BalanceInputs:
     names: List[str]
     score: str
     normalize: bool
+
+
 def _resolve_feature_names(names: Optional[List[str]], p: int) -> List[str]:
     """Return feature names or generate fallback labels for balance tables."""
     if names is not None:
@@ -33,6 +35,8 @@ def _resolve_feature_names(names: Optional[List[str]], p: int) -> List[str]:
         if len(names_list) == p:
             return names_list
     return [f"x{j + 1}" for j in range(p)]
+
+
 def _extract_balance_inputs(
     *,
     data: CausalData,
@@ -240,6 +244,35 @@ def run_unconfoundedness_diagnostics(
 ) -> Dict[str, Any]:
     """Run covariate-balance diagnostics implied by unconfoundedness.
 
+    The diagnostic compares the treated and control pseudo-populations induced
+    by the estimated propensity score. For ATE, the effective weights are
+
+    .. math::
+
+        w_{1i} = \bar w_i \frac{D_i}{\hat m_i},
+        \qquad
+        w_{0i} = \bar w_i \frac{1-D_i}{1-\hat m_i},
+
+    while for ATTE this implementation uses
+
+    .. math::
+
+        w_{1i} = D_i,
+        \qquad
+        w_{0i} = (1-D_i)\frac{\hat m_i}{1-\hat m_i}.
+
+    For each confounder :math:`X_j`, the weighted standardized mean
+    difference is
+
+    .. math::
+
+        \mathrm{SMD}_j =
+        \frac{|\mu_{1j}^{(w)} - \mu_{0j}^{(w)}|}
+        {\sqrt{(s_{1j}^{2,(w)} + s_{0j}^{2,(w)}) / 2}}.
+
+    Smaller weighted SMDs are better. A common rule of thumb is to aim for
+    :math:`|\mathrm{SMD}| < 0.10`.
+
     Parameters
     ----------
     data : CausalData
@@ -266,6 +299,39 @@ def run_unconfoundedness_diagnostics(
         If required diagnostic arrays are missing or have incompatible shapes.
     RuntimeError
         If balance weights collapse to zero total mass.
+
+    Examples
+    --------
+    >>> from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+    >>> from causalis.dgp import obs_linear_26_dataset
+    >>> from causalis.scenarios.unconfoundedness.model import IRM
+    >>> data = obs_linear_26_dataset(
+    ...     n=1000,
+    ...     seed=3141,
+    ...     include_oracle=False,
+    ...     return_causal_data=True,
+    ... )
+    >>> irm = IRM(
+    ...     data=data,
+    ...     ml_g=RandomForestRegressor(
+    ...         n_estimators=200,
+    ...         max_depth=6,
+    ...         min_samples_leaf=5,
+    ...         random_state=3141,
+    ...     ),
+    ...     ml_m=RandomForestClassifier(
+    ...         n_estimators=200,
+    ...         max_depth=6,
+    ...         min_samples_leaf=5,
+    ...         random_state=3141,
+    ...     ),
+    ...     n_folds=3,
+    ...     random_state=3141,
+    ... )
+    >>> estimate = irm.fit().estimate(score="ATE")
+    >>> report = run_unconfoundedness_diagnostics(data, estimate)
+    >>> report["balance"]["smd_max"]  # doctest: +SKIP
+    >>> report["balance"]["worst_features"].head()  # doctest: +SKIP
     """
     inputs = _extract_balance_inputs(
         data=data,

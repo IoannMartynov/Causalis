@@ -4,6 +4,7 @@ Causalis: A Python package for causal inference.
 
 import importlib
 import warnings
+from importlib.metadata import PackageNotFoundError, version as _dist_version
 from typing import TYPE_CHECKING
 
 # Suppress noisy tqdm warning in environments without ipywidgets
@@ -25,7 +26,22 @@ except Exception:
     # If tqdm is not installed or any issue arises, do not fail import
     pass
 
-__version__ = "0.1.2"
+try:
+    from ._version import version as __version__
+except Exception:
+    try:
+        __version__ = _dist_version("causalis")
+    except PackageNotFoundError:
+        try:
+            from setuptools_scm import get_version as _scm_get_version
+        except Exception:
+            __version__ = "0.0.0.dev0"
+        else:
+            try:
+                __version__ = _scm_get_version(root="..", relative_to=__file__)
+            except Exception:
+                __version__ = "0.0.0.dev0"
+
 __all__ = ["data_contracts", "dgp", "scenarios", "shared"]
 
 _LAZY_SUBMODULES = {"data_contracts", "dgp", "scenarios", "shared"}

@@ -48,3 +48,5 @@ def test_atte_has_expected_columns_and_finite_main_stats():
     )
     assert np.isfinite(float(report["influence_diagnostics"]["se_plugin"]))
     assert "summary" in report
+    assert "max_|t|_g1" not in set(report["summary"]["metric"])
+    assert {"max_|t|_g0", "max_|t|_m", "oos_max_abs_t"}.issubset(set(report["summary"]["metric"]))

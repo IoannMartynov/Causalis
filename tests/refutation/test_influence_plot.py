@@ -23,8 +23,8 @@ def _build_data_and_estimate(*, include_yd_in_diag: bool = True):
     g1 = g0 + 0.7
     y = g0 + d * 0.7 + rng.normal(scale=0.15, size=n)
 
-    df = pd.DataFrame({"y": y, "d": d, "x1": x1})
-    data = CausalData(df=df, treatment="d", outcome="y", confounders=["x1"])
+    df = pd.DataFrame({"user_id": [f"user_{i}" for i in range(n)], "y": y, "d": d, "x1": x1})
+    data = CausalData(df=df, treatment="d", outcome="y", confounders=["x1"], user_id="user_id")
 
     diag = UnconfoundednessDiagnosticData(
         m_hat=m,
@@ -62,70 +62,34 @@ def _build_data_and_estimate(*, include_yd_in_diag: bool = True):
     return data, estimate
 
 
-def test_plot_influence_instability_with_ipw_panels():
+def test_plot_influence_instability_returns_top_k_panels():
     data, estimate = _build_data_and_estimate(include_yd_in_diag=True)
-    fig = plot_influence_instability(estimate=estimate, data=data, include_ipw=True)
+    fig = plot_influence_instability(estimate=estimate, data=data, top_k=7)
 
     assert fig is not None
     assert not plt.fignum_exists(fig.number)
-    assert len(fig.axes) == 4
-    titles = [ax.get_title() for ax in fig.axes]
-    assert any("Influence Magnitude" in title for title in titles)
-    assert any("Instability" in title for title in titles)
-    assert any("IPW-Term" in title for title in titles)
-    assert any("Effective Sample Size" in title for title in titles)
+    assert len(fig.axes) == 2
+
+    ax_rank, ax_scatter = fig.axes
+    assert "Top-7 |psi| Contributions" == ax_rank.get_title()
+    assert "Top Influential Points by Propensity" == ax_scatter.get_title()
+    assert len(ax_rank.patches) == 7
+    assert all("user_id=user_" in tick.get_text() for tick in ax_rank.get_yticklabels())
 
     plt.close(fig)
 
 
 def test_plot_influence_instability_falls_back_to_data_for_y_d():
     data, estimate = _build_data_and_estimate(include_yd_in_diag=False)
-    fig = plot_influence_instability(estimate=estimate, data=data, include_ipw=False)
+    fig = plot_influence_instability(estimate=estimate, data=data, top_k=5)
 
     assert fig is not None
     assert not plt.fignum_exists(fig.number)
     assert len(fig.axes) == 2
-    titles = [ax.get_title() for ax in fig.axes]
-    assert any("Influence Magnitude" in title for title in titles)
-    assert any("Instability" in title for title in titles)
+    assert len(fig.axes[0].patches) == 5
 
     plt.close(fig)
 
-
-def test_plot_influence_instability_uses_cached_score_plot_inputs_without_data():
-    _, estimate = _build_data_and_estimate(include_yd_in_diag=True)
-    diag = estimate.diagnostic_data
-    n = int(np.asarray(diag.m_hat, dtype=float).size)
-    d = np.asarray(diag.d, dtype=float).ravel()
-    m = np.asarray(diag.m_hat, dtype=float).ravel()
-    score_cache = {
-        "score": "ATE",
-        "trimming_threshold": 1e-3,
-        "normalize_ipw": False,
-        "d": d,
-        "m_clipped": np.clip(m, 1e-3, 1.0 - 1e-3),
-        "psi": np.zeros(n, dtype=float),
-        "ipw_t": d / np.clip(m, 1e-3, 1.0 - 1e-3),
-        "ipw_c": (1.0 - d) / (1.0 - np.clip(m, 1e-3, 1.0 - 1e-3)),
-        "ipw_t_label": r"$D/m$",
-        "ipw_c_label": r"$(1-D)/(1-m)$",
-    }
-    diag_cached_only = diag.model_copy(
-        update={
-            "m_hat": None,
-            "g0_hat": None,
-            "g1_hat": None,
-            "y": None,
-            "d": None,
-            "score_plot_cache": score_cache,
-        }
-    )
-    estimate_cached_only = estimate.model_copy(update={"diagnostic_data": diag_cached_only})
-
-    fig = plot_influence_instability(estimate=estimate_cached_only, data=None, include_ipw=False)
-    assert fig is not None
-    assert len(fig.axes) == 2
-    plt.close(fig)
 
 
 def test_plot_influence_instability_populates_cache_on_first_call():
@@ -133,7 +97,9 @@ def test_plot_influence_instability_populates_cache_on_first_call():
     diag_no_cache = estimate.diagnostic_data.model_copy(update={"score_plot_cache": None})
     estimate_no_cache = estimate.model_copy(update={"diagnostic_data": diag_no_cache})
 
-    fig = plot_influence_instability(estimate=estimate_no_cache, data=data, include_ipw=False)
+    fig = plot_influence_instability(estimate=estimate_no_cache, data=data, top_k=4)
     assert fig is not None
-    assert isinstance(estimate_no_cache.diagnostic_data.score_plot_cache, dict)
+    cache = estimate_no_cache.diagnostic_data.score_plot_cache
+    assert isinstance(cache, dict)
+    assert {"score", "trimming_threshold", "d", "m_clipped", "psi", "row_index"}.issubset(set(cache))
     plt.close(fig)

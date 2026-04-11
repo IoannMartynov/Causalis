@@ -106,8 +106,10 @@ def test_score_diagnostics_reports_oos_moment_tstats_from_folds():
     assert oos["fold_table"].shape[0] == 2
 
     summary = report["summary"]
-    assert "oos_tstat_fold" in set(summary["metric"])
-    assert "oos_tstat_strict" in set(summary["metric"])
+    assert "oos_max_abs_t" in set(summary["metric"])
+    summary_oos = summary.loc[summary["metric"] == "oos_max_abs_t"]
+    assert not summary_oos.empty
+    assert np.isclose(float(summary_oos["value"].iloc[0]), 0.0)
 
 
 def test_unconfoundedness_uses_w_bar_for_weighted_ate_balance():

@@ -75,3 +75,21 @@ def generate_api_reference() -> Path:
 - Documenting every local implementation detail.
 - Adding empty or low-value sections.
 - Writing broader guarantees than the code actually provides.
+
+## Releases
+
+Releases are automated through GitHub Actions and PyPI Trusted Publishing.
+
+- Package versions are derived from Git tags via `setuptools-scm`; do not edit a version string by hand.
+- To cut the next release, run the `Cut Release` GitHub Actions workflow and choose whether to bump `patch`, `minor`, or `major`.
+- The workflow creates the next `vX.Y.Z` tag automatically.
+- Pushing that tag triggers the `Release` workflow, which builds the package, creates a GitHub Release, and publishes the same artifacts to PyPI.
+
+### PyPI Setup
+
+Configure PyPI Trusted Publishing for this repository before the first automated release:
+
+1. Open the `causalis` project on PyPI.
+2. Add a trusted publisher for this GitHub repository.
+3. Set the workflow file to `.github/workflows/release.yml`.
+4. Set the environment name to `pypi`.

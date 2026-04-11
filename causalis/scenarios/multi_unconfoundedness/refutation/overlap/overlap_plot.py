@@ -86,6 +86,7 @@ def plot_m_overlap(
 
     def _kde_reflect(x: np.ndarray, xs: np.ndarray, h: float) -> np.ndarray:
         x = np.asarray(x, float)
+        xs = np.asarray(xs, float)
         if x.size == 0:
             return np.zeros_like(xs)
         if x.size < 2 or np.std(x) < 1e-8:
@@ -94,10 +95,23 @@ def plot_m_overlap(
             z = (xs - mu) / h0
             return np.exp(-0.5 * z**2) / (np.sqrt(2 * np.pi) * h0)
 
-        xr = np.concatenate([x, -x, 2 - x])  # reflect at 0 and 1
-        diff = (xs[None, :] - xr[:, None]) / h
-        kern = np.exp(-0.5 * diff**2) / (np.sqrt(2 * np.pi) * h)
-        return kern.mean(axis=0)
+        grid_size = int(min(2048, max(512, xs.size)))
+        edges = np.linspace(0.0, 1.0, grid_size + 1, dtype=float)
+        centers = 0.5 * (edges[:-1] + edges[1:])
+        dx = float(edges[1] - edges[0])
+
+        counts, _ = np.histogram(np.clip(x, 0.0, 1.0), bins=edges)
+        density = counts.astype(float) / (x.size * dx)
+
+        radius = max(1, int(np.ceil(4.0 * h / dx)))
+        offsets = np.arange(-radius, radius + 1, dtype=float)
+        kernel = np.exp(-0.5 * ((offsets * dx) / h) ** 2)
+        kernel /= np.sqrt(2 * np.pi) * h
+        kernel *= dx
+
+        padded = np.pad(density, pad_width=radius, mode="reflect")
+        smooth = np.convolve(padded, kernel, mode="same")[radius:-radius]
+        return np.interp(xs, centers, smooth, left=smooth[0], right=smooth[-1])
 
     def _patch_color(patches, fallback):
         for p in patches:

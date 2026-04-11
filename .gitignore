@@ -24,6 +24,7 @@ var/
 pip-wheel-metadata/
 share/python-wheels/
 MANIFEST
+causalis/_version.py
 
 # Virtual environments
 .env

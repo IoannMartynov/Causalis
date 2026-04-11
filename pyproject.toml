@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=69"]
+requires = ["setuptools>=69", "setuptools-scm[toml]>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "causalis"
-version = "0.2.7"
+dynamic = ["version"]
 description = "A Python toolkit for causal inference and experimentation"
 readme = "README.md"
 authors = [
@@ -49,6 +49,11 @@ docs = [
 
 [tool.setuptools.packages.find]
 include = ["causalis", "causalis.*"]
+
+[tool.setuptools_scm]
+fallback_version = "0.2.7"
+tag_regex = "^v(?P<version>\\d+\\.\\d+\\.\\d+)$"
+version_file = "causalis/_version.py"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
