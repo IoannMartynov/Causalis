@@ -15,6 +15,7 @@
 
 causalis.scenarios.unconfoundedness.refutation.unconfoundedness.unconfoundedness_validation
 causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity
+causalis.scenarios.unconfoundedness.refutation.unconfoundedness.love_plot
 ```
 
 ## Package Contents
@@ -36,7 +37,7 @@ causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity
 ````{py:data} __all__
 :canonical: causalis.scenarios.unconfoundedness.refutation.unconfoundedness.__all__
 :value: >
-   ['run_unconfoundedness_diagnostics', 'sensitivity_analysis', 'get_sensitivity_summary', 'sensitivity...
+   ['love_plot', 'run_unconfoundedness_diagnostics', 'sensitivity_analysis', 'get_sensitivity_summary',...
 
 ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.__all__
 ```

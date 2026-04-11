@@ -10,8 +10,8 @@
     <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
     <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
     <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-    <script src="../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="causalis.scenarios.unconfoundedness.refutation.score.residual_plots" href="causalis.scenarios.unconfoundedness.refutation.score.residual_plots.html" />
@@ -35,7 +35,7 @@
             
   <section id="module-causalis.scenarios.unconfoundedness.refutation.score.influence_plot">
 <span id="causalis-scenarios-unconfoundedness-refutation-score-influence-plot"></span><h1><a class="reference internal" href="#module-causalis.scenarios.unconfoundedness.refutation.score.influence_plot" title="causalis.scenarios.unconfoundedness.refutation.score.influence_plot"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.unconfoundedness.refutation.score.influence_plot</span></code></a><a class="headerlink" href="#module-causalis.scenarios.unconfoundedness.refutation.score.influence_plot" title="Link to this heading">¶</a></h1>
-<p>Influence/instability plots for score-based diagnostics.</p>
+<p>Lightweight plots for the most influential score contributions.</p>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
 <section id="functions">
@@ -43,7 +43,7 @@
 <table class="autosummary longtable docutils align-left">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.unconfoundedness.refutation.score.influence_plot.plot_influence_instability" title="causalis.scenarios.unconfoundedness.refutation.score.influence_plot.plot_influence_instability"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_influence_instability</span></code></a></p></td>
-<td><p>Plot instability diagnostics for per-unit score (EIF moment).</p></td>
+<td><p>Plot only the most influential score contributions.</p></td>
 </tr>
 </tbody>
 </table>
@@ -62,49 +62,57 @@
 <h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="causalis.scenarios.unconfoundedness.refutation.score.influence_plot.plot_influence_instability">
-<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.unconfoundedness.refutation.score.influence_plot.</span></span><span class="sig-name descname"><span class="pre">plot_influence_instability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="causalis.data_contracts.causal_estimate.html#causalis.data_contracts.causal_estimate.CausalEstimate" title="causalis.data_contracts.causal_estimate.CausalEstimate"><span class="pre">causalis.data_contracts.causal_estimate.CausalEstimate</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">causalis.dgp.causaldata.CausalData</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">trimming_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_estimator_psi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_ipw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'fd'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_hist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scatter_log_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">220</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font_scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dpi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transparent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">matplotlib.pyplot.Figure</span></span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.refutation.score.influence_plot.plot_influence_instability" title="Link to this definition">¶</a></dt>
-<dd><p>Plot instability diagnostics for per-unit score (EIF moment).</p>
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.unconfoundedness.refutation.score.influence_plot.</span></span><span class="sig-name descname"><span class="pre">plot_influence_instability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="causalis.data_contracts.causal_estimate.html#causalis.data_contracts.causal_estimate.CausalEstimate" title="causalis.data_contracts.causal_estimate.CausalEstimate"><span class="pre">causalis.data_contracts.causal_estimate.CausalEstimate</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">causalis.dgp.causaldata.CausalData</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">trimming_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_estimator_psi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">220</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font_scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dpi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transparent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">matplotlib.pyplot.Figure</span></span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.refutation.score.influence_plot.plot_influence_instability" title="Link to this definition">¶</a></dt>
+<dd><p>Plot only the most influential score contributions.</p>
 <p class="rubric" id="id1">Panels</p>
 <ol class="arabic simple">
-<li><p>Histogram of <code class="docutils literal notranslate"><span class="pre">|psi_i|</span></code> (optional log-x scale).</p></li>
-<li><p>Scatter of <code class="docutils literal notranslate"><span class="pre">|psi_i|</span></code> versus clipped propensity <code class="docutils literal notranslate"><span class="pre">m_i</span></code>.</p></li>
-<li><p>(optional) Histogram of IPW terms.</p></li>
-<li><p>(optional) ESS ratio bars for treated/control weights.</p></li>
+<li><p>Ranked bar chart of the top <code class="docutils literal notranslate"><span class="pre">k</span></code> observations by <code class="docutils literal notranslate"><span class="pre">|psi_i|</span></code>.</p></li>
+<li><p>Scatter of those top <code class="docutils literal notranslate"><span class="pre">k</span></code> observations versus clipped propensity <code class="docutils literal notranslate"><span class="pre">m_i</span></code>.</p></li>
 </ol>
-<p class="rubric" id="id2">Parameters</p>
-<p>estimate : CausalEstimate
-Estimate with diagnostic data (<code class="docutils literal notranslate"><span class="pre">m_hat</span></code>, <code class="docutils literal notranslate"><span class="pre">g0_hat</span></code>; optionally <code class="docutils literal notranslate"><span class="pre">y</span></code>, <code class="docutils literal notranslate"><span class="pre">d</span></code>, <code class="docutils literal notranslate"><span class="pre">g1_hat</span></code>, <code class="docutils literal notranslate"><span class="pre">psi</span></code>).
-data : CausalData, optional
-Optional fallback source for <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">d</span></code> if not stored in diagnostic data.
-trimming_threshold : float, optional
-Propensity clipping threshold. If omitted, uses diagnostic/model defaults.
-use_estimator_psi : bool, default True
-Use estimator-provided <code class="docutils literal notranslate"><span class="pre">diagnostic_data.psi</span></code> when available; otherwise reconstruct score.
-include_ipw : bool, default True
-Add IPW-term histogram and ESS ratio bar panels.
-bins : Any, default “fd”
-Histogram bins for non-log histograms.
-log_hist : bool, default False
-Use log-scaled x-axis bins for <code class="docutils literal notranslate"><span class="pre">|psi_i|</span></code> histogram when possible.
-scatter_log_y : bool, default True
-Plot <code class="docutils literal notranslate"><span class="pre">|psi_i|</span></code> on log scale in the scatter panel.
-top_k : int, default 10
-Highlight top-k largest <code class="docutils literal notranslate"><span class="pre">|psi_i|</span></code> in the scatter panel.
-figsize : tuple, optional
-Figure size. Defaults to <code class="docutils literal notranslate"><span class="pre">(12,</span> <span class="pre">8)</span></code> with IPW panels, <code class="docutils literal notranslate"><span class="pre">(11,</span> <span class="pre">4.6)</span></code> otherwise.
-dpi : int, default 220
-Dots per inch.
-font_scale : float, default 1.10
-Font scaling factor.
-save : str, optional
-Path to save the figure.
-save_dpi : int, optional
-DPI for saving.
-transparent : bool, default False
-Whether to save with transparency.</p>
-<p class="rubric" id="id3">Returns</p>
-<p>matplotlib.figure.Figure
-The generated figure.</p>
+<p>This replacement intentionally avoids plotting every observation. Use
+<code class="docutils literal notranslate"><span class="pre">run_score_diagnostics(...</span> <span class="pre">)[&quot;summary&quot;]</span></code> for global tail metrics and this
+plot for a lightweight drill-down into the largest contributors.</p>
+<p class="rubric" id="id2">Notes</p>
+<p>The figure ranks observations by :math:<code class="docutils literal notranslate"><span class="pre">|\hat\psi_i|</span></code>, where
+:math:<code class="docutils literal notranslate"><span class="pre">\hat\psi_i</span></code> is the fitted score contribution. Large values indicate
+observations with unusually strong leverage on the final estimate. If many
+top points sit near propensity clipping boundaries, that is usually a sign
+to inspect overlap and nuisance fit quality together.</p>
+<p class="rubric" id="id3">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from causalis.dgp import obs_linear_26_dataset
+from causalis.scenarios.unconfoundedness.model import IRM
+data = obs_linear_26_dataset(
+…     n=1000,
+…     seed=3141,
+…     include_oracle=False,
+…     return_causal_data=True,
+… )
+irm = IRM(
+…     data=data,
+…     ml_g=RandomForestRegressor(
+…         n_estimators=200,
+…         max_depth=6,
+…         min_samples_leaf=5,
+…         random_state=3141,
+…     ),
+…     ml_m=RandomForestClassifier(
+…         n_estimators=200,
+…         max_depth=6,
+…         min_samples_leaf=5,
+…         random_state=3141,
+…     ),
+…     n_folds=3,
+…     random_state=3141,
+… )
+estimate = irm.fit().estimate(score=”ATE”)
+fig = plot_influence_instability(estimate, data=data, top_k=15)  # doctest: +SKIP</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py data">
@@ -187,7 +195,7 @@ The generated figure.</p>
       &#169;.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
       
       |

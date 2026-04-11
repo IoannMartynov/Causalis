@@ -35,7 +35,7 @@
 
 ### API
 
-````{py:function} plot_residual_diagnostics(estimate: causalis.data_contracts.causal_estimate.CausalEstimate, data: typing.Optional[causalis.dgp.causaldata.CausalData] = None, *, clip_propensity: float = 1e-06, n_bins: int = 20, marker_size: float = 12.0, alpha: float = 0.35, figsize: typing.Tuple[float, float] = (14.0, 4.8), dpi: int = 220, font_scale: float = 1.1, save: typing.Optional[str] = None, save_dpi: typing.Optional[int] = None, transparent: bool = False) -> matplotlib.pyplot.Figure
+````{py:function} plot_residual_diagnostics(estimate: causalis.data_contracts.causal_estimate.CausalEstimate, data: typing.Optional[causalis.dgp.causaldata.CausalData] = None, *, clip_propensity: float = 1e-06, n_bins: int = 20, marker_size: float = 12.0, alpha: float = 0.35, max_scatter_points: typing.Optional[int] = None, random_state: typing.Optional[int] = None, figsize: typing.Tuple[float, float] = (14.0, 4.8), dpi: int = 220, font_scale: float = 1.1, save: typing.Optional[str] = None, save_dpi: typing.Optional[int] = None, transparent: bool = False) -> matplotlib.pyplot.Figure
 :canonical: causalis.scenarios.unconfoundedness.refutation.score.residual_plots.plot_residual_diagnostics
 
 ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.score.residual_plots.plot_residual_diagnostics

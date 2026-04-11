@@ -97,7 +97,7 @@
 ```
 ````
 
-````{py:function} sensitivity_benchmark(effect_estimation: typing.Dict[str, typing.Any], benchmarking_set: typing.List[str], fit_args: typing.Optional[typing.Dict[str, typing.Any]] = None) -> pandas.DataFrame
+````{py:function} sensitivity_benchmark(effect_estimation: typing.Dict[str, typing.Any] | typing.Any, data: causalis.dgp.causaldata.CausalData, benchmarking_set: typing.List[str] | typing.Literal[all], fit_args: typing.Optional[typing.Dict[str, typing.Any]] = None) -> pandas.DataFrame
 :canonical: causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_benchmark
 
 ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_benchmark

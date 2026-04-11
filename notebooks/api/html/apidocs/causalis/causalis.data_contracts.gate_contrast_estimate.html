@@ -10,11 +10,11 @@
     <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
     <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
     <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-    <script src="../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="causalis.data_contracts.causal_diagnostic_data" href="causalis.data_contracts.causal_diagnostic_data.html" />
+    <link rel="next" title="causalis.data_contracts.sensitivity_analysis_result" href="causalis.data_contracts.sensitivity_analysis_result.html" />
     <link rel="prev" title="causalis.data_contracts" href="causalis.data_contracts.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
@@ -51,7 +51,7 @@
 <h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">causalis.data_contracts.gate_contrast_estimate.</span></span><span class="sig-name descname"><span class="pre">GateContrastEstimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data:</span> <span class="pre">typing.Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">causalis.data_contracts.gate_contrast_estimate.</span></span><span class="sig-name descname"><span class="pre">GateContrastEstimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">pydantic.BaseModel</span></code></p>
 <p>Result contract for a post-estimation subgroup-effect contrast.</p>
 <p class="rubric">Initialization</p>
@@ -67,127 +67,127 @@ validated to form a valid model.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.estimand">
-<span class="sig-name descname"><span class="pre">estimand</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.estimand" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">estimand</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.estimand" title="Link to this definition">¶</a></dt>
 <dd><p>‘GATE_CONTRAST’</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.model">
-<span class="sig-name descname"><span class="pre">model</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.model" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">model</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.model" title="Link to this definition">¶</a></dt>
 <dd><p>‘IRM’</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.model_options">
-<span class="sig-name descname"><span class="pre">model_options</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.model_options" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">model_options</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.model_options" title="Link to this definition">¶</a></dt>
 <dd><p>‘Field(…)’</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.left_group">
-<span class="sig-name descname"><span class="pre">left_group</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.left_group" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">left_group</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.left_group" title="Link to this definition">¶</a></dt>
 <dd><p>None</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.right_group">
-<span class="sig-name descname"><span class="pre">right_group</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.right_group" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">right_group</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.right_group" title="Link to this definition">¶</a></dt>
 <dd><p>None</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.contrast_label">
-<span class="sig-name descname"><span class="pre">contrast_label</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.contrast_label" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">contrast_label</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.contrast_label" title="Link to this definition">¶</a></dt>
 <dd><p>None</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.value">
-<span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.value" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">value</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.value" title="Link to this definition">¶</a></dt>
 <dd><p>None</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.std_error">
-<span class="sig-name descname"><span class="pre">std_error</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.std_error" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">std_error</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.std_error" title="Link to this definition">¶</a></dt>
 <dd><p>None</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.test_stat">
-<span class="sig-name descname"><span class="pre">test_stat</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.test_stat" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">test_stat</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.test_stat" title="Link to this definition">¶</a></dt>
 <dd><p>None</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.p_value">
-<span class="sig-name descname"><span class="pre">p_value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.p_value" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">p_value</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.p_value" title="Link to this definition">¶</a></dt>
 <dd><p>None</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.ci_lower">
-<span class="sig-name descname"><span class="pre">ci_lower</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.ci_lower" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ci_lower</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.ci_lower" title="Link to this definition">¶</a></dt>
 <dd><p>None</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.ci_upper">
-<span class="sig-name descname"><span class="pre">ci_upper</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.ci_upper" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ci_upper</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.ci_upper" title="Link to this definition">¶</a></dt>
 <dd><p>None</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.alpha">
-<span class="sig-name descname"><span class="pre">alpha</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.alpha" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">alpha</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.alpha" title="Link to this definition">¶</a></dt>
 <dd><p>None</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.alternative">
-<span class="sig-name descname"><span class="pre">alternative</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.alternative" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">alternative</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.alternative" title="Link to this definition">¶</a></dt>
 <dd><p>‘two-sided’</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.is_significant">
-<span class="sig-name descname"><span class="pre">is_significant</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.is_significant" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">is_significant</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.is_significant" title="Link to this definition">¶</a></dt>
 <dd><p>None</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.left_value">
-<span class="sig-name descname"><span class="pre">left_value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.left_value" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">left_value</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.left_value" title="Link to this definition">¶</a></dt>
 <dd><p>None</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.right_value">
-<span class="sig-name descname"><span class="pre">right_value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.right_value" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">right_value</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.right_value" title="Link to this definition">¶</a></dt>
 <dd><p>None</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.n_left">
-<span class="sig-name descname"><span class="pre">n_left</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.n_left" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">n_left</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.n_left" title="Link to this definition">¶</a></dt>
 <dd><p>None</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.n_right">
-<span class="sig-name descname"><span class="pre">n_right</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.n_right" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">n_right</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.n_right" title="Link to this definition">¶</a></dt>
 <dd><p>None</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.time">
-<span class="sig-name descname"><span class="pre">time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.time" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">time</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.time" title="Link to this definition">¶</a></dt>
 <dd><p>‘Field(…)’</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.diagnostic_data">
-<span class="sig-name descname"><span class="pre">diagnostic_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.diagnostic_data" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">diagnostic_data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.data_contracts.gate_contrast_estimate.GateContrastEstimate.diagnostic_data" title="Link to this definition">¶</a></dt>
 <dd><p>None</p>
 </dd></dl>
 
@@ -244,7 +244,7 @@ validated to form a valid model.</p>
   <li><a href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a><ul>
   <li><a href="causalis.data_contracts.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.data_contracts</span></code></a><ul>
       <li>Previous: <a href="causalis.data_contracts.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.data_contracts</span></code></a></li>
-      <li>Next: <a href="causalis.data_contracts.causal_diagnostic_data.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.data_contracts.causal_diagnostic_data</span></code></a></li>
+      <li>Next: <a href="causalis.data_contracts.sensitivity_analysis_result.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.data_contracts.sensitivity_analysis_result</span></code></a></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -267,7 +267,7 @@ validated to form a valid model.</p>
       &#169;.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
       
       |
