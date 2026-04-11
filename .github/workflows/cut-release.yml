@@ -92,3 +92,9 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag -a "$RELEASE_TAG" -m "Release $RELEASE_TAG"
           git push origin "$RELEASE_TAG"
+
+      - name: Dispatch release workflow
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.next_tag.outputs.tag }}
+        run: gh workflow run release.yml --ref main -f tag="$RELEASE_TAG"

@@ -14,6 +14,7 @@
 :maxdepth: 1
 
 causalis.data_contracts.gate_contrast_estimate
+causalis.data_contracts.sensitivity_analysis_result
 causalis.data_contracts.causal_diagnostic_data
 causalis.data_contracts.causal_estimate
 causalis.data_contracts.panel_data_scm

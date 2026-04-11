@@ -10,8 +10,8 @@
     <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
     <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
     <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-    <script src="../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity" href="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.html" />
@@ -64,27 +64,102 @@
 <dt class="sig sig-object py" id="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.unconfoundedness_validation.run_unconfoundedness_diagnostics">
 <span class="sig-prename descclassname"><span class="pre">causalis.scenarios.unconfoundedness.refutation.unconfoundedness.unconfoundedness_validation.</span></span><span class="sig-name descname"><span class="pre">run_unconfoundedness_diagnostics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">causalis.dgp.causaldata.CausalData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="causalis.data_contracts.causal_estimate.html#causalis.data_contracts.causal_estimate.CausalEstimate" title="causalis.data_contracts.causal_estimate.CausalEstimate"><span class="pre">causalis.data_contracts.causal_estimate.CausalEstimate</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_summary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.unconfoundedness_validation.run_unconfoundedness_diagnostics" title="Link to this definition">¶</a></dt>
 <dd><p>Run covariate-balance diagnostics implied by unconfoundedness.</p>
-<p class="rubric" id="id1">Parameters</p>
-<p>data : CausalData
-Dataset used to fit the estimator.
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>The diagnostic compares the treated and control pseudo-populations induced
+by the estimated propensity score. For ATE, the effective weights are
+
+.. math::
+
+    w_{1i} = ar w_i 
+</pre></div>
+</div>
+<p>rac{D_i}{\hat m_i},
+\qquad
+w_{0i} = ar w_i
+rac{1-D_i}{1-\hat m_i},</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>while for ATTE this implementation uses
+
+.. math::
+
+    w_{1i} = D_i,
+    \qquad
+    w_{0i} = (1-D_i)
+</pre></div>
+</div>
+<p>rac{\hat m_i}{1-\hat m_i}.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>For each confounder :math:`X_j`, the weighted standardized mean
+difference is
+
+.. math::
+
+    \mathrm{SMD}_j =
+</pre></div>
+</div>
+<p>rac{|\mu_{1j}^{(w)} - \mu_{0j}^{(w)}|}
+{\sqrt{(s_{1j}^{2,(w)} + s_{0j}^{2,(w)}) / 2}}.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Smaller weighted SMDs are better. A common rule of thumb is to aim for
+:math:`|\mathrm{SMD}| &lt; 0.10`.
+
+Parameters
+----------
+data : CausalData
+    Dataset used to fit the estimator.
 estimate : CausalEstimate
-Effect estimate with <code class="docutils literal notranslate"><span class="pre">diagnostic_data</span></code> containing propensity and, when
-available, weight information.
+    Effect estimate with ``diagnostic_data`` containing propensity and, when
+    available, weight information.
 threshold : float, default 0.10
-SMD threshold used for warnings and pass/fail summaries.
+    SMD threshold used for warnings and pass/fail summaries.
 normalize : bool, optional
-Override whether pseudo-population weights are mean-normalized.
+    Override whether pseudo-population weights are mean-normalized.
 return_summary : bool, default True
-Include a compact summary table in the returned payload.</p>
-<p class="rubric" id="id2">Returns</p>
-<p>Dict[str, Any]
-Diagnostic report with weighted balance tables, severity flags, and an
-optional summary DataFrame.</p>
-<p class="rubric" id="id3">Raises</p>
-<p>ValueError
-If required diagnostic arrays are missing or have incompatible shapes.
+    Include a compact summary table in the returned payload.
+
+Returns
+-------
+Dict[str, Any]
+    Diagnostic report with weighted balance tables, severity flags, and an
+    optional summary DataFrame.
+
+Raises
+------
+ValueError
+    If required diagnostic arrays are missing or have incompatible shapes.
 RuntimeError
-If balance weights collapse to zero total mass.</p>
+    If balance weights collapse to zero total mass.
+
+Examples
+--------
+&gt;&gt;&gt; from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+&gt;&gt;&gt; from causalis.dgp import obs_linear_26_dataset
+&gt;&gt;&gt; from causalis.scenarios.unconfoundedness.model import IRM
+&gt;&gt;&gt; data = obs_linear_26_dataset(
+...     n=1000,
+...     seed=3141,
+...     include_oracle=False,
+...     return_causal_data=True,
+... )
+&gt;&gt;&gt; irm = IRM(
+...     data=data,
+...     ml_g=RandomForestRegressor(
+...         n_estimators=200,
+...         max_depth=6,
+...         min_samples_leaf=5,
+...         random_state=3141,
+...     ),
+...     ml_m=RandomForestClassifier(
+...         n_estimators=200,
+...         max_depth=6,
+...         min_samples_leaf=5,
+...         random_state=3141,
+...     ),
+...     n_folds=3,
+...     random_state=3141,
+... )
+&gt;&gt;&gt; estimate = irm.fit().estimate(score=&quot;ATE&quot;)
+&gt;&gt;&gt; report = run_unconfoundedness_diagnostics(data, estimate)
+&gt;&gt;&gt; report[&quot;balance&quot;][&quot;smd_max&quot;]  # doctest: +SKIP
+&gt;&gt;&gt; report[&quot;balance&quot;][&quot;worst_features&quot;].head()  # doctest: +SKIP
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py data">
@@ -167,7 +242,7 @@ If balance weights collapse to zero total mass.</p>
       &#169;.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
       
       |

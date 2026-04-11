@@ -10,8 +10,8 @@
     <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
     <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
     <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-    <script src="../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="causalis.scenarios.unconfoundedness.refutation.overlap.reliability_plot" href="causalis.scenarios.unconfoundedness.refutation.overlap.reliability_plot.html" />
@@ -91,6 +91,47 @@ Color for control group.</p>
 <p class="rubric" id="id2">Returns</p>
 <p>matplotlib.figure.Figure
 The generated figure.</p>
+<p class="rubric" id="id3">Notes</p>
+<p>This figure compares the treated and control distributions of
+:math:<code class="docutils literal notranslate"><span class="pre">m(X)</span> <span class="pre">=</span> <span class="pre">\mathbb{P}(D=1</span> <span class="pre">\mid</span> <span class="pre">X)</span></code>. Good overlap means both groups place
+noticeable mass in the same regions of the unit interval. Clear separation
+or strong piling-up near <code class="docutils literal notranslate"><span class="pre">0</span></code> and <code class="docutils literal notranslate"><span class="pre">1</span></code> is a warning sign for unstable
+weighting.</p>
+<p class="rubric" id="id4">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from causalis.dgp import obs_linear_26_dataset
+from causalis.scenarios.unconfoundedness.model import IRM
+data = obs_linear_26_dataset(
+…     n=1000,
+…     seed=3141,
+…     include_oracle=False,
+…     return_causal_data=True,
+… )
+irm = IRM(
+…     data=data,
+…     ml_g=RandomForestRegressor(
+…         n_estimators=200,
+…         max_depth=6,
+…         min_samples_leaf=5,
+…         random_state=3141,
+…     ),
+…     ml_m=RandomForestClassifier(
+…         n_estimators=200,
+…         max_depth=6,
+…         min_samples_leaf=5,
+…         random_state=3141,
+…     ),
+…     n_folds=3,
+…     random_state=3141,
+… )
+estimate = irm.fit().estimate(score=”ATE”)
+fig = plot_m_overlap(estimate)  # doctest: +SKIP</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
 </dd></dl>
 
 </section>
@@ -167,7 +208,7 @@ The generated figure.</p>
       &#169;.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
       
       |

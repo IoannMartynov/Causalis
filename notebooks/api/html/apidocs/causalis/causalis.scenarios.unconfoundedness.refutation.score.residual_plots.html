@@ -10,8 +10,8 @@
     <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
     <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
     <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-    <script src="../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="causalis.scenarios.unconfoundedness.refutation.overlap" href="causalis.scenarios.unconfoundedness.refutation.overlap.html" />
@@ -62,7 +62,7 @@
 <h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="causalis.scenarios.unconfoundedness.refutation.score.residual_plots.plot_residual_diagnostics">
-<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.unconfoundedness.refutation.score.residual_plots.</span></span><span class="sig-name descname"><span class="pre">plot_residual_diagnostics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="causalis.data_contracts.causal_estimate.html#causalis.data_contracts.causal_estimate.CausalEstimate" title="causalis.data_contracts.causal_estimate.CausalEstimate"><span class="pre">causalis.data_contracts.causal_estimate.CausalEstimate</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">causalis.dgp.causaldata.CausalData</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_propensity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">12.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.35</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(14.0,</span> <span class="pre">4.8)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">220</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font_scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dpi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transparent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">matplotlib.pyplot.Figure</span></span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.refutation.score.residual_plots.plot_residual_diagnostics" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.unconfoundedness.refutation.score.residual_plots.</span></span><span class="sig-name descname"><span class="pre">plot_residual_diagnostics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="causalis.data_contracts.causal_estimate.html#causalis.data_contracts.causal_estimate.CausalEstimate" title="causalis.data_contracts.causal_estimate.CausalEstimate"><span class="pre">causalis.data_contracts.causal_estimate.CausalEstimate</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">causalis.dgp.causaldata.CausalData</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_propensity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">12.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.35</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_scatter_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(14.0,</span> <span class="pre">4.8)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">220</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font_scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dpi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transparent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">matplotlib.pyplot.Figure</span></span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.refutation.score.residual_plots.plot_residual_diagnostics" title="Link to this definition">¶</a></dt>
 <dd><p>Plot residual diagnostics for nuisance models.</p>
 <p class="rubric" id="id1">Panels</p>
 <ol class="arabic simple">
@@ -70,7 +70,18 @@
 <li><p>Control-only: <code class="docutils literal notranslate"><span class="pre">u0</span> <span class="pre">=</span> <span class="pre">y</span> <span class="pre">-</span> <span class="pre">g0</span></code> vs <code class="docutils literal notranslate"><span class="pre">g0</span></code>.</p></li>
 <li><p>Binned calibration error: <code class="docutils literal notranslate"><span class="pre">E[d</span> <span class="pre">-</span> <span class="pre">m</span> <span class="pre">|</span> <span class="pre">m</span> <span class="pre">in</span> <span class="pre">bin]</span></code> vs binned <code class="docutils literal notranslate"><span class="pre">m</span></code>.</p></li>
 </ol>
-<p class="rubric" id="id2">Parameters</p>
+<p class="rubric" id="id2">Notes</p>
+<p>These plots check the nuisance pieces directly:</p>
+<ul class="simple">
+<li><p>outcome residuals :math:<code class="docutils literal notranslate"><span class="pre">u_1</span> <span class="pre">=</span> <span class="pre">Y</span> <span class="pre">-</span> <span class="pre">\hat</span> <span class="pre">g_1(X)</span></code> and
+:math:<code class="docutils literal notranslate"><span class="pre">u_0</span> <span class="pre">=</span> <span class="pre">Y</span> <span class="pre">-</span> <span class="pre">\hat</span> <span class="pre">g_0(X)</span></code> should look roughly centered around zero
+without strong patterns against fitted values,</p></li>
+<li><p>treatment residuals :math:<code class="docutils literal notranslate"><span class="pre">D</span> <span class="pre">-</span> <span class="pre">\hat</span> <span class="pre">m(X)</span></code> should average near zero within
+propensity bins.</p></li>
+</ul>
+<p>Clear trends usually mean the nuisance models still leave structure in the
+data, which can show up later as unstable score diagnostics.</p>
+<p class="rubric" id="id3">Parameters</p>
 <p>estimate : CausalEstimate
 Estimate with diagnostic data (<code class="docutils literal notranslate"><span class="pre">m_hat</span></code>, <code class="docutils literal notranslate"><span class="pre">g0_hat</span></code>; optionally <code class="docutils literal notranslate"><span class="pre">g1_hat</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code>, <code class="docutils literal notranslate"><span class="pre">d</span></code>).
 data : CausalData, optional
@@ -83,6 +94,12 @@ marker_size : float, default 12.0
 Scatter marker size.
 alpha : float, default 0.35
 Scatter opacity.
+max_scatter_points : int, optional
+Maximum number of points drawn in each residual scatter panel. When set,
+scatter points are sampled uniformly without replacement, while the
+binned-mean overlays and calibration panel still use all observations.
+random_state : int, optional
+Random seed used when <code class="docutils literal notranslate"><span class="pre">max_scatter_points</span></code> triggers scatter sampling.
 figsize : tuple, default (14.0, 4.8)
 Figure size.
 dpi : int, default 220
@@ -95,9 +112,44 @@ save_dpi : int, optional
 DPI for saving.
 transparent : bool, default False
 Whether to save with transparency.</p>
-<p class="rubric" id="id3">Returns</p>
+<p class="rubric" id="id4">Returns</p>
 <p>matplotlib.figure.Figure
 The generated figure.</p>
+<p class="rubric" id="id5">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from causalis.dgp import obs_linear_26_dataset
+from causalis.scenarios.unconfoundedness.model import IRM
+data = obs_linear_26_dataset(
+…     n=1000,
+…     seed=3141,
+…     include_oracle=False,
+…     return_causal_data=True,
+… )
+irm = IRM(
+…     data=data,
+…     ml_g=RandomForestRegressor(
+…         n_estimators=200,
+…         max_depth=6,
+…         min_samples_leaf=5,
+…         random_state=3141,
+…     ),
+…     ml_m=RandomForestClassifier(
+…         n_estimators=200,
+…         max_depth=6,
+…         min_samples_leaf=5,
+…         random_state=3141,
+…     ),
+…     n_folds=3,
+…     random_state=3141,
+… )
+estimate = irm.fit().estimate(score=”ATE”)
+fig = plot_residual_diagnostics(estimate, data=data)  # doctest: +SKIP</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py data">
@@ -180,7 +232,7 @@ The generated figure.</p>
       &#169;.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
       
       |
