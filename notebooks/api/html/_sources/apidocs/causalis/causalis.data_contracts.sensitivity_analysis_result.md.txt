@@ -1,0 +1,74 @@
+# {py:mod}`causalis.data_contracts.sensitivity_analysis_result`
+
+```{py:module} causalis.data_contracts.sensitivity_analysis_result
+```
+
+```{autodoc2-docstring} causalis.data_contracts.sensitivity_analysis_result
+:allowtitles:
+```
+
+## Module Contents
+
+### Classes
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`SensitivityAnalysisResult <causalis.data_contracts.sensitivity_analysis_result.SensitivityAnalysisResult>`
+  - ```{autodoc2-docstring} causalis.data_contracts.sensitivity_analysis_result.SensitivityAnalysisResult
+    :summary:
+    ```
+````
+
+### API
+
+`````{py:class} SensitivityAnalysisResult(data: collections.abc.Mapping[str, typing.Any] | None = None, *, summary_builder: collections.abc.Callable[..., pandas.DataFrame] | None = None, text_summary_builder: collections.abc.Callable[..., str] | None = None, summary_kwargs: collections.abc.Mapping[str, typing.Any] | None = None)
+:canonical: causalis.data_contracts.sensitivity_analysis_result.SensitivityAnalysisResult
+
+Bases: {py:obj}`dict`
+
+```{autodoc2-docstring} causalis.data_contracts.sensitivity_analysis_result.SensitivityAnalysisResult
+```
+
+```{rubric} Initialization
+```
+
+```{autodoc2-docstring} causalis.data_contracts.sensitivity_analysis_result.SensitivityAnalysisResult.__init__
+```
+
+````{py:method} summary() -> pandas.DataFrame
+:canonical: causalis.data_contracts.sensitivity_analysis_result.SensitivityAnalysisResult.summary
+
+```{autodoc2-docstring} causalis.data_contracts.sensitivity_analysis_result.SensitivityAnalysisResult.summary
+```
+
+````
+
+````{py:method} text_summary() -> str
+:canonical: causalis.data_contracts.sensitivity_analysis_result.SensitivityAnalysisResult.text_summary
+
+```{autodoc2-docstring} causalis.data_contracts.sensitivity_analysis_result.SensitivityAnalysisResult.text_summary
+```
+
+````
+
+````{py:method} copy() -> causalis.data_contracts.sensitivity_analysis_result.SensitivityAnalysisResult
+:canonical: causalis.data_contracts.sensitivity_analysis_result.SensitivityAnalysisResult.copy
+
+```{autodoc2-docstring} causalis.data_contracts.sensitivity_analysis_result.SensitivityAnalysisResult.copy
+```
+
+````
+
+````{py:method} __str__() -> str
+:canonical: causalis.data_contracts.sensitivity_analysis_result.SensitivityAnalysisResult.__str__
+
+````
+
+````{py:method} __repr__() -> str
+:canonical: causalis.data_contracts.sensitivity_analysis_result.SensitivityAnalysisResult.__repr__
+
+````
+
+`````
