@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-import numpy as np
-import pandas as pd
-import warnings
+import hashlib
 from datetime import datetime
 from typing import Any, Dict, Optional, Tuple
 
+import numpy as np
+import pandas as pd
 from joblib import Parallel, delayed
-from sklearn.base import is_classifier, clone, BaseEstimator
+from sklearn.base import clone, BaseEstimator
 from sklearn.model_selection import StratifiedKFold
 from sklearn.utils.validation import check_is_fitted
 from scipy.stats import norm
@@ -20,197 +20,13 @@ except ImportError:
 from causalis.data_contracts.multicausaldata import MultiCausalData
 from causalis.data_contracts.multicausal_estimate import MultiCausalEstimate
 from causalis.data_contracts.causal_diagnostic_data import MultiUnconfoundednessDiagnosticData
-
-
-def _is_binary(values: np.ndarray) -> bool:
-    """Check if an array contains only binary values (0 and 1).
-
-    Parameters
-    ----------
-    values : np.ndarray
-        The array to check.
-
-    Returns
-    -------
-    bool
-        True if the array is binary, False otherwise.
-    """
-    uniq = np.unique(values)
-    if uniq.size == 0:
-        return False
-    return np.all(np.isin(uniq, np.array([0, 1], dtype=float)))
-
-
-def _safe_is_classifier(estimator) -> bool:
-    """Safely check if an estimator is a classifier.
-
-    Parameters
-    ----------
-    estimator : estimator
-        The estimator to check.
-
-    Returns
-    -------
-    bool
-        True if the estimator is a classifier, False otherwise.
-    """
-    try:
-        return is_classifier(estimator)
-    except (AttributeError, TypeError):
-        return getattr(estimator, "_estimator_type", None) == "classifier"
-
-
-def _predict_prob_or_value(model, X: np.ndarray, is_propensity: bool = False) -> np.ndarray:
-    """Predict probabilities or values using a model.
-
-    Parameters
-    ----------
-    model : estimator
-        The fitted model to use for prediction.
-    X : np.ndarray
-        The input features.
-    is_propensity : bool, default False
-        Whether the prediction is for a propensity score. If True, values are clipped to [0, 1].
-        For multiclass propensity matrices use `_predict_propensity_matrix()`.
-
-    Returns
-    -------
-    np.ndarray
-        The predicted values or probabilities.
-    """
-    if _safe_is_classifier(model) and hasattr(model, "predict_proba"):
-        res = np.asarray(model.predict_proba(X), dtype=float)
-        if (not is_propensity) and res.ndim == 2:
-            classes = getattr(model, "classes_", None)
-            if classes is not None:
-                classes = np.asarray(classes)
-                idx_1 = np.where(classes == 1)[0]
-                if idx_1.size > 0:
-                    return res[:, int(idx_1[0])]
-                if classes.size == 1 and classes[0] == 0:
-                    return np.zeros(res.shape[0], dtype=float)
-                if classes.size == 1 and classes[0] == 1:
-                    return np.ones(res.shape[0], dtype=float)
-            if res.shape[1] == 2:
-                return res[:, 1]
-            if res.shape[1] == 1:
-                return res[:, 0]
-            return res.ravel()
-    else:
-        res = np.asarray(model.predict(X), dtype=float)
-
-    if is_propensity:
-        if np.any((res < -1e-12) | (res > 1.0 + 1e-12)):
-            warnings.warn("Propensity model produced values outside [0, 1]. "
-                          "Consider using a classifier or a model with a logistic link.", RuntimeWarning)
-        res = np.clip(res, 0.0, 1.0)
-    return np.asarray(res, dtype=float)
-
-
-def _predict_propensity_matrix(model, X: np.ndarray, n_treatments: int) -> np.ndarray:
-    """Predict propensity matrix P(D=k|X) with aligned treatment columns."""
-    if not _safe_is_classifier(model) or not hasattr(model, "predict_proba"):
-        raise ValueError("ml_m must be a probabilistic classifier exposing predict_proba().")
-
-    proba = np.asarray(model.predict_proba(X), dtype=float)
-    if proba.ndim != 2:
-        raise ValueError(
-            f"ml_m.predict_proba() must return 2D array (n, K). Got shape {proba.shape}."
-        )
-
-    n = X.shape[0]
-    classes = getattr(model, "classes_", None)
-    if classes is None:
-        if proba.shape[1] != n_treatments:
-            raise ValueError(
-                f"ml_m returned {proba.shape[1]} probability columns, expected {n_treatments}."
-            )
-        out = proba
-    else:
-        classes = np.asarray(classes)
-        if classes.ndim != 1:
-            raise ValueError("ml_m.classes_ must be a 1D array.")
-        out = np.zeros((n, n_treatments), dtype=float)
-        seen = set()
-        for j, cls in enumerate(classes):
-            if not np.isfinite(cls):
-                raise ValueError("ml_m.classes_ contains non-finite labels.")
-            cls_int = int(cls)
-            if cls_int != cls:
-                raise ValueError(
-                    "ml_m.classes_ must contain integer treatment labels 0..K-1."
-                )
-            if cls_int < 0 or cls_int >= n_treatments:
-                raise ValueError(
-                    f"ml_m.classes_ contains out-of-range label {cls_int}; expected 0..{n_treatments - 1}."
-                )
-            out[:, cls_int] = proba[:, j]
-            seen.add(cls_int)
-        missing = [k for k in range(n_treatments) if k not in seen]
-        if missing:
-            raise RuntimeError(
-                "A cross-fitting training fold is missing treatment classes "
-                f"{missing}. Reduce n_folds or increase sample size."
-            )
-
-    if np.any((out < -1e-12) | (out > 1.0 + 1e-12)):
-        warnings.warn(
-            "Propensity model produced values outside [0, 1]. "
-            "Values are clipped and renormalized row-wise.",
-            RuntimeWarning,
-        )
-    out = np.clip(out, 0.0, 1.0)
-    row_sums = out.sum(axis=1, keepdims=True)
-    if np.any(row_sums <= 1e-12):
-        raise RuntimeError("Propensity predictions contain rows with zero total probability.")
-    if np.any(np.abs(row_sums - 1.0) > 1e-6):
-        warnings.warn(
-            "Propensity probabilities do not sum to 1. Values are renormalized row-wise.",
-            RuntimeWarning,
-        )
-    out = out / row_sums
-    return out
-
-
-def _clip_propensity(p: np.ndarray, thr: float) -> np.ndarray:
-    """Clip propensity scores to be within [thr, 1 - thr].
-
-    Parameters
-    ----------
-    p : np.ndarray
-        The propensity scores to clip.
-    thr : float
-        The threshold for clipping.
-
-    Returns
-    -------
-    np.ndarray
-        The clipped propensity scores.
-    """
-    thr = float(thr)
-    return np.clip(p, thr, 1.0 - thr)
-
-
-def _trim_multiclass_propensity(p: np.ndarray, thr: float) -> np.ndarray:
-    """Lower-trim multiclass propensity and renormalize rows to sum to 1."""
-    p = np.asarray(p, dtype=float)
-    if p.ndim != 2:
-        raise ValueError(f"Propensity matrix must be 2D (n, K). Got shape {p.shape}.")
-    n_treatments = p.shape[1]
-    if n_treatments < 2:
-        raise ValueError("Need at least 2 treatment columns for multiclass propensity.")
-
-    thr = float(thr)
-    if not np.isfinite(thr) or not (0.0 <= thr < (1.0 / n_treatments)):
-        raise ValueError(
-            f"trimming_threshold must be finite and in [0, 1/K) for K={n_treatments}; got {thr}."
-        )
-
-    p_trim = np.maximum(p, thr)
-    row_sums = p_trim.sum(axis=1, keepdims=True)
-    if np.any(row_sums <= 1e-12):
-        raise RuntimeError("Trimmed propensity contains rows with zero total probability.")
-    return p_trim / row_sums
+from causalis.scenarios.multi_unconfoundedness._utils import (
+    _is_binary,
+    _normalize_multiclass_ipw_terms,
+    _predict_propensity_matrix,
+    _safe_is_classifier,
+    _trim_multiclass_propensity,
+)
 
 
 class MultiTreatmentIRM(BaseEstimator):
@@ -251,6 +67,10 @@ class MultiTreatmentIRM(BaseEstimator):
             - If nuisance learners are already multithreaded (e.g. CatBoost with
               `thread_count=-1`), keep `n_jobs=1` or set learner threads to `1`
               to avoid CPU oversubscription.
+        store_diagnostics : bool, default True
+            Whether to retain raw fit-time arrays and diagnostic-only artifacts on
+            the fitted model. Set to ``False`` for a lighter-weight estimator that
+            still supports ATE estimation, while omitting heavy diagnostic caches.
         """
     def __init__(
         self,
@@ -265,10 +85,13 @@ class MultiTreatmentIRM(BaseEstimator):
         trimming_threshold: float = 1e-2,
         random_state: Optional[int] = None,
         n_jobs: int = 1,
-    ):
+        store_diagnostics: bool = True,
+    ) -> None:
         self.data = data
         self.ml_g = ml_g
         self.ml_m = ml_m
+        self._ml_g_is_default = False
+        self._ml_m_is_default = False
         self.n_folds = int(n_folds)
         self.n_rep = int(n_rep)
         self.score = "ATE"
@@ -277,6 +100,15 @@ class MultiTreatmentIRM(BaseEstimator):
         self.trimming_threshold = float(trimming_threshold)
         self.random_state = random_state
         self.n_jobs = int(n_jobs)
+        self.store_diagnostics = bool(store_diagnostics)
+        self.normalize_ipw_effective_ = bool(normalize_ipw)
+        self._X = None
+        self._y = None
+        self._d = None
+        self._fit_store_diagnostics_ = bool(store_diagnostics)
+        self._fit_sample_fingerprint_ = None
+        self.folds_ = None
+        self.m_hat_raw_ = None
         if not np.isfinite(self.trimming_threshold) or not (0.0 <= self.trimming_threshold < 0.5):
             raise ValueError("trimming_threshold must be finite and in [0, 0.5).")
         if self.n_jobs == 0 or self.n_jobs < -1:
@@ -292,6 +124,7 @@ class MultiTreatmentIRM(BaseEstimator):
                     allow_writing_files=False,
                     random_seed=self.random_state,
                 )
+                self._ml_m_is_default = True
             if self.ml_g is None and self.data is not None:
                 y_is_binary = False
                 try:
@@ -308,6 +141,7 @@ class MultiTreatmentIRM(BaseEstimator):
                         allow_writing_files=False,
                         random_seed=self.random_state,
                     )
+                    self._ml_g_is_default = True
                 else:
                     self.ml_g = CatBoostRegressor(
                         thread_count=-1,
@@ -315,6 +149,7 @@ class MultiTreatmentIRM(BaseEstimator):
                         allow_writing_files=False,
                         random_seed=self.random_state,
                     )
+                    self._ml_g_is_default = True
 
         # If ml_g is still None and HAS_CATBOOST is True, it means data was not provided.
         # It will be initialized in fit().
@@ -347,18 +182,23 @@ class MultiTreatmentIRM(BaseEstimator):
 
         return X, y, d, y_is_binary, n_treatments_
 
-    def _normalize_ipw_terms(self, d: np.ndarray, m_hat: np.ndarray) -> np.ndarray:
-        """Return IPW representer d_k / m_k with optional Hajek column normalization."""
-        d = np.asarray(d, dtype=float)
-        m_hat = np.asarray(m_hat, dtype=float)
+    def _use_normalized_ipw(self, score: Optional[str] = None) -> bool:
+        """Return whether Hajek-style IPW normalization is active for a score."""
+        score_u = str(self.score if score is None else score).upper()
+        return bool(self.normalize_ipw) and score_u == "ATE"
 
-        h = d / m_hat
-
-        if self.normalize_ipw:
-            h_mean = h.mean(axis=0, keepdims=True)  # (1, D)
-            h = h / np.where(h_mean != 0, h_mean, 1.0)
-
-        return h
+    def _normalize_ipw_terms(
+        self,
+        d: np.ndarray,
+        m_hat: np.ndarray,
+        score: Optional[str] = None,
+    ) -> np.ndarray:
+        """Return d_k / m_k with score-aware Hajek column normalization."""
+        return _normalize_multiclass_ipw_terms(
+            d=d,
+            m_hat=m_hat,
+            normalize_ipw=self._use_normalized_ipw(score=score),
+        )
 
     def _initialize_default_learners_for_fit(self, y_is_binary: bool) -> None:
         """Initialize default CatBoost nuisances when users do not provide learners."""
@@ -371,6 +211,7 @@ class MultiTreatmentIRM(BaseEstimator):
                 allow_writing_files=False,
                 random_seed=self.random_state,
             )
+            self._ml_m_is_default = True
         if self.ml_g is None:
             if y_is_binary:
                 self.ml_g = CatBoostClassifier(
@@ -386,6 +227,21 @@ class MultiTreatmentIRM(BaseEstimator):
                     allow_writing_files=False,
                     random_seed=self.random_state,
                 )
+            self._ml_g_is_default = True
+
+    def _configure_default_learner_parallelism(self) -> None:
+        """Avoid oversubscribing CPUs when fold-level parallelism is enabled."""
+        if self.n_jobs == 1 or not HAS_CATBOOST:
+            return
+
+        for estimator, is_default in ((self.ml_g, self._ml_g_is_default), (self.ml_m, self._ml_m_is_default)):
+            if not is_default or estimator is None:
+                continue
+            if not hasattr(estimator, "get_params") or not hasattr(estimator, "set_params"):
+                continue
+            params = estimator.get_params(deep=False)
+            if params.get("thread_count", None) == -1:
+                estimator.set_params(thread_count=1)
 
     def _ensure_learners_available(self) -> None:
         if self.ml_g is None or self.ml_m is None:
@@ -425,6 +281,116 @@ class MultiTreatmentIRM(BaseEstimator):
                 f"n_folds={self.n_folds} exceeds minimum treatment class count={min_class_count}. "
                 "Reduce n_folds or collect more data."
             )
+
+    @staticmethod
+    def _hash_array(arr: np.ndarray, *, dtype: Optional[np.dtype] = None) -> str:
+        """Return an order-sensitive digest for a numeric array."""
+        arr_np = np.asarray(arr, dtype=dtype)
+        arr_c = np.ascontiguousarray(arr_np)
+        return hashlib.blake2b(arr_c.view(np.uint8), digest_size=16).hexdigest()
+
+    @staticmethod
+    def _hash_index(index: pd.Index) -> str:
+        """Return an order-sensitive digest for a pandas index."""
+        hashed = pd.util.hash_pandas_object(index, index=False).to_numpy(dtype=np.uint64, copy=False)
+        return hashlib.blake2b(np.ascontiguousarray(hashed).view(np.uint8), digest_size=16).hexdigest()
+
+    def _compute_sample_fingerprint(
+        self,
+        *,
+        X: np.ndarray,
+        y: np.ndarray,
+        d: np.ndarray,
+    ) -> Dict[str, Any]:
+        """Build a compact fingerprint for the fitted sample order and contents."""
+        if self.data is None or not hasattr(self.data, "df"):
+            raise RuntimeError("MultiCausalData must be available to fingerprint the fitted sample.")
+
+        return {
+            "n_obs": int(len(y)),
+            "index_hash": self._hash_index(self.data.df.index),
+            "x_hash": self._hash_array(X, dtype=float),
+            "y_hash": self._hash_array(y, dtype=float),
+            "d_hash": self._hash_array(d, dtype=int),
+        }
+
+    def _validate_current_data_matches_fit(
+        self,
+        *,
+        X: np.ndarray,
+        y: np.ndarray,
+        d: np.ndarray,
+    ) -> None:
+        """Reject fallback reloads when the underlying MultiCausalData changed after fit."""
+        expected_n = int(self.g_hat_.shape[0])
+        if len(y) != expected_n:
+            raise RuntimeError(
+                "Current data does not match the fitted nuisance predictions. "
+                "Refit the model with matching data."
+            )
+
+        fingerprint = getattr(self, "_fit_sample_fingerprint_", None)
+        if fingerprint is None:
+            return
+
+        current = self._compute_sample_fingerprint(X=X, y=y, d=d)
+        if current != fingerprint:
+            raise RuntimeError(
+                "Current data does not match the fitted nuisance predictions. "
+                "The underlying MultiCausalData changed after fit(); refit the model."
+            )
+
+    def _store_fit_sample(self, X: np.ndarray, y: np.ndarray, d: np.ndarray) -> None:
+        """Persist immutable fit-time targets and optional diagnostic covariates."""
+        self._fit_sample_fingerprint_ = self._compute_sample_fingerprint(X=X, y=y, d=d)
+        self._y = np.asarray(y, dtype=float).copy()
+        self._d = np.asarray(d, dtype=int).copy()
+        if self.store_diagnostics:
+            self._X = np.asarray(X, dtype=float).copy()
+        else:
+            self._X = None
+
+    def _store_cross_fitted_predictions(
+        self,
+        *,
+        g_hat: np.ndarray,
+        m_hat: np.ndarray,
+        folds: np.ndarray,
+    ) -> None:
+        """Validate and store cross-fitted nuisance predictions."""
+        if np.any(np.isnan(m_hat)) or np.any(np.isnan(g_hat)):
+            raise RuntimeError("Cross-fitted predictions contain NaN values.")
+        self.g_hat_ = g_hat
+        self.m_hat_ = _trim_multiclass_propensity(m_hat, self.trimming_threshold)
+        if self.store_diagnostics:
+            self.folds_ = folds
+            self.m_hat_raw_ = np.asarray(m_hat, dtype=float).copy()
+        else:
+            self.folds_ = None
+            self.m_hat_raw_ = None
+
+    def _resolve_estimation_targets(self) -> Tuple[np.ndarray, np.ndarray]:
+        """Return fit-time outcomes and treatments for ATE/ATTE estimation."""
+        if self._y is not None and self._d is not None:
+            return self._y, self._d
+
+        X, y, d, _, _ = self._check_data()
+        self._validate_current_data_matches_fit(X=X, y=y, d=d)
+        return y, d
+
+    def _resolve_diagnostic_features(self) -> np.ndarray:
+        """Return fit-time confounders for diagnostic-only payloads."""
+        if self._X is not None:
+            return self._X
+        if not getattr(self, "_fit_store_diagnostics_", self.store_diagnostics):
+            raise RuntimeError(
+                "Confounder diagnostics are unavailable because the model was fitted with "
+                "store_diagnostics=False."
+            )
+
+        X, y, d, _, _ = self._check_data()
+        self._validate_current_data_matches_fit(X=X, y=y, d=d)
+        return X
 
     def _predict_binary_outcome_probability(self, model_g, X: np.ndarray) -> np.ndarray:
         """Predict P(Y=1|X,D=k) robustly across binary classifier APIs."""
@@ -587,9 +553,17 @@ class MultiTreatmentIRM(BaseEstimator):
             raise RuntimeError("Cross-fitted predictions contain NaN values.")
         return g_hat, m_hat, folds
 
-    def fit(self, data: Optional[MultiCausalData] = None) -> "MultiTreatmentIRM":
+    def fit(
+        self,
+        data: Optional[MultiCausalData] = None,
+        *,
+        store_diagnostics: Optional[bool] = None,
+    ) -> "MultiTreatmentIRM":
         if data is not None:
             self.data = data
+        if store_diagnostics is not None:
+            self.store_diagnostics = bool(store_diagnostics)
+        self._fit_store_diagnostics_ = bool(self.store_diagnostics)
         if self.data is None:
             raise ValueError("Model must be provided with MultiCausalData either in __init__ or in .fit(data_contracts).")
         X, y, d, y_is_binary, n_treatments = self._check_data()
@@ -597,41 +571,48 @@ class MultiTreatmentIRM(BaseEstimator):
 
         self._initialize_default_learners_for_fit(y_is_binary=y_is_binary)
         self._ensure_learners_available()
+        self._configure_default_learner_parallelism()
         self._validate_fit_config(y_is_binary=y_is_binary)
 
-        # Cache raw sample data used by estimate()/diagnostics.
-        self._X = X.copy()
-        self._y = y.copy()
-        self._d = d.copy()
+        self._store_fit_sample(X=X, y=y, d=d)
 
         g_hat, m_hat_raw, folds = self._cross_fit_nuisances(X=X, y=y, d=d, y_is_binary=y_is_binary)
-        self.folds_ = folds
-        self.g_hat_ = g_hat
-        self.m_hat_raw_ = np.asarray(m_hat_raw, dtype=float).copy()
-        self.m_hat_ = _trim_multiclass_propensity(m_hat_raw, self.trimming_threshold)
+        self._store_cross_fitted_predictions(g_hat=g_hat, m_hat=m_hat_raw, folds=folds)
         return self
 
     def _validate_estimate_request(self, score: str, alpha: float) -> str:
         if not (0.0 < float(alpha) < 1.0):
             raise ValueError("alpha must be in (0, 1).")
         score_u = str(score).upper()
-        if score_u != "ATE":
-            raise RuntimeError("Only ATE is supported")
+        if score_u not in {"ATE", "ATTE"}:
+            raise RuntimeError("Only ATE and ATTE are supported")
         return score_u
 
     def _compute_score_terms(
         self, *, y: np.ndarray, d: np.ndarray, g_hat: np.ndarray, m_hat: np.ndarray
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-        """Compute orthogonal score building blocks for multi-arm ATE contrasts."""
+        """Compute orthogonal score building blocks for multi-arm ATE or ATTE contrasts."""
         y_col = y.reshape(-1, 1)
         u = y_col - g_hat
-        h = self._normalize_ipw_terms(d, m_hat)
-        # For each active arm k>0, compare k vs baseline arm 0 in one vectorized expression.
-        psi_b = (
-            (g_hat[:, 1:] - g_hat[:, [0]])
-            + (u[:, 1:] * h[:, 1:])
-            - (u[:, [0]] * h[:, [0]])
-        )
+        score_u = str(self.score).upper()
+        h = self._normalize_ipw_terms(d, m_hat, score=score_u)
+        if score_u == "ATE":
+            # For each active arm k>0, compare k vs baseline arm 0 in one vectorized expression.
+            psi_b = (
+                (g_hat[:, 1:] - g_hat[:, [0]])
+                + (u[:, 1:] * h[:, 1:])
+                - (u[:, [0]] * h[:, [0]])
+            )
+        else:
+            g0_hat = g_hat[:, [0]]
+            residual0 = y_col - g0_hat
+            d0 = d[:, [0]].astype(float)
+            dk = d[:, 1:].astype(float)
+            pk = dk.mean(axis=0)
+            if np.any(pk <= 0.0):
+                raise RuntimeError("ATTE requested but some active treatment arms have zero sample share.")
+            ratio = m_hat[:, 1:] / m_hat[:, [0]]
+            psi_b = (dk / pk[None, :]) * residual0 - (d0 / pk[None, :]) * ratio * residual0
         psi_a = -np.ones(y.shape[0], dtype=float)
         return y_col, u, h, psi_a, psi_b
 
@@ -672,43 +653,80 @@ class MultiTreatmentIRM(BaseEstimator):
     def _compute_relative_effect_inference(
         self,
         *,
+        score: str,
         theta_hat: np.ndarray,
         se: np.ndarray,
         psi_b: np.ndarray,
+        influence: np.ndarray,
+        y_col: np.ndarray,
+        d: np.ndarray,
         g_hat: np.ndarray,
         u: np.ndarray,
         h: np.ndarray,
+        m_hat: np.ndarray,
         z: float,
-    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, Optional[np.ndarray]]:
         """Compute relative effect (% vs baseline) and delta-method interval."""
+        score_u = str(score).upper()
         n = u.shape[0]
-        psi_mu_c = (g_hat[:, [0]] + u[:, [0]] * h[:, [0]]).ravel()
-        mu_c = float(psi_mu_c.mean())
+        if score_u == "ATE":
+            psi_mu_c = (g_hat[:, [0]] + u[:, [0]] * h[:, [0]]).ravel()
+            mu_c = float(psi_mu_c.mean())
 
-        if mu_c == 0:
-            nan_vec = np.full_like(theta_hat, np.nan, dtype=float)
-            return nan_vec, nan_vec, nan_vec
+            if mu_c == 0:
+                nan_vec = np.full_like(theta_hat, np.nan, dtype=float)
+                return nan_vec, nan_vec, nan_vec, None
 
-        se_mu_c = psi_mu_c.std(ddof=1) / np.sqrt(n) if n > 1 else np.nan
-        psi_mu_c_centered = psi_mu_c - mu_c
-        psi_b_centered = psi_b - theta_hat
-        if n > 1:
-            cov_theta_mu_c = (psi_b_centered * psi_mu_c_centered[:, None]).mean(axis=0) / n
-        else:
-            cov_theta_mu_c = np.full(theta_hat.shape, np.nan, dtype=float)
+            se_mu_c = psi_mu_c.std(ddof=1) / np.sqrt(n) if n > 1 else np.nan
+            psi_mu_c_centered = psi_mu_c - mu_c
+            psi_b_centered = psi_b - theta_hat
+            if n > 1:
+                cov_theta_mu_c = (psi_b_centered * psi_mu_c_centered[:, None]).mean(axis=0) / n
+            else:
+                cov_theta_mu_c = np.full(theta_hat.shape, np.nan, dtype=float)
 
-        tau_rel = 100.0 * theta_hat / mu_c
-        d_theta = 100.0 / mu_c
-        d_mu = -100.0 * theta_hat / (mu_c ** 2)
-        var_rel = (
-            (d_theta ** 2) * (se ** 2)
-            + (d_mu ** 2) * (se_mu_c ** 2)
-            + 2.0 * d_theta * d_mu * cov_theta_mu_c
-        )
-        se_rel = np.sqrt(np.maximum(var_rel, 0.0))
-        ci_low_rel = tau_rel - z * se_rel
-        ci_high_rel = tau_rel + z * se_rel
-        return tau_rel, ci_low_rel, ci_high_rel
+            tau_rel = 100.0 * theta_hat / mu_c
+            d_theta = 100.0 / mu_c
+            d_mu = -100.0 * theta_hat / (mu_c ** 2)
+            var_rel = (
+                (d_theta ** 2) * (se ** 2)
+                + (d_mu ** 2) * (se_mu_c ** 2)
+                + 2.0 * d_theta * d_mu * cov_theta_mu_c
+            )
+            se_rel = np.sqrt(np.maximum(var_rel, 0.0))
+            ci_low_rel = tau_rel - z * se_rel
+            ci_high_rel = tau_rel + z * se_rel
+            return tau_rel, ci_low_rel, ci_high_rel, None
+
+        g0_hat = g_hat[:, [0]]
+        residual0 = y_col - g0_hat
+        d0 = d[:, [0]].astype(float)
+        dk = d[:, 1:].astype(float)
+        pk = dk.mean(axis=0)
+        ratio = m_hat[:, 1:] / m_hat[:, [0]]
+        psi_mu_c = (dk / pk[None, :]) * g0_hat + (ratio / pk[None, :]) * d0 * residual0
+        mu_c = np.mean(psi_mu_c, axis=0)
+        psi_mu_c_centered = psi_mu_c - mu_c[None, :]
+
+        tau_rel = np.full_like(theta_hat, np.nan, dtype=float)
+        ci_low_rel = np.full_like(theta_hat, np.nan, dtype=float)
+        ci_high_rel = np.full_like(theta_hat, np.nan, dtype=float)
+        valid = np.isfinite(mu_c) & (np.abs(mu_c) > 0.0)
+        if np.any(valid):
+            tau_rel[valid] = 100.0 * theta_hat[valid] / mu_c[valid]
+            with np.errstate(divide="ignore", invalid="ignore"):
+                if_rel = 100.0 * (
+                    influence[:, valid] / mu_c[None, valid]
+                    - (theta_hat[None, valid] * psi_mu_c_centered[:, valid]) / (mu_c[None, valid] ** 2)
+                )
+            if n > 1:
+                var_rel = np.var(if_rel, axis=0, ddof=1) / n
+            else:
+                var_rel = np.full(np.sum(valid), np.nan, dtype=float)
+            se_rel = np.sqrt(np.maximum(var_rel, 0.0))
+            ci_low_rel[valid] = tau_rel[valid] - z * se_rel
+            ci_high_rel[valid] = tau_rel[valid] + z * se_rel
+        return tau_rel, ci_low_rel, ci_high_rel, mu_c
 
     def _build_estimate_diagnostic_data(
         self,
@@ -721,30 +739,27 @@ class MultiTreatmentIRM(BaseEstimator):
         psi_b: np.ndarray,
         influence: np.ndarray,
         score: str,
+        normalize_ipw_effective: bool,
+        x: Optional[np.ndarray],
     ) -> Optional[MultiUnconfoundednessDiagnosticData]:
-        if not diagnostic_data:
+        if (not diagnostic_data) or x is None:
             return None
-        sens_elements = self._sensitivity_element_est(
-            y=y_col, d=d, g_hat=g_hat, m_hat=m_hat, psi=influence
-        )
+        sens_elements = {}
+        if score == "ATE":
+            sens_elements = self._sensitivity_element_est(
+                y=y_col, d=d, g_hat=g_hat, m_hat=m_hat, psi=influence
+            )
         diag = MultiUnconfoundednessDiagnosticData(
             m_hat=m_hat,
             m_hat_raw=getattr(self, "m_hat_raw_", None),
             d=d,
             y=y_col,
-            x=np.asarray(
-                getattr(
-                    self,
-                    "_X",
-                    self.data.get_df()[list(self.data.confounders)].to_numpy(dtype=float, copy=False),
-                ),
-                dtype=float,
-            ),
+            x=np.asarray(x, dtype=float),
             g_hat=g_hat,
             psi_b=psi_b,
             folds=self.folds_,
             trimming_threshold=self.trimming_threshold,
-            normalize_ipw=self.normalize_ipw,
+            normalize_ipw=normalize_ipw_effective,
             score=score,
             **sens_elements,
         )
@@ -757,16 +772,31 @@ class MultiTreatmentIRM(BaseEstimator):
         check_is_fitted(self, attributes=["g_hat_", "m_hat_"])
         score_u = self._validate_estimate_request(score=score, alpha=alpha)
         self.score = score_u
+        normalize_ipw_effective = self._use_normalized_ipw(score=score_u)
+        self.normalize_ipw_effective_ = normalize_ipw_effective
 
-        y, d = self._y, self._d
+        y, d = self._resolve_estimation_targets()
         g_hat, m_hat = self.g_hat_, self.m_hat_
         y_col, u, h, psi_a, psi_b = self._compute_score_terms(y=y, d=d, g_hat=g_hat, m_hat=m_hat)
         theta_hat, influence, se, t_stat, pval, ci_low, ci_high, z = self._solve_moment_and_inference(
             psi_a=psi_a, psi_b=psi_b, alpha=alpha
         )
-        tau_rel, ci_low_rel, ci_high_rel = self._compute_relative_effect_inference(
-            theta_hat=theta_hat, se=se, psi_b=psi_b, g_hat=g_hat, u=u, h=h, z=z
+        tau_rel, ci_low_rel, ci_high_rel, control_mean_by_arm = self._compute_relative_effect_inference(
+            score=score_u,
+            theta_hat=theta_hat,
+            se=se,
+            psi_b=psi_b,
+            influence=influence,
+            y_col=y_col,
+            d=d,
+            g_hat=g_hat,
+            u=u,
+            h=h,
+            m_hat=m_hat,
+            z=z,
         )
+        has_fit_features = getattr(self, "_fit_store_diagnostics_", self.store_diagnostics)
+        x = self._resolve_diagnostic_features() if (diagnostic_data and has_fit_features) else None
         diag = self._build_estimate_diagnostic_data(
             diagnostic_data=diagnostic_data,
             y_col=y_col,
@@ -776,6 +806,8 @@ class MultiTreatmentIRM(BaseEstimator):
             psi_b=psi_b,
             influence=influence,
             score=score_u,
+            normalize_ipw_effective=normalize_ipw_effective,
+            x=x,
         )
         treatment_cols = list(self.data.treatments.columns)
         baseline_treatment = treatment_cols[0]
@@ -795,7 +827,9 @@ class MultiTreatmentIRM(BaseEstimator):
             model_options={
                 "n_folds": self.n_folds,
                 "n_rep": self.n_rep,
-                "normalize_ipw": self.normalize_ipw,
+                "normalize_ipw": normalize_ipw_effective,
+                "normalize_ipw_requested": self.normalize_ipw,
+                "normalize_ipw_effective": normalize_ipw_effective,
                 "trimming_rule": self.trimming_rule,
                 "trimming_threshold": self.trimming_threshold,
                 "random_state": self.random_state,
@@ -823,6 +857,7 @@ class MultiTreatmentIRM(BaseEstimator):
             n_treated_by_arm=n_treated_by_arm,
             treatment_mean=treatment_mean,
             control_mean=control_mean,
+            control_mean_by_arm=control_mean_by_arm,
             contrast_labels=contrast_labels,
             confounders=list(self.data.confounders),
             time=datetime.now().strftime("%Y-%m-%d"),
@@ -928,17 +963,15 @@ class MultiTreatmentIRM(BaseEstimator):
     ) -> dict:
         if any(getattr(self, attr, None) is None for attr in ["g_hat_", "m_hat_"]):
             raise RuntimeError("Model must be fitted before sensitivity analysis.")
-
-        # --- fetch data ---
-        if y is None:
-            y = getattr(self, "_y", None)
-        if d is None:
-            d = getattr(self, "_d", None)
+        if str(getattr(self, "score", "ATE")).upper() != "ATE":
+            raise RuntimeError("Sensitivity elements are implemented only for score='ATE' in MultiTreatmentIRM.")
 
         if y is None or d is None:
-            df = self.data.get_df()
-            y = df[self.data.outcome].to_numpy(dtype=float)
-            d = df[self.data.treatments.columns].to_numpy(dtype=int)
+            y_cached, d_cached = self._resolve_estimation_targets()
+            if y is None:
+                y = y_cached
+            if d is None:
+                d = d_cached
 
         # --- get fitted nuisances ---
         if m_hat is None:
@@ -1040,6 +1073,8 @@ class MultiTreatmentIRM(BaseEstimator):
             *,
             r2_y: Optional[float] = None,
     ) -> "MultiTreatmentIRM":
+        if str(getattr(self, "score", "ATE")).upper() != "ATE":
+            raise RuntimeError("Sensitivity analysis is currently supported only for score='ATE' in MultiTreatmentIRM.")
         from causalis.scenarios.multi_unconfoundedness.refutation.unconfoundedness.sensitivity import (
             sensitivity_analysis as sa_fn,
             get_sensitivity_summary

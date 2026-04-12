@@ -77,6 +77,7 @@ class MultiCausalEstimate(BaseModel):
     n_treated_by_arm: Optional[np.ndarray] = None
     treatment_mean: Optional[np.ndarray] = None
     control_mean: Optional[float] = None
+    control_mean_by_arm: Optional[np.ndarray] = None
     contrast_labels: List[str] = Field(default_factory=list)
     confounders: List[str] = Field(default_factory=list)
     time: str = Field(default_factory=lambda: datetime.now().strftime("%Y-%m-%d"))
@@ -157,6 +158,13 @@ class MultiCausalEstimate(BaseModel):
             treatment_mean = self._as_1d_array(self.treatment_mean, n_effects, name="treatment_mean").astype(float)
 
         control_mean = float(self.control_mean) if self.control_mean is not None else None
+        control_mean_by_arm = None
+        if self.control_mean_by_arm is not None:
+            control_mean_by_arm = self._as_1d_array(
+                self.control_mean_by_arm,
+                n_effects,
+                name="control_mean_by_arm",
+            ).astype(float)
 
         summary_columns: Dict[str, Dict[str, Any]] = {}
         for i, contrast in enumerate(self._contrast_names(n_effects)):
@@ -173,6 +181,9 @@ class MultiCausalEstimate(BaseModel):
 
             n_treated_i = int(n_treated_by_arm[i]) if n_treated_by_arm is not None else int(self.n_treated)
             treatment_mean_i = _fmt_float(float(treatment_mean[i])) if treatment_mean is not None else None
+            control_mean_i = control_mean
+            if control_mean_by_arm is not None:
+                control_mean_i = float(control_mean_by_arm[i])
 
             summary_columns[contrast] = {
                 "estimand": self.estimand,
@@ -185,7 +196,7 @@ class MultiCausalEstimate(BaseModel):
                 "n_treated": n_treated_i,
                 "n_control": int(self.n_control),
                 "treatment_mean": treatment_mean_i,
-                "control_mean": _fmt_float(control_mean),
+                "control_mean": _fmt_float(control_mean_i),
                 "time": self.time,
             }
 

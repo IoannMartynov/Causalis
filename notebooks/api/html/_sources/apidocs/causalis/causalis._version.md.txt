@@ -1,0 +1,128 @@
+---
+orphan: true
+---
+
+# {py:mod}`causalis._version`
+
+```{py:module} causalis._version
+```
+
+```{autodoc2-docstring} causalis._version
+:allowtitles:
+```
+
+## Module Contents
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis._version.__all__>`
+  - ```{autodoc2-docstring} causalis._version.__all__
+    :summary:
+    ```
+* - {py:obj}`version <causalis._version.version>`
+  - ```{autodoc2-docstring} causalis._version.version
+    :summary:
+    ```
+* - {py:obj}`__version__ <causalis._version.__version__>`
+  - ```{autodoc2-docstring} causalis._version.__version__
+    :summary:
+    ```
+* - {py:obj}`__version_tuple__ <causalis._version.__version_tuple__>`
+  - ```{autodoc2-docstring} causalis._version.__version_tuple__
+    :summary:
+    ```
+* - {py:obj}`version_tuple <causalis._version.version_tuple>`
+  - ```{autodoc2-docstring} causalis._version.version_tuple
+    :summary:
+    ```
+* - {py:obj}`commit_id <causalis._version.commit_id>`
+  - ```{autodoc2-docstring} causalis._version.commit_id
+    :summary:
+    ```
+* - {py:obj}`__commit_id__ <causalis._version.__commit_id__>`
+  - ```{autodoc2-docstring} causalis._version.__commit_id__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} __all__
+:canonical: causalis._version.__all__
+:value: >
+   ['__version__', '__version_tuple__', 'version', 'version_tuple', '__commit_id__', 'commit_id']
+
+```{autodoc2-docstring} causalis._version.__all__
+```
+
+````
+
+````{py:data} version
+:canonical: causalis._version.version
+:type: str
+:value: >
+   None
+
+```{autodoc2-docstring} causalis._version.version
+```
+
+````
+
+````{py:data} __version__
+:canonical: causalis._version.__version__
+:type: str
+:value: >
+   None
+
+```{autodoc2-docstring} causalis._version.__version__
+```
+
+````
+
+````{py:data} __version_tuple__
+:canonical: causalis._version.__version_tuple__
+:type: tuple[int | str, ...]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis._version.__version_tuple__
+```
+
+````
+
+````{py:data} version_tuple
+:canonical: causalis._version.version_tuple
+:type: tuple[int | str, ...]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis._version.version_tuple
+```
+
+````
+
+````{py:data} commit_id
+:canonical: causalis._version.commit_id
+:type: str | None
+:value: >
+   None
+
+```{autodoc2-docstring} causalis._version.commit_id
+```
+
+````
+
+````{py:data} __commit_id__
+:canonical: causalis._version.__commit_id__
+:type: str | None
+:value: >
+   None
+
+```{autodoc2-docstring} causalis._version.__commit_id__
+```
+
+````

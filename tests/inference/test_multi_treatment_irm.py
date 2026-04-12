@@ -2,8 +2,10 @@ import numpy as np
 import pandas as pd
 import pytest
 from sklearn.dummy import DummyRegressor
-from sklearn.linear_model import LogisticRegression
+from sklearn.base import BaseEstimator
+from sklearn.linear_model import LinearRegression, LogisticRegression
 
+import causalis.scenarios.multi_unconfoundedness.model as multi_irm_module
 from causalis.data_contracts.multicausal_estimate import MultiCausalEstimate
 from causalis.data_contracts.multicausaldata import MultiCausalData
 from causalis.scenarios.multi_unconfoundedness.model import MultiTreatmentIRM
@@ -32,6 +34,49 @@ def _make_multi_causal_data(n: int = 180, seed: int = 42) -> MultiCausalData:
         }
     )
 
+    return MultiCausalData(
+        df=df,
+        outcome="y",
+        treatment_names=["d0", "d1", "d2"],
+        confounders=["x1", "x2"],
+        control_treatment="d0",
+    )
+
+
+def _make_selection_multi_causal_data(n: int = 900, seed: int = 123) -> MultiCausalData:
+    rng = np.random.default_rng(seed)
+    x1 = rng.normal(0.0, 1.0, size=n)
+    x2 = rng.normal(0.0, 1.0, size=n)
+
+    logits = np.column_stack(
+        [
+            np.zeros(n, dtype=float),
+            1.3 * x1 - 0.2 * x2,
+            -1.0 * x1 + 0.4 * x2,
+        ]
+    )
+    logits = logits - logits.max(axis=1, keepdims=True)
+    probs = np.exp(logits)
+    probs = probs / probs.sum(axis=1, keepdims=True)
+
+    labels = np.array([rng.choice(3, p=p_i) for p_i in probs], dtype=int)
+    d = np.eye(3, dtype=int)[labels]
+
+    y0 = 2.0 + 0.7 * x1 - 0.5 * x2 + rng.normal(0.0, 0.25, size=n)
+    tau1 = 1.0 + 1.1 * x1
+    tau2 = -0.4 + 0.8 * x1
+    y = y0 + (labels == 1) * tau1 + (labels == 2) * tau2
+
+    df = pd.DataFrame(
+        {
+            "y": y,
+            "x1": x1,
+            "x2": x2,
+            "d0": d[:, 0],
+            "d1": d[:, 1],
+            "d2": d[:, 2],
+        }
+    )
     return MultiCausalData(
         df=df,
         outcome="y",
@@ -216,6 +261,132 @@ def test_multi_treatment_irm_trimmed_propensity_rows_sum_to_one():
     assert np.all(model.m_hat_ >= model.trimming_threshold - 1e-12)
 
 
+def test_multi_treatment_irm_atte_score_matches_closed_form_and_disables_hajek():
+    model = MultiTreatmentIRM(normalize_ipw=True)
+    model.score = "ATTE"
+
+    y = np.array([1.2, 2.1, 0.9, 1.7], dtype=float)
+    d = np.array(
+        [
+            [1, 0, 0],
+            [0, 1, 0],
+            [0, 0, 1],
+            [0, 1, 0],
+        ],
+        dtype=int,
+    )
+    g_hat = np.array(
+        [
+            [1.0, 1.5, 0.8],
+            [1.1, 2.0, 1.4],
+            [0.7, 1.2, 1.0],
+            [1.3, 1.8, 1.1],
+        ],
+        dtype=float,
+    )
+    m_hat = np.array(
+        [
+            [0.55, 0.25, 0.20],
+            [0.30, 0.45, 0.25],
+            [0.25, 0.20, 0.55],
+            [0.28, 0.52, 0.20],
+        ],
+        dtype=float,
+    )
+
+    y_col, _, h, psi_a, psi_b = model._compute_score_terms(y=y, d=d, g_hat=g_hat, m_hat=m_hat)
+
+    g0_hat = g_hat[:, [0]]
+    residual0 = y_col - g0_hat
+    d0 = d[:, [0]].astype(float)
+    dk = d[:, 1:].astype(float)
+    pk = dk.mean(axis=0)
+    ratio = m_hat[:, 1:] / m_hat[:, [0]]
+    expected_psi_b = (dk / pk[None, :]) * residual0 - (d0 / pk[None, :]) * ratio * residual0
+
+    np.testing.assert_allclose(psi_b, expected_psi_b, atol=1e-12, rtol=0.0)
+    np.testing.assert_allclose(h, d / m_hat, atol=1e-12, rtol=0.0)
+    np.testing.assert_allclose(psi_a, -np.ones(y.shape[0], dtype=float), atol=0.0, rtol=0.0)
+
+
+def test_multi_treatment_irm_atte_differs_from_ate_under_selection_on_x():
+    data = _make_selection_multi_causal_data()
+    model = MultiTreatmentIRM(
+        data=data,
+        ml_g=LinearRegression(),
+        ml_m=LogisticRegression(max_iter=2000),
+        n_folds=3,
+        random_state=7,
+    ).fit()
+
+    ate = model.estimate(score="ATE", diagnostic_data=False)
+    atte = model.estimate(score="ATTE", diagnostic_data=False)
+
+    assert ate.estimand == "ATE"
+    assert atte.estimand == "ATTE"
+    assert ate.value.shape == (2,)
+    assert atte.value.shape == (2,)
+    assert np.all(np.isfinite(ate.value))
+    assert np.all(np.isfinite(atte.value))
+    assert np.max(np.abs(ate.value - atte.value)) > 0.1
+
+
+def test_multi_treatment_irm_atte_relative_outputs_use_per_arm_control_mean():
+    data = _make_selection_multi_causal_data(seed=321)
+    model = MultiTreatmentIRM(
+        data=data,
+        ml_g=LinearRegression(),
+        ml_m=LogisticRegression(max_iter=2000),
+        n_folds=3,
+        random_state=11,
+    ).fit()
+
+    result = model.estimate(score="ATTE")
+
+    assert result.control_mean_by_arm is not None
+    assert result.control_mean_by_arm.shape == (2,)
+    np.testing.assert_allclose(
+        result.value_relative,
+        100.0 * result.value / result.control_mean_by_arm,
+        rtol=1e-10,
+        atol=1e-12,
+    )
+
+    summary = result.summary()
+    for idx, contrast in enumerate(result.contrast_labels):
+        assert summary.loc["control_mean", contrast] == f"{result.control_mean_by_arm[idx]:.4f}"
+
+
+def test_multi_treatment_irm_atte_diagnostics_skip_ate_sensitivity_and_report_effective_ipw():
+    data = _make_selection_multi_causal_data(seed=777)
+    model = MultiTreatmentIRM(
+        data=data,
+        ml_g=LinearRegression(),
+        ml_m=LogisticRegression(max_iter=2000),
+        n_folds=3,
+        normalize_ipw=True,
+        random_state=19,
+    ).fit()
+
+    result = model.estimate(score="ATTE", diagnostic_data=True)
+    diag = result.diagnostic_data
+
+    assert diag is not None
+    assert result.model_options["normalize_ipw_requested"] is True
+    assert result.model_options["normalize_ipw_effective"] is False
+    assert result.model_options["normalize_ipw"] is False
+    assert model.normalize_ipw_effective_ is False
+    assert diag.score == "ATTE"
+    assert diag.normalize_ipw is False
+    assert diag.sigma2 is None
+    assert diag.nu2 is None
+    assert diag.psi_sigma2 is None
+    assert diag.psi_nu2 is None
+    assert diag.riesz_rep is None
+    assert diag.m_alpha is None
+    assert diag.psi is None
+
+
 def test_multi_treatment_irm_rejects_trimming_threshold_above_one_over_k():
     data = _make_multi_causal_data()
     model = MultiTreatmentIRM(
@@ -227,3 +398,170 @@ def test_multi_treatment_irm_rejects_trimming_threshold_above_one_over_k():
     )
     with pytest.raises(ValueError, match="1/K"):
         model.fit()
+
+
+def test_diagnostics_use_cached_x_without_reloading_dataframe(monkeypatch):
+    data = _make_multi_causal_data(seed=55)
+    model = MultiTreatmentIRM(
+        data,
+        ml_g=DummyRegressor(strategy="mean"),
+        ml_m=LogisticRegression(max_iter=1000),
+        n_folds=3,
+    ).fit()
+
+    def _unexpected_get_df(*args, **kwargs):
+        raise AssertionError("estimate() unexpectedly reloaded the dataframe")
+
+    monkeypatch.setattr(MultiCausalData, "get_df", _unexpected_get_df)
+    result = model.estimate(score="ATE")
+
+    assert result.diagnostic_data is not None
+    np.testing.assert_allclose(result.diagnostic_data.x, model._X)
+
+
+def test_fit_store_diagnostics_controls_payload_and_model_caches():
+    data = _make_multi_causal_data(seed=17)
+    model = MultiTreatmentIRM(
+        data,
+        ml_g=DummyRegressor(strategy="mean"),
+        ml_m=LogisticRegression(max_iter=1000),
+        n_folds=3,
+    ).fit(store_diagnostics=False)
+
+    assert model._X is None
+    assert model._y is not None
+    assert model._d is not None
+    assert model.m_hat_raw_ is None
+    assert model.folds_ is None
+
+    result = model.estimate(score="ATE")
+    assert result.diagnostic_data is None
+    assert np.all(np.isfinite(result.value))
+
+
+def test_lightweight_mode_estimate_uses_cached_targets_without_reloading_dataframe(monkeypatch):
+    data = _make_multi_causal_data(seed=29)
+    model = MultiTreatmentIRM(
+        data,
+        ml_g=DummyRegressor(strategy="mean"),
+        ml_m=LogisticRegression(max_iter=1000),
+        n_folds=3,
+    ).fit(store_diagnostics=False)
+
+    def _unexpected_get_df(*args, **kwargs):
+        raise AssertionError("estimate() unexpectedly reloaded the dataframe")
+
+    monkeypatch.setattr(MultiCausalData, "get_df", _unexpected_get_df)
+    result = model.estimate(score="ATE")
+
+    assert result.diagnostic_data is None
+    assert np.all(np.isfinite(result.value))
+
+
+def test_lightweight_mode_matches_full_mode_on_unchanged_data():
+    data = _make_multi_causal_data(seed=41)
+    kwargs = dict(
+        data=data,
+        ml_g=DummyRegressor(strategy="mean"),
+        ml_m=LogisticRegression(max_iter=1000),
+        n_folds=3,
+        random_state=13,
+    )
+
+    result_full = MultiTreatmentIRM(**kwargs).fit(store_diagnostics=True).estimate(score="ATE")
+    result_light = MultiTreatmentIRM(**kwargs).fit(store_diagnostics=False).estimate(score="ATE")
+
+    np.testing.assert_allclose(result_light.value, result_full.value, rtol=1e-12, atol=0.0)
+    np.testing.assert_allclose(
+        result_light.model_options["std_error"],
+        result_full.model_options["std_error"],
+        rtol=1e-12,
+        atol=0.0,
+    )
+
+
+def test_lightweight_mode_estimate_is_stable_after_data_reordering():
+    data = _make_multi_causal_data(seed=1234)
+    model = MultiTreatmentIRM(
+        data,
+        ml_g=DummyRegressor(strategy="mean"),
+        ml_m=LogisticRegression(max_iter=1000),
+        n_folds=3,
+    ).fit(store_diagnostics=False)
+
+    first = model.estimate(score="ATE")
+    data.df = data.df.sample(frac=1.0, random_state=7).reset_index(drop=True)
+    second = model.estimate(score="ATE")
+
+    np.testing.assert_allclose(second.value, first.value, rtol=1e-12, atol=0.0)
+    np.testing.assert_allclose(
+        second.model_options["std_error"],
+        first.model_options["std_error"],
+        rtol=1e-12,
+        atol=0.0,
+    )
+
+
+def test_lightweight_mode_legacy_reload_fallback_rejects_changed_data():
+    data = _make_multi_causal_data(seed=4321)
+    model = MultiTreatmentIRM(
+        data,
+        ml_g=DummyRegressor(strategy="mean"),
+        ml_m=LogisticRegression(max_iter=1000),
+        n_folds=3,
+    ).fit(store_diagnostics=False)
+
+    model._y = None
+    model._d = None
+    data.df = data.df.sample(frac=1.0, random_state=19).reset_index(drop=True)
+
+    with pytest.raises(RuntimeError, match="changed after fit"):
+        model.estimate(score="ATE")
+
+
+def test_default_catboost_parallelism_is_reduced_only_for_internal_defaults(monkeypatch):
+    class _FakeCatBoost(BaseEstimator):
+        def __init__(
+            self,
+            *,
+            thread_count: int = -1,
+            verbose: bool = False,
+            allow_writing_files: bool = False,
+            random_seed: int | None = None,
+            loss_function: str | None = None,
+        ):
+            self.thread_count = thread_count
+            self.verbose = verbose
+            self.allow_writing_files = allow_writing_files
+            self.random_seed = random_seed
+            self.loss_function = loss_function
+
+    data = _make_multi_causal_data(seed=314)
+
+    monkeypatch.setattr(multi_irm_module, "HAS_CATBOOST", True)
+    monkeypatch.setattr(multi_irm_module, "CatBoostClassifier", _FakeCatBoost)
+    monkeypatch.setattr(multi_irm_module, "CatBoostRegressor", _FakeCatBoost)
+
+    model_defaults = MultiTreatmentIRM(data=data, n_jobs=2, random_state=11)
+    model_defaults._configure_default_learner_parallelism()
+
+    assert model_defaults._ml_g_is_default is True
+    assert model_defaults._ml_m_is_default is True
+    assert model_defaults.ml_g.get_params()["thread_count"] == 1
+    assert model_defaults.ml_m.get_params()["thread_count"] == 1
+
+    ml_g = _FakeCatBoost(thread_count=-1)
+    ml_m = _FakeCatBoost(thread_count=-1)
+    model_custom = MultiTreatmentIRM(
+        data=data,
+        ml_g=ml_g,
+        ml_m=ml_m,
+        n_jobs=2,
+        random_state=11,
+    )
+    model_custom._configure_default_learner_parallelism()
+
+    assert model_custom._ml_g_is_default is False
+    assert model_custom._ml_m_is_default is False
+    assert model_custom.ml_g.get_params()["thread_count"] == -1
+    assert model_custom.ml_m.get_params()["thread_count"] == -1

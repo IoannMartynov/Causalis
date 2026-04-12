@@ -11,6 +11,11 @@ import pandas as pd
 
 from causalis.data_contracts.multicausal_estimate import MultiCausalEstimate
 from causalis.data_contracts.multicausaldata import MultiCausalData
+from causalis.scenarios.multi_unconfoundedness._utils import (
+    _normalize_multiclass_ipw_terms,
+    _normalize_rows_to_simplex,
+    _trim_multiclass_propensity,
+)
 
 
 def _grade(value: float, warn: float, strong: float) -> str:
@@ -90,39 +95,6 @@ def _comparison_labels(treatment_names: List[str]) -> List[str]:
     return [f"{name} vs {baseline}" for name in treatment_names[1:]]
 
 
-def _normalize_rows_to_simplex(p: np.ndarray) -> np.ndarray:
-    p = np.asarray(p, dtype=float)
-    p = np.maximum(p, 1e-12)
-    row_sums = p.sum(axis=1, keepdims=True)
-    if np.any(np.isfinite(row_sums) & (row_sums <= 1e-12)):
-        raise RuntimeError("Propensity matrix contains rows with zero total probability.")
-    safe_sums = np.where(np.isfinite(row_sums) & (row_sums > 1e-12), row_sums, 1.0)
-    return p / safe_sums
-
-
-def _trim_multiclass_propensity(p: np.ndarray, trimming_threshold: float) -> np.ndarray:
-    """Lower-trim multiclass propensity and renormalize rows to sum to 1."""
-    p = np.asarray(p, dtype=float)
-    if p.ndim != 2:
-        raise ValueError(f"Propensity matrix must be 2D (n, K). Got shape {p.shape}.")
-    n_treatments = p.shape[1]
-    if n_treatments < 2:
-        raise ValueError("Need at least 2 treatment columns for multiclass propensity.")
-
-    thr = float(trimming_threshold)
-    if not np.isfinite(thr) or not (0.0 <= thr < (1.0 / n_treatments)):
-        raise ValueError(
-            f"trimming_threshold must be finite and in [0, 1/K) for K={n_treatments}; got {thr}."
-        )
-
-    p_simplex = _normalize_rows_to_simplex(p)
-    if thr <= 0.0:
-        return p_simplex
-
-    p_trim = np.maximum(p_simplex, thr)
-    return _normalize_rows_to_simplex(p_trim)
-
-
 def _build_basis(x: np.ndarray, n_basis_funcs: Optional[int]) -> np.ndarray:
     n, p = x.shape
     if n_basis_funcs is None:
@@ -138,11 +110,7 @@ def _build_basis(x: np.ndarray, n_basis_funcs: Optional[int]) -> np.ndarray:
 
 
 def _normalize_ipw_terms(d: np.ndarray, m: np.ndarray, *, normalize_ipw: bool) -> np.ndarray:
-    h = d / m
-    if normalize_ipw:
-        h_mean = np.mean(h, axis=0, keepdims=True)
-        h = h / np.where(h_mean != 0.0, h_mean, 1.0)
-    return h
+    return _normalize_multiclass_ipw_terms(d=d, m_hat=m, normalize_ipw=normalize_ipw)
 
 
 def _resolve_theta(value: Any, n_contrasts: int) -> np.ndarray:
