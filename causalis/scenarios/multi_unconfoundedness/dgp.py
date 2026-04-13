@@ -367,7 +367,8 @@ def generate_multitreatment_gamma_26(
     beta_d = np.array([
         [0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00],
         [0.01, 0.10, 0.0015, 0.50, 0.20, 0.05, 0.35, 0.40],
-        [-0.005, 0.07, 0.0010, 0.35, 0.10, 0.08, 0.20, 0.25],
+        # Align d_2 selection with positive-effect drivers so oracle ATTE exceeds ATE.
+        [-0.008, 0.13, 0.0020, 0.10, 0.30, -0.08, 0.00, 0.55],
     ], dtype=float)
 
     theta = [0.0, -0.05, 0.10]
@@ -568,8 +569,6 @@ def generate_multi_dml_cx_26(
     return_causal_data: bool = True,
 ) -> Union[pd.DataFrame, MultiCausalData]:
     r"""
-    CX-inspired four-arm binary-outcome benchmark based on ``dgp--1163305488.ipynb``.
-
     The notebook simulates overlapping ``contact`` and ``repeat`` actions. This
     packaged DGP resolves them into a mutually exclusive one-hot treatment:
 

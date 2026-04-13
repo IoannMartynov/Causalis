@@ -42,7 +42,7 @@ def _make_multi_causal_data(n: int = 180, seed: int = 42) -> MultiCausalData:
     )
 
 
-def _make_estimate(data: MultiCausalData, *, normalize_ipw: bool = False):
+def _make_estimate(data: MultiCausalData, *, normalize_ipw: bool = False, score: str = "ATE"):
     model = MultiTreatmentIRM(
         data=data,
         ml_g=DummyRegressor(strategy="mean"),
@@ -51,7 +51,7 @@ def _make_estimate(data: MultiCausalData, *, normalize_ipw: bool = False):
         n_folds=3,
         random_state=1,
     ).fit()
-    return model.estimate(score="ATE", diagnostic_data=True)
+    return model.estimate(score=score, diagnostic_data=True)
 
 
 def test_multi_score_diagnostics_runs_and_returns_long_summary():
@@ -99,3 +99,11 @@ def test_multi_score_diagnostics_warns_and_disables_hajek_for_orthogonality():
     assert report["params"]["normalize_ipw"] is True
     assert report["params"]["orthogonality_normalize_ipw"] is False
     assert report["meta"]["orthogonality_derivatives_use_score_normalization"] is False
+
+
+def test_multi_score_diagnostics_reject_atte_estimates():
+    data = _make_multi_causal_data(seed=91)
+    estimate = _make_estimate(data, score="ATTE")
+
+    with pytest.raises(ValueError, match="Only ATE is supported"):
+        run_score_diagnostics(data, estimate, return_summary=True)

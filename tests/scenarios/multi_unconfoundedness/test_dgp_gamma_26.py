@@ -48,3 +48,28 @@ def test_gamma_26_respects_treatment_ordering_vs_control():
     assert np.all(g2 > g0)
     assert np.all(cate1 < 0.0)
     assert np.all(cate2 > 0.0)
+
+
+def test_gamma_26_oracle_atte_is_separated_from_ate_and_shares_stay_calibrated():
+    df = generate_multitreatment_gamma_26(
+        n=4000,
+        seed=42,
+        include_oracle=True,
+        return_causal_data=False,
+    )
+
+    ate_d_1 = float(df["cate_d_1"].mean())
+    atte_d_1 = float(df.loc[df["d_1"] == 1, "cate_d_1"].mean())
+    ate_d_2 = float(df["cate_d_2"].mean())
+    atte_d_2 = float(df.loc[df["d_2"] == 1, "cate_d_2"].mean())
+
+    share_d_0 = float(df["d_0"].mean())
+    share_d_1 = float(df["d_1"].mean())
+    share_d_2 = float(df["d_2"].mean())
+
+    assert atte_d_1 < ate_d_1 - 0.05
+    assert atte_d_2 > ate_d_2 + 0.05
+
+    assert abs(share_d_0 - 0.50) < 0.03
+    assert abs(share_d_1 - 0.25) < 0.03
+    assert abs(share_d_2 - 0.25) < 0.03
