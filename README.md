@@ -23,6 +23,17 @@ Causalis focuses on:
 pip install causalis
 ```
 
+## Building A Production Release
+
+Use the helper below when you want `dist/*` to contain a stable release instead of a `setuptools_scm` dev build:
+
+```bash
+./scripts/build_release.sh 0.3.1
+twine upload dist/*
+```
+
+The script removes older `dist/causalis-*` artifacts before building and, by default, stops if the checkout has tracked changes. It uses the current environment's `python`, or `PYTHON_BIN=/path/to/python` if you want to force a specific interpreter.
+
 # Quickstart: Classic RCT (difference in means + inference)
 
 ```python

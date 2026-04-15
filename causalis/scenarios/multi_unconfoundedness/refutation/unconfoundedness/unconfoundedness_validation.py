@@ -19,6 +19,7 @@ class _BalanceInputs:
     m_hat: np.ndarray
     feature_names: List[str]
     treatment_names: List[str]
+    score: str
     normalize: bool
 
 
@@ -117,9 +118,10 @@ def _extract_balance_inputs(
         x_raw = data.get_df()[list(data.confounders)].to_numpy(dtype=float)
 
     score_raw = getattr(diag, "score", estimate.estimand)
-    if str(score_raw).upper() != "ATE":
+    score = str(score_raw).upper()
+    if score not in {"ATE", "ATTE"}:
         raise ValueError(
-            "Only ATE is supported for multi-treatment unconfoundedness diagnostics. "
+            "Multi-treatment unconfoundedness diagnostics support only ATE or ATTE. "
             f"Got score={score_raw!r}."
         )
 
@@ -128,6 +130,8 @@ def _extract_balance_inputs(
         normalize_used = getattr(diag, "normalize_ipw", None)
     if normalize_used is None:
         normalize_used = bool(estimate.model_options.get("normalize_ipw", False))
+    if score == "ATTE":
+        normalize_used = False
 
     x = np.asarray(x_raw, dtype=float)
     d = np.asarray(d_raw, dtype=float)
@@ -157,6 +161,7 @@ def _extract_balance_inputs(
         m_hat=m_hat,
         feature_names=feature_names,
         treatment_names=treatment_names,
+        score=score,
         normalize=bool(normalize_used),
     )
 
@@ -207,8 +212,12 @@ def _balance_smd(inputs: _BalanceInputs, *, threshold: float) -> Dict[str, Any]:
         comp = _comparison_label(baseline_name, tr_name)
         comparison_labels.append(comp)
 
-        w_baseline = d[:, 0] / m_hat[:, 0]
-        w_treated = d[:, tr_idx] / m_hat[:, tr_idx]
+        if inputs.score == "ATE":
+            w_baseline = d[:, 0] / m_hat[:, 0]
+            w_treated = d[:, tr_idx] / m_hat[:, tr_idx]
+        else:
+            w_baseline = d[:, 0] * (m_hat[:, tr_idx] / m_hat[:, 0])
+            w_treated = d[:, tr_idx]
 
         if inputs.normalize:
             mean_baseline = float(np.mean(w_baseline))
@@ -395,8 +404,8 @@ def run_unconfoundedness_diagnostics(
 ) -> Dict[str, Any]:
     """Run multi-treatment unconfoundedness diagnostics from data and estimate.
 
-    This implementation currently supports ATE diagnostics only and computes
-    pairwise balance between baseline treatment 0 and each active treatment k.
+    This implementation computes pairwise balance between baseline treatment 0
+    and each active treatment k for either ATE or ATTE estimates.
     """
     if not isinstance(data, MultiCausalData):
         raise TypeError(f"data must be MultiCausalData, got {type(data).__name__}.")
@@ -424,7 +433,7 @@ def run_unconfoundedness_diagnostics(
 
     report: Dict[str, Any] = {
         "params": {
-            "score": "ATE",
+            "score": inputs.score,
             "normalize": inputs.normalize,
             "smd_threshold": float(threshold),
         },

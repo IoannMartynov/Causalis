@@ -67,10 +67,12 @@ def _resolve_trimming_threshold(
     return float(trim_thr)
 
 
-def _resolve_normalize_ipw(diagnostic_data: Any, estimate: MultiCausalEstimate) -> bool:
+def _resolve_normalize_ipw(score: str, diagnostic_data: Any, estimate: MultiCausalEstimate) -> bool:
     normalize_ipw = getattr(diagnostic_data, "normalize_ipw", None)
     if normalize_ipw is None:
         normalize_ipw = estimate.model_options.get("normalize_ipw", False)
+    if str(score).upper() == "ATTE":
+        return False
     return bool(normalize_ipw)
 
 
@@ -131,21 +133,48 @@ def _compute_psi_from_nuisances(
     g_hat: np.ndarray,
     m: np.ndarray,
     theta: np.ndarray,
+    score: str,
     normalize_ipw: bool,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    h = _normalize_ipw_terms(d=d, m=m, normalize_ipw=normalize_ipw)
     u = y[:, None] - g_hat
-
-    psi_b = (
-        (g_hat[:, 1:] - g_hat[:, [0]])
-        + (u[:, 1:] * h[:, 1:])
-        - (u[:, [0]] * h[:, [0]])
-    )
+    score_u = str(score).upper()
+    if score_u == "ATE":
+        h = _normalize_ipw_terms(d=d, m=m, normalize_ipw=normalize_ipw)
+        psi_b = (
+            (g_hat[:, 1:] - g_hat[:, [0]])
+            + (u[:, 1:] * h[:, 1:])
+            - (u[:, [0]] * h[:, [0]])
+        )
+    else:
+        h = np.full_like(m, np.nan, dtype=float)
+        g0_hat = g_hat[:, [0]]
+        residual0 = y[:, None] - g0_hat
+        d0 = d[:, [0]].astype(float)
+        dk = d[:, 1:].astype(float)
+        pk = dk.mean(axis=0)
+        if np.any(pk <= 0.0):
+            raise RuntimeError("ATTE requested but some active treatment arms have zero sample share.")
+        e0_hat = m[:, [0]]
+        baseline_floor = float(np.finfo(float).tiny)
+        if np.any(~np.isfinite(e0_hat)) or np.any(e0_hat <= baseline_floor):
+            raise RuntimeError(
+                "ATTE requested but baseline propensity m_hat[:, 0] is numerically zero after trimming/clipping. "
+                "Increase trimming_threshold or inspect overlap."
+            )
+        ratio = np.divide(
+            m[:, 1:],
+            e0_hat,
+            out=np.full_like(m[:, 1:], np.nan, dtype=float),
+            where=e0_hat > baseline_floor,
+        )
+        if np.any(~np.isfinite(ratio)):
+            raise RuntimeError("ATTE requested but the e_k/e_0 ratio contains non-finite values.")
+        psi_b = (dk / pk[None, :]) * residual0 - (d0 / pk[None, :]) * ratio * residual0
     psi = psi_b - theta[None, :]
     return psi, psi_b, h, u
 
 
-def _orthogonality_derivatives(
+def _orthogonality_derivatives_ate(
     *,
     x_basis: np.ndarray,
     d: np.ndarray,
@@ -179,6 +208,92 @@ def _orthogonality_derivatives(
         se_m0 = d_m0_terms.std(axis=0, ddof=1) / np.sqrt(n) if n > 1 else np.full(b, np.nan)
 
         t_gk = d_gk / np.maximum(se_gk, 1e-12)
+        t_g0 = d_g0 / np.maximum(se_g0, 1e-12)
+        t_mk = d_mk / np.maximum(se_mk, 1e-12)
+        t_m0 = d_m0 / np.maximum(se_m0, 1e-12)
+
+        for basis_idx in range(b):
+            rows.append(
+                {
+                    "comparison": comparison_labels[idx],
+                    "basis": int(basis_idx),
+                    "d_gk": float(d_gk[basis_idx]),
+                    "se_gk": float(se_gk[basis_idx]),
+                    "t_gk": float(t_gk[basis_idx]),
+                    "d_g0": float(d_g0[basis_idx]),
+                    "se_g0": float(se_g0[basis_idx]),
+                    "t_g0": float(t_g0[basis_idx]),
+                    "d_mk": float(d_mk[basis_idx]),
+                    "se_mk": float(se_mk[basis_idx]),
+                    "t_mk": float(t_mk[basis_idx]),
+                    "d_m0": float(d_m0[basis_idx]),
+                    "se_m0": float(se_m0[basis_idx]),
+                    "t_m0": float(t_m0[basis_idx]),
+                }
+            )
+
+        max_rows.append(
+            {
+                "comparison": comparison_labels[idx],
+                "max_|t|_gk": float(np.nanmax(np.abs(t_gk))),
+                "max_|t|_g0": float(np.nanmax(np.abs(t_g0))),
+                "max_|t|_mk": float(np.nanmax(np.abs(t_mk))),
+                "max_|t|_m0": float(np.nanmax(np.abs(t_m0))),
+            }
+        )
+
+    max_df = pd.DataFrame(max_rows)
+    max_df["max_|t|"] = np.nanmax(
+        max_df[["max_|t|_gk", "max_|t|_g0", "max_|t|_mk", "max_|t|_m0"]].to_numpy(dtype=float),
+        axis=1,
+    )
+
+    return pd.DataFrame(rows), max_df
+
+
+def _orthogonality_derivatives_atte(
+    *,
+    x_basis: np.ndarray,
+    y: np.ndarray,
+    d: np.ndarray,
+    g_hat: np.ndarray,
+    m: np.ndarray,
+    comparison_labels: List[str],
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    n, b = x_basis.shape
+    j = len(comparison_labels)
+
+    rows: List[Dict[str, Any]] = []
+    max_rows: List[Dict[str, Any]] = []
+
+    g0_hat = g_hat[:, 0]
+    residual0 = y - g0_hat
+    d0 = d[:, 0].astype(float)
+
+    for idx in range(j):
+        k = idx + 1
+        dk = d[:, k].astype(float)
+        pk = float(np.mean(dk))
+        if pk <= 0.0:
+            raise RuntimeError("ATTE requested but some active treatment arms have zero sample share.")
+
+        ratio = m[:, k] / m[:, 0]
+        d_gk_terms = np.zeros((n, b), dtype=float)
+        d_g0_terms = x_basis * (((d0 * ratio) - dk) / pk)[:, None]
+        d_mk_terms = -x_basis * ((d0 * residual0) / (pk * m[:, 0]))[:, None]
+        d_m0_terms = x_basis * ((d0 * residual0 * ratio) / (pk * m[:, 0]))[:, None]
+
+        d_gk = d_gk_terms.mean(axis=0)
+        d_g0 = d_g0_terms.mean(axis=0)
+        d_mk = d_mk_terms.mean(axis=0)
+        d_m0 = d_m0_terms.mean(axis=0)
+
+        se_gk = d_gk_terms.std(axis=0, ddof=1) / np.sqrt(n) if n > 1 else np.full(b, np.nan)
+        se_g0 = d_g0_terms.std(axis=0, ddof=1) / np.sqrt(n) if n > 1 else np.full(b, np.nan)
+        se_mk = d_mk_terms.std(axis=0, ddof=1) / np.sqrt(n) if n > 1 else np.full(b, np.nan)
+        se_m0 = d_m0_terms.std(axis=0, ddof=1) / np.sqrt(n) if n > 1 else np.full(b, np.nan)
+
+        t_gk = np.zeros(b, dtype=float)
         t_g0 = d_g0 / np.maximum(se_g0, 1e-12)
         t_mk = d_mk / np.maximum(se_mk, 1e-12)
         t_m0 = d_m0 / np.maximum(se_m0, 1e-12)
@@ -438,8 +553,12 @@ def run_score_diagnostics(
         raise ValueError("estimate.diagnostic_data must include `m_hat`, `d`, and `g_hat`.")
 
     score_raw = getattr(diag, "score", estimate.estimand)
-    if str(score_raw).upper() != "ATE":
-        raise ValueError(f"Only ATE is supported for multi-treatment score diagnostics. Got score={score_raw!r}.")
+    score = str(score_raw).upper()
+    if score not in {"ATE", "ATTE"}:
+        raise ValueError(
+            "Multi-treatment score diagnostics support only ATE or ATTE. "
+            f"Got score={score_raw!r}."
+        )
 
     y_raw = getattr(diag, "y", None)
     if y_raw is None:
@@ -476,7 +595,7 @@ def run_score_diagnostics(
     theta = _resolve_theta(estimate.value, n_contrasts=j)
 
     trimming_thr = _resolve_trimming_threshold(trimming_threshold, diag, estimate)
-    normalize_ipw = _resolve_normalize_ipw(diag, estimate)
+    normalize_ipw = _resolve_normalize_ipw(score, diag, estimate)
     m_diag = _trim_multiclass_propensity(m, trimming_thr)
 
     x_basis = _build_basis(x=x, n_basis_funcs=n_basis_funcs)
@@ -487,11 +606,14 @@ def run_score_diagnostics(
         g_hat=g_hat,
         m=m_diag,
         theta=theta,
+        score=score,
         normalize_ipw=normalize_ipw,
     )
 
     normalize_ipw_for_orthogonality = bool(normalize_ipw)
-    if normalize_ipw_for_orthogonality:
+    if score == "ATTE":
+        normalize_ipw_for_orthogonality = False
+    elif normalize_ipw_for_orthogonality:
         warnings.warn(
             "Orthogonality derivatives are computed with normalize_ipw=False because "
             "m-derivatives for Hajek-normalized IPW are not implemented.",
@@ -558,14 +680,24 @@ def run_score_diagnostics(
     u = u[finite_rows]
     folds_arr = folds_arr[finite_rows] if folds_arr is not None and folds_arr.size == n else None
 
-    ortho_df, ortho_max = _orthogonality_derivatives(
-        x_basis=x_basis,
-        d=d,
-        m=m_diag,
-        h=h_ortho,
-        u=u,
-        comparison_labels=comparison_labels,
-    )
+    if score == "ATE":
+        ortho_df, ortho_max = _orthogonality_derivatives_ate(
+            x_basis=x_basis,
+            d=d,
+            m=m_diag,
+            h=h_ortho,
+            u=u,
+            comparison_labels=comparison_labels,
+        )
+    else:
+        ortho_df, ortho_max = _orthogonality_derivatives_atte(
+            x_basis=x_basis,
+            y=y,
+            d=d,
+            g_hat=g_hat,
+            m=m_diag,
+            comparison_labels=comparison_labels,
+        )
 
     infl_df, top_influential = _influence_summary(
         psi=psi,
@@ -668,7 +800,7 @@ def run_score_diagnostics(
 
     report: Dict[str, Any] = {
         "params": {
-            "score": "ATE",
+            "score": score,
             "trimming_threshold": float(trimming_thr),
             "normalize_ipw": bool(normalize_ipw),
             "orthogonality_normalize_ipw": bool(normalize_ipw_for_orthogonality),

@@ -42,7 +42,7 @@
 <table class="autosummary longtable docutils align-left">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM" title="causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MultiTreatmentIRM</span></code></a></p></td>
-<td><p>Interactive Regression Model for multi-treatment unconfoundedness.</p></td>
+<td><p>Interactive Regression Model (IRM) for multi-treatment unconfoundedness.</p></td>
 </tr>
 </tbody>
 </table>
@@ -51,61 +51,187 @@
 <h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">causalis.scenarios.multi_unconfoundedness.model.</span></span><span class="sig-name descname"><span class="pre">MultiTreatmentIRM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="causalis.data_contracts.multicausaldata.html#causalis.data_contracts.multicausaldata.MultiCausalData" title="causalis.data_contracts.multicausaldata.MultiCausalData"><span class="pre">causalis.data_contracts.multicausaldata.MultiCausalData</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ml_g</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ml_m</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_folds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_rep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize_ipw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trimming_rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'truncate'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trimming_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">causalis.scenarios.multi_unconfoundedness.model.</span></span><span class="sig-name descname"><span class="pre">MultiTreatmentIRM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="causalis.data_contracts.multicausaldata.html#causalis.data_contracts.multicausaldata.MultiCausalData" title="causalis.data_contracts.multicausaldata.MultiCausalData"><span class="pre">causalis.data_contracts.multicausaldata.MultiCausalData</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ml_g</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ml_m</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_folds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_rep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize_ipw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trimming_rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'truncate'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trimming_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_diagnostics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">sklearn.base.BaseEstimator</span></code></p>
-<p>Interactive Regression Model for multi-treatment unconfoundedness.</p>
+<p>Interactive Regression Model (IRM) for multi-treatment unconfoundedness.</p>
 <p>DoubleML-style cross-fitting estimator consuming <code class="docutils literal notranslate"><span class="pre">MultiCausalData</span></code> and
-producing pairwise ATE contrasts against baseline treatment (column 0).
-Model supports &gt;= 2 treatments.</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Parameters
-----------
-data : MultiCausalData
-    Data container with outcome, one-hot multi-treatment indicators, and confounders.
+producing pairwise contrasts between each active treatment arm and the
+baseline arm (column 0). The model supports <code class="docutils literal notranslate"><span class="pre">K</span> <span class="pre">&gt;=</span> <span class="pre">2</span></code> mutually exclusive
+treatment arms encoded as one-hot columns.</p>
+<p class="rubric" id="id1">Parameters</p>
+<p>data : MultiCausalData
+Data container with outcome, one-hot treatment indicators, and confounders.
 ml_g : estimator
-    Learner for E[Y|X,D]. If classifier and Y is binary, predict_proba is used; otherwise predict().
+Learner for :math:<code class="docutils literal notranslate"><span class="pre">\mathbb{E}[Y</span> <span class="pre">\mid</span> <span class="pre">X,</span> <span class="pre">D=k]</span></code>. If classifier and <code class="docutils literal notranslate"><span class="pre">Y</span></code> is
+binary, <code class="docutils literal notranslate"><span class="pre">predict_proba</span></code> is used; otherwise <code class="docutils literal notranslate"><span class="pre">predict()</span></code> is used.
 ml_m : classifier
-    Learner for E[D|X] (generelized propensity score). Must support predict_proba() or predict() in (0,1).
+Learner for the generalized propensity score
+:math:<code class="docutils literal notranslate"><span class="pre">\mathbb{P}(D=k</span> <span class="pre">\mid</span> <span class="pre">X)</span></code>. Must support <code class="docutils literal notranslate"><span class="pre">predict_proba()</span></code>.
 n_folds : int, default 5
-    Number of cross-fitting folds.
+Number of cross-fitting folds.
 n_rep : int, default 1
-    Number of repetitions of sample splitting. Currently only 1 is supported.
+Number of repetitions of sample splitting. Currently only 1 is supported.
 normalize_ipw : bool, default False
-    Whether to normalize IPW terms within the score.
-    This is a Hajek-style stabilization: it can reduce variance but may add
-    small finite-sample bias.
-trimming_rule : {&quot;truncate&quot;}, default &quot;truncate&quot;
-    Trimming approach for propensity scores.
+Whether to normalize inverse-probability terms within the score. Applied
+to <code class="docutils literal notranslate"><span class="pre">score=&quot;ATE&quot;</span></code> only. For <code class="docutils literal notranslate"><span class="pre">score=&quot;ATTE&quot;</span></code>, normalization is ignored
+to preserve the canonical orthogonal ATTE score used by the estimator.
+trimming_rule : {“truncate”}, default “truncate”
+Trimming approach for propensity scores.
 trimming_threshold : float, default 1e-2
-    Threshold for trimming if rule is &quot;truncate&quot;.
+Lower threshold used before renormalizing multiclass propensities back to
+the simplex.
 random_state : Optional[int], default None
-    Random seed for fold creation.
+Random seed for fold creation.
 n_jobs : int, default 1
-    Number of parallel jobs for fold-level cross-fitting.
-    Use `-1` to use all available CPUs.
-    Practical guidance:
-    - Start with `n_jobs=1` for stable, low-contention defaults.
-    - Increase to `n_jobs=2/4/-1` when cross-fitting is the bottleneck.
-    - If nuisance learners are already multithreaded (e.g. CatBoost with
-      `thread_count=-1`), keep `n_jobs=1` or set learner threads to `1`
-      to avoid CPU oversubscription.
+Number of parallel jobs for fold-level cross-fitting.
+Use <code class="docutils literal notranslate"><span class="pre">-1</span></code> to use all available CPUs.
+Practical guidance:
+- Start with <code class="docutils literal notranslate"><span class="pre">n_jobs=1</span></code> for stable, low-contention defaults.
+- Increase to <code class="docutils literal notranslate"><span class="pre">n_jobs=2/4/-1</span></code> when cross-fitting is the bottleneck.
+- If nuisance learners are already multithreaded (e.g. CatBoost with
+<code class="docutils literal notranslate"><span class="pre">thread_count=-1</span></code>), keep <code class="docutils literal notranslate"><span class="pre">n_jobs=1</span></code> or set learner threads to <code class="docutils literal notranslate"><span class="pre">1</span></code>
+to avoid CPU oversubscription.
+store_diagnostics : bool, default True
+Whether to retain raw fit-time arrays and diagnostic-only artifacts on
+the fitted model. Set to <code class="docutils literal notranslate"><span class="pre">False</span></code> for a lighter-weight estimator that
+still supports effect estimation while omitting heavier caches such as
+confounders, raw propensities, and fold assignments.</p>
+<p class="rubric" id="id2">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from sklearn.linear_model import LinearRegression, LogisticRegression
+from causalis.dgp.multicausaldata import generate_multi_dml_cx_26
+from causalis.scenarios.multi_unconfoundedness.model import MultiTreatmentIRM
+data = generate_multi_dml_cx_26(
+…     n=1000,
+…     seed=3141,
+…     return_causal_data=True,
+… )
+irm = MultiTreatmentIRM(
+…     data=data,
+…     ml_g=LinearRegression(),
+…     ml_m=LogisticRegression(max_iter=2000),
+…     n_folds=3,
+…     random_state=3141,
+… )
+res_ate = irm.fit().estimate(score=”ATE”)
+res_ate.summary()  # doctest: +SKIP
+res_atte = irm.estimate(score=”ATTE”)
+res_atte.value  # doctest: +SKIP</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+<p class="rubric" id="id3">Notes</p>
+<p>Let :math:<code class="docutils literal notranslate"><span class="pre">W</span> <span class="pre">=</span> <span class="pre">(Y,</span> <span class="pre">D,</span> <span class="pre">X)</span></code> where :math:<code class="docutils literal notranslate"><span class="pre">D</span> <span class="pre">\in</span> <span class="pre">\{0,</span> <span class="pre">1,</span> <span class="pre">\dots,</span> <span class="pre">K-1\}</span></code> and arm
+:math:<code class="docutils literal notranslate"><span class="pre">0</span></code> is the designated baseline. Define the arm-specific outcome
+regressions and generalized propensity scores as</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>g_{0, k}(x) = \mathbb{E}[Y \mid D=k, X=x], \qquad
+m_{0, k}(x) = \mathbb{P}(D=k \mid X=x).
 </pre></div>
 </div>
+<p>Under multi-arm unconfoundedness and overlap,</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>(Y(0), \dots, Y(K-1)) \perp D \mid X,
+\qquad
+0 &lt; m_{0, k}(X) &lt; 1 \ \text{a.s. for all } k,
+</pre></div>
+</div>
+<p>the pairwise baseline ATE for arm :math:<code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">&gt;</span> <span class="pre">0</span></code> is</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\theta_{0, k}^{ATE}
+=
+\mathbb{E}[g_{0, k}(X) - g_{0, 0}(X)].
+</pre></div>
+</div>
+<p>The corresponding pairwise ATTE conditions on membership in arm :math:<code class="docutils literal notranslate"><span class="pre">k</span></code>:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\theta_{0, k}^{ATTE}
+=
+\mathbb{E}[g_{0, k}(X) - g_{0, 0}(X) \mid D=k].
+</pre></div>
+</div>
+<p>This implementation cross-fits all arm-specific outcome nuisances
+:math:<code class="docutils literal notranslate"><span class="pre">\hat</span> <span class="pre">g_k(X)</span></code> and all class propensities :math:<code class="docutils literal notranslate"><span class="pre">\hat</span> <span class="pre">m_k(X)</span></code>. The
+propensity vector is lower-trimmed componentwise and then renormalized onto
+the simplex so that each row still sums to one.</p>
+<p>Estimation solves the sample moment equation</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\mathbb{E}_n[\psi_a(W_i; \hat\eta)\theta_k + \psi_{b, k}(W_i; \hat\eta)] = 0,
+</pre></div>
+</div>
+<p>which yields the closed-form estimate</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\hat\theta_k
+=
+-\frac{\mathbb{E}_n[\psi_{b, k}(W_i; \hat\eta)]}
+{\mathbb{E}_n[\psi_a(W_i; \hat\eta)]}.
+</pre></div>
+</div>
+<p>For the pairwise ATE, the score component for each active arm :math:<code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">&gt;</span> <span class="pre">0</span></code>
+is</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\psi_{b, k}^{ATE}
+=
+\hat g_k(X) - \hat g_0(X)
++
+(Y - \hat g_k(X)) \frac{d_k}{\tilde m_k(X)}
+-
+(Y - \hat g_0(X)) \frac{d_0}{\tilde m_0(X)},
+</pre></div>
+</div>
+<p>with :math:<code class="docutils literal notranslate"><span class="pre">\psi_a</span> <span class="pre">=</span> <span class="pre">-1</span></code>. Here :math:<code class="docutils literal notranslate"><span class="pre">d_k</span> <span class="pre">=</span> <span class="pre">1\{D=k\}</span></code> and
+:math:<code class="docutils literal notranslate"><span class="pre">\tilde</span> <span class="pre">m_k</span></code> denotes the trimmed-and-renormalized propensity for arm
+:math:<code class="docutils literal notranslate"><span class="pre">k</span></code>.</p>
+<p>For the pairwise ATTE, let :math:<code class="docutils literal notranslate"><span class="pre">p_k</span> <span class="pre">=</span> <span class="pre">\mathbb{E}[d_k]</span></code>. Because
+:math:<code class="docutils literal notranslate"><span class="pre">Y(k)</span></code> is observed for treated units in arm :math:<code class="docutils literal notranslate"><span class="pre">k</span></code>, the orthogonal
+(doubly robust) score takes the baseline-regression form</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\psi_{b, k}^{ATTE}
+=
+\frac{d_k}{p_k} (Y - \hat g_0(X))
+-
+\frac{d_0}{p_k}
+\frac{\tilde m_k(X)}{\tilde m_0(X)}
+(Y - \hat g_0(X)).
+</pre></div>
+</div>
+<p>For ATTE, :math:<code class="docutils literal notranslate"><span class="pre">\psi_a</span> <span class="pre">=</span> <span class="pre">-1</span></code> in the solved moment equation and the
+returned estimate object keeps the same shape and fields as for ATE.</p>
 <p class="rubric">Initialization</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="causalis.data_contracts.multicausaldata.html#causalis.data_contracts.multicausaldata.MultiCausalData" title="causalis.data_contracts.multicausaldata.MultiCausalData"><span class="pre">causalis.data_contracts.multicausaldata.MultiCausalData</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM" title="causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM"><span class="pre">causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM</span></a></span></span><a class="headerlink" href="#causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.fit" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="causalis.data_contracts.multicausaldata.html#causalis.data_contracts.multicausaldata.MultiCausalData" title="causalis.data_contracts.multicausaldata.MultiCausalData"><span class="pre">causalis.data_contracts.multicausaldata.MultiCausalData</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_diagnostics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM" title="causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM"><span class="pre">causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM</span></a></span></span><a class="headerlink" href="#causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.fit" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.estimate">
 <span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">score</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ATE'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diagnostic_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="causalis.data_contracts.multicausal_estimate.html#causalis.data_contracts.multicausal_estimate.MultiCausalEstimate" title="causalis.data_contracts.multicausal_estimate.MultiCausalEstimate"><span class="pre">causalis.data_contracts.multicausal_estimate.MultiCausalEstimate</span></a></span></span><a class="headerlink" href="#causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.estimate" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Estimate pairwise baseline contrasts for each active treatment arm.</p>
+<p class="rubric" id="id4">Parameters</p>
+<p>score : {“ATE”, “ATTE”}, default “ATE”
+Target estimand. <code class="docutils literal notranslate"><span class="pre">&quot;ATE&quot;</span></code> estimates pairwise average treatment effects
+for each active arm versus baseline arm 0. <code class="docutils literal notranslate"><span class="pre">&quot;ATTE&quot;</span></code> estimates the
+corresponding pairwise average treatment effect on the treated for each
+active arm versus baseline arm 0 using the orthogonal / doubly robust
+ATTE score.
+alpha : float, default 0.05
+Two-sided significance level used for Wald confidence intervals.
+diagnostic_data : bool, default True
+Whether to attach the fitted diagnostic payload to the returned estimate.</p>
+<p class="rubric" id="returns">Returns</p>
+<p>MultiCausalEstimate
+Result container holding one effect estimate per active arm versus
+the baseline arm, together with confidence intervals, p-values,
+relative effects, and optionally diagnostic payloads.</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.diagnostics_">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">diagnostics_</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.diagnostics_" title="Link to this definition">¶</a></dt>
 <dd><p>Return diagnostic data.</p>
-<p class="rubric" id="returns">Returns</p>
+<p class="rubric" id="id5">Returns</p>
 <p>dict
 Dictionary containing ‘m_hat’, ‘g_hat’ and ‘folds’.</p>
 </dd></dl>
@@ -114,7 +240,7 @@ Dictionary containing ‘m_hat’, ‘g_hat’ and ‘folds’.</p>
 <dt class="sig sig-object py" id="causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.coef">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">coef</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span></span><a class="headerlink" href="#causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.coef" title="Link to this definition">¶</a></dt>
 <dd><p>Return the estimated coefficient.</p>
-<p class="rubric" id="id1">Returns</p>
+<p class="rubric" id="id6">Returns</p>
 <p>np.ndarray
 The estimated coefficient.</p>
 </dd></dl>
@@ -123,7 +249,7 @@ The estimated coefficient.</p>
 <dt class="sig sig-object py" id="causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.se">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">se</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span></span><a class="headerlink" href="#causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.se" title="Link to this definition">¶</a></dt>
 <dd><p>Return the standard error of the estimate.</p>
-<p class="rubric" id="id2">Returns</p>
+<p class="rubric" id="id7">Returns</p>
 <p>np.ndarray
 The standard error.</p>
 </dd></dl>
@@ -132,7 +258,7 @@ The standard error.</p>
 <dt class="sig sig-object py" id="causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.pvalues">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">pvalues</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span></span><a class="headerlink" href="#causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.pvalues" title="Link to this definition">¶</a></dt>
 <dd><p>Return the p-values for the estimate.</p>
-<p class="rubric" id="id3">Returns</p>
+<p class="rubric" id="id8">Returns</p>
 <p>np.ndarray
 The p-values.</p>
 </dd></dl>
@@ -141,7 +267,7 @@ The p-values.</p>
 <dt class="sig sig-object py" id="causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.summary">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">summary</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></span><a class="headerlink" href="#causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.summary" title="Link to this definition">¶</a></dt>
 <dd><p>Return a summary DataFrame of the results.</p>
-<p class="rubric" id="id4">Returns</p>
+<p class="rubric" id="id9">Returns</p>
 <p>pd.DataFrame
 The results summary.</p>
 </dd></dl>
@@ -150,7 +276,7 @@ The results summary.</p>
 <dt class="sig sig-object py" id="causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.orth_signal">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">orth_signal</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span></span><a class="headerlink" href="#causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.orth_signal" title="Link to this definition">¶</a></dt>
 <dd><p>Return the cross-fitted orthogonal signal (psi_b).</p>
-<p class="rubric" id="id5">Returns</p>
+<p class="rubric" id="id10">Returns</p>
 <p>np.ndarray
 The orthogonal signal.</p>
 </dd></dl>

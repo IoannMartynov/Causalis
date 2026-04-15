@@ -78,10 +78,14 @@ def generate_api_reference() -> Path:
 
 ## Releases
 
-Releases are automated through GitHub Actions and PyPI Trusted Publishing.
+Releases are usually automated through GitHub Actions and PyPI Trusted Publishing, but local production builds are supported when you need to upload manually.
 
 - Package versions are derived from Git tags via `setuptools-scm`; do not edit a version string by hand.
-- To cut the next release, run the `Cut Release` GitHub Actions workflow and choose whether to bump `patch`, `minor`, or `major`.
+- To build a local production distribution, run `./scripts/build_release.sh 0.3.1`.
+- The helper uses the current environment's `python` by default, or `PYTHON_BIN=/path/to/python` if you want to pin an interpreter.
+- The helper clears prior `dist/causalis-*` artifacts first and refuses tracked dirty changes unless you pass `--allow-dirty`.
+- After a successful local build, upload the fresh artifacts with `twine upload dist/*`.
+- To cut the next automated release, run the `Cut Release` GitHub Actions workflow and choose whether to bump `patch`, `minor`, or `major`.
 - The workflow creates the next `vX.Y.Z` tag automatically.
 - Pushing that tag triggers the `Release` workflow, which builds the package, creates a GitHub Release, and publishes the same artifacts to PyPI.
 

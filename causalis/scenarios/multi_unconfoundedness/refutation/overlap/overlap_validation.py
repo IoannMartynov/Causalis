@@ -265,9 +265,10 @@ def run_overlap_diagnostics(
         raise ValueError("Need at least 2 treatment columns for overlap diagnostics.")
 
     score_raw = getattr(diag, "score", estimate.estimand)
-    if str(score_raw).upper() != "ATE":
+    score = str(score_raw).upper()
+    if score not in {"ATE", "ATTE"}:
         raise ValueError(
-            "Only ATE is supported for multi-treatment overlap diagnostics. "
+            "Multi-treatment overlap diagnostics support only ATE or ATTE. "
             f"Got score={score_raw!r}."
         )
 
@@ -279,6 +280,8 @@ def run_overlap_diagnostics(
         if norm is None:
             norm = estimate.model_options.get("normalize_ipw", False)
         use_hajek = bool(norm)
+    if score == "ATTE":
+        use_hajek = False
 
     threshold_values = dict(_DEFAULT_OVERLAP_THRESHOLDS)
     if isinstance(thresholds, dict):
@@ -486,7 +489,7 @@ def run_overlap_diagnostics(
 
     report: Dict[str, Any] = {
         "params": {
-            "score": "ATE",
+            "score": score,
             "use_hajek": bool(use_hajek),
             "thresholds": threshold_values,
             "auc_flip_margin": float(auc_flip_margin),

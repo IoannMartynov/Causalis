@@ -30,48 +30,164 @@ from causalis.scenarios.multi_unconfoundedness._utils import (
 
 
 class MultiTreatmentIRM(BaseEstimator):
-    """Interactive Regression Model for multi-treatment unconfoundedness.
+    r"""Interactive Regression Model (IRM) for multi-treatment unconfoundedness.
 
     DoubleML-style cross-fitting estimator consuming ``MultiCausalData`` and
-    producing pairwise ATE contrasts against baseline treatment (column 0).
-       Model supports >= 2 treatments.
+    producing pairwise contrasts between each active treatment arm and the
+    baseline arm (column 0). The model supports ``K >= 2`` mutually exclusive
+    treatment arms encoded as one-hot columns.
 
-        Parameters
-        ----------
-        data : MultiCausalData
-            Data container with outcome, one-hot multi-treatment indicators, and confounders.
-        ml_g : estimator
-            Learner for E[Y|X,D]. If classifier and Y is binary, predict_proba is used; otherwise predict().
-        ml_m : classifier
-            Learner for E[D|X] (generelized propensity score). Must support predict_proba() or predict() in (0,1).
-        n_folds : int, default 5
-            Number of cross-fitting folds.
-        n_rep : int, default 1
-            Number of repetitions of sample splitting. Currently only 1 is supported.
-        normalize_ipw : bool, default False
-            Whether to normalize IPW terms within the score.
-            This is a Hajek-style stabilization: it can reduce variance but may add
-            small finite-sample bias.
-        trimming_rule : {"truncate"}, default "truncate"
-            Trimming approach for propensity scores.
-        trimming_threshold : float, default 1e-2
-            Threshold for trimming if rule is "truncate".
-        random_state : Optional[int], default None
-            Random seed for fold creation.
-        n_jobs : int, default 1
-            Number of parallel jobs for fold-level cross-fitting.
-            Use `-1` to use all available CPUs.
-            Practical guidance:
-            - Start with `n_jobs=1` for stable, low-contention defaults.
-            - Increase to `n_jobs=2/4/-1` when cross-fitting is the bottleneck.
-            - If nuisance learners are already multithreaded (e.g. CatBoost with
-              `thread_count=-1`), keep `n_jobs=1` or set learner threads to `1`
-              to avoid CPU oversubscription.
-        store_diagnostics : bool, default True
-            Whether to retain raw fit-time arrays and diagnostic-only artifacts on
-            the fitted model. Set to ``False`` for a lighter-weight estimator that
-            still supports ATE estimation, while omitting heavy diagnostic caches.
-        """
+    Parameters
+    ----------
+    data : MultiCausalData
+        Data container with outcome, one-hot treatment indicators, and confounders.
+    ml_g : estimator
+        Learner for :math:`\mathbb{E}[Y \mid X, D=k]`. If classifier and ``Y`` is
+        binary, ``predict_proba`` is used; otherwise ``predict()`` is used.
+    ml_m : classifier
+        Learner for the generalized propensity score
+        :math:`\mathbb{P}(D=k \mid X)`. Must support ``predict_proba()``.
+    n_folds : int, default 5
+        Number of cross-fitting folds.
+    n_rep : int, default 1
+        Number of repetitions of sample splitting. Currently only 1 is supported.
+    normalize_ipw : bool, default False
+        Whether to normalize inverse-probability terms within the score. Applied
+        to ``score="ATE"`` only. For ``score="ATTE"``, normalization is ignored
+        to preserve the canonical orthogonal ATTE score used by the estimator.
+    trimming_rule : {"truncate"}, default "truncate"
+        Trimming approach for propensity scores.
+    trimming_threshold : float, default 1e-2
+        Lower threshold used before renormalizing multiclass propensities back to
+        the simplex.
+    random_state : Optional[int], default None
+        Random seed for fold creation.
+    n_jobs : int, default 1
+        Number of parallel jobs for fold-level cross-fitting.
+        Use `-1` to use all available CPUs.
+        Practical guidance:
+        - Start with `n_jobs=1` for stable, low-contention defaults.
+        - Increase to `n_jobs=2/4/-1` when cross-fitting is the bottleneck.
+        - If nuisance learners are already multithreaded (e.g. CatBoost with
+          ``thread_count=-1``), keep `n_jobs=1` or set learner threads to `1`
+          to avoid CPU oversubscription.
+    store_diagnostics : bool, default True
+        Whether to retain raw fit-time arrays and diagnostic-only artifacts on
+        the fitted model. Set to ``False`` for a lighter-weight estimator that
+        still supports effect estimation while omitting heavier caches such as
+        confounders, raw propensities, and fold assignments.
+
+    Examples
+    --------
+    >>> from sklearn.linear_model import LinearRegression, LogisticRegression
+    >>> from causalis.dgp.multicausaldata import generate_multi_dml_cx_26
+    >>> from causalis.scenarios.multi_unconfoundedness.model import MultiTreatmentIRM
+    >>> data = generate_multi_dml_cx_26(
+    ...     n=1000,
+    ...     seed=3141,
+    ...     return_causal_data=True,
+    ... )
+    >>> irm = MultiTreatmentIRM(
+    ...     data=data,
+    ...     ml_g=LinearRegression(),
+    ...     ml_m=LogisticRegression(max_iter=2000),
+    ...     n_folds=3,
+    ...     random_state=3141,
+    ... )
+    >>> res_ate = irm.fit().estimate(score="ATE")
+    >>> res_ate.summary()  # doctest: +SKIP
+    >>> res_atte = irm.estimate(score="ATTE")
+    >>> res_atte.value  # doctest: +SKIP
+
+    Notes
+    -----
+    Let :math:`W = (Y, D, X)` where :math:`D \in \{0, 1, \dots, K-1\}` and arm
+    :math:`0` is the designated baseline. Define the arm-specific outcome
+    regressions and generalized propensity scores as
+
+    .. math::
+
+        g_{0, k}(x) = \mathbb{E}[Y \mid D=k, X=x], \qquad
+        m_{0, k}(x) = \mathbb{P}(D=k \mid X=x).
+
+    Under multi-arm unconfoundedness and overlap,
+
+    .. math::
+
+        (Y(0), \dots, Y(K-1)) \perp D \mid X,
+        \qquad
+        0 < m_{0, k}(X) < 1 \ \text{a.s. for all } k,
+
+    the pairwise baseline ATE for arm :math:`k > 0` is
+
+    .. math::
+
+        \theta_{0, k}^{ATE}
+        =
+        \mathbb{E}[g_{0, k}(X) - g_{0, 0}(X)].
+
+    The corresponding pairwise ATTE conditions on membership in arm :math:`k`:
+
+    .. math::
+
+        \theta_{0, k}^{ATTE}
+        =
+        \mathbb{E}[g_{0, k}(X) - g_{0, 0}(X) \mid D=k].
+
+    This implementation cross-fits all arm-specific outcome nuisances
+    :math:`\hat g_k(X)` and all class propensities :math:`\hat m_k(X)`. The
+    propensity vector is lower-trimmed componentwise and then renormalized onto
+    the simplex so that each row still sums to one.
+
+    Estimation solves the sample moment equation
+
+    .. math::
+
+        \mathbb{E}_n[\psi_a(W_i; \hat\eta)\theta_k + \psi_{b, k}(W_i; \hat\eta)] = 0,
+
+    which yields the closed-form estimate
+
+    .. math::
+
+        \hat\theta_k
+        =
+        -\frac{\mathbb{E}_n[\psi_{b, k}(W_i; \hat\eta)]}
+        {\mathbb{E}_n[\psi_a(W_i; \hat\eta)]}.
+
+    For the pairwise ATE, the score component for each active arm :math:`k > 0`
+    is
+
+    .. math::
+
+        \psi_{b, k}^{ATE}
+        =
+        \hat g_k(X) - \hat g_0(X)
+        +
+        (Y - \hat g_k(X)) \frac{d_k}{\tilde m_k(X)}
+        -
+        (Y - \hat g_0(X)) \frac{d_0}{\tilde m_0(X)},
+
+    with :math:`\psi_a = -1`. Here :math:`d_k = 1\{D=k\}` and
+    :math:`\tilde m_k` denotes the trimmed-and-renormalized propensity for arm
+    :math:`k`.
+
+    For the pairwise ATTE, let :math:`p_k = \mathbb{E}[d_k]`. Because
+    :math:`Y(k)` is observed for treated units in arm :math:`k`, the orthogonal
+    (doubly robust) score takes the baseline-regression form
+
+    .. math::
+
+        \psi_{b, k}^{ATTE}
+        =
+        \frac{d_k}{p_k} (Y - \hat g_0(X))
+        -
+        \frac{d_0}{p_k}
+        \frac{\tilde m_k(X)}{\tilde m_0(X)}
+        (Y - \hat g_0(X)).
+
+    For ATTE, :math:`\psi_a = -1` in the solved moment equation and the
+    returned estimate object keeps the same shape and fields as for ATE.
+    """
     def __init__(
         self,
         data: Optional[MultiCausalData] = None,
@@ -589,12 +705,18 @@ class MultiTreatmentIRM(BaseEstimator):
         return score_u
 
     def _compute_score_terms(
-        self, *, y: np.ndarray, d: np.ndarray, g_hat: np.ndarray, m_hat: np.ndarray
+        self,
+        *,
+        y: np.ndarray,
+        d: np.ndarray,
+        g_hat: np.ndarray,
+        m_hat: np.ndarray,
+        score: Optional[str] = None,
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """Compute orthogonal score building blocks for multi-arm ATE or ATTE contrasts."""
         y_col = y.reshape(-1, 1)
         u = y_col - g_hat
-        score_u = str(self.score).upper()
+        score_u = str(self.score if score is None else score).upper()
         h = self._normalize_ipw_terms(d, m_hat, score=score_u)
         if score_u == "ATE":
             # For each active arm k>0, compare k vs baseline arm 0 in one vectorized expression.
@@ -611,7 +733,24 @@ class MultiTreatmentIRM(BaseEstimator):
             pk = dk.mean(axis=0)
             if np.any(pk <= 0.0):
                 raise RuntimeError("ATTE requested but some active treatment arms have zero sample share.")
-            ratio = m_hat[:, 1:] / m_hat[:, [0]]
+            e0_hat = m_hat[:, [0]]
+            baseline_floor = float(np.finfo(float).tiny)
+            if np.any(~np.isfinite(e0_hat)) or np.any(e0_hat <= baseline_floor):
+                raise RuntimeError(
+                    "ATTE requested but baseline propensity m_hat[:, 0] is numerically zero after trimming/clipping. "
+                    "Increase trimming_threshold or inspect overlap."
+                )
+            ratio = np.divide(
+                m_hat[:, 1:],
+                e0_hat,
+                out=np.full_like(m_hat[:, 1:], np.nan, dtype=float),
+                where=e0_hat > baseline_floor,
+            )
+            if np.any(~np.isfinite(ratio)):
+                raise RuntimeError("ATTE requested but the e_k/e_0 ratio contains non-finite values.")
+
+            # For ATTE, Y(k) is observed for treated units in arm k, so the
+            # orthogonal score keeps only the baseline nuisance in final form.
             psi_b = (dk / pk[None, :]) * residual0 - (d0 / pk[None, :]) * ratio * residual0
         psi_a = -np.ones(y.shape[0], dtype=float)
         return y_col, u, h, psi_a, psi_b
@@ -767,8 +906,33 @@ class MultiTreatmentIRM(BaseEstimator):
         return diag
 
     def estimate(
-        self, score: str = "ATE", alpha: float = 0.05, diagnostic_data: bool = True
+        self,
+        score: str = "ATE",
+        alpha: float = 0.05,
+        diagnostic_data: bool = True,
     ) -> MultiCausalEstimate:
+        """Estimate pairwise baseline contrasts for each active treatment arm.
+
+        Parameters
+        ----------
+        score : {"ATE", "ATTE"}, default "ATE"
+            Target estimand. ``"ATE"`` estimates pairwise average treatment effects
+            for each active arm versus baseline arm 0. ``"ATTE"`` estimates the
+            corresponding pairwise average treatment effect on the treated for each
+            active arm versus baseline arm 0 using the orthogonal / doubly robust
+            ATTE score.
+        alpha : float, default 0.05
+            Two-sided significance level used for Wald confidence intervals.
+        diagnostic_data : bool, default True
+            Whether to attach the fitted diagnostic payload to the returned estimate.
+
+        Returns
+        -------
+        MultiCausalEstimate
+            Result container holding one effect estimate per active arm versus
+            the baseline arm, together with confidence intervals, p-values,
+            relative effects, and optionally diagnostic payloads.
+        """
         check_is_fitted(self, attributes=["g_hat_", "m_hat_"])
         score_u = self._validate_estimate_request(score=score, alpha=alpha)
         self.score = score_u
@@ -777,7 +941,13 @@ class MultiTreatmentIRM(BaseEstimator):
 
         y, d = self._resolve_estimation_targets()
         g_hat, m_hat = self.g_hat_, self.m_hat_
-        y_col, u, h, psi_a, psi_b = self._compute_score_terms(y=y, d=d, g_hat=g_hat, m_hat=m_hat)
+        y_col, u, h, psi_a, psi_b = self._compute_score_terms(
+            y=y,
+            d=d,
+            g_hat=g_hat,
+            m_hat=m_hat,
+            score=score_u,
+        )
         theta_hat, influence, se, t_stat, pval, ci_low, ci_high, z = self._solve_moment_and_inference(
             psi_a=psi_a, psi_b=psi_b, alpha=alpha
         )

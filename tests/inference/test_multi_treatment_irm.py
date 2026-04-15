@@ -294,7 +294,13 @@ def test_multi_treatment_irm_atte_score_matches_closed_form_and_disables_hajek()
         dtype=float,
     )
 
-    y_col, _, h, psi_a, psi_b = model._compute_score_terms(y=y, d=d, g_hat=g_hat, m_hat=m_hat)
+    y_col, _, h, psi_a, psi_b = model._compute_score_terms(
+        y=y,
+        d=d,
+        g_hat=g_hat,
+        m_hat=m_hat,
+        score="ATTE",
+    )
 
     g0_hat = g_hat[:, [0]]
     residual0 = y_col - g0_hat
@@ -307,6 +313,37 @@ def test_multi_treatment_irm_atte_score_matches_closed_form_and_disables_hajek()
     np.testing.assert_allclose(psi_b, expected_psi_b, atol=1e-12, rtol=0.0)
     np.testing.assert_allclose(h, d / m_hat, atol=1e-12, rtol=0.0)
     np.testing.assert_allclose(psi_a, -np.ones(y.shape[0], dtype=float), atol=0.0, rtol=0.0)
+
+
+def test_multi_treatment_irm_atte_api_uses_single_score():
+    data = _make_selection_multi_causal_data(seed=202)
+    model = MultiTreatmentIRM(
+        data=data,
+        ml_g=LinearRegression(),
+        ml_m=LogisticRegression(max_iter=2000),
+        n_folds=3,
+        random_state=23,
+    ).fit()
+
+    result = model.estimate(score="ATTE", diagnostic_data=False)
+
+    assert result.estimand == "ATTE"
+    assert np.all(np.isfinite(result.value))
+    assert np.all(np.isfinite(result.value_relative))
+
+
+def test_multi_treatment_irm_rejects_legacy_atte_variant_kwarg():
+    data = _make_multi_causal_data(seed=88)
+    model = MultiTreatmentIRM(
+        data=data,
+        ml_g=LinearRegression(),
+        ml_m=LogisticRegression(max_iter=1000),
+        n_folds=3,
+        random_state=5,
+    ).fit()
+
+    with pytest.raises(TypeError, match="atte_variant"):
+        model.estimate(score="ATE", atte_variant="dr")
 
 
 def test_multi_treatment_irm_atte_differs_from_ate_under_selection_on_x():
@@ -329,6 +366,25 @@ def test_multi_treatment_irm_atte_differs_from_ate_under_selection_on_x():
     assert np.all(np.isfinite(ate.value))
     assert np.all(np.isfinite(atte.value))
     assert np.max(np.abs(ate.value - atte.value)) > 0.1
+
+
+def test_multi_treatment_irm_ate_is_stable_after_atte_calls():
+    data = _make_selection_multi_causal_data(seed=222)
+    model = MultiTreatmentIRM(
+        data=data,
+        ml_g=LinearRegression(),
+        ml_m=LogisticRegression(max_iter=2000),
+        n_folds=3,
+        random_state=13,
+    ).fit()
+
+    ate_before = model.estimate(score="ATE", diagnostic_data=False)
+    _ = model.estimate(score="ATTE", diagnostic_data=False)
+    ate_after = model.estimate(score="ATE", diagnostic_data=False)
+
+    np.testing.assert_allclose(ate_before.value, ate_after.value, rtol=1e-10, atol=1e-12)
+    np.testing.assert_allclose(ate_before.ci_lower_absolute, ate_after.ci_lower_absolute, rtol=1e-10, atol=1e-12)
+    np.testing.assert_allclose(ate_before.ci_upper_absolute, ate_after.ci_upper_absolute, rtol=1e-10, atol=1e-12)
 
 
 def test_multi_treatment_irm_atte_relative_outputs_use_per_arm_control_mean():
@@ -355,6 +411,23 @@ def test_multi_treatment_irm_atte_relative_outputs_use_per_arm_control_mean():
     summary = result.summary()
     for idx, contrast in enumerate(result.contrast_labels):
         assert summary.loc["control_mean", contrast] == f"{result.control_mean_by_arm[idx]:.4f}"
+
+
+def test_multi_treatment_irm_atte_runs_on_small_synthetic_data():
+    data = _make_multi_causal_data(n=210, seed=314)
+    model = MultiTreatmentIRM(
+        data=data,
+        ml_g=LinearRegression(),
+        ml_m=LogisticRegression(max_iter=2000),
+        n_folds=3,
+        random_state=29,
+    ).fit()
+
+    atte = model.estimate(score="ATTE", diagnostic_data=False)
+
+    assert atte.estimand == "ATTE"
+    assert np.all(np.isfinite(atte.value))
+    assert np.all(np.isfinite(atte.value_relative))
 
 
 def test_multi_treatment_irm_atte_diagnostics_skip_ate_sensitivity_and_report_effective_ipw():
