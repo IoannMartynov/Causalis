@@ -23,7 +23,7 @@
 
 ### API
 
-`````{py:class} MultiTreatmentIRM(data: typing.Optional[causalis.data_contracts.multicausaldata.MultiCausalData] = None, ml_g: typing.Any = None, ml_m: typing.Any = None, *, n_folds: int = 5, n_rep: int = 1, normalize_ipw: bool = False, trimming_rule: str = 'truncate', trimming_threshold: float = 0.01, random_state: typing.Optional[int] = None, n_jobs: int = 1)
+`````{py:class} MultiTreatmentIRM(data: typing.Optional[causalis.data_contracts.multicausaldata.MultiCausalData] = None, ml_g: typing.Any = None, ml_m: typing.Any = None, *, n_folds: int = 5, n_rep: int = 1, normalize_ipw: bool = False, trimming_rule: str = 'truncate', trimming_threshold: float = 0.01, random_state: typing.Optional[int] = None, n_jobs: int = 1, store_diagnostics: bool = True)
 :canonical: causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM
 
 Bases: {py:obj}`sklearn.base.BaseEstimator`
@@ -37,7 +37,7 @@ Bases: {py:obj}`sklearn.base.BaseEstimator`
 ```{autodoc2-docstring} causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.__init__
 ```
 
-````{py:method} fit(data: typing.Optional[causalis.data_contracts.multicausaldata.MultiCausalData] = None) -> causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM
+````{py:method} fit(data: typing.Optional[causalis.data_contracts.multicausaldata.MultiCausalData] = None, *, store_diagnostics: typing.Optional[bool] = None) -> causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM
 :canonical: causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.fit
 
 ```{autodoc2-docstring} causalis.scenarios.multi_unconfoundedness.model.MultiTreatmentIRM.fit

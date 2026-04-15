@@ -1,0 +1,12 @@
+---
+orphan: true
+---
+
+# {py:mod}`causalis.scenarios.multi_unconfoundedness._utils`
+
+```{py:module} causalis.scenarios.multi_unconfoundedness._utils
+```
+
+```{autodoc2-docstring} causalis.scenarios.multi_unconfoundedness._utils
+:allowtitles:
+```

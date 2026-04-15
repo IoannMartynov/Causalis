@@ -53,7 +53,11 @@ def _make_multi_causal_data(n: int = 180, seed: int = 42) -> MultiCausalData:
     )
 
 
-def _make_estimate(data: MultiCausalData, *, score: str = "ATE") -> MultiCausalEstimate:
+def _make_estimate(
+    data: MultiCausalData,
+    *,
+    score: str = "ATE",
+) -> MultiCausalEstimate:
     model = MultiTreatmentIRM(
         data=data,
         ml_g=DummyRegressor(strategy="mean"),
@@ -210,14 +214,28 @@ def test_multi_overlap_requires_strict_input_types():
         run_overlap_diagnostics(data, {"diagnostic_data": estimate.diagnostic_data})
 
 
-def test_multi_refutation_runners_reject_atte_estimates():
+def test_multi_overlap_diagnostics_support_atte_estimates():
     data = _make_multi_causal_data(seed=141)
     estimate = _make_estimate(data, score="ATTE")
 
-    with pytest.raises(ValueError, match="Only ATE is supported"):
-        run_overlap_diagnostics(data, estimate)
-    with pytest.raises(ValueError, match="Only ATE is supported"):
-        run_unconfoundedness_diagnostics(data, estimate)
+    report = run_overlap_diagnostics(data, estimate)
+
+    assert report["params"]["score"] == "ATTE"
+    assert report["params"]["use_hajek"] is False
+    assert list(report["summary"].columns) == ["comparison", "metric", "value", "flag"]
+    assert {"d_0 vs d_1", "d_0 vs d_2"}.issubset(set(report["summary"]["comparison"]))
+
+
+def test_multi_unconfoundedness_diagnostics_support_atte_estimates():
+    data = _make_multi_causal_data(seed=141)
+    estimate = _make_estimate(data, score="ATTE")
+
+    report = run_unconfoundedness_diagnostics(data, estimate)
+
+    assert report["params"]["score"] == "ATTE"
+    assert report["params"]["normalize"] is False
+    assert list(report["summary"].columns) == ["comparison", "metric", "value", "flag"]
+    assert list(report["balance"]["by_comparison"]["comparison"]) == ["d_0 vs d_1", "d_0 vs d_2"]
 
 
 def test_multi_refutation_namespace_exposes_overlap_runner():

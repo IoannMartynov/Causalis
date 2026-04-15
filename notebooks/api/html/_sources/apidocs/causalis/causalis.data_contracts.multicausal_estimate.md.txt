@@ -256,6 +256,17 @@ Bases: {py:obj}`pydantic.BaseModel`
 
 ````
 
+````{py:attribute} control_mean_by_arm
+:canonical: causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.control_mean_by_arm
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.control_mean_by_arm
+```
+
+````
+
 ````{py:attribute} contrast_labels
 :canonical: causalis.data_contracts.multicausal_estimate.MultiCausalEstimate.contrast_labels
 :type: typing.List[str]

@@ -42,7 +42,12 @@ def _make_multi_causal_data(n: int = 180, seed: int = 42) -> MultiCausalData:
     )
 
 
-def _make_estimate(data: MultiCausalData, *, normalize_ipw: bool = False, score: str = "ATE"):
+def _make_estimate(
+    data: MultiCausalData,
+    *,
+    normalize_ipw: bool = False,
+    score: str = "ATE",
+):
     model = MultiTreatmentIRM(
         data=data,
         ml_g=DummyRegressor(strategy="mean"),
@@ -101,9 +106,16 @@ def test_multi_score_diagnostics_warns_and_disables_hajek_for_orthogonality():
     assert report["meta"]["orthogonality_derivatives_use_score_normalization"] is False
 
 
-def test_multi_score_diagnostics_reject_atte_estimates():
+def test_multi_score_diagnostics_support_atte_estimates():
     data = _make_multi_causal_data(seed=91)
     estimate = _make_estimate(data, score="ATTE")
 
-    with pytest.raises(ValueError, match="Only ATE is supported"):
-        run_score_diagnostics(data, estimate, return_summary=True)
+    report = run_score_diagnostics(data, estimate, return_summary=True)
+
+    assert report["params"]["score"] == "ATTE"
+    assert report["params"]["normalize_ipw"] is False
+    assert report["params"]["orthogonality_normalize_ipw"] is False
+    assert list(report["summary"].columns) == ["comparison", "metric", "value", "flag"]
+    assert {"d_1 vs d_0", "d_2 vs d_0"}.issubset(set(report["summary"]["comparison"]))
+    assert np.allclose(report["orthogonality_derivatives"]["d_gk"].to_numpy(dtype=float), 0.0)
+    assert np.allclose(report["orthogonality_derivatives"]["t_gk"].to_numpy(dtype=float), 0.0)
