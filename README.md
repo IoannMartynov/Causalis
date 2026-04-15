@@ -100,4 +100,4 @@ MIT (see LICENSE).
 # Acknowledgements
 
 https://github.com/DoubleML/doubleml-for-py
-.
+
