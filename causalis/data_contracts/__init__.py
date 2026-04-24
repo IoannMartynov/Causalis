@@ -3,6 +3,7 @@ from __future__ import annotations
 from .causaldata import CausalData
 from .multicausaldata import MultiCausalData
 from .causaldata_instrumental import CausalDataInstrumental
+from .panel_data_did import PanelDataDID
 from .panel_data_scm import PanelDataSCM
 from .panel_estimate import PanelEstimate
 from .causal_estimate import CausalEstimate
@@ -29,6 +30,7 @@ __all__ = [
     "CausalData",
     "MultiCausalData",
     "CausalDataInstrumental",
+    "PanelDataDID",
     "PanelDataSCM",
     "PanelEstimate",
     "CausalEstimate",
