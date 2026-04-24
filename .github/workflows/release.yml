@@ -4,44 +4,75 @@ on:
   push:
     tags:
       - "v*.*.*"
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: Release tag to publish, for example v0.2.8
-        required: true
-        type: string
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
 
 permissions:
   contents: read
 
 jobs:
-  build:
+  build-and-check:
+    name: Test and build distributions
     runs-on: ubuntu-latest
-    env:
-      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          ref: ${{ env.RELEASE_TAG }}
+          ref: ${{ github.ref_name }}
+
+      - name: Fetch main and tags
+        run: git fetch --force origin main:refs/remotes/origin/main --tags
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
-      - name: Install build tooling
-        run: python -m pip install --upgrade build "setuptools-scm[toml]>=8"
+      - name: Install release tooling
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade build twine "setuptools-scm[toml]>=8" ".[dev]"
 
-      - name: Verify tag resolves to package version
+      - name: Verify release tag
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
         run: |
           python - <<'PY'
           import os
+          import re
+          import subprocess
+
           from setuptools_scm import get_version
 
           tag = os.environ["RELEASE_TAG"]
+          if not re.fullmatch(r"v\d+\.\d+\.\d+", tag):
+              raise SystemExit(f"Release tag must look like vX.Y.Z, got {tag!r}.")
+
+          tag_type = subprocess.check_output(
+              ["git", "cat-file", "-t", tag],
+              text=True,
+          ).strip()
+          if tag_type != "tag":
+              raise SystemExit(
+                  f"{tag} is a lightweight tag. Create releases with "
+                  f"`git tag -a {tag} -m \"Release {tag}\"`."
+              )
+
+          tagged_commit = subprocess.check_output(
+              ["git", "rev-list", "-n", "1", tag],
+              text=True,
+          ).strip()
+          is_on_main = subprocess.run(
+              ["git", "merge-base", "--is-ancestor", tagged_commit, "origin/main"],
+              check=False,
+          )
+          if is_on_main.returncode != 0:
+              raise SystemExit(f"{tag} does not point to a commit reachable from origin/main.")
+
           expected = tag.removeprefix("v")
           version = get_version(root=".", version_scheme="guess-next-dev")
 
@@ -53,40 +84,29 @@ jobs:
           print(f"Releasing causalis {version}")
           PY
 
+      - name: Run tests
+        run: python -m pytest
+
       - name: Build distributions
         run: python -m build
 
+      - name: Check package metadata
+        run: python -m twine check --strict dist/*
+
       - name: Upload distributions
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-dists
           path: dist/*
-
-  github-release:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    env:
-      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
-
-    steps:
-      - name: Download distributions
-        uses: actions/download-artifact@v5
-        with:
-          name: release-dists
-          path: dist
-
-      - name: Create GitHub Release
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: gh release create "$RELEASE_TAG" dist/* --generate-notes --verify-tag
+          if-no-files-found: error
 
   pypi:
-    needs: build
+    name: Publish to PyPI
+    needs: build-and-check
     runs-on: ubuntu-latest
     environment:
       name: pypi
+      url: https://pypi.org/p/causalis
     permissions:
       id-token: write
 
@@ -98,4 +118,28 @@ jobs:
           path: dist
 
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@v1.13.0
+
+  github-release:
+    name: Create GitHub Release
+    needs: pypi
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@v5
+        with:
+          name: release-dists
+          path: dist
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$RELEASE_TAG" dist/* \
+            --title "$RELEASE_TAG" \
+            --generate-notes \
+            --verify-tag

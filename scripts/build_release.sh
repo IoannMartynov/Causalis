@@ -5,9 +5,12 @@ usage() {
   cat <<'EOF'
 Usage: ./scripts/build_release.sh X.Y.Z [--allow-dirty]
 
-Build a production release for causalis by overriding setuptools_scm with an
+Build local causalis release artifacts by overriding setuptools_scm with an
 explicit version. Existing causalis artifacts in dist/ are removed first so
-twine upload dist/* only picks up the requested release.
+local smoke checks only inspect the requested build.
+
+Production releases are published by pushing an annotated vX.Y.Z tag to GitHub,
+not by uploading local artifacts manually.
 
 The script uses the current environment's python interpreter by default. Set
 PYTHON_BIN=/path/to/python if you want to force a specific interpreter.
@@ -82,4 +85,5 @@ printf 'Building causalis %s with %s\n' "$version" "$python_bin"
 SETUPTOOLS_SCM_PRETEND_VERSION_FOR_CAUSALIS="$version" "$python_bin" -m build
 
 printf '\nBuilt release artifacts in %s/dist\n' "$repo_root"
-printf 'Next step: twine upload dist/*\n'
+printf 'Run twine check --strict dist/* for a local metadata smoke check.\n'
+printf 'Publish production releases by pushing an annotated vX.Y.Z tag.\n'

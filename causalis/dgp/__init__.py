@@ -13,6 +13,8 @@ The most commonly used entry points are:
   with confounding and ground-truth nuisance objects.
 - ``generate_scm_data`` for synthetic panel data with one treated unit and a
   donor pool.
+- ``generate_did_data`` for simultaneous-adoption panel data with treated and
+  never-treated groups.
 - ``generate_multitreatment`` for one-hot multi-arm treatment assignment.
 
 Notes
@@ -30,7 +32,12 @@ Across the package, generators follow a few conventions:
 
 Examples
 --------
->>> from causalis.dgp import generate_rct, generate_scm_data, obs_linear_26_dataset
+>>> from causalis.dgp import (
+...     generate_rct,
+...     generate_scm_data,
+...     generate_did_data,
+...     obs_linear_26_dataset,
+... )
 >>> rct = generate_rct(
 ...     n=1000,
 ...     outcome_type="binary",
@@ -45,6 +52,9 @@ Examples
 >>> panel = generate_scm_data(n_donors=5, n_pre_periods=24, n_post_periods=6)
 >>> panel.df.shape[0] > 0  # doctest: +SKIP
 True
+>>> did_panel = generate_did_data(n_treated_units=5, n_control_units=10)
+>>> did_panel.design_type
+'simultaneous_adoption'
 """
 
 from .base import _sigmoid, _logit
@@ -62,6 +72,11 @@ from .causaldata import (
 )
 from .causaldata_instrumental import generate_iv_data
 from .panel_data_scm import generate_scm_data
+from .panel_data_did import (
+    generate_did_data,
+    generate_did_gamma_data,
+    generate_did_poisson_data,
+)
 
 __all__ = [
     "CausalDatasetGenerator",
@@ -79,4 +94,7 @@ __all__ = [
     "generate_cuped_binary",
     "make_cuped_binary_26",
     "generate_scm_data",
+    "generate_did_data",
+    "generate_did_gamma_data",
+    "generate_did_poisson_data",
 ]

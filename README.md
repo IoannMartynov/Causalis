@@ -23,16 +23,25 @@ Causalis focuses on:
 pip install causalis
 ```
 
-## Building A Production Release
+## Releasing
 
-Use the helper below when you want `dist/*` to contain a stable release instead of a `setuptools_scm` dev build:
+Production releases are created from annotated Git tags on `main`. The tag
+drives the package version through `setuptools-scm`, then GitHub Actions builds,
+checks, publishes to PyPI with Trusted Publishing, and creates the matching
+GitHub Release.
 
 ```bash
-./scripts/build_release.sh 0.3.1
-twine upload dist/*
+git checkout main
+git pull --ff-only origin main
+python3 -m pytest
+
+git tag -a v0.5.1 -m "Release v0.5.1"
+git push origin v0.5.1
 ```
 
-The script removes older `dist/causalis-*` artifacts before building and, by default, stops if the checkout has tracked changes. It uses the current environment's `python`, or `PYTHON_BIN=/path/to/python` if you want to force a specific interpreter.
+Do not edit a version string by hand or upload release artifacts manually.
+Configure the PyPI trusted publisher for `causalis-causalcraft/Causalis`,
+workflow `release.yml`, and environment `pypi`.
 
 # Quickstart: Classic RCT (difference in means + inference)
 
@@ -100,4 +109,3 @@ MIT (see LICENSE).
 # Acknowledgements
 
 https://github.com/DoubleML/doubleml-for-py
-
