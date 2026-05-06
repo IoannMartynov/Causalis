@@ -217,3 +217,189 @@ class PanelDIDEstimate(BaseModel):
             "time": self.created_at.strftime("%Y-%m-%d"),
         }
         return pd.DataFrame({"field": list(summary.keys()), "value": list(summary.values())}).set_index("field")
+
+
+class CallawaySantAnnaDIDEstimate(BaseModel):
+    """Result contract for Callaway-Sant'Anna staggered-adoption DID estimates."""
+
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        extra="forbid",
+        validate_assignment=True,
+    )
+
+    estimand: Literal["group_time_att"] = "group_time_att"
+    model: str
+
+    estimator: str
+    control_group: str
+    anticipation: int
+    base_period: Literal["universal", "varying"]
+    include_pre_periods: bool
+    alpha: float
+
+    att_gt: pd.DataFrame
+    aggregates: Dict[str, pd.DataFrame]
+    support: pd.DataFrame
+    skipped_cells: pd.DataFrame
+
+    outcome: str
+    treatment: str
+    unit_col: str
+    time_col: str
+    covariates: List[str] = Field(default_factory=list)
+    cluster_col: Optional[str] = None
+    inference: str
+
+    diagnostics: Dict[str, Any] = Field(default_factory=dict)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+    @property
+    def att(self) -> float:
+        """Simple overall ATT, weighting each treated cohort-time observation equally."""
+
+        return float(self.aggregates["simple"].iloc[0]["estimate"])
+
+    @property
+    def value(self) -> float:
+        """Alias for the simple overall ATT."""
+
+        return self.att
+
+    @property
+    def se(self) -> float:
+        """Standard error for the simple overall ATT."""
+
+        return float(self.aggregates["simple"].iloc[0]["se"])
+
+    @property
+    def std_error(self) -> float:
+        """Alias for the simple overall ATT standard error."""
+
+        return self.se
+
+    @property
+    def ci_lower(self) -> float:
+        return float(self.aggregates["simple"].iloc[0]["ci_lower"])
+
+    @property
+    def ci_upper(self) -> float:
+        return float(self.aggregates["simple"].iloc[0]["ci_upper"])
+
+    @property
+    def p_value(self) -> float:
+        return float(self.aggregates["simple"].iloc[0]["p_value"])
+
+    @property
+    def diagnostic_data(self) -> Optional[Dict[str, Any]]:
+        """Compatibility alias for callers moving from older DID result objects."""
+
+        if self.diagnostics.get("diagnostic_data_requested") is False:
+            return None
+        return self.diagnostics
+
+    def aggregate(self, kind: Literal["simple", "cohort", "calendar", "event"]) -> pd.DataFrame:
+        """Return an aggregate table: ``simple``, ``cohort``, ``calendar``, or ``event``."""
+
+        if kind not in self.aggregates:
+            raise ValueError("kind must be one of 'simple', 'cohort', 'calendar', or 'event'.")
+        return self.aggregates[kind].copy()
+
+    def event_study(self) -> pd.DataFrame:
+        """Return dynamic effects by event time."""
+
+        return self.aggregate("event")
+
+    @model_validator(mode="after")
+    def _validate_fields(self) -> "CallawaySantAnnaDIDEstimate":
+        if self.created_at.tzinfo is None:
+            raise ValueError("created_at must be timezone-aware.")
+
+        if not self.model:
+            raise ValueError("model must be non-empty.")
+        if self.estimator not in {"dr", "aipw", "ipw"}:
+            raise ValueError("estimator must be one of 'dr', 'aipw', or 'ipw'.")
+        if self.control_group not in {"never_treated", "not_yet_treated", "not_yet_or_never"}:
+            raise ValueError(
+                "control_group must be one of 'never_treated', 'not_yet_treated', or 'not_yet_or_never'."
+            )
+        if self.anticipation < 0:
+            raise ValueError("anticipation must be non-negative.")
+        if not np.isfinite(float(self.alpha)) or not (0.0 < float(self.alpha) < 1.0):
+            raise ValueError("alpha must be finite and in (0, 1).")
+
+        for name in ("att_gt", "support", "skipped_cells"):
+            value = getattr(self, name)
+            if not isinstance(value, pd.DataFrame):
+                raise ValueError(f"{name} must be a pandas DataFrame.")
+
+        expected_aggregates = {"simple", "cohort", "calendar", "event"}
+        if set(self.aggregates) != expected_aggregates:
+            raise ValueError("aggregates must contain simple, cohort, calendar, and event tables.")
+        for kind, table in self.aggregates.items():
+            if not isinstance(table, pd.DataFrame):
+                raise ValueError(f"aggregates[{kind!r}] must be a pandas DataFrame.")
+        if self.aggregates["simple"].empty:
+            raise ValueError("aggregates['simple'] must contain one row.")
+
+        required_att_cols = {"cell_id", "cohort", "time", "event_time", "att"}
+        missing_att_cols = required_att_cols.difference(self.att_gt.columns)
+        if missing_att_cols:
+            raise ValueError(f"att_gt is missing required columns: {sorted(missing_att_cols)}.")
+
+        simple_cols = {"estimate", "se", "ci_lower", "ci_upper", "p_value", "is_significant"}
+        missing_simple_cols = simple_cols.difference(self.aggregates["simple"].columns)
+        if missing_simple_cols:
+            raise ValueError(
+                f"aggregates['simple'] is missing required columns: {sorted(missing_simple_cols)}."
+            )
+
+        if not self.outcome:
+            raise ValueError("outcome must be non-empty.")
+        if not self.treatment:
+            raise ValueError("treatment must be non-empty.")
+        if not self.unit_col:
+            raise ValueError("unit_col must be non-empty.")
+        if not self.time_col:
+            raise ValueError("time_col must be non-empty.")
+        if any(not isinstance(c, str) or not c for c in self.covariates):
+            raise ValueError("covariates must contain only non-empty strings.")
+
+        return self
+
+    @staticmethod
+    def _fmt_float(value: Any) -> str | None:
+        try:
+            out = float(value)
+        except (TypeError, ValueError):
+            return None
+        if not np.isfinite(out):
+            return None
+        return f"{out:.4f}"
+
+    def summary(self) -> pd.DataFrame:
+        """Return a compact summary of the simple overall ATT."""
+
+        row = self.aggregates["simple"].iloc[0]
+        values = {
+            "estimand": "ATT",
+            "model": self.model,
+            "estimator": self.estimator,
+            "control_group": self.control_group,
+            "anticipation": self.anticipation,
+            "base_period": self.base_period,
+            "include_pre_periods": self.include_pre_periods,
+            "value": (
+                f"{float(row['estimate']):.4f} "
+                f"(ci_abs: {float(row['ci_lower']):.4f}, {float(row['ci_upper']):.4f})"
+            ),
+            "std_error": self._fmt_float(row["se"]),
+            "alpha": self._fmt_float(self.alpha),
+            "p_value": self._fmt_float(row["p_value"]),
+            "is_significant": bool(row["is_significant"]),
+            "n_att_gt_cells": int(len(self.att_gt)),
+            "n_skipped_cells": int(len(self.skipped_cells)),
+            "inference": self.inference,
+            "time": self.created_at.strftime("%Y-%m-%d"),
+        }
+        return pd.DataFrame({"field": list(values), "value": list(values.values())}).set_index("field")

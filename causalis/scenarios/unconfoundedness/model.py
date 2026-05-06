@@ -4,6 +4,7 @@ IRM estimator consuming CausalData.
 Implements cross-fitted nuisance estimation for g0, g1 and m, and supports ATE/ATTE/GATE/GATET scores.
 https://github.com/DoubleML/doubleml-for-py/blob/main/doubleml/irm/irm.py
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -18,17 +19,24 @@ from sklearn.base import clone, BaseEstimator
 from sklearn.model_selection import StratifiedKFold
 from sklearn.utils.validation import check_is_fitted
 from scipy.stats import norm
+
 try:
     from catboost import CatBoostClassifier, CatBoostRegressor
+
     HAS_CATBOOST = True
 except ImportError:
     HAS_CATBOOST = False
 
 from causalis.dgp.causaldata import CausalData
-from causalis.data_contracts.causal_diagnostic_data import UnconfoundednessDiagnosticData
+from causalis.data_contracts.causal_diagnostic_data import (
+    UnconfoundednessDiagnosticData,
+)
 from causalis.data_contracts.causal_estimate import CausalEstimate
 from causalis.data_contracts.gate_estimate import GateEstimate
-from causalis.scenarios.gate.model import estimate_gate_from_irm, estimate_gatet_from_irm
+from causalis.scenarios.gate.model import (
+    estimate_gate_from_irm,
+    estimate_gatet_from_irm,
+)
 from causalis.scenarios.unconfoundedness._diagnostic_utils import (
     _build_irm_estimate_diagnostic_data,
 )
@@ -302,10 +310,12 @@ class IRM(BaseEstimator):
                         random_seed=self.random_state,
                     )
                 self._ml_g_is_default = True
-        
+
         # If ml_g is still None and HAS_CATBOOST is True, it means data was not provided.
         # It will be initialized in fit().
-        if not np.isfinite(self.trimming_threshold) or not (0.0 <= self.trimming_threshold < 0.5):
+        if not np.isfinite(self.trimming_threshold) or not (
+            0.0 <= self.trimming_threshold < 0.5
+        ):
             raise ValueError("trimming_threshold must be finite and in [0, 0.5).")
         if self.relative_baseline_min < 0.0:
             raise ValueError("relative_baseline_min must be non-negative.")
@@ -381,10 +391,15 @@ class IRM(BaseEstimator):
         if self.n_jobs == 1 or not HAS_CATBOOST:
             return
 
-        for estimator, is_default in ((self.ml_g, self._ml_g_is_default), (self.ml_m, self._ml_m_is_default)):
+        for estimator, is_default in (
+            (self.ml_g, self._ml_g_is_default),
+            (self.ml_m, self._ml_m_is_default),
+        ):
             if not is_default or estimator is None:
                 continue
-            if not hasattr(estimator, "get_params") or not hasattr(estimator, "set_params"):
+            if not hasattr(estimator, "get_params") or not hasattr(
+                estimator, "set_params"
+            ):
                 continue
             params = estimator.get_params(deep=False)
             if params.get("thread_count", None) == -1:
@@ -393,16 +408,26 @@ class IRM(BaseEstimator):
     def _ensure_learners_available(self) -> None:
         """Ensure nuisance learners are configured."""
         if self.ml_g is None or self.ml_m is None:
-            raise ValueError("ml_g and ml_m must be provided (either as defaults or in __init__).")
+            raise ValueError(
+                "ml_g and ml_m must be provided (either as defaults or in __init__)."
+            )
 
     def _validate_fit_config(self, y_is_binary: bool) -> None:
         """Validate IRM fit-time configuration."""
         # Enforce valid propensity model: must expose predict_proba when classifier
         if _safe_is_classifier(self.ml_m) and not hasattr(self.ml_m, "predict_proba"):
-            raise ValueError("ml_m must support predict_proba() to produce valid propensity probabilities.")
+            raise ValueError(
+                "ml_m must support predict_proba() to produce valid propensity probabilities."
+            )
         # For binary outcomes, require probabilistic outcome models when using classifiers
-        if y_is_binary and _safe_is_classifier(self.ml_g) and not hasattr(self.ml_g, "predict_proba"):
-            raise ValueError("Binary outcome: ml_g is a classifier but does not expose predict_proba(). Use a probabilistic classifier or calibrate it.")
+        if (
+            y_is_binary
+            and _safe_is_classifier(self.ml_g)
+            and not hasattr(self.ml_g, "predict_proba")
+        ):
+            raise ValueError(
+                "Binary outcome: ml_g is a classifier but does not expose predict_proba(). Use a probabilistic classifier or calibrate it."
+            )
 
         if self.n_rep != 1:
             raise NotImplementedError("IRM currently supports n_rep=1 only.")
@@ -410,7 +435,9 @@ class IRM(BaseEstimator):
             raise ValueError("n_folds must be at least 2")
         if self.trimming_rule not in {"truncate"}:
             raise ValueError("Only trimming_rule='truncate' is supported")
-        if not np.isfinite(self.trimming_threshold) or not (0.0 <= self.trimming_threshold < 0.5):
+        if not np.isfinite(self.trimming_threshold) or not (
+            0.0 <= self.trimming_threshold < 0.5
+        ):
             raise ValueError("trimming_threshold must be finite and in [0, 0.5).")
 
     def _validate_treatment_support(self, d: np.ndarray) -> None:
@@ -438,8 +465,12 @@ class IRM(BaseEstimator):
     @staticmethod
     def _hash_index(index: pd.Index) -> str:
         """Return an order-sensitive digest for a pandas index."""
-        hashed = pd.util.hash_pandas_object(index, index=False).to_numpy(dtype=np.uint64, copy=False)
-        return hashlib.blake2b(np.ascontiguousarray(hashed).view(np.uint8), digest_size=16).hexdigest()
+        hashed = pd.util.hash_pandas_object(index, index=False).to_numpy(
+            dtype=np.uint64, copy=False
+        )
+        return hashlib.blake2b(
+            np.ascontiguousarray(hashed).view(np.uint8), digest_size=16
+        ).hexdigest()
 
     def _compute_sample_fingerprint(
         self,
@@ -450,7 +481,9 @@ class IRM(BaseEstimator):
     ) -> Dict[str, Any]:
         """Build a compact fingerprint for the fitted sample order and contents."""
         if self.data is None or not hasattr(self.data, "df"):
-            raise RuntimeError("CausalData must be available to fingerprint the fitted sample.")
+            raise RuntimeError(
+                "CausalData must be available to fingerprint the fitted sample."
+            )
 
         return {
             "n_obs": int(len(y)),
@@ -516,7 +549,7 @@ class IRM(BaseEstimator):
     ) -> np.ndarray:
         """Fit one outcome nuisance model (g0 or g1) and predict on test fold."""
         model_g = clone(self.ml_g)
-        mask = (d_tr == treatment_value)
+        mask = d_tr == treatment_value
         if not np.any(mask):
             raise RuntimeError(empty_group_error)
         X_g, y_g = X_tr[mask], y_tr[mask]
@@ -594,7 +627,9 @@ class IRM(BaseEstimator):
         m_hat = np.full(n, np.nan, dtype=float)
         folds = np.full(n, -1, dtype=int)
 
-        skf = StratifiedKFold(n_splits=self.n_folds, shuffle=True, random_state=self.random_state)
+        skf = StratifiedKFold(
+            n_splits=self.n_folds, shuffle=True, random_state=self.random_state
+        )
         splits = list(skf.split(X, d))
 
         if self.n_jobs == 1:
@@ -640,7 +675,11 @@ class IRM(BaseEstimator):
         folds: np.ndarray,
     ) -> None:
         """Validate and store cross-fitted nuisance predictions."""
-        if np.any(np.isnan(m_hat)) or np.any(np.isnan(g0_hat)) or np.any(np.isnan(g1_hat)):
+        if (
+            np.any(np.isnan(m_hat))
+            or np.any(np.isnan(g0_hat))
+            or np.any(np.isnan(g1_hat))
+        ):
             raise RuntimeError("Cross-fitted predictions contain NaN values.")
         self.g0_hat_ = g0_hat
         self.g1_hat_ = g1_hat
@@ -656,7 +695,9 @@ class IRM(BaseEstimator):
         """Persist immutable fit-time targets and optional diagnostic covariates."""
         self._fit_sample_fingerprint_ = self._compute_sample_fingerprint(X=X, y=y, d=d)
         if getattr(self.data, "user_id_name", None):
-            self._fit_index_ = pd.Index(self.data.user_id.copy(), name=self.data.user_id_name)
+            self._fit_index_ = pd.Index(
+                self.data.user_id.copy(), name=self.data.user_id_name
+            )
             self._fit_row_index_ = self.data.df.index.copy()
         else:
             self._fit_index_ = self.data.df.index.copy()
@@ -693,14 +734,24 @@ class IRM(BaseEstimator):
         self._validate_current_data_matches_fit(X=X, y=y, d=d)
         return X
 
-    def _resolve_estimation_sample(self) -> Tuple[Optional[np.ndarray], np.ndarray, np.ndarray]:
+    def _resolve_estimation_sample(
+        self,
+    ) -> Tuple[Optional[np.ndarray], np.ndarray, np.ndarray]:
         """Backward-compatible wrapper exposing cached estimation inputs."""
         y, d = self._resolve_estimation_targets()
-        has_fit_features = getattr(self, "_fit_store_diagnostics_", self.store_diagnostics)
+        has_fit_features = getattr(
+            self, "_fit_store_diagnostics_", self.store_diagnostics
+        )
         X = self._resolve_diagnostic_features() if has_fit_features else None
         return X, y, d
 
-    def _get_weights(self, n: int, m_hat_adj: Optional[np.ndarray], d: np.ndarray, score: Optional[str] = None) -> Tuple[np.ndarray, np.ndarray]:
+    def _get_weights(
+        self,
+        n: int,
+        m_hat_adj: Optional[np.ndarray],
+        d: np.ndarray,
+        score: Optional[str] = None,
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """Compute weights for the IRM score.
 
         Parameters
@@ -729,7 +780,9 @@ class IRM(BaseEstimator):
             weights=self.weights,
         )
 
-    def _use_normalized_ipw(self, score: Optional[str] = None, *, warn: bool = False) -> bool:
+    def _use_normalized_ipw(
+        self, score: Optional[str] = None, *, warn: bool = False
+    ) -> bool:
         """Return whether Hájek normalization is active for a given score."""
         return _use_normalized_irm_ipw(
             normalize_ipw=self.normalize_ipw,
@@ -783,7 +836,9 @@ class IRM(BaseEstimator):
         n = len(y)
         u0 = y - g0_hat
         u1 = y - g1_hat
-        h1, h0, inv_m, inv_1m = self._compute_ipw_components(d=d, m_hat=m_hat, score=score)
+        h1, h0, inv_m, inv_1m = self._compute_ipw_components(
+            d=d, m_hat=m_hat, score=score
+        )
         w, w_bar = self._get_weights(n, m_hat, d, score=score)
         psi_b = w * (g1_hat - g0_hat) + w_bar * (u1 * h1 - u0 * h0)
 
@@ -837,7 +892,9 @@ class IRM(BaseEstimator):
             self.store_diagnostics = bool(store_diagnostics)
         self._fit_store_diagnostics_ = bool(self.store_diagnostics)
         if self.data is None:
-            raise ValueError("Model must be provided with CausalData either in __init__ or in .fit(data_contracts).")
+            raise ValueError(
+                "Model must be provided with CausalData either in __init__ or in .fit(data_contracts)."
+            )
         X, y, d, y_is_binary = self._check_data()
 
         # Initialize default learners if not provided and data is now available
@@ -850,8 +907,12 @@ class IRM(BaseEstimator):
         self._validate_treatment_support(d)
         self._store_fit_sample(X=X, y=y, d=d)
 
-        g0_hat, g1_hat, m_hat, folds = self._cross_fit_nuisances(X=X, y=y, d=d, y_is_binary=y_is_binary)
-        self._store_cross_fitted_predictions(g0_hat=g0_hat, g1_hat=g1_hat, m_hat=m_hat, folds=folds)
+        g0_hat, g1_hat, m_hat, folds = self._cross_fit_nuisances(
+            X=X, y=y, d=d, y_is_binary=y_is_binary
+        )
+        self._store_cross_fitted_predictions(
+            g0_hat=g0_hat, g1_hat=g1_hat, m_hat=m_hat, folds=folds
+        )
 
         return self
 
@@ -861,12 +922,17 @@ class IRM(BaseEstimator):
             raise ValueError("alpha must be in (0,1)")
         score_u = str(score).upper()
         if score_u == "CATE":
-            raise NotImplementedError("score='CATE' is not supported.")
+            raise NotImplementedError(
+                "score='CATE' is a prediction task, not a scalar estimand. "
+                "Use model.predict_cate(X) to score new clients."
+            )
         if score_u not in {"ATE", "ATTE", "GATE", "GATET"}:
             raise ValueError("score must be 'ATE', 'ATTE', 'GATE', or 'GATET'")
         return score_u
 
-    def _estimate_inference_approx_flags(self, score: str, normalize_ipw_effective: bool) -> Dict[str, bool]:
+    def _estimate_inference_approx_flags(
+        self, score: str, normalize_ipw_effective: bool
+    ) -> Dict[str, bool]:
         """Return flags for inference paths that use ratio-style approximations."""
         return {
             "se_approx_hajek": bool(score == "ATE" and normalize_ipw_effective),
@@ -963,14 +1029,16 @@ class IRM(BaseEstimator):
         se_rel = np.nan
 
         baseline_too_small = abs(mu_c) < self.relative_baseline_min
-        baseline_low_signal = np.isfinite(mu_c_se) and mu_c_se > 0.0 and abs(mu_c) < z * mu_c_se
+        baseline_low_signal = (
+            np.isfinite(mu_c_se) and mu_c_se > 0.0 and abs(mu_c) < z * mu_c_se
+        )
 
         if np.isfinite(mu_c) and not (baseline_too_small or baseline_low_signal):
             tau_rel = 100.0 * theta_hat / mu_c
             IF_mu = psi_mu_c - mu_c
             with np.errstate(divide="ignore", invalid="ignore"):
                 # Delta-method IF for tau_rel = 100 * theta / mu_c.
-                IF_rel = 100.0 * (IF / mu_c - (theta_hat * IF_mu) / (mu_c ** 2))
+                IF_rel = 100.0 * (IF / mu_c - (theta_hat * IF_mu) / (mu_c**2))
             var_rel = float(np.var(IF_rel, ddof=1)) / n
             se_rel = float(np.sqrt(max(var_rel, 0.0)))
             ci_low_rel = tau_rel - z * se_rel
@@ -982,7 +1050,9 @@ class IRM(BaseEstimator):
             if not np.isfinite(mu_c):
                 reasons.append("is not finite")
             if baseline_too_small:
-                reasons.append(f"is below relative_baseline_min={self.relative_baseline_min:.3e}")
+                reasons.append(
+                    f"is below relative_baseline_min={self.relative_baseline_min:.3e}"
+                )
             if baseline_low_signal:
                 reasons.append(f"is within {z:.2f} SE of 0 (SE={mu_c_se:.3e})")
             reason_str = "; ".join(reasons) if reasons else "is too small"
@@ -1069,7 +1139,9 @@ class IRM(BaseEstimator):
                 "std_error": se,
                 "t_stat": t_stat,
                 "se_approx_hajek": bool(approx_flags.get("se_approx_hajek", False)),
-                "se_approx_weight_norm": bool(approx_flags.get("se_approx_weight_norm", False)),
+                "se_approx_weight_norm": bool(
+                    approx_flags.get("se_approx_weight_norm", False)
+                ),
             },
             value=theta_hat,
             ci_upper_absolute=ci_high,
@@ -1155,7 +1227,9 @@ class IRM(BaseEstimator):
         self.score = score
 
         if score in {"GATE", "GATET"}:
-            subgroup_estimator = estimate_gate_from_irm if score == "GATE" else estimate_gatet_from_irm
+            subgroup_estimator = (
+                estimate_gate_from_irm if score == "GATE" else estimate_gatet_from_irm
+            )
             return subgroup_estimator(
                 irm_model=self,
                 groups=groups,
@@ -1168,7 +1242,9 @@ class IRM(BaseEstimator):
         normalize_ipw_effective = self._use_normalized_ipw(score=score, warn=False)
         self.normalize_ipw_effective_ = normalize_ipw_effective
         # Track known finite-sample approximation paths in inference metadata.
-        approx_flags = self._estimate_inference_approx_flags(score=score, normalize_ipw_effective=normalize_ipw_effective)
+        approx_flags = self._estimate_inference_approx_flags(
+            score=score, normalize_ipw_effective=normalize_ipw_effective
+        )
         self._warn_if_inference_is_approximate(approx_flags)
 
         y, d = self._resolve_estimation_targets()
@@ -1181,20 +1257,24 @@ class IRM(BaseEstimator):
         w_bar = components["w_bar"]
         psi_a = components["psi_a"]
         psi_b = components["psi_b"]
-        theta_hat, IF, se, t_stat, pval, ci_low, ci_high, z = self._solve_moment_equation(
-            psi_a=psi_a, psi_b=psi_b, alpha=alpha
+        theta_hat, IF, se, t_stat, pval, ci_low, ci_high, z = (
+            self._solve_moment_equation(psi_a=psi_a, psi_b=psi_b, alpha=alpha)
         )
-        self._cache_estimate_core(theta_hat=theta_hat, se=se, IF=IF, psi_a=psi_a, psi_b=psi_b)
+        self._cache_estimate_core(
+            theta_hat=theta_hat, se=se, IF=IF, psi_a=psi_a, psi_b=psi_b
+        )
 
-        mu_c, tau_rel, ci_low_rel, ci_high_rel, se_rel = self._compute_relative_effect_stats(
-            theta_hat=theta_hat,
-            IF=IF,
-            w=w,
-            w_bar=w_bar,
-            g0_hat=g0_hat,
-            u0=components["u0"],
-            h0=components["h0"],
-            z=z,
+        mu_c, tau_rel, ci_low_rel, ci_high_rel, se_rel = (
+            self._compute_relative_effect_stats(
+                theta_hat=theta_hat,
+                IF=IF,
+                w=w,
+                w_bar=w_bar,
+                g0_hat=g0_hat,
+                u0=components["u0"],
+                h0=components["h0"],
+                z=z,
+            )
         )
         self.mu_c_ = mu_c
         self.se_relative_ = np.array([se_rel])
@@ -1381,6 +1461,12 @@ class IRM(BaseEstimator):
             cov_kwds=cov_kwds,
         )
 
+    def predict_cate(self, X: pd.DataFrame | np.ndarray) -> np.ndarray:
+        """Predict CATE/uplift for new rows using lazy full-sample scoring models."""
+        from causalis.scenarios.uplift.model import predict_cate
+
+        return predict_cate(self, X)
+
     # --------- Sensitivity ---------
     def _sensitivity_element_est(
         self,
@@ -1425,7 +1511,9 @@ class IRM(BaseEstimator):
             Sensitivity elements including 'sigma2', 'nu2', 'psi_sigma2', 'psi_nu2',
             'riesz_rep', 'm_alpha', and 'psi'.
         """
-        if any(getattr(self, attr) is None for attr in ["g0_hat_", "g1_hat_", "m_hat_"]):
+        if any(
+            getattr(self, attr) is None for attr in ["g0_hat_", "g1_hat_", "m_hat_"]
+        ):
             raise RuntimeError("IRM model must be fitted before sensitivity analysis.")
 
         if y is None:
@@ -1468,9 +1556,16 @@ class IRM(BaseEstimator):
             score=getattr(self, "score", "ATE"),
         )
 
-    def sensitivity_analysis(self, r2_y: float, r2_d: float, rho: float = 1.0, H0: float = 0.0, alpha: float = 0.05) -> "IRM":
+    def sensitivity_analysis(
+        self,
+        r2_y: float,
+        r2_d: float,
+        rho: float = 1.0,
+        H0: float = 0.0,
+        alpha: float = 0.05,
+    ) -> "IRM":
         """Compute a sensitivity analysis following Chernozhukov et al. (2022).
-        
+
         Parameters
         ----------
         r2_y : float
@@ -1486,8 +1581,9 @@ class IRM(BaseEstimator):
         """
         from causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity import (
             sensitivity_analysis as sa_fn,
-            get_sensitivity_summary
+            get_sensitivity_summary,
         )
+
         check_is_fitted(self, attributes=["coef_", "se_", "psi_"])
 
         # Execute sensitivity analysis using the centralized module logic
@@ -1495,7 +1591,9 @@ class IRM(BaseEstimator):
 
         self.sensitivity_result = res
         # Cache the summary string for display
-        self.sensitivity_summary = get_sensitivity_summary({"model": self, "bias_aware": res})
+        self.sensitivity_summary = get_sensitivity_summary(
+            {"model": self, "bias_aware": res}
+        )
 
         return self
 
