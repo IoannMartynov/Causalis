@@ -5,6 +5,7 @@ from .multicausaldata import MultiCausalData
 from .causaldata_instrumental import CausalDataInstrumental
 from .panel_data_did import PanelDataDID
 from .panel_data_scm import PanelDataSCM
+from .panel_did_estimate import PanelDIDDiagnosticData, PanelDIDEstimate
 from .panel_estimate import PanelEstimate
 from .causal_estimate import CausalEstimate
 from .gate_estimate import GateEstimate
@@ -32,6 +33,8 @@ __all__ = [
     "CausalDataInstrumental",
     "PanelDataDID",
     "PanelDataSCM",
+    "PanelDIDDiagnosticData",
+    "PanelDIDEstimate",
     "PanelEstimate",
     "CausalEstimate",
     "GateEstimate",

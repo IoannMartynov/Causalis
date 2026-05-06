@@ -5,9 +5,11 @@ from causalis.data_contracts import PanelDataDID
 from causalis.dgp import generate_did_data as generate_did_data_top_level
 from causalis.dgp.panel_data_did import (
     generate_did_data,
+    generate_did_gamma,
     generate_did_gamma_data,
     generate_did_poisson_data,
 )
+from causalis.scenarios.did import generate_did_gamma_26
 
 
 ORACLE_COLS = {"y_cf", "tau_realized_true", "mu_cf", "mu_treated", "tau_mean_true"}
@@ -121,3 +123,23 @@ def test_top_level_did_export_matches_package_function():
 
     assert isinstance(panel, PanelDataDID)
     assert panel.df.shape[0] == 15
+
+
+def test_did_gamma_26_scenario_wrapper_uses_renamed_dgp_function():
+    scenario_df = generate_did_gamma_26(
+        seed=17,
+        return_panel_data=False,
+        include_oracles=False,
+        n_treated_units=2,
+        n_control_units=3,
+    )
+    dgp_df = generate_did_gamma(
+        seed=17,
+        return_panel_data=False,
+        include_oracles=False,
+        n_treated_units=2,
+        n_control_units=3,
+    )
+
+    assert scenario_df.equals(dgp_df)
+    assert {"y_cf", "tau_mean_true"}.isdisjoint(scenario_df.columns)
