@@ -125,21 +125,36 @@ def test_top_level_did_export_matches_package_function():
     assert panel.df.shape[0] == 15
 
 
-def test_did_gamma_26_scenario_wrapper_uses_renamed_dgp_function():
+def test_did_gamma_26_scenario_wrapper_generates_staggered_csa_panel():
+    scenario_panel = generate_did_gamma_26(
+        seed=17,
+        return_panel_data=True,
+        include_oracles=True,
+        n_treated_units=6,
+        n_control_units=8,
+        n_pre_periods=5,
+        n_post_periods=4,
+        n_cohorts=3,
+    )
+
+    assert isinstance(scenario_panel, PanelDataDID)
+    assert scenario_panel.design_type == "staggered_adoption"
+    assert len(scenario_panel.cohorts) == 3
+    assert len(scenario_panel.never_treated_units) == 8
+    assert ORACLE_COLS.issubset(scenario_panel.df.columns)
+    assert COVARIATE_COLS.issubset(scenario_panel.df.columns)
+    assert scenario_panel.att_gt_cells()["is_supported"].all()
+
     scenario_df = generate_did_gamma_26(
         seed=17,
         return_panel_data=False,
         include_oracles=False,
-        n_treated_units=2,
-        n_control_units=3,
-    )
-    dgp_df = generate_did_gamma(
-        seed=17,
-        return_panel_data=False,
-        include_oracles=False,
-        n_treated_units=2,
-        n_control_units=3,
+        n_treated_units=6,
+        n_control_units=8,
+        n_pre_periods=5,
+        n_post_periods=4,
+        n_cohorts=3,
     )
 
-    assert scenario_df.equals(dgp_df)
     assert {"y_cf", "tau_mean_true"}.isdisjoint(scenario_df.columns)
+    assert scenario_df["cohort"].nunique(dropna=True) == 3
