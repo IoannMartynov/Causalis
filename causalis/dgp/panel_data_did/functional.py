@@ -322,7 +322,7 @@ def generate_did_poisson_data(
     return _finalize_output(out, include_oracle=include_oracle)
 
 
-def generate_did_gamma_26_data(
+def generate_did_gamma(
     *,
     seed: int = 42,
     return_panel_data: bool = True,
@@ -351,6 +351,9 @@ def generate_did_gamma_26_data(
         treatment_effect_slope=treatment_effect_slope,
         **params,
     )
+
+
+generate_did_gamma_26_data = generate_did_gamma
 
 
 def generate_did_poisson_26_data(

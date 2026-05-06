@@ -74,6 +74,7 @@ from .causaldata_instrumental import generate_iv_data
 from .panel_data_scm import generate_scm_data
 from .panel_data_did import (
     generate_did_data,
+    generate_did_gamma,
     generate_did_gamma_data,
     generate_did_poisson_data,
 )
@@ -95,6 +96,7 @@ __all__ = [
     "make_cuped_binary_26",
     "generate_scm_data",
     "generate_did_data",
+    "generate_did_gamma",
     "generate_did_gamma_data",
     "generate_did_poisson_data",
 ]
