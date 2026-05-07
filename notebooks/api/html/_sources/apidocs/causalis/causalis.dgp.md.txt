@@ -16,6 +16,7 @@
 causalis.dgp.panel_data_scm
 causalis.dgp.causaldata
 causalis.dgp.multicausaldata
+causalis.dgp.panel_data_did
 causalis.dgp.causaldata_instrumental
 ```
 

@@ -54,7 +54,12 @@ inputs to downstream estimators.</p></li>
 <blockquote>
 <div><blockquote>
 <div><blockquote>
-<div><p>from causalis.dgp import generate_rct, generate_scm_data, obs_linear_26_dataset
+<div><p>from causalis.dgp import (
+…     generate_rct,
+…     generate_scm_data,
+…     generate_did_data,
+…     obs_linear_26_dataset,
+… )
 rct = generate_rct(
 …     n=1000,
 …     outcome_type=”binary”,
@@ -68,7 +73,10 @@ sorted(col for col in [“m”, “g0”, “g1”, “cate”] if col in obs.df
 [‘cate’, ‘g0’, ‘g1’, ‘m’]
 panel = generate_scm_data(n_donors=5, n_pre_periods=24, n_post_periods=6)
 panel.df.shape[0] &gt; 0  # doctest: +SKIP
-True</p>
+True
+did_panel = generate_did_data(n_treated_units=5, n_control_units=10)
+did_panel.design_type
+‘simultaneous_adoption’</p>
 </div></blockquote>
 </div></blockquote>
 </div></blockquote>
@@ -85,6 +93,8 @@ optional pre-period covariates.</p></li>
 with confounding and ground-truth nuisance objects.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">generate_scm_data</span></code> for synthetic panel data with one treated unit and a
 donor pool.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">generate_did_data</span></code> for simultaneous-adoption panel data with treated and
+never-treated groups.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">generate_multitreatment</span></code> for one-hot multi-arm treatment assignment.</p></li>
 </ul>
 <section id="subpackages">
@@ -105,6 +115,11 @@ donor pool.</p></li>
 <li class="toctree-l1"><a class="reference internal" href="causalis.dgp.multicausaldata.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.dgp.multicausaldata</span></code></a><ul>
 <li class="toctree-l2"><a class="reference internal" href="causalis.dgp.multicausaldata.functional.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.dgp.multicausaldata.functional</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="causalis.dgp.multicausaldata.base.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.dgp.multicausaldata.base</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="causalis.dgp.panel_data_did.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.dgp.panel_data_did</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="causalis.dgp.panel_data_did.functional.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.dgp.panel_data_did.functional</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="causalis.dgp.panel_data_did.base.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.dgp.panel_data_did.base</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="causalis.dgp.causaldata_instrumental.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.dgp.causaldata_instrumental</span></code></a><ul>

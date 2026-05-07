@@ -70,7 +70,6 @@ from .causaldata import (
     make_cuped_tweedie, generate_cuped_tweedie_26,
     generate_cuped_binary, make_cuped_binary_26
 )
-from .causaldata_instrumental import generate_iv_data
 from .panel_data_scm import generate_scm_data
 from .panel_data_did import (
     generate_did_data,
@@ -85,7 +84,6 @@ __all__ = [
     "generate_classic_rct",
     "classic_rct_gamma",
     "obs_linear_effect",
-    "generate_iv_data",
     "make_gold_linear",
     "obs_linear_26_dataset",
     "generate_classic_rct_26",

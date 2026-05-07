@@ -1,0 +1,53 @@
+# {py:mod}`causalis.scenarios.uplift.model`
+
+```{py:module} causalis.scenarios.uplift.model
+```
+
+```{autodoc2-docstring} causalis.scenarios.uplift.model
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`predict_cate <causalis.scenarios.uplift.model.predict_cate>`
+  - ```{autodoc2-docstring} causalis.scenarios.uplift.model.predict_cate
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.scenarios.uplift.model.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.uplift.model.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} predict_cate(irm_model: typing.Any, X: pandas.DataFrame | numpy.ndarray) -> numpy.ndarray
+:canonical: causalis.scenarios.uplift.model.predict_cate
+
+```{autodoc2-docstring} causalis.scenarios.uplift.model.predict_cate
+```
+````
+
+````{py:data} __all__
+:canonical: causalis.scenarios.uplift.model.__all__
+:value: >
+   ['predict_cate']
+
+```{autodoc2-docstring} causalis.scenarios.uplift.model.__all__
+```
+
+````

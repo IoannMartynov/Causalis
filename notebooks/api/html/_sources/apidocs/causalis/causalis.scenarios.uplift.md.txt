@@ -1,0 +1,43 @@
+# {py:mod}`causalis.scenarios.uplift`
+
+```{py:module} causalis.scenarios.uplift
+```
+
+```{autodoc2-docstring} causalis.scenarios.uplift
+:allowtitles:
+```
+
+## Submodules
+
+```{toctree}
+:titlesonly:
+:maxdepth: 1
+
+causalis.scenarios.uplift.model
+```
+
+## Package Contents
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.scenarios.uplift.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.uplift.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} __all__
+:canonical: causalis.scenarios.uplift.__all__
+:value: >
+   ['predict_cate']
+
+```{autodoc2-docstring} causalis.scenarios.uplift.__all__
+```
+
+````

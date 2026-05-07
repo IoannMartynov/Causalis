@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>causalis.scenarios.did.refutation.post_inference &#8212; Causalis API Reference  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="causalis.scenarios.did.dgp" href="causalis.scenarios.did.dgp.html" />
+    <link rel="prev" title="causalis.scenarios.did.refutation.diagnostic_plots" href="causalis.scenarios.did.refutation.diagnostic_plots.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-causalis.scenarios.did.refutation.post_inference">
+<span id="causalis-scenarios-did-refutation-post-inference"></span><h1><a class="reference internal" href="#module-causalis.scenarios.did.refutation.post_inference" title="causalis.scenarios.did.refutation.post_inference"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.did.refutation.post_inference</span></code></a><a class="headerlink" href="#module-causalis.scenarios.did.refutation.post_inference" title="Link to this heading">¶</a></h1>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.did.refutation.post_inference.did_post_inference_cell_table" title="causalis.scenarios.did.refutation.post_inference.did_post_inference_cell_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">did_post_inference_cell_table</span></code></a></p></td>
+<td><p>Return fitted cell-level inference diagnostics for a Callaway &amp; Sant’Anna estimate.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.did.refutation.post_inference.did_influence_table" title="causalis.scenarios.did.refutation.post_inference.did_influence_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">did_influence_table</span></code></a></p></td>
+<td><p>Return unit-level influence shares for the simple overall ATT.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.did.refutation.post_inference.did_cluster_influence_table" title="causalis.scenarios.did.refutation.post_inference.did_cluster_influence_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">did_cluster_influence_table</span></code></a></p></td>
+<td><p>Return cluster-level influence shares for clustered Callaway &amp; Sant’Anna estimates.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.did.refutation.post_inference.run_did_post_inference_diagnostics" title="causalis.scenarios.did.refutation.post_inference.run_did_post_inference_diagnostics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_did_post_inference_diagnostics</span></code></a></p></td>
+<td><p>Run post-fit Callaway &amp; Sant’Anna inference diagnostics and return a reliability report.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.did.refutation.post_inference.run_did_inference_diagnostics" title="causalis.scenarios.did.refutation.post_inference.run_did_inference_diagnostics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_did_inference_diagnostics</span></code></a></p></td>
+<td><p>Alias for :func:<code class="docutils literal notranslate"><span class="pre">run_did_post_inference_diagnostics</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="data">
+<h3>Data<a class="headerlink" href="#data" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.did.refutation.post_inference.__all__" title="causalis.scenarios.did.refutation.post_inference.__all__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__all__</span></code></a></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.did.refutation.post_inference.did_post_inference_cell_table">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.did.refutation.post_inference.</span></span><span class="sig-name descname"><span class="pre">did_post_inference_cell_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="causalis.data_contracts.panel_did_estimate.html#causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate" title="causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate"><span class="pre">causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.scenarios.did.refutation.post_inference.did_post_inference_cell_table" title="Link to this definition">¶</a></dt>
+<dd><p>Return fitted cell-level inference diagnostics for a Callaway &amp; Sant’Anna estimate.</p>
+<p>This function merges the point estimates and standard errors with auxiliary
+cell-level diagnostics produced during the estimation process (e.g., propensity
+clipping, covariate balance, and effective sample sizes).</p>
+<p class="rubric" id="id11">Parameters</p>
+<p>estimate : CallawaySantAnnaDIDEstimate
+The fitted estimate object from a <code class="docutils literal notranslate"><span class="pre">CallawaySantAnnaDID</span></code> model.</p>
+<p class="rubric" id="id12">Returns</p>
+<p>pd.DataFrame
+A table where each row corresponds to an ATT(g,t) cell, containing:
+- <code class="docutils literal notranslate"><span class="pre">group</span></code>: The treatment group (first treated period).
+- <code class="docutils literal notranslate"><span class="pre">time</span></code>: The calendar time period.
+- <code class="docutils literal notranslate"><span class="pre">att</span></code>: The point estimate for this cell.
+- <code class="docutils literal notranslate"><span class="pre">se</span></code>: The standard error.
+- <code class="docutils literal notranslate"><span class="pre">t_stat</span></code>: The t-statistic (att / se).
+- <code class="docutils literal notranslate"><span class="pre">is_post_treatment</span></code>: Whether the cell is in the post-treatment period.
+- Additional columns from the model’s cell diagnostics (e.g., <code class="docutils literal notranslate"><span class="pre">control_ess</span></code>,
+<code class="docutils literal notranslate"><span class="pre">max_propensity_clip</span></code>).</p>
+<p class="rubric" id="id13">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.scenarios.did import CallawaySantAnnaDID, generate_did_gamma_26
+from causalis.scenarios.did.refutation import did_post_inference_cell_table
+data = generate_did_gamma_26(n_units=200, n_periods=5, seed=42)
+model = CallawaySantAnnaDID().fit(data)
+est = model.estimate(diagnostic_data=True)
+cells = did_post_inference_cell_table(est)
+cells[[“group”, “time”, “att”, “t_stat”]].head()</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.did.refutation.post_inference.did_influence_table">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.did.refutation.post_inference.</span></span><span class="sig-name descname"><span class="pre">did_influence_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_or_estimate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">causalis.data_contracts.PanelDataDID</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="causalis.data_contracts.panel_did_estimate.html#causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate" title="causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate"><span class="pre">causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="causalis.data_contracts.panel_did_estimate.html#causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate" title="causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate"><span class="pre">causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.scenarios.did.refutation.post_inference.did_influence_table" title="Link to this definition">¶</a></dt>
+<dd><p>Return unit-level influence shares for the simple overall ATT.</p>
+<p>Influence scores represent the first-order contribution of each unit to the
+final estimate. This function aggregates influence scores across all ATT(g,t)
+cells used in the simple average ATT and calculates their relative shares.</p>
+<p class="rubric" id="id14">Parameters</p>
+<p>data_or_estimate : PanelDataDID or CallawaySantAnnaDIDEstimate
+If a <code class="docutils literal notranslate"><span class="pre">PanelDataDID</span></code> object is provided, the second argument <code class="docutils literal notranslate"><span class="pre">estimate</span></code>
+must be supplied. If a <code class="docutils literal notranslate"><span class="pre">CallawaySantAnnaDIDEstimate</span></code> is provided, the
+data will be resolved from the estimate if possible.
+estimate : CallawaySantAnnaDIDEstimate, optional
+The fitted estimate object. Required if the first argument is data.
+top_n : int, optional
+If provided, only return the top N units by absolute influence share.</p>
+<p class="rubric" id="id15">Returns</p>
+<p>pd.DataFrame
+A table of unit-level influence metrics:
+- <code class="docutils literal notranslate"><span class="pre">unit_id</span></code>: The unit identifier.
+- <code class="docutils literal notranslate"><span class="pre">rank</span></code>: Ranking by absolute influence.
+- <code class="docutils literal notranslate"><span class="pre">influence_score</span></code>: The raw aggregated influence score.
+- <code class="docutils literal notranslate"><span class="pre">abs_influence_score</span></code>: The absolute value of the score.
+- <code class="docutils literal notranslate"><span class="pre">abs_influence_share</span></code>: The share of total absolute influence.</p>
+<p class="rubric" id="id16">Notes</p>
+<p>The influence share for unit :math:<code class="docutils literal notranslate"><span class="pre">i</span></code> is defined as:</p>
+<p>.. math::
+S_i = \frac{|\psi_i|}{\sum_{j=1}^n |\psi_j|}</p>
+<p>where :math:<code class="docutils literal notranslate"><span class="pre">\psi_i</span></code> is the influence score of unit :math:<code class="docutils literal notranslate"><span class="pre">i</span></code> on the
+target parameter (e.g., the simple aggregate ATT). High influence shares
+indicate units that have a disproportionate impact on the final result.</p>
+<p class="rubric" id="id17">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.scenarios.did import CallawaySantAnnaDID, generate_did_gamma_26
+from causalis.scenarios.did.refutation import did_influence_table
+data = generate_did_gamma_26(n_units=200, n_periods=5, seed=42)
+model = CallawaySantAnnaDID().fit(data)
+est = model.estimate(diagnostic_data=True)
+influence = did_influence_table(data, est, top_n=5)
+influence[[“unit_id”, “abs_influence_share”]]</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.did.refutation.post_inference.did_cluster_influence_table">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.did.refutation.post_inference.</span></span><span class="sig-name descname"><span class="pre">did_cluster_influence_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">causalis.data_contracts.PanelDataDID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="causalis.data_contracts.panel_did_estimate.html#causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate" title="causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate"><span class="pre">causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.scenarios.did.refutation.post_inference.did_cluster_influence_table" title="Link to this definition">¶</a></dt>
+<dd><p>Return cluster-level influence shares for clustered Callaway &amp; Sant’Anna estimates.</p>
+<p>Aggregates unit-level influence scores up to the cluster level. This is
+essential for diagnostics when the model was fitted using clustered
+standard errors, as the independence assumption holds at the cluster level.</p>
+<p class="rubric" id="id18">Parameters</p>
+<p>data : PanelDataDID
+The original panel data used for estimation.
+estimate : CallawaySantAnnaDIDEstimate
+The fitted estimate object, which must have <code class="docutils literal notranslate"><span class="pre">cluster_col</span></code> defined.</p>
+<p class="rubric" id="id19">Returns</p>
+<p>pd.DataFrame
+A table of cluster-level influence metrics:
+- <code class="docutils literal notranslate"><span class="pre">cluster_id</span></code>: The cluster identifier.
+- <code class="docutils literal notranslate"><span class="pre">rank</span></code>: Ranking by absolute influence.
+- <code class="docutils literal notranslate"><span class="pre">influence_score</span></code>: Sum of unit influence scores within the cluster.
+- <code class="docutils literal notranslate"><span class="pre">abs_influence_share</span></code>: Share of total absolute influence.</p>
+<p class="rubric" id="id20">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.scenarios.did import CallawaySantAnnaDID, generate_did_gamma_26
+from causalis.scenarios.did.refutation import did_cluster_influence_table</p>
+<p class="rubric" id="id21">Assuming data has a ‘cluster’ column</p>
+<p class="rubric" id="id22">model = CallawaySantAnnaDID(cluster_col=’cluster’).fit(data)</p>
+<p class="rubric" id="id23">est = model.estimate(diagnostic_data=True)</p>
+<p class="rubric" id="id24">clusters = did_cluster_influence_table(data, est)</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.did.refutation.post_inference.run_did_post_inference_diagnostics">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.did.refutation.post_inference.</span></span><span class="sig-name descname"><span class="pre">run_did_post_inference_diagnostics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_or_estimate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">causalis.data_contracts.PanelDataDID</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="causalis.data_contracts.panel_did_estimate.html#causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate" title="causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate"><span class="pre">causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="causalis.data_contracts.panel_did_estimate.html#causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate" title="causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate"><span class="pre">causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_skipped_post_cell_share</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_control_ess</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_propensity_clip_share</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_abs_weighted_smd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_top_unit_influence_share</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_top_cluster_influence_share</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_influence_ess</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_abs_pretrend_t_stat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_simple_cell_weight_share</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_clusters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">require_multiplier_bootstrap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.scenarios.did.refutation.post_inference.run_did_post_inference_diagnostics" title="Link to this definition">¶</a></dt>
+<dd><p>Run post-fit Callaway &amp; Sant’Anna inference diagnostics and return a reliability report.</p>
+<p>This function performs a comprehensive suite of checks on the fitted model
+to detect potential issues with identification, estimation stability, and
+excessive influence of individual observations.</p>
+<p class="rubric" id="id25">Parameters</p>
+<p>data_or_estimate : PanelDataDID or CallawaySantAnnaDIDEstimate
+The first argument can be either the data or the estimate. If data is
+passed, the <code class="docutils literal notranslate"><span class="pre">estimate</span></code> argument must also be provided.
+estimate : CallawaySantAnnaDIDEstimate, optional
+The fitted estimate object. Required if the first argument is data.
+max_skipped_post_cell_share : float, default 0.20
+Maximum allowable share of requested post-treatment cells that were
+skipped (e.g., due to lack of treated/control units).
+min_control_ess : float, default 20.0
+Minimum effective sample size for the control group in each ATT(g,t) cell.
+max_propensity_clip_share : float, default 0.05
+Maximum share of units in a cell that can have their propensity scores
+clipped to the boundaries.
+max_abs_weighted_smd : float, default 0.25
+Maximum allowable absolute weighted Standardized Mean Difference (SMD)
+for covariates after IPW reweighting.
+max_top_unit_influence_share : float, default 0.20
+Maximum absolute influence share of the single most influential unit.
+max_top_cluster_influence_share : float, default 0.50
+Maximum absolute influence share of the single most influential cluster.
+min_influence_ess : float, default 10.0
+Minimum Effective Sample Size (ESS) based on influence scores, calculated
+as :math:<code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">/</span> <span class="pre">\sum</span> <span class="pre">w_i^2</span></code>.
+max_abs_pretrend_t_stat : float, default 2.0
+Maximum absolute t-statistic allowed for pre-treatment testing cells.
+max_simple_cell_weight_share : float, default 0.50
+Maximum weight share of any single ATT(g,t) cell in the simple aggregate ATT.
+min_clusters : int, default 2
+Minimum number of clusters required for valid clustered inference.
+require_multiplier_bootstrap : bool, default False
+If True, flags a warning if the multiplier bootstrap was not used for
+simultaneous inference.</p>
+<p class="rubric" id="id26">Returns</p>
+<p>pd.DataFrame
+A diagnostic report with columns:
+- <code class="docutils literal notranslate"><span class="pre">test</span></code>: Name of the diagnostic check.
+- <code class="docutils literal notranslate"><span class="pre">flag</span></code>: Status (GREEN, YELLOW, RED).
+- <code class="docutils literal notranslate"><span class="pre">value</span></code>: Observed value of the metric.
+- <code class="docutils literal notranslate"><span class="pre">threshold</span></code>: The threshold used for the check.
+- <code class="docutils literal notranslate"><span class="pre">message</span></code>: Descriptive result message.</p>
+<p class="rubric" id="id27">Notes</p>
+<p>The influence-based ESS is a measure of how concentrated the estimate’s
+dependence is on a small subset of units. It is defined as:</p>
+<p>.. math::
+ESS_{\psi} = \frac{(\sum |\psi_i|)^2}{\sum \psi_i^2}</p>
+<p>Low values suggest the result may be driven by outliers.</p>
+<p class="rubric" id="id28">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.scenarios.did import CallawaySantAnnaDID, generate_did_gamma_26
+from causalis.scenarios.did.refutation import run_did_post_inference_diagnostics
+data = generate_did_gamma_26(n_units=300, n_periods=5, seed=42)
+model = CallawaySantAnnaDID().fit(data)
+est = model.estimate(diagnostic_data=True)
+report = run_did_post_inference_diagnostics(data, est)
+report[[“test”, “flag”, “value”]]</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.did.refutation.post_inference.run_did_inference_diagnostics">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.did.refutation.post_inference.</span></span><span class="sig-name descname"><span class="pre">run_did_inference_diagnostics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.scenarios.did.refutation.post_inference.run_did_inference_diagnostics" title="Link to this definition">¶</a></dt>
+<dd><p>Alias for :func:<code class="docutils literal notranslate"><span class="pre">run_did_post_inference_diagnostics</span></code>.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="causalis.scenarios.did.refutation.post_inference.__all__">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.did.refutation.post_inference.</span></span><span class="sig-name descname"><span class="pre">__all__</span></span><a class="headerlink" href="#causalis.scenarios.did.refutation.post_inference.__all__" title="Link to this definition">¶</a></dt>
+<dd><p>[‘did_post_inference_cell_table’, ‘did_influence_table’, ‘did_cluster_influence_table’, ‘run_did_pos…</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../reference.html">Causalis API Reference</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../reference.html">Documentation overview</a><ul>
+  <li><a href="../index.html">API Modules</a><ul>
+  <li><a href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a><ul>
+  <li><a href="causalis.scenarios.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios</span></code></a><ul>
+  <li><a href="causalis.scenarios.did.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.did</span></code></a><ul>
+  <li><a href="causalis.scenarios.did.refutation.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.did.refutation</span></code></a><ul>
+      <li>Previous: <a href="causalis.scenarios.did.refutation.diagnostic_plots.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.did.refutation.diagnostic_plots</span></code></a></li>
+      <li>Next: <a href="causalis.scenarios.did.dgp.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.did.dgp</span></code></a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../../_sources/apidocs/causalis/causalis.scenarios.did.refutation.post_inference.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

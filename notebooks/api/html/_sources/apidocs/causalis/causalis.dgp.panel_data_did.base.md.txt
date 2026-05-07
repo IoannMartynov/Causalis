@@ -1,0 +1,377 @@
+# {py:mod}`causalis.dgp.panel_data_did.base`
+
+```{py:module} causalis.dgp.panel_data_did.base
+```
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base
+:allowtitles:
+```
+
+## Module Contents
+
+### Classes
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`PanelDIDGeneratorConfig <causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig>`
+  - ```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig
+    :summary:
+    ```
+* - {py:obj}`PanelDIDGenerator <causalis.dgp.panel_data_did.base.PanelDIDGenerator>`
+  - ```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGenerator
+    :summary:
+    ```
+````
+
+### API
+
+`````{py:class} PanelDIDGeneratorConfig
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig
+```
+
+````{py:attribute} n_treated_units
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.n_treated_units
+:type: int
+:value: >
+   20
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.n_treated_units
+```
+
+````
+
+````{py:attribute} n_control_units
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.n_control_units
+:type: int
+:value: >
+   60
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.n_control_units
+```
+
+````
+
+````{py:attribute} n_pre_periods
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.n_pre_periods
+:type: int
+:value: >
+   24
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.n_pre_periods
+```
+
+````
+
+````{py:attribute} n_post_periods
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.n_post_periods
+:type: int
+:value: >
+   12
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.n_post_periods
+```
+
+````
+
+````{py:attribute} time_start
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.time_start
+:type: int
+:value: >
+   1
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.time_start
+```
+
+````
+
+````{py:attribute} time_freq
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.time_freq
+:type: str
+:value: >
+   'M'
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.time_freq
+```
+
+````
+
+````{py:attribute} calendar_start
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.calendar_start
+:type: str
+:value: >
+   '2021-01'
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.calendar_start
+```
+
+````
+
+````{py:attribute} treated_prefix
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.treated_prefix
+:type: str
+:value: >
+   'treated_market_'
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.treated_prefix
+```
+
+````
+
+````{py:attribute} control_prefix
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.control_prefix
+:type: str
+:value: >
+   'control_market_'
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.control_prefix
+```
+
+````
+
+````{py:attribute} random_state
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.random_state
+:type: typing.Optional[int]
+:value: >
+   42
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.random_state
+```
+
+````
+
+````{py:attribute} return_panel_data
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.return_panel_data
+:type: bool
+:value: >
+   True
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.return_panel_data
+```
+
+````
+
+````{py:attribute} outcome_distribution
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.outcome_distribution
+:type: typing.Literal[gaussian, gamma, poisson]
+:value: >
+   'gaussian'
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.outcome_distribution
+```
+
+````
+
+````{py:attribute} gamma_shape
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.gamma_shape
+:type: float
+:value: >
+   9.0
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.gamma_shape
+```
+
+````
+
+````{py:attribute} exposure_log_mean
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.exposure_log_mean
+:type: float
+:value: >
+   7.1
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.exposure_log_mean
+```
+
+````
+
+````{py:attribute} exposure_log_std
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.exposure_log_std
+:type: float
+:value: >
+   0.45
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.exposure_log_std
+```
+
+````
+
+````{py:attribute} treated_selection_shift
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.treated_selection_shift
+:type: float
+:value: >
+   0.12
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.treated_selection_shift
+```
+
+````
+
+````{py:attribute} common_factor_std_log
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.common_factor_std_log
+:type: float
+:value: >
+   0.05
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.common_factor_std_log
+```
+
+````
+
+````{py:attribute} unit_noise_std_log
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.unit_noise_std_log
+:type: float
+:value: >
+   0.07
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.unit_noise_std_log
+```
+
+````
+
+````{py:attribute} outcome_noise_std_log
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.outcome_noise_std_log
+:type: float
+:value: >
+   0.06
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.outcome_noise_std_log
+```
+
+````
+
+````{py:attribute} gaussian_noise_std
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.gaussian_noise_std
+:type: float
+:value: >
+   90.0
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.gaussian_noise_std
+```
+
+````
+
+````{py:attribute} rho_common
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.rho_common
+:type: float
+:value: >
+   0.45
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.rho_common
+```
+
+````
+
+````{py:attribute} rho_unit
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.rho_unit
+:type: float
+:value: >
+   0.35
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.rho_unit
+```
+
+````
+
+````{py:attribute} seasonality_strength
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.seasonality_strength
+:type: float
+:value: >
+   0.16
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.seasonality_strength
+```
+
+````
+
+````{py:attribute} parallel_trend_violation
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.parallel_trend_violation
+:type: float
+:value: >
+   0.0
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.parallel_trend_violation
+```
+
+````
+
+````{py:attribute} treatment_effect_rate
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.treatment_effect_rate
+:type: float
+:value: >
+   0.08
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.treatment_effect_rate
+```
+
+````
+
+````{py:attribute} treatment_effect_slope
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.treatment_effect_slope
+:type: float
+:value: >
+   0.0
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.treatment_effect_slope
+```
+
+````
+
+````{py:attribute} treatment_effect_heterogeneity_std
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.treatment_effect_heterogeneity_std
+:type: float
+:value: >
+   0.025
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig.treatment_effect_heterogeneity_std
+```
+
+````
+
+`````
+
+`````{py:class} PanelDIDGenerator(config: causalis.dgp.panel_data_did.base.PanelDIDGeneratorConfig)
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGenerator
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGenerator
+```
+
+```{rubric} Initialization
+```
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGenerator.__init__
+```
+
+````{py:attribute} covariate_cols
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGenerator.covariate_cols
+:type: tuple[str, ...]
+:value: >
+   ('exposure', 'avg_order_value', 'market_competition', 'macro_index', 'seasonality_index')
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGenerator.covariate_cols
+```
+
+````
+
+````{py:attribute} cluster_col
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGenerator.cluster_col
+:type: str
+:value: >
+   'region'
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGenerator.cluster_col
+```
+
+````
+
+````{py:method} generate(*, return_panel_data: typing.Optional[bool] = None) -> typing.Union[pandas.DataFrame, causalis.data_contracts.panel_data_did.PanelDataDID]
+:canonical: causalis.dgp.panel_data_did.base.PanelDIDGenerator.generate
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.base.PanelDIDGenerator.generate
+```
+
+````
+
+`````

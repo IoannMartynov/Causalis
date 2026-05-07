@@ -1,0 +1,111 @@
+# {py:mod}`causalis.dgp.panel_data_did.functional`
+
+```{py:module} causalis.dgp.panel_data_did.functional
+```
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.functional
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`generate_did_data <causalis.dgp.panel_data_did.functional.generate_did_data>`
+  - ```{autodoc2-docstring} causalis.dgp.panel_data_did.functional.generate_did_data
+    :summary:
+    ```
+* - {py:obj}`generate_did_gamma_data <causalis.dgp.panel_data_did.functional.generate_did_gamma_data>`
+  - ```{autodoc2-docstring} causalis.dgp.panel_data_did.functional.generate_did_gamma_data
+    :summary:
+    ```
+* - {py:obj}`generate_did_poisson_data <causalis.dgp.panel_data_did.functional.generate_did_poisson_data>`
+  - ```{autodoc2-docstring} causalis.dgp.panel_data_did.functional.generate_did_poisson_data
+    :summary:
+    ```
+* - {py:obj}`generate_did_gamma <causalis.dgp.panel_data_did.functional.generate_did_gamma>`
+  - ```{autodoc2-docstring} causalis.dgp.panel_data_did.functional.generate_did_gamma
+    :summary:
+    ```
+* - {py:obj}`generate_did_poisson_26_data <causalis.dgp.panel_data_did.functional.generate_did_poisson_26_data>`
+  - ```{autodoc2-docstring} causalis.dgp.panel_data_did.functional.generate_did_poisson_26_data
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`PanelOutput <causalis.dgp.panel_data_did.functional.PanelOutput>`
+  - ```{autodoc2-docstring} causalis.dgp.panel_data_did.functional.PanelOutput
+    :summary:
+    ```
+* - {py:obj}`generate_did_gamma_26_data <causalis.dgp.panel_data_did.functional.generate_did_gamma_26_data>`
+  - ```{autodoc2-docstring} causalis.dgp.panel_data_did.functional.generate_did_gamma_26_data
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} PanelOutput
+:canonical: causalis.dgp.panel_data_did.functional.PanelOutput
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.functional.PanelOutput
+```
+
+````
+
+````{py:function} generate_did_data(n_treated_units: int = 20, n_control_units: int = 60, n_pre_periods: int = 24, n_post_periods: int = 12, treatment_effect_rate: float = 0.08, treatment_effect_slope: float = 0.0, time_start: int = 1, calendar_start: str = '2021-01', time_freq: str = 'M', treated_prefix: str = 'treated_market_', control_prefix: str = 'control_market_', random_state: typing.Optional[int] = 42, return_panel_data: bool = True, include_oracle: bool = True, **advanced_params: typing.Any) -> causalis.dgp.panel_data_did.functional.PanelOutput
+:canonical: causalis.dgp.panel_data_did.functional.generate_did_data
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.functional.generate_did_data
+```
+````
+
+````{py:function} generate_did_gamma_data(n: int = 960, seed: int = 42, return_panel_data: bool = True, include_oracle: bool = True, n_treated_units: int = 20, n_control_units: int = 60, treatment_effect_rate: float = 0.08, treatment_effect_slope: float = 0.0, n_pre_periods: typing.Optional[int] = None, n_post_periods: typing.Optional[int] = None, **advanced_params: typing.Any) -> causalis.dgp.panel_data_did.functional.PanelOutput
+:canonical: causalis.dgp.panel_data_did.functional.generate_did_gamma_data
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.functional.generate_did_gamma_data
+```
+````
+
+````{py:function} generate_did_poisson_data(n: int = 960, seed: int = 42, return_panel_data: bool = True, include_oracle: bool = True, n_treated_units: int = 20, n_control_units: int = 60, treatment_effect_rate: float = 0.08, treatment_effect_slope: float = 0.0, n_pre_periods: typing.Optional[int] = None, n_post_periods: typing.Optional[int] = None, **advanced_params: typing.Any) -> causalis.dgp.panel_data_did.functional.PanelOutput
+:canonical: causalis.dgp.panel_data_did.functional.generate_did_poisson_data
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.functional.generate_did_poisson_data
+```
+````
+
+````{py:function} generate_did_gamma(*, seed: int = 42, return_panel_data: bool = True, include_oracles: bool = True, n_treated_units: int = 20, n_control_units: int = 60, n_pre_periods: typing.Optional[int] = None, n_post_periods: typing.Optional[int] = None, treatment_effect_rate: float = 0.08, treatment_effect_slope: float = 0.0, advanced_params: typing.Optional[dict[str, typing.Any]] = None) -> causalis.dgp.panel_data_did.functional.PanelOutput
+:canonical: causalis.dgp.panel_data_did.functional.generate_did_gamma
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.functional.generate_did_gamma
+```
+````
+
+````{py:data} generate_did_gamma_26_data
+:canonical: causalis.dgp.panel_data_did.functional.generate_did_gamma_26_data
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.functional.generate_did_gamma_26_data
+```
+
+````
+
+````{py:function} generate_did_poisson_26_data(*, seed: int = 42, return_panel_data: bool = True, include_oracles: bool = True, n_treated_units: int = 20, n_control_units: int = 60, n_pre_periods: typing.Optional[int] = None, n_post_periods: typing.Optional[int] = None, treatment_effect_rate: float = 0.08, treatment_effect_slope: float = 0.0, advanced_params: typing.Optional[dict[str, typing.Any]] = None) -> causalis.dgp.panel_data_did.functional.PanelOutput
+:canonical: causalis.dgp.panel_data_did.functional.generate_did_poisson_26_data
+
+```{autodoc2-docstring} causalis.dgp.panel_data_did.functional.generate_did_poisson_26_data
+```
+````

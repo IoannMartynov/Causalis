@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>causalis.scenarios.did.refutation.diagnostics &#8212; Causalis API Reference  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="causalis.scenarios.did.refutation.diagnostic_plots" href="causalis.scenarios.did.refutation.diagnostic_plots.html" />
+    <link rel="prev" title="causalis.scenarios.did.refutation.post_inference_plots" href="causalis.scenarios.did.refutation.post_inference_plots.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-causalis.scenarios.did.refutation.diagnostics">
+<span id="causalis-scenarios-did-refutation-diagnostics"></span><h1><a class="reference internal" href="#module-causalis.scenarios.did.refutation.diagnostics" title="causalis.scenarios.did.refutation.diagnostics"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.did.refutation.diagnostics</span></code></a><a class="headerlink" href="#module-causalis.scenarios.did.refutation.diagnostics" title="Link to this heading">¶</a></h1>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.did.refutation.diagnostics.did_support_table" title="causalis.scenarios.did.refutation.diagnostics.did_support_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">did_support_table</span></code></a></p></td>
+<td><p>Return Callaway &amp; Sant’Anna <code class="docutils literal notranslate"><span class="pre">ATT(g,t)</span></code> support under the requested model policy.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.did.refutation.diagnostics.raw_did_event_study_table" title="causalis.scenarios.did.refutation.diagnostics.raw_did_event_study_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">raw_did_event_study_table</span></code></a></p></td>
+<td><p>Return unadjusted DID event-study cells from the validated panel.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.did.refutation.diagnostics.did_covariate_balance_table" title="causalis.scenarios.did.refutation.diagnostics.did_covariate_balance_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">did_covariate_balance_table</span></code></a></p></td>
+<td><p>Return unweighted base-period covariate balance for Callaway &amp; Sant’Anna cells.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.did.refutation.diagnostics.did_base_design_table" title="causalis.scenarios.did.refutation.diagnostics.did_base_design_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">did_base_design_table</span></code></a></p></td>
+<td><p>Return base-period control-design rank diagnostics for Callaway &amp; Sant’Anna cells.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.did.refutation.diagnostics.run_did_diagnostics" title="causalis.scenarios.did.refutation.diagnostics.run_did_diagnostics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_did_diagnostics</span></code></a></p></td>
+<td><p>Run compact pre-fit diagnostics for Callaway &amp; Sant’Anna estimation readiness.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="data">
+<h3>Data<a class="headerlink" href="#data" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.did.refutation.diagnostics.BasePeriod" title="causalis.scenarios.did.refutation.diagnostics.BasePeriod"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BasePeriod</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.did.refutation.diagnostics.__all__" title="causalis.scenarios.did.refutation.diagnostics.__all__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__all__</span></code></a></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
+<dl class="py data">
+<dt class="sig sig-object py" id="causalis.scenarios.did.refutation.diagnostics.BasePeriod">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.did.refutation.diagnostics.</span></span><span class="sig-name descname"><span class="pre">BasePeriod</span></span><a class="headerlink" href="#causalis.scenarios.did.refutation.diagnostics.BasePeriod" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.did.refutation.diagnostics.did_support_table">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.did.refutation.diagnostics.</span></span><span class="sig-name descname"><span class="pre">did_support_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">causalis.data_contracts.PanelDataDID</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="causalis.data_contracts.panel_data_did.html#causalis.data_contracts.panel_data_did.ComparisonGroup" title="causalis.data_contracts.panel_data_did.ComparisonGroup"><span class="pre">causalis.data_contracts.panel_data_did.ComparisonGroup</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'not_yet_or_never'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anticipation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.scenarios.did.refutation.diagnostics.BasePeriod" title="causalis.scenarios.did.refutation.diagnostics.BasePeriod"><span class="pre">causalis.scenarios.did.refutation.diagnostics.BasePeriod</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'universal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_pre_periods</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.scenarios.did.refutation.diagnostics.did_support_table" title="Link to this definition">¶</a></dt>
+<dd><p>Return Callaway &amp; Sant’Anna <code class="docutils literal notranslate"><span class="pre">ATT(g,t)</span></code> support under the requested model policy.</p>
+<p>This function identifies the available cohort-time cells for estimation and
+verifies if there are enough units to form complete treated/control pairs.
+A unit is “complete” if it is observed in both the base period and the
+target period.</p>
+<p class="rubric" id="id15">Parameters</p>
+<p>data : PanelDataDID
+The validated panel data object.
+control_group : {“not_yet_or_never”, “never_treated”}, default “not_yet_or_never”
+The definition of the comparison group.
+anticipation : int, default 0
+Number of periods before treatment to exclude from the control group
+due to potential anticipation effects.
+base_period : {“universal”, “varying”}, default “universal”
+Whether to use a fixed base period (universal) or a period-specific
+one (varying) for each target period.
+include_pre_periods : bool, default False
+Whether to include pre-treatment periods (useful for placebo tests).</p>
+<p class="rubric" id="id16">Returns</p>
+<p>pd.DataFrame
+A table of support metrics for each cohort-time cell:
+- <code class="docutils literal notranslate"><span class="pre">cohort</span></code>: The treatment group.
+- <code class="docutils literal notranslate"><span class="pre">time</span></code>: The calendar period.
+- <code class="docutils literal notranslate"><span class="pre">base_time</span></code>: The period used as a baseline for the difference.
+- <code class="docutils literal notranslate"><span class="pre">is_supported</span></code>: Whether the cell has sufficient data for estimation.
+- <code class="docutils literal notranslate"><span class="pre">n_treated_complete</span></code>: Number of treated units observed in both periods.
+- <code class="docutils literal notranslate"><span class="pre">n_control_complete</span></code>: Number of control units observed in both periods.
+- <code class="docutils literal notranslate"><span class="pre">treated_completion_rate</span></code>: Share of cohort units that are complete.
+- <code class="docutils literal notranslate"><span class="pre">control_completion_rate</span></code>: Share of control units that are complete.</p>
+<p class="rubric" id="id17">Notes</p>
+<p>The Callaway &amp; Sant’Anna (2021) estimator requires that for each target
+parameter :math:<code class="docutils literal notranslate"><span class="pre">ATT(g,t)</span></code>, there exists a set of units in the comparison
+group that are also observed in the base period :math:<code class="docutils literal notranslate"><span class="pre">g-1</span></code> (or :math:<code class="docutils literal notranslate"><span class="pre">t-1</span></code>
+for varying base periods).</p>
+<p class="rubric" id="id18">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.scenarios.did import generate_did_gamma_26
+from causalis.scenarios.did.refutation import did_support_table
+data = generate_did_gamma_26(n_units=100, n_periods=5, seed=42)
+support = did_support_table(data, control_group=”never_treated”)
+support[[“cohort”, “time”, “is_supported”, “n_treated_complete”]].head()</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.did.refutation.diagnostics.raw_did_event_study_table">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.did.refutation.diagnostics.</span></span><span class="sig-name descname"><span class="pre">raw_did_event_study_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">causalis.data_contracts.PanelDataDID</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="causalis.data_contracts.panel_data_did.html#causalis.data_contracts.panel_data_did.ComparisonGroup" title="causalis.data_contracts.panel_data_did.ComparisonGroup"><span class="pre">causalis.data_contracts.panel_data_did.ComparisonGroup</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'not_yet_or_never'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anticipation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.scenarios.did.refutation.diagnostics.BasePeriod" title="causalis.scenarios.did.refutation.diagnostics.BasePeriod"><span class="pre">causalis.scenarios.did.refutation.diagnostics.BasePeriod</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'varying'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_pre_periods</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.scenarios.did.refutation.diagnostics.raw_did_event_study_table" title="Link to this definition">¶</a></dt>
+<dd><p>Return unadjusted DID event-study cells from the validated panel.</p>
+<p>This function calculates simple mean differences between treated and control
+groups across different event-time periods. These are “raw” estimates
+without covariate adjustment or IPW/DR weighting.</p>
+<p class="rubric" id="id19">Parameters</p>
+<p>data : PanelDataDID
+The validated panel data object.
+control_group : {“not_yet_or_never”, “never_treated”}, default “not_yet_or_never”
+The definition of the comparison group.
+anticipation : int, default 0
+Number of periods before treatment to exclude.
+base_period : {“varying”, “universal”}, default “varying”
+The base period policy for the event study.
+include_pre_periods : bool, default True
+Whether to include pre-treatment (placebo) periods.</p>
+<p class="rubric" id="id20">Returns</p>
+<p>pd.DataFrame
+A table of raw DID estimates:
+- <code class="docutils literal notranslate"><span class="pre">event_time</span></code>: Periods relative to treatment (:math:<code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">-</span> <span class="pre">g</span></code>).
+- <code class="docutils literal notranslate"><span class="pre">raw_did</span></code>: The unadjusted Difference-in-Differences estimate.
+- <code class="docutils literal notranslate"><span class="pre">se</span></code>: Naive standard error of the mean difference.
+- <code class="docutils literal notranslate"><span class="pre">t_stat</span></code>: t-statistic for the null of zero difference.
+- <code class="docutils literal notranslate"><span class="pre">n_treated</span></code>, <code class="docutils literal notranslate"><span class="pre">n_control</span></code>: Sample sizes in the cell.</p>
+<p class="rubric" id="id21">Notes</p>
+<p>The raw DID for a cohort-time cell :math:<code class="docutils literal notranslate"><span class="pre">(g,</span> <span class="pre">t)</span></code> is calculated as:</p>
+<p>.. math::
+\Delta_{raw}(g,t) = [E[Y_t | G=g] - E[Y_{base} | G=g]] - [E[Y_t | C] - E[Y_{base} | C]]</p>
+<p>where :math:<code class="docutils literal notranslate"><span class="pre">C</span></code> is the comparison group. These are useful for visual
+inspection of parallel trends before applying more complex estimators.</p>
+<p class="rubric" id="id22">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.scenarios.did import generate_did_gamma_26
+from causalis.scenarios.did.refutation import raw_did_event_study_table
+data = generate_did_gamma_26(n_units=200, n_periods=5, seed=42)
+event_table = raw_did_event_study_table(data)
+event_table[[“event_time”, “raw_did”, “t_stat”]].head()</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.did.refutation.diagnostics.did_covariate_balance_table">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.did.refutation.diagnostics.</span></span><span class="sig-name descname"><span class="pre">did_covariate_balance_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">causalis.data_contracts.PanelDataDID</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="causalis.data_contracts.panel_data_did.html#causalis.data_contracts.panel_data_did.ComparisonGroup" title="causalis.data_contracts.panel_data_did.ComparisonGroup"><span class="pre">causalis.data_contracts.panel_data_did.ComparisonGroup</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'not_yet_or_never'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anticipation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.scenarios.did.refutation.diagnostics.BasePeriod" title="causalis.scenarios.did.refutation.diagnostics.BasePeriod"><span class="pre">causalis.scenarios.did.refutation.diagnostics.BasePeriod</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'universal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_pre_periods</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.scenarios.did.refutation.diagnostics.did_covariate_balance_table" title="Link to this definition">¶</a></dt>
+<dd><p>Return unweighted base-period covariate balance for Callaway &amp; Sant’Anna cells.</p>
+<p>Calculates the standardized mean difference (SMD) for each covariate
+between the treated and control groups in the base period.</p>
+<p class="rubric" id="id23">Parameters</p>
+<p>data : PanelDataDID
+The validated panel data object.
+control_group : {“not_yet_or_never”, “never_treated”}, default “not_yet_or_never”
+The definition of the comparison group.
+anticipation : int, default 0
+Anticipation periods to exclude.
+base_period : {“universal”, “varying”}, default “universal”
+Base period policy.
+include_pre_periods : bool, default False
+Whether to include pre-treatment cells.
+post_only : bool, default True
+If True, only checks balance for cells used in post-treatment estimation.</p>
+<p class="rubric" id="id24">Returns</p>
+<p>pd.DataFrame
+A balance table with columns:
+- <code class="docutils literal notranslate"><span class="pre">covariate</span></code>: Name of the covariate.
+- <code class="docutils literal notranslate"><span class="pre">treated_mean</span></code>: Average value in the treated group.
+- <code class="docutils literal notranslate"><span class="pre">control_mean</span></code>: Average value in the control group.
+- <code class="docutils literal notranslate"><span class="pre">smd</span></code>: Standardized Mean Difference.
+- <code class="docutils literal notranslate"><span class="pre">abs_smd</span></code>: Absolute value of the SMD.</p>
+<p class="rubric" id="id25">Notes</p>
+<p>The Standardized Mean Difference is defined as:</p>
+<p>.. math::
+SMD = \frac{\bar{X}<em>{treated} - \bar{X}</em>{control}}{\sqrt{(s^2_{treated} + s^2_{control}) / 2}}</p>
+<p>Values of :math:<code class="docutils literal notranslate"><span class="pre">|SMD|</span> <span class="pre">&gt;</span> <span class="pre">0.1</span></code> or :math:<code class="docutils literal notranslate"><span class="pre">0.25</span></code> are often used as thresholds
+to indicate potential imbalance that requires adjustment.</p>
+<p class="rubric" id="id26">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.scenarios.did import generate_did_gamma_26
+from causalis.scenarios.did.refutation import did_covariate_balance_table
+data = generate_did_gamma_26(n_units=200, n_periods=5, seed=42)
+balance = did_covariate_balance_table(data)
+balance[[“covariate”, “treated_mean”, “control_mean”, “abs_smd”]].head()</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.did.refutation.diagnostics.did_base_design_table">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.did.refutation.diagnostics.</span></span><span class="sig-name descname"><span class="pre">did_base_design_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">causalis.data_contracts.PanelDataDID</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="causalis.data_contracts.panel_data_did.html#causalis.data_contracts.panel_data_did.ComparisonGroup" title="causalis.data_contracts.panel_data_did.ComparisonGroup"><span class="pre">causalis.data_contracts.panel_data_did.ComparisonGroup</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'not_yet_or_never'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anticipation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.scenarios.did.refutation.diagnostics.BasePeriod" title="causalis.scenarios.did.refutation.diagnostics.BasePeriod"><span class="pre">causalis.scenarios.did.refutation.diagnostics.BasePeriod</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'universal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_pre_periods</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.scenarios.did.refutation.diagnostics.did_base_design_table" title="Link to this definition">¶</a></dt>
+<dd><p>Return base-period control-design rank diagnostics for Callaway &amp; Sant’Anna cells.</p>
+<p>Checks the numerical stability of the propensity score and outcome regression
+designs in the comparison group. High condition numbers or rank deficiency
+indicate potential multicollinearity or insufficient variation in covariates.</p>
+<p class="rubric" id="id27">Parameters</p>
+<p>data : PanelDataDID
+The validated panel data object.
+control_group : {“not_yet_or_never”, “never_treated”}, default “not_yet_or_never”
+The definition of the comparison group.
+anticipation : int, default 0
+Anticipation periods to exclude.
+base_period : {“universal”, “varying”}, default “universal”
+Base period policy.
+include_pre_periods : bool, default False
+Whether to include pre-treatment cells.
+post_only : bool, default True
+If True, only checks cells used in post-treatment estimation.</p>
+<p class="rubric" id="id28">Returns</p>
+<p>pd.DataFrame
+A table of design diagnostics:
+- <code class="docutils literal notranslate"><span class="pre">n_control</span></code>: Number of units in the control pool for the cell.
+- <code class="docutils literal notranslate"><span class="pre">n_parameters</span></code>: Number of covariates including the intercept.
+- <code class="docutils literal notranslate"><span class="pre">control_design_rank</span></code>: Matrix rank of the covariate design.
+- <code class="docutils literal notranslate"><span class="pre">condition_number</span></code>: The L2 condition number of the design matrix.
+- <code class="docutils literal notranslate"><span class="pre">is_rank_deficient</span></code>: Whether the matrix is not full rank.</p>
+<p class="rubric" id="id29">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.scenarios.did import generate_did_gamma_26
+from causalis.scenarios.did.refutation import did_base_design_table
+data = generate_did_gamma_26(n_units=200, n_periods=5, seed=42)
+design = did_base_design_table(data)
+design[[“n_control”, “condition_number”, “is_rank_deficient”]].head()</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.did.refutation.diagnostics.run_did_diagnostics">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.did.refutation.diagnostics.</span></span><span class="sig-name descname"><span class="pre">run_did_diagnostics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">causalis.data_contracts.PanelDataDID</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="causalis.data_contracts.panel_data_did.html#causalis.data_contracts.panel_data_did.ComparisonGroup" title="causalis.data_contracts.panel_data_did.ComparisonGroup"><span class="pre">causalis.data_contracts.panel_data_did.ComparisonGroup</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'not_yet_or_never'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anticipation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.scenarios.did.refutation.diagnostics.BasePeriod" title="causalis.scenarios.did.refutation.diagnostics.BasePeriod"><span class="pre">causalis.scenarios.did.refutation.diagnostics.BasePeriod</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'universal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_pre_periods</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_treated_per_cell</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_control_per_cell</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_control_to_treated_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_pair_completion_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_control_pool_retention</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_unsupported_cell_share</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_pre_periods</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_abs_pretrend_t_stat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_abs_covariate_smd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_condition_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">_DEFAULT_MAX_CONDITION_NUMBER</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_clusters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.scenarios.did.refutation.diagnostics.run_did_diagnostics" title="Link to this definition">¶</a></dt>
+<dd><p>Run compact pre-fit diagnostics for Callaway &amp; Sant’Anna estimation readiness.</p>
+<p>This function performs a battery of “smoke tests” on the data before fitting
+the model. It checks for sufficient sample size, parallel trends in pre-treatment
+periods, covariate balance, and numerical stability of the design.</p>
+<p class="rubric" id="id30">Parameters</p>
+<p>data : PanelDataDID
+The validated panel data object.
+control_group : {“not_yet_or_never”, “never_treated”}, default “not_yet_or_never”
+The definition of the comparison group.
+anticipation : int, default 0
+Anticipation periods to exclude.
+base_period : {“universal”, “varying”}, default “universal”
+Base period policy.
+include_pre_periods : bool, default False
+Whether to include pre-treatment cells in the diagnostics.
+min_treated_per_cell : int, default 30
+Minimum number of treated units required in each ATT(g,t) cell.
+min_control_per_cell : int, default 30
+Minimum number of control units required in each ATT(g,t) cell.
+min_control_to_treated_ratio : float, default 1.0
+Minimum ratio of control units to treated units.
+min_pair_completion_rate : float, default 0.80
+Minimum share of units that must be observed in both base and target periods.
+min_control_pool_retention : float, default 0.25
+Minimum share of the original control pool that must be available for estimation.
+max_unsupported_cell_share : float, default 0.25
+Maximum allowable share of cohort-time cells that cannot be estimated.
+min_pre_periods : int, default 2
+Minimum number of pre-treatment periods required for placebo tests.
+max_abs_pretrend_t_stat : float, default 2.0
+Maximum absolute t-statistic allowed for raw pre-treatment differences.
+max_abs_covariate_smd : float, default 0.25
+Maximum allowable absolute SMD for covariates in the base period.
+max_condition_number : float, default 1e6
+Maximum allowable condition number for the control design matrix.
+min_clusters : int, default 2
+Minimum number of clusters required if clustering is used.</p>
+<p class="rubric" id="id31">Returns</p>
+<p>pd.DataFrame
+A diagnostic report with columns:
+- <code class="docutils literal notranslate"><span class="pre">test</span></code>: Name of the diagnostic check.
+- <code class="docutils literal notranslate"><span class="pre">flag</span></code>: Status (GREEN, YELLOW, RED).
+- <code class="docutils literal notranslate"><span class="pre">value</span></code>: Observed value of the metric.
+- <code class="docutils literal notranslate"><span class="pre">threshold</span></code>: The threshold used for the check.
+- <code class="docutils literal notranslate"><span class="pre">message</span></code>: Descriptive result message.</p>
+<p class="rubric" id="id32">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.scenarios.did import generate_did_gamma_26
+from causalis.scenarios.did.refutation import run_did_diagnostics
+data = generate_did_gamma_26(n_units=300, n_periods=5, seed=42)
+report = run_did_diagnostics(data)
+report[[“test”, “flag”, “value”]]</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="causalis.scenarios.did.refutation.diagnostics.__all__">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.did.refutation.diagnostics.</span></span><span class="sig-name descname"><span class="pre">__all__</span></span><a class="headerlink" href="#causalis.scenarios.did.refutation.diagnostics.__all__" title="Link to this definition">¶</a></dt>
+<dd><p>[‘did_support_table’, ‘raw_did_event_study_table’, ‘did_covariate_balance_table’, ‘did_base_design_t…</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../reference.html">Causalis API Reference</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../reference.html">Documentation overview</a><ul>
+  <li><a href="../index.html">API Modules</a><ul>
+  <li><a href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a><ul>
+  <li><a href="causalis.scenarios.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios</span></code></a><ul>
+  <li><a href="causalis.scenarios.did.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.did</span></code></a><ul>
+  <li><a href="causalis.scenarios.did.refutation.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.did.refutation</span></code></a><ul>
+      <li>Previous: <a href="causalis.scenarios.did.refutation.post_inference_plots.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.did.refutation.post_inference_plots</span></code></a></li>
+      <li>Next: <a href="causalis.scenarios.did.refutation.diagnostic_plots.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.did.refutation.diagnostic_plots</span></code></a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../../_sources/apidocs/causalis/causalis.scenarios.did.refutation.diagnostics.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

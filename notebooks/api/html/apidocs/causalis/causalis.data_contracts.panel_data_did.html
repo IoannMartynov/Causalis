@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>causalis.data_contracts.panel_data_did &#8212; Causalis API Reference  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="causalis.data_contracts.causaldata" href="causalis.data_contracts.causaldata.html" />
+    <link rel="prev" title="causalis.data_contracts.multicausal_estimate" href="causalis.data_contracts.multicausal_estimate.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-causalis.data_contracts.panel_data_did">
+<span id="causalis-data-contracts-panel-data-did"></span><h1><a class="reference internal" href="#module-causalis.data_contracts.panel_data_did" title="causalis.data_contracts.panel_data_did"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.data_contracts.panel_data_did</span></code></a><a class="headerlink" href="#module-causalis.data_contracts.panel_data_did" title="Link to this heading">¶</a></h1>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.data_contracts.panel_data_did.PanelDataDID" title="causalis.data_contracts.panel_data_did.PanelDataDID"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PanelDataDID</span></code></a></p></td>
+<td><p>Validated long-format panel contract for staggered-adoption DID.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="data">
+<h3>Data<a class="headerlink" href="#data" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.data_contracts.panel_data_did.TimeLike" title="causalis.data_contracts.panel_data_did.TimeLike"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeLike</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.data_contracts.panel_data_did.ComparisonGroup" title="causalis.data_contracts.panel_data_did.ComparisonGroup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ComparisonGroup</span></code></a></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
+<dl class="py data">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.TimeLike">
+<span class="sig-prename descclassname"><span class="pre">causalis.data_contracts.panel_data_did.</span></span><span class="sig-name descname"><span class="pre">TimeLike</span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.TimeLike" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.ComparisonGroup">
+<span class="sig-prename descclassname"><span class="pre">causalis.data_contracts.panel_data_did.</span></span><span class="sig-name descname"><span class="pre">ComparisonGroup</span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.ComparisonGroup" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">causalis.data_contracts.panel_data_did.</span></span><span class="sig-name descname"><span class="pre">PanelDataDID</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">pydantic.BaseModel</span></code></p>
+<p>Validated long-format panel contract for staggered-adoption DID.</p>
+<p class="rubric" id="id1">Required fields</p>
+<p>df : pandas.DataFrame
+Long-format panel data.
+y : str
+Outcome column name in <code class="docutils literal notranslate"><span class="pre">df</span></code>.
+unit_col : str
+Unit identifier column name in <code class="docutils literal notranslate"><span class="pre">df</span></code>.
+time_col : str
+Calendar time column name in <code class="docutils literal notranslate"><span class="pre">df</span></code>.
+Preferred input format is <code class="docutils literal notranslate"><span class="pre">pandas.Period</span></code> values with a regular
+frequency (for example monthly <code class="docutils literal notranslate"><span class="pre">Period['M']</span></code>). Datetime/string values
+are accepted only when a regular frequency can be inferred.
+treated_time : str
+Binary period-level treatment column in <code class="docutils literal notranslate"><span class="pre">df</span></code> (0/1 or False/True).
+Treatment is required to be absorbing: once a unit is treated, every
+later observed row for that unit must remain treated.
+covariates : sequence of str, optional
+Optional numeric covariate column names in <code class="docutils literal notranslate"><span class="pre">df</span></code>. The input alias
+<code class="docutils literal notranslate"><span class="pre">covariants</span></code> is accepted for convenience.
+cluster_col : str, optional
+Optional cluster identifier column name in <code class="docutils literal notranslate"><span class="pre">df</span></code>. The input alias
+<code class="docutils literal notranslate"><span class="pre">cluster</span></code> is accepted for convenience. <code class="docutils literal notranslate"><span class="pre">unit_col</span></code> is valid for
+unit-level clustering. Estimators that form unit-level influence
+functions require non-unit cluster columns to be stable within unit;
+<code class="docutils literal notranslate"><span class="pre">time_col</span></code> is therefore valid for the contract but not for those
+estimators.</p>
+<p class="rubric" id="id2">Notes</p>
+<p>Extra keyword arguments are rejected.
+The contract derives <code class="docutils literal notranslate"><span class="pre">treated_units</span></code>, <code class="docutils literal notranslate"><span class="pre">control_units</span></code> (never-treated
+units), <code class="docutils literal notranslate"><span class="pre">cohorts</span></code>, per-unit first treatment dates, and <code class="docutils literal notranslate"><span class="pre">time_freq</span></code> from
+the input data. <code class="docutils literal notranslate"><span class="pre">treatment_start</span></code> is kept as a compatibility alias for the
+earliest treatment cohort; staggered estimators should use <code class="docutils literal notranslate"><span class="pre">cohorts</span></code> and
+<code class="docutils literal notranslate"><span class="pre">first_treatment_by_unit</span></code> instead.
+This contract is intended for Callaway &amp; Sant’Anna-style staggered
+difference-in-differences designs. It validates cohort support for at least
+one estimable <code class="docutils literal notranslate"><span class="pre">ATT(g,t)</span></code> cell using not-yet-treated or never-treated
+comparison units and exposes a full support table via <code class="docutils literal notranslate"><span class="pre">att_gt_cells</span></code>.
+The model stores a validated internal dataframe snapshot used by all contract
+methods; mutating the public <code class="docutils literal notranslate"><span class="pre">df</span></code> attribute after construction does not
+affect validated contract behavior.
+Outcome <code class="docutils literal notranslate"><span class="pre">y</span></code> must not contain null/NaN values. Represent missing panel
+periods by omitting unit-time rows, not by keeping rows with <code class="docutils literal notranslate"><span class="pre">NaN</span></code> outcome.
+For fiscal quarter/year semantics, pass <code class="docutils literal notranslate"><span class="pre">time_col</span></code> explicitly as
+<code class="docutils literal notranslate"><span class="pre">pandas.Period</span></code> with the desired fiscal frequency.</p>
+<p class="rubric">Initialization</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code class="docutils literal notranslate"><span class="pre">ValidationError</span></code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code class="docutils literal notranslate"><span class="pre">self</span></code> is explicitly positional-only to allow <code class="docutils literal notranslate"><span class="pre">self</span></code> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.model_config" title="Link to this definition">¶</a></dt>
+<dd><p>‘ConfigDict(…)’</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.df">
+<span class="sig-name descname"><span class="pre">df</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.df" title="Link to this definition">¶</a></dt>
+<dd><p>‘Field(…)’</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.y">
+<span class="sig-name descname"><span class="pre">y</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.y" title="Link to this definition">¶</a></dt>
+<dd><p>‘Field(…)’</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.unit_col">
+<span class="sig-name descname"><span class="pre">unit_col</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.unit_col" title="Link to this definition">¶</a></dt>
+<dd><p>‘Field(…)’</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.time_col">
+<span class="sig-name descname"><span class="pre">time_col</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.time_col" title="Link to this definition">¶</a></dt>
+<dd><p>‘Field(…)’</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.treated_time">
+<span class="sig-name descname"><span class="pre">treated_time</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.treated_time" title="Link to this definition">¶</a></dt>
+<dd><p>‘Field(…)’</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.covariates">
+<span class="sig-name descname"><span class="pre">covariates</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.covariates" title="Link to this definition">¶</a></dt>
+<dd><p>‘Field(…)’</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.cluster_col">
+<span class="sig-name descname"><span class="pre">cluster_col</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.cluster_col" title="Link to this definition">¶</a></dt>
+<dd><p>‘Field(…)’</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.treated_units">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">treated_units</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Hashable</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.treated_units" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.control_units">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">control_units</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Hashable</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.control_units" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.never_treated_units">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">never_treated_units</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Hashable</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.never_treated_units" title="Link to this definition">¶</a></dt>
+<dd><p>Units that are never treated in the observed panel.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.first_treatment_by_unit">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">first_treatment_by_unit</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Hashable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.Period</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.first_treatment_by_unit" title="Link to this definition">¶</a></dt>
+<dd><p>Map every unit to its first treatment period, or <code class="docutils literal notranslate"><span class="pre">None</span></code> if never treated.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.cohort_by_unit">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">cohort_by_unit</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Hashable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">pandas.Period</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.cohort_by_unit" title="Link to this definition">¶</a></dt>
+<dd><p>Map ever-treated units to their first treatment cohort.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.cohorts">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">cohorts</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.Period</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.cohorts" title="Link to this definition">¶</a></dt>
+<dd><p>Sorted first-treatment periods among ever-treated units.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.treatment_start">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">treatment_start</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.Period</span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.treatment_start" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.latest_treatment_start">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">latest_treatment_start</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.Period</span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.latest_treatment_start" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.time_freq">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">time_freq</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.time_freq" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.n_pre_periods">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">n_pre_periods</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.n_pre_periods" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.n_post_periods">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">n_post_periods</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.n_post_periods" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.last_post_period">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">last_post_period</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.Period</span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.last_post_period" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.design_type">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">design_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">canonical_2x2</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">simultaneous_adoption</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">staggered_adoption</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.design_type" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.has_covariates">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">has_covariates</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.has_covariates" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.has_cluster">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">has_cluster</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.has_cluster" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.df_analysis">
+<span class="sig-name descname"><span class="pre">df_analysis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.df_analysis" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.covariate_frame">
+<span class="sig-name descname"><span class="pre">covariate_frame</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.covariate_frame" title="Link to this definition">¶</a></dt>
+<dd><p>Return a copy of the validated covariate design columns.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.cluster_series">
+<span class="sig-name descname"><span class="pre">cluster_series</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.Series</span></span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.cluster_series" title="Link to this definition">¶</a></dt>
+<dd><p>Return a copy of the validated cluster identifier column.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.cohort_units">
+<span class="sig-name descname"><span class="pre">cohort_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cohort</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.data_contracts.panel_data_did.TimeLike" title="causalis.data_contracts.panel_data_did.TimeLike"><span class="pre">causalis.data_contracts.panel_data_did.TimeLike</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Hashable</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.cohort_units" title="Link to this definition">¶</a></dt>
+<dd><p>Return units first treated in the requested cohort.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.not_yet_treated_units">
+<span class="sig-name descname"><span class="pre">not_yet_treated_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.data_contracts.panel_data_did.TimeLike" title="causalis.data_contracts.panel_data_did.TimeLike"><span class="pre">causalis.data_contracts.panel_data_did.TimeLike</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_never</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Hashable</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.not_yet_treated_units" title="Link to this definition">¶</a></dt>
+<dd><p>Return units untreated at <code class="docutils literal notranslate"><span class="pre">time</span></code> because they adopt later or never adopt.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.comparison_units">
+<span class="sig-name descname"><span class="pre">comparison_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cohort</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.data_contracts.panel_data_did.TimeLike" title="causalis.data_contracts.panel_data_did.TimeLike"><span class="pre">causalis.data_contracts.panel_data_did.TimeLike</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.data_contracts.panel_data_did.TimeLike" title="causalis.data_contracts.panel_data_did.TimeLike"><span class="pre">causalis.data_contracts.panel_data_did.TimeLike</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.data_contracts.panel_data_did.ComparisonGroup" title="causalis.data_contracts.panel_data_did.ComparisonGroup"><span class="pre">causalis.data_contracts.panel_data_did.ComparisonGroup</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'not_yet_or_never'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Hashable</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.comparison_units" title="Link to this definition">¶</a></dt>
+<dd><p>Return valid comparison units for a Callaway-Sant’Anna <code class="docutils literal notranslate"><span class="pre">ATT(g,t)</span></code> cell.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.df_for_did">
+<span class="sig-name descname"><span class="pre">df_for_did</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">treated_group_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'treated_group'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'post'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cohort_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cohort'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_time_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'event_time'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.df_for_did" title="Link to this definition">¶</a></dt>
+<dd><p>Return analysis data with derived staggered-DID cohort and event-time columns.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.pre_times">
+<span class="sig-name descname"><span class="pre">pre_times</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cohort</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#causalis.data_contracts.panel_data_did.TimeLike" title="causalis.data_contracts.panel_data_did.TimeLike"><span class="pre">causalis.data_contracts.panel_data_did.TimeLike</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.Period</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.pre_times" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.post_times">
+<span class="sig-name descname"><span class="pre">post_times</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cohort</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#causalis.data_contracts.panel_data_did.TimeLike" title="causalis.data_contracts.panel_data_did.TimeLike"><span class="pre">causalis.data_contracts.panel_data_did.TimeLike</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.Period</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.post_times" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.analysis_times">
+<span class="sig-name descname"><span class="pre">analysis_times</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.Period</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.analysis_times" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.time_to_index">
+<span class="sig-name descname"><span class="pre">time_to_index</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.Period</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.time_to_index" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.treatment_start_idx">
+<span class="sig-name descname"><span class="pre">treatment_start_idx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cohort</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#causalis.data_contracts.panel_data_did.TimeLike" title="causalis.data_contracts.panel_data_did.TimeLike"><span class="pre">causalis.data_contracts.panel_data_did.TimeLike</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.treatment_start_idx" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.att_gt_cells">
+<span class="sig-name descname"><span class="pre">att_gt_cells</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.data_contracts.panel_data_did.ComparisonGroup" title="causalis.data_contracts.panel_data_did.ComparisonGroup"><span class="pre">causalis.data_contracts.panel_data_did.ComparisonGroup</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'not_yet_or_never'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anticipation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">universal</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">varying</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'universal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_pre_periods</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_unsupported</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.att_gt_cells" title="Link to this definition">¶</a></dt>
+<dd><p>Return Callaway-Sant’Anna <code class="docutils literal notranslate"><span class="pre">ATT(g,t)</span></code> support under an explicit policy.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.cell_counts">
+<span class="sig-name descname"><span class="pre">cell_counts</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.cell_counts" title="Link to this definition">¶</a></dt>
+<dd><p>Return ever-treated/never-treated row counts by analysis period and own-treatment status.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.data_contracts.panel_data_did.PanelDataDID.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#causalis.data_contracts.panel_data_did.PanelDataDID.__repr__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../reference.html">Causalis API Reference</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../reference.html">Documentation overview</a><ul>
+  <li><a href="../index.html">API Modules</a><ul>
+  <li><a href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a><ul>
+  <li><a href="causalis.data_contracts.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.data_contracts</span></code></a><ul>
+      <li>Previous: <a href="causalis.data_contracts.multicausal_estimate.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.data_contracts.multicausal_estimate</span></code></a></li>
+      <li>Next: <a href="causalis.data_contracts.causaldata.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.data_contracts.causaldata</span></code></a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../../_sources/apidocs/causalis/causalis.data_contracts.panel_data_did.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

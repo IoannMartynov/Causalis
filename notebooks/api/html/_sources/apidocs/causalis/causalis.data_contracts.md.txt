@@ -13,6 +13,7 @@
 :titlesonly:
 :maxdepth: 1
 
+causalis.data_contracts.panel_did_estimate
 causalis.data_contracts.gate_contrast_estimate
 causalis.data_contracts.sensitivity_analysis_result
 causalis.data_contracts.causal_diagnostic_data
@@ -21,6 +22,7 @@ causalis.data_contracts.panel_data_scm
 causalis.data_contracts.panel_estimate
 causalis.data_contracts.causaldata_instrumental
 causalis.data_contracts.multicausal_estimate
+causalis.data_contracts.panel_data_did
 causalis.data_contracts.causaldata
 causalis.data_contracts.gate_estimate
 causalis.data_contracts.multicausaldata
@@ -57,7 +59,7 @@ causalis.data_contracts.multicausaldata
 ````{py:data} __all__
 :canonical: causalis.data_contracts.__all__
 :value: >
-   ['CausalData', 'MultiCausalData', 'CausalDataInstrumental', 'PanelDataSCM', 'PanelEstimate', 'Causal...
+   ['CausalData', 'MultiCausalData', 'CausalDataInstrumental', 'PanelDataDID', 'PanelDataSCM', 'PanelDI...
 
 ```{autodoc2-docstring} causalis.data_contracts.__all__
 ```
