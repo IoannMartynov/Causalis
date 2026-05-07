@@ -71,9 +71,9 @@ result.summary()
 
 **[Multi Unconfoundedness](https://causalis.causalcraft.com/articles/multi_unconfoundedness)**: Multi Unconfoundedness extends observational identification to multiple treatment arms. We estimate causal contrasts across arms by adjusting for observed confounders and modeling generalized propensity scores.
 
-**[Synthetic Control*](https://causalis.causalcraft.com/articles/synthetic_control)*: Single treated-unit panel setups matched against a weighted synthetic donor pool.
+**[Synthetic Control](https://causalis.causalcraft.com/articles/synthetic_control)**: Single treated-unit panel setups matched against a weighted synthetic donor pool.
 
-**[Difference in Difference*](https://causalis.causalcraft.com/articles/did)*: causal effects by comparing the changes in outcomes over time between a treatment group and a control group based on parallel trends
+**[Difference in Difference](https://causalis.causalcraft.com/articles/did)**: causal effects by comparing the changes in outcomes over time between a treatment group and a control group based on parallel trends
 
 **[Uplift / CATE scoring](https://causalis.causalcraft.com/articles/uplift)**: Uplift modeling estimates the Conditional Average Treatment Effect (CATE) for individual units, enabling optimal targeting and personalized decision making.
 
