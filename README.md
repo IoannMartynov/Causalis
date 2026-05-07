@@ -83,6 +83,10 @@ See scenario notebooks: https://causalis.causalcraft.com/explore-scenarios
 
 # [Contributing guidelines](https://github.com/causalis-causalcraft/Causalis?tab=contributing-ov-file)
 
-# Acknowledgements
+# Maintainers
+
+[Ioann Martynov](https://www.linkedin.com/in/ioannmartynov/)
+
+# References
 
 https://github.com/DoubleML/doubleml-for-py
