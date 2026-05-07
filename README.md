@@ -65,7 +65,7 @@ result.summary()
 |--------------------------------------------------------------------------------------------|-----------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------|
 | [Classic RCT](https://causalis.causalcraft.com/articles/classic_rct)                       | Difference in means (ttest, ztest, bootstrap) | Random assignment, no sample ratio mismatch, SUTVA                                                                              |
 | [CUPED](https://causalis.causalcraft.com/articles/cuped)                                   | CUPED-adjusted difference in means            | Random assignment, no sample ratio mismatch, SUTVA, valid pre-period metrics                                                    |
-| [Unconfoundedness](https://causalis.causalcraft.com/articles/uncofoundedness)              | DML IRM                                       | Unconfoundedness, Overlap, SUTVA, No leakage, Score stability                                                                   |
+| [Unconfoundedness](https://causalis.causalcraft.com/articles/unconfoundedness)             | DML IRM                                       | Unconfoundedness, Overlap, SUTVA, No leakage, Score stability                                                                   |
 | [GATE](https://causalis.causalcraft.com/articles/gate)                                     | DML IRM (GATE and GATET)                      | Same assumptions as unconfoundedness, plus meaningful pre-specified or validated subgroup definitions.                          |
 | [Multi Unconfoundedness](https://causalis.causalcraft.com/articles/multi_unconfoundedness) | Multi DML IRM                                 | Unconfoundedness, Multi class Overlap, SUTVA, No leakage, Score stability                                                       |
 | [Synthetic Control](https://causalis.causalcraft.com/articles/synthetic_control)           | ASCM                                          | No interference / spillovers, No anticipation, The treated unit’s untreated outcome path is well approximated by the donor pool |
@@ -86,3 +86,20 @@ See scenario notebooks: https://causalis.causalcraft.com/explore-scenarios
 
 https://github.com/DoubleML/doubleml-for-py
 
+## Search terms / supported methods
+
+Causalis covers methods often searched as:
+
+- causal inference Python
+- causal machine learning Python
+- treatment effect estimation
+- A/B testing Python
+- randomized controlled trial analysis
+- CUPED Python
+- Double Machine Learning Python
+- DML / IRM
+- CATE estimation
+- uplift modeling
+- propensity score diagnostics
+- synthetic control Python
+- difference-in-differences Python
