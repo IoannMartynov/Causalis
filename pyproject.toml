@@ -11,6 +11,28 @@ authors = [
     {name = "causalis Team"}
 ]
 license = {text = "MIT"}
+
+keywords = [
+  "causal inference",
+  "causal machine learning",
+  "econometrics",
+  "experimentation",
+  "ab testing",
+  "a/b testing",
+  "rct",
+  "cuped",
+  "dml",
+  "double machine learning",
+  "treatment effects",
+  "cate",
+  "uplift modeling",
+  "propensity score",
+  "synthetic control",
+  "difference in differences",
+  "did",
+  "python"
+]
+
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",

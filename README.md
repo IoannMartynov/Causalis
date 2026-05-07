@@ -61,21 +61,16 @@ result.summary()
 
 # Pick your scenario
 
-**[Classic RCT](https://causalis.causalcraft.com/articles/classic_rct)**: randomized assignment (no pre-period metric).
-
-**[CUPED](https://causalis.causalcraft.com/articles/cuped)**: randomized assignment with pre-period metric for variance reduction.
-
-**[Unconfoundedness](https://causalis.causalcraft.com/articles/uncofoundedness)**: observational study adjusting for measured confounders (DML IRM).
-
-**[GATE](https://causalis.causalcraft.com/articles/gate)**: Subgroup treatment effects built on top of an observational IRM workflow.
-
-**[Multi Unconfoundedness](https://causalis.causalcraft.com/articles/multi_unconfoundedness)**: Multi Unconfoundedness extends observational identification to multiple treatment arms. We estimate causal contrasts across arms by adjusting for observed confounders and modeling generalized propensity scores.
-
-**[Synthetic Control](https://causalis.causalcraft.com/articles/synthetic_control)**: Single treated-unit panel setups matched against a weighted synthetic donor pool.
-
-**[Difference in Difference](https://causalis.causalcraft.com/articles/did)**: causal effects by comparing the changes in outcomes over time between a treatment group and a control group based on parallel trends
-
-**[Uplift / CATE scoring](https://causalis.causalcraft.com/articles/uplift)**: Uplift modeling estimates the Conditional Average Treatment Effect (CATE) for individual units, enabling optimal targeting and personalized decision making.
+| Scenario                                                                                   | Estimator                                     | Assumptions                                                                                                                     |
+|--------------------------------------------------------------------------------------------|-----------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------|
+| [Classic RCT](https://causalis.causalcraft.com/articles/classic_rct)                       | Difference in means (ttest, ztest, bootstrap) | Random assignment, no sample ratio mismatch, SUTVA                                                                              |
+| [CUPED](https://causalis.causalcraft.com/articles/cuped)                                   | CUPED-adjusted difference in means            | Random assignment, no sample ratio mismatch, SUTVA, valid pre-period metrics                                                    |
+| [Unconfoundedness](https://causalis.causalcraft.com/articles/unconfoundedness)             | DML IRM                                       | Unconfoundedness, Overlap, SUTVA, No leakage, Score stability                                                                   |
+| [GATE](https://causalis.causalcraft.com/articles/gate)                                     | DML IRM (GATE and GATET)                      | Same assumptions as unconfoundedness, plus meaningful pre-specified or validated subgroup definitions.                          |
+| [Multi Unconfoundedness](https://causalis.causalcraft.com/articles/multi_unconfoundedness) | Multi DML IRM                                 | Unconfoundedness, Multi class Overlap, SUTVA, No leakage, Score stability                                                       |
+| [Synthetic Control](https://causalis.causalcraft.com/articles/synthetic_control)           | ASCM                                          | No interference / spillovers, No anticipation, The treated unit’s untreated outcome path is well approximated by the donor pool |
+| [Difference in Difference](https://causalis.causalcraft.com/articles/did)                  | CallawaySantAnnaDID                           | Parallel trends, no anticipation, stable group composition, no spillovers between treated and control groups.                   |
+| [Uplift / CATE scoring](https://causalis.causalcraft.com/articles/uplift)                  | DML IRM (CATE)                                | Identified treatment effects from randomized or unconfounded data, overlap, calibrated individual-level predictions.            |
 
 [Introduction to Causal Inference](https://causalis.causalcraft.com/articles/introduction-to-causal-inference): guide
 
@@ -90,3 +85,21 @@ See scenario notebooks: https://causalis.causalcraft.com/explore-scenarios
 # References
 
 https://github.com/DoubleML/doubleml-for-py
+
+## Search terms / supported methods
+
+Causalis covers methods often searched as:
+
+- causal inference Python
+- causal machine learning Python
+- treatment effect estimation
+- A/B testing Python
+- randomized controlled trial analysis
+- CUPED Python
+- Double Machine Learning Python
+- DML / IRM
+- CATE estimation
+- uplift modeling
+- propensity score diagnostics
+- synthetic control Python
+- difference-in-differences Python
