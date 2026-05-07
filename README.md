@@ -1,8 +1,10 @@
 # Causalis
-![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12%20|%203.13%20|%203.14-blue)
+[![PyPI version](https://img.shields.io/pypi/v/causalis.svg)](https://pypi.org/project/causalis/)
 [![PyPI Downloads](https://static.pepy.tech/personalized-badge/causalis?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=GREEN&left_text=downloads)](https://pepy.tech/projects/causalis)
+![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12%20|%203.13%20|%203.14-blue)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Code quality](https://img.shields.io/badge/code%20quality-A-brightgreen)
+[![Docs](https://img.shields.io/badge/docs-causalis.causalcraft.com-blue)](https://causalis.causalcraft.com/)
 
 <a href="https://causalis.causalcraft.com/"><img src="https://raw.githubusercontent.com/causalis-causalcraft/Causalis/main/notebooks/new_logo_big.svg" alt="Causalis logo" width="80" style="float: left; margin-right: 10px;" /></a>
 
@@ -14,34 +16,16 @@ Robust causal inference for experiments and observational studies in Python, org
 ## Why Causalis?
 Causalis focuses on:
 - Scenario-first workflows (you pick the study design; Causalis provides best-practice defaults).
-- Guardrails and diagnostics (e.g., SRM checks, balance checks).
-- Typed data contracts (`CausalData`) to fail fast on schema issues. 
+- Extensive robustness tests that reveal issues in the study design or model specification
+- Pydantic data contracts 
+- An advanced DGP (Data Generating Process) with heterogeneous treatment effects, latent variables, and correlated confounders
+- A website with notebooks based on real-world cases
 
 ## Installation
 ### Recommended
 ```bash
 pip install causalis
 ```
-
-## Releasing
-
-Production releases are created from annotated Git tags on `main`. The tag
-drives the package version through `setuptools-scm`, then GitHub Actions builds,
-checks, publishes to PyPI with Trusted Publishing, and creates the matching
-GitHub Release.
-
-```bash
-git checkout main
-git pull --ff-only origin main
-python3 -m pytest
-
-git tag -a v0.5.1 -m "Release v0.5.1"
-git push origin v0.5.1
-```
-
-Do not edit a version string by hand or upload release artifacts manually.
-Configure the PyPI trusted publisher for `causalis-causalcraft/Causalis`,
-workflow `release.yml`, and environment `pypi`.
 
 # Quickstart: Classic RCT (difference in means + inference)
 
@@ -77,34 +61,25 @@ result.summary()
 
 # Pick your scenario
 
-Classic RCT: randomized assignment (no pre-period metric).
+**Classic RCT**: randomized assignment (no pre-period metric).
 
-CUPED: randomized assignment with pre-period metric for variance reduction.
+**CUPED**: randomized assignment with pre-period metric for variance reduction.
 
-Unconfoundedness: observational study adjusting for measured confounders (DML IRM).
+**Unconfoundedness**: observational study adjusting for measured confounders (DML IRM).
+
+**GATE**: Subgroup treatment effects built on top of an observational IRM workflow.
+
+**Multi Unconfoundedness**: Multi Unconfoundedness extends observational identification to multiple treatment arms. We estimate causal contrasts across arms by adjusting for observed confounders and modeling generalized propensity scores.
+
+**Synthetic Control**: Single treated-unit panel setups matched against a weighted synthetic donor pool.
+
+**Difference in Difference**: causal effects by comparing the changes in outcomes over time between a treatment group and a control group based on parallel trends
+
+**Uplift / CATE scoring**: Uplift modeling estimates the Conditional Average Treatment Effect (CATE) for individual units, enabling optimal targeting and personalized decision making.
 
 See scenario notebooks: https://causalis.causalcraft.com/explore-scenarios
 
-# Responsible use / limitations
-
-Causal estimates require identification assumptions (e.g., randomization or unconfoundedness + overlap).
-Causalis can help with diagnostics, but it cannot guarantee assumptions hold in your data.
-
-# Contributing
-
-Contributions are welcome—bug reports, docs fixes, notebooks, and new estimators.
-Please read CONTRIBUTING.md and follow the Code of Conduct.
-
-# Getting help
-
-Questions: GitHub Discussions
-
-Bugs: GitHub Issues (include minimal repro + versions)
-
-
-# License
-
-MIT (see LICENSE).
+# [Contributing guidelines](https://github.com/causalis-causalcraft/Causalis?tab=contributing-ov-file)
 
 # Acknowledgements
 

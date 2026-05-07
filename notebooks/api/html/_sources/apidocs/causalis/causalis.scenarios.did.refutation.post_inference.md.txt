@@ -1,0 +1,97 @@
+# {py:mod}`causalis.scenarios.did.refutation.post_inference`
+
+```{py:module} causalis.scenarios.did.refutation.post_inference
+```
+
+```{autodoc2-docstring} causalis.scenarios.did.refutation.post_inference
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`did_post_inference_cell_table <causalis.scenarios.did.refutation.post_inference.did_post_inference_cell_table>`
+  - ```{autodoc2-docstring} causalis.scenarios.did.refutation.post_inference.did_post_inference_cell_table
+    :summary:
+    ```
+* - {py:obj}`did_influence_table <causalis.scenarios.did.refutation.post_inference.did_influence_table>`
+  - ```{autodoc2-docstring} causalis.scenarios.did.refutation.post_inference.did_influence_table
+    :summary:
+    ```
+* - {py:obj}`did_cluster_influence_table <causalis.scenarios.did.refutation.post_inference.did_cluster_influence_table>`
+  - ```{autodoc2-docstring} causalis.scenarios.did.refutation.post_inference.did_cluster_influence_table
+    :summary:
+    ```
+* - {py:obj}`run_did_post_inference_diagnostics <causalis.scenarios.did.refutation.post_inference.run_did_post_inference_diagnostics>`
+  - ```{autodoc2-docstring} causalis.scenarios.did.refutation.post_inference.run_did_post_inference_diagnostics
+    :summary:
+    ```
+* - {py:obj}`run_did_inference_diagnostics <causalis.scenarios.did.refutation.post_inference.run_did_inference_diagnostics>`
+  - ```{autodoc2-docstring} causalis.scenarios.did.refutation.post_inference.run_did_inference_diagnostics
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.scenarios.did.refutation.post_inference.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.did.refutation.post_inference.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} did_post_inference_cell_table(estimate: causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate) -> pandas.DataFrame
+:canonical: causalis.scenarios.did.refutation.post_inference.did_post_inference_cell_table
+
+```{autodoc2-docstring} causalis.scenarios.did.refutation.post_inference.did_post_inference_cell_table
+```
+````
+
+````{py:function} did_influence_table(data_or_estimate: causalis.data_contracts.PanelDataDID | causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate, estimate: typing.Optional[causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate] = None, *, top_n: typing.Optional[int] = None) -> pandas.DataFrame
+:canonical: causalis.scenarios.did.refutation.post_inference.did_influence_table
+
+```{autodoc2-docstring} causalis.scenarios.did.refutation.post_inference.did_influence_table
+```
+````
+
+````{py:function} did_cluster_influence_table(data: causalis.data_contracts.PanelDataDID, estimate: causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate) -> pandas.DataFrame
+:canonical: causalis.scenarios.did.refutation.post_inference.did_cluster_influence_table
+
+```{autodoc2-docstring} causalis.scenarios.did.refutation.post_inference.did_cluster_influence_table
+```
+````
+
+````{py:function} run_did_post_inference_diagnostics(data_or_estimate: causalis.data_contracts.PanelDataDID | causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate, estimate: typing.Optional[causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate] = None, *, max_skipped_post_cell_share: float = 0.2, min_control_ess: float = 20.0, max_propensity_clip_share: float = 0.05, max_abs_weighted_smd: float = 0.25, max_top_unit_influence_share: float = 0.2, max_top_cluster_influence_share: float = 0.5, min_influence_ess: float = 10.0, max_abs_pretrend_t_stat: float = 2.0, max_simple_cell_weight_share: float = 0.5, min_clusters: int = 2, require_multiplier_bootstrap: bool = False) -> pandas.DataFrame
+:canonical: causalis.scenarios.did.refutation.post_inference.run_did_post_inference_diagnostics
+
+```{autodoc2-docstring} causalis.scenarios.did.refutation.post_inference.run_did_post_inference_diagnostics
+```
+````
+
+````{py:function} run_did_inference_diagnostics(*args, **kwargs) -> pandas.DataFrame
+:canonical: causalis.scenarios.did.refutation.post_inference.run_did_inference_diagnostics
+
+```{autodoc2-docstring} causalis.scenarios.did.refutation.post_inference.run_did_inference_diagnostics
+```
+````
+
+````{py:data} __all__
+:canonical: causalis.scenarios.did.refutation.post_inference.__all__
+:value: >
+   ['did_post_inference_cell_table', 'did_influence_table', 'did_cluster_influence_table', 'run_did_pos...
+
+```{autodoc2-docstring} causalis.scenarios.did.refutation.post_inference.__all__
+```
+
+````

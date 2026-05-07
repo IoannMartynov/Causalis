@@ -95,3 +95,19 @@ Configure PyPI Trusted Publishing for this repository before the first automated
 2. Add a trusted publisher for `causalis-causalcraft/Causalis`.
 3. Set the workflow file to `release.yml`.
 4. Set the environment name to `pypi`.
+
+## Releasing
+
+Production releases are created from annotated Git tags on `main`. The tag
+drives the package version through `setuptools-scm`, then GitHub Actions builds,
+checks, publishes to PyPI with Trusted Publishing, and creates the matching
+GitHub Release.
+
+```bash
+git checkout main
+git pull --ff-only origin main
+python3 -m pytest
+
+git tag -a v0.5.1 -m "Release v0.5.1"
+git push origin v0.5.1
+```

@@ -123,6 +123,14 @@ Bases: {py:obj}`sklearn.base.BaseEstimator`
 
 ````
 
+````{py:method} predict_cate(X: pandas.DataFrame | numpy.ndarray) -> numpy.ndarray
+:canonical: causalis.scenarios.unconfoundedness.model.IRM.predict_cate
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.model.IRM.predict_cate
+```
+
+````
+
 ````{py:method} sensitivity_analysis(r2_y: float, r2_d: float, rho: float = 1.0, H0: float = 0.0, alpha: float = 0.05) -> causalis.scenarios.unconfoundedness.model.IRM
 :canonical: causalis.scenarios.unconfoundedness.model.IRM.sensitivity_analysis
 

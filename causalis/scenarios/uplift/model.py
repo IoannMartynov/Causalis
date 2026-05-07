@@ -1,4 +1,9 @@
-"""Lazy CATE/uplift scoring helpers for fitted unconfoundedness models."""
+"""
+Lazy Conditional Average Treatment Effect (CATE) and uplift scoring helpers.
+
+This module provides functionality to predict heterogeneous treatment effects (CATE)
+for new observations using models fitted under the unconfoundedness assumption.
+"""
 
 from __future__ import annotations
 
@@ -16,11 +21,21 @@ from causalis.scenarios.unconfoundedness._utils import _predict_prob_or_value
 
 @dataclass
 class _ConstantOutcomeModel:
-    """Minimal prediction model for single-class outcome arms."""
+    """
+    Minimal prediction model for single-class outcome arms.
+
+    Used when a treatment arm in the training data has only one unique outcome value.
+
+    Attributes
+    ----------
+    value : float
+        The constant value to predict.
+    """
 
     value: float
 
     def predict(self, X: np.ndarray) -> np.ndarray:
+        """Predict the constant value for all inputs."""
         return np.full(np.asarray(X).shape[0], self.value, dtype=float)
 
 
@@ -140,11 +155,77 @@ def _validate_scoring_features(
 
 
 def predict_cate(irm_model: Any, X: pd.DataFrame | np.ndarray) -> np.ndarray:
-    """Predict CATE/uplift for new rows from a fitted binary-treatment IRM.
+    r"""
+    Predict Conditional Average Treatment Effect (CATE), or uplift, for new observations.
 
-    The first call trains final full-sample outcome models for ``D=0`` and
-    ``D=1`` and caches them on ``irm_model``. Existing ``fit()`` and
-    ``estimate()`` paths do not train or store these scoring models.
+    This function implements a "lazy" T-learner approach. On its first call for a given
+    fitted :class:`~causalis.scenarios.unconfoundedness.model.IRM` model, it trains two
+    separate full-sample outcome models—one for the control group ($D=0$) and one for the
+    treatment group ($D=1$). These models are then cached on the ``irm_model`` object for
+    subsequent calls.
+
+    Mathematical Note
+    -----------------
+    The CATE at a point $x$ is defined as the difference in potential outcomes:
+
+    .. math::
+
+        \tau(x) = \mathbb{E}[Y(1) - Y(0) \mid X = x]
+
+    Under the assumption of unconfoundedness (no unmeasured confounders), this can be
+    estimated as:
+
+    .. math::
+
+        \tau(x) = \mathbb{E}[Y \mid X = x, D = 1] - \mathbb{E}[Y \mid X = x, D = 0]
+
+    The estimator $\hat{\tau}(x)$ used here is:
+
+    .. math::
+
+        \hat{\tau}(x) = \hat{g}_1(x) - \hat{g}_0(x)
+
+    where $\hat{g}_1$ is a machine learning model (cloned from ``irm_model.ml_g``) trained
+    on the subset of the original training data where $D_i = 1$, and $\hat{g}_0$ is
+    similarly trained on the subset where $D_i = 0$.
+
+    Parameters
+    ----------
+    irm_model : IRM
+        A fitted :class:`~causalis.scenarios.unconfoundedness.model.IRM` object.
+        The model must have been fitted using :meth:`~causalis.scenarios.unconfoundedness.model.IRM.fit`.
+    X : pd.DataFrame or np.ndarray
+        New observations for which to predict the CATE.
+        If a DataFrame, it must contain the same confounder columns as used during fit.
+        If an ndarray, it must have the same number of columns as the fitted confounders.
+
+    Returns
+    -------
+    np.ndarray
+        A 1D array of predicted CATE/uplift values for each row in ``X``.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> import numpy as np
+    >>> from causalis.scenarios.unconfoundedness.model import IRM
+    >>> from causalis.scenarios.unconfoundedness.dgp import generate_obs_hte_26
+    >>> from causalis.scenarios.uplift.model import predict_cate
+    >>> # Generate data
+    >>> data = generate_obs_hte_26(n=1000, seed=42)
+    >>> # Fit IRM model
+    >>> irm = IRM(data=data).fit()
+    >>> # Predict uplift for new data
+    >>> X_new = data.df.loc[:5, data.confounders]
+    >>> uplift = predict_cate(irm, X_new)
+    >>> print(uplift.shape)
+    (6,)
+
+    Notes
+    -----
+    The models trained for prediction use the full sample (split by treatment arm)
+    available at fit time, whereas the :meth:`~causalis.scenarios.unconfoundedness.model.IRM.fit`
+    method uses cross-fitting for nuisance estimation.
     """
     _validate_fitted_irm(irm_model)
     X_np = _validate_scoring_features(irm_model, X)

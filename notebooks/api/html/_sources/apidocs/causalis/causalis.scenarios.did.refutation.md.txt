@@ -1,0 +1,98 @@
+# {py:mod}`causalis.scenarios.did.refutation`
+
+```{py:module} causalis.scenarios.did.refutation
+```
+
+```{autodoc2-docstring} causalis.scenarios.did.refutation
+:allowtitles:
+```
+
+## Submodules
+
+```{toctree}
+:titlesonly:
+:maxdepth: 1
+
+causalis.scenarios.did.refutation.post_inference_plots
+causalis.scenarios.did.refutation.diagnostics
+causalis.scenarios.did.refutation.diagnostic_plots
+causalis.scenarios.did.refutation.post_inference
+```
+
+## Package Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`plot_did_support <causalis.scenarios.did.refutation.plot_did_support>`
+  - ```{autodoc2-docstring} causalis.scenarios.did.refutation.plot_did_support
+    :summary:
+    ```
+* - {py:obj}`plot_raw_did_event_study <causalis.scenarios.did.refutation.plot_raw_did_event_study>`
+  - ```{autodoc2-docstring} causalis.scenarios.did.refutation.plot_raw_did_event_study
+    :summary:
+    ```
+* - {py:obj}`plot_did_post_inference_event_study <causalis.scenarios.did.refutation.plot_did_post_inference_event_study>`
+  - ```{autodoc2-docstring} causalis.scenarios.did.refutation.plot_did_post_inference_event_study
+    :summary:
+    ```
+* - {py:obj}`plot_did_influence_concentration <causalis.scenarios.did.refutation.plot_did_influence_concentration>`
+  - ```{autodoc2-docstring} causalis.scenarios.did.refutation.plot_did_influence_concentration
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.scenarios.did.refutation.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.did.refutation.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} plot_did_support(*args, **kwargs)
+:canonical: causalis.scenarios.did.refutation.plot_did_support
+
+```{autodoc2-docstring} causalis.scenarios.did.refutation.plot_did_support
+```
+````
+
+````{py:function} plot_raw_did_event_study(*args, **kwargs)
+:canonical: causalis.scenarios.did.refutation.plot_raw_did_event_study
+
+```{autodoc2-docstring} causalis.scenarios.did.refutation.plot_raw_did_event_study
+```
+````
+
+````{py:function} plot_did_post_inference_event_study(*args, **kwargs)
+:canonical: causalis.scenarios.did.refutation.plot_did_post_inference_event_study
+
+```{autodoc2-docstring} causalis.scenarios.did.refutation.plot_did_post_inference_event_study
+```
+````
+
+````{py:function} plot_did_influence_concentration(*args, **kwargs)
+:canonical: causalis.scenarios.did.refutation.plot_did_influence_concentration
+
+```{autodoc2-docstring} causalis.scenarios.did.refutation.plot_did_influence_concentration
+```
+````
+
+````{py:data} __all__
+:canonical: causalis.scenarios.did.refutation.__all__
+:value: >
+   ['did_support_table', 'raw_did_event_study_table', 'did_covariate_balance_table', 'did_base_design_t...
+
+```{autodoc2-docstring} causalis.scenarios.did.refutation.__all__
+```
+
+````

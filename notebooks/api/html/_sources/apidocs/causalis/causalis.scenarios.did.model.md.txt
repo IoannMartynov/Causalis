@@ -1,0 +1,159 @@
+# {py:mod}`causalis.scenarios.did.model`
+
+```{py:module} causalis.scenarios.did.model
+```
+
+```{autodoc2-docstring} causalis.scenarios.did.model
+:allowtitles:
+```
+
+## Module Contents
+
+### Classes
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`CallawaySantAnnaDID <causalis.scenarios.did.model.CallawaySantAnnaDID>`
+  - ```{autodoc2-docstring} causalis.scenarios.did.model.CallawaySantAnnaDID
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`Estimator <causalis.scenarios.did.model.Estimator>`
+  - ```{autodoc2-docstring} causalis.scenarios.did.model.Estimator
+    :summary:
+    ```
+* - {py:obj}`AggregateKind <causalis.scenarios.did.model.AggregateKind>`
+  - ```{autodoc2-docstring} causalis.scenarios.did.model.AggregateKind
+    :summary:
+    ```
+* - {py:obj}`BasePeriod <causalis.scenarios.did.model.BasePeriod>`
+  - ```{autodoc2-docstring} causalis.scenarios.did.model.BasePeriod
+    :summary:
+    ```
+* - {py:obj}`__all__ <causalis.scenarios.did.model.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.did.model.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} Estimator
+:canonical: causalis.scenarios.did.model.Estimator
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.did.model.Estimator
+```
+
+````
+
+````{py:data} AggregateKind
+:canonical: causalis.scenarios.did.model.AggregateKind
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.did.model.AggregateKind
+```
+
+````
+
+````{py:data} BasePeriod
+:canonical: causalis.scenarios.did.model.BasePeriod
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.did.model.BasePeriod
+```
+
+````
+
+`````{py:class} CallawaySantAnnaDID(*, estimator: causalis.scenarios.did.model.Estimator = 'dr', control_group: causalis.data_contracts.panel_data_did.ComparisonGroup = 'not_yet_or_never', anticipation: int = 0, base_period: causalis.scenarios.did.model.BasePeriod = 'universal', include_pre_periods: bool = False, alpha: float = 0.05, diagnostic_data: bool = True, propensity_clip: float = _DEFAULT_PROPENSITY_CLIP, logit_ridge: float = _DEFAULT_LOGIT_RIDGE, optimizer_tol: float = _DEFAULT_OPTIMIZER_TOL, optimizer_maxiter: int = _DEFAULT_OPTIMIZER_MAXITER, min_treated_per_cell: int = 30, min_control_per_cell: int = 30, min_control_ess: float = 20.0, max_propensity_clip_share: float = 0.05, max_condition_number: float = _DEFAULT_MAX_CONDITION_NUMBER, bootstrap_replications: int = 0, random_state: typing.Optional[int] = None)
+:canonical: causalis.scenarios.did.model.CallawaySantAnnaDID
+
+```{autodoc2-docstring} causalis.scenarios.did.model.CallawaySantAnnaDID
+```
+
+```{rubric} Initialization
+```
+
+```{autodoc2-docstring} causalis.scenarios.did.model.CallawaySantAnnaDID.__init__
+```
+
+````{py:method} fit(data: causalis.data_contracts.panel_data_did.PanelDataDID) -> causalis.scenarios.did.model.CallawaySantAnnaDID
+:canonical: causalis.scenarios.did.model.CallawaySantAnnaDID.fit
+
+```{autodoc2-docstring} causalis.scenarios.did.model.CallawaySantAnnaDID.fit
+```
+
+````
+
+````{py:method} estimate(*, alpha: typing.Optional[float] = None, diagnostic_data: typing.Optional[bool] = None, bootstrap_replications: typing.Optional[int] = None, random_state: typing.Optional[int] = None) -> causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate
+:canonical: causalis.scenarios.did.model.CallawaySantAnnaDID.estimate
+
+```{autodoc2-docstring} causalis.scenarios.did.model.CallawaySantAnnaDID.estimate
+```
+
+````
+
+````{py:property} is_fitted
+:canonical: causalis.scenarios.did.model.CallawaySantAnnaDID.is_fitted
+:type: bool
+
+```{autodoc2-docstring} causalis.scenarios.did.model.CallawaySantAnnaDID.is_fitted
+```
+
+````
+
+````{py:property} support_
+:canonical: causalis.scenarios.did.model.CallawaySantAnnaDID.support_
+:type: pandas.DataFrame
+
+```{autodoc2-docstring} causalis.scenarios.did.model.CallawaySantAnnaDID.support_
+```
+
+````
+
+````{py:property} skipped_cells_
+:canonical: causalis.scenarios.did.model.CallawaySantAnnaDID.skipped_cells_
+:type: pandas.DataFrame
+
+```{autodoc2-docstring} causalis.scenarios.did.model.CallawaySantAnnaDID.skipped_cells_
+```
+
+````
+
+````{py:property} cell_diagnostics_
+:canonical: causalis.scenarios.did.model.CallawaySantAnnaDID.cell_diagnostics_
+:type: pandas.DataFrame
+
+```{autodoc2-docstring} causalis.scenarios.did.model.CallawaySantAnnaDID.cell_diagnostics_
+```
+
+````
+
+````{py:method} __repr__() -> str
+:canonical: causalis.scenarios.did.model.CallawaySantAnnaDID.__repr__
+
+````
+
+`````
+
+````{py:data} __all__
+:canonical: causalis.scenarios.did.model.__all__
+:value: >
+   ['AggregateKind', 'BasePeriod', 'CallawaySantAnnaDID', 'CallawaySantAnnaDIDEstimate', 'Estimator']
+
+```{autodoc2-docstring} causalis.scenarios.did.model.__all__
+```
+
+````

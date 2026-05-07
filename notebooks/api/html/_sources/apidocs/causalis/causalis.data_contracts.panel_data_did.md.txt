@@ -1,0 +1,415 @@
+# {py:mod}`causalis.data_contracts.panel_data_did`
+
+```{py:module} causalis.data_contracts.panel_data_did
+```
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did
+:allowtitles:
+```
+
+## Module Contents
+
+### Classes
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`PanelDataDID <causalis.data_contracts.panel_data_did.PanelDataDID>`
+  - ```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`TimeLike <causalis.data_contracts.panel_data_did.TimeLike>`
+  - ```{autodoc2-docstring} causalis.data_contracts.panel_data_did.TimeLike
+    :summary:
+    ```
+* - {py:obj}`ComparisonGroup <causalis.data_contracts.panel_data_did.ComparisonGroup>`
+  - ```{autodoc2-docstring} causalis.data_contracts.panel_data_did.ComparisonGroup
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} TimeLike
+:canonical: causalis.data_contracts.panel_data_did.TimeLike
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.TimeLike
+```
+
+````
+
+````{py:data} ComparisonGroup
+:canonical: causalis.data_contracts.panel_data_did.ComparisonGroup
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.ComparisonGroup
+```
+
+````
+
+`````{py:class} PanelDataDID(/, **data: typing.Any)
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID
+
+Bases: {py:obj}`pydantic.BaseModel`
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID
+```
+
+```{rubric} Initialization
+```
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.__init__
+```
+
+````{py:attribute} model_config
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.model_config
+:value: >
+   'ConfigDict(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.model_config
+```
+
+````
+
+````{py:attribute} df
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.df
+:type: pandas.DataFrame
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.df
+```
+
+````
+
+````{py:attribute} y
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.y
+:type: str
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.y
+```
+
+````
+
+````{py:attribute} unit_col
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.unit_col
+:type: str
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.unit_col
+```
+
+````
+
+````{py:attribute} time_col
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.time_col
+:type: str
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.time_col
+```
+
+````
+
+````{py:attribute} treated_time
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.treated_time
+:type: str
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.treated_time
+```
+
+````
+
+````{py:attribute} covariates
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.covariates
+:type: tuple[str, ...]
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.covariates
+```
+
+````
+
+````{py:attribute} cluster_col
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.cluster_col
+:type: typing.Optional[str]
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.cluster_col
+```
+
+````
+
+````{py:property} treated_units
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.treated_units
+:type: typing.Sequence[typing.Hashable]
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.treated_units
+```
+
+````
+
+````{py:property} control_units
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.control_units
+:type: typing.Sequence[typing.Hashable]
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.control_units
+```
+
+````
+
+````{py:property} never_treated_units
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.never_treated_units
+:type: typing.Sequence[typing.Hashable]
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.never_treated_units
+```
+
+````
+
+````{py:property} first_treatment_by_unit
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.first_treatment_by_unit
+:type: dict[typing.Hashable, typing.Optional[pandas.Period]]
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.first_treatment_by_unit
+```
+
+````
+
+````{py:property} cohort_by_unit
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.cohort_by_unit
+:type: dict[typing.Hashable, pandas.Period]
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.cohort_by_unit
+```
+
+````
+
+````{py:property} cohorts
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.cohorts
+:type: typing.Sequence[pandas.Period]
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.cohorts
+```
+
+````
+
+````{py:property} treatment_start
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.treatment_start
+:type: pandas.Period
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.treatment_start
+```
+
+````
+
+````{py:property} latest_treatment_start
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.latest_treatment_start
+:type: pandas.Period
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.latest_treatment_start
+```
+
+````
+
+````{py:property} time_freq
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.time_freq
+:type: str
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.time_freq
+```
+
+````
+
+````{py:property} n_pre_periods
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.n_pre_periods
+:type: int
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.n_pre_periods
+```
+
+````
+
+````{py:property} n_post_periods
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.n_post_periods
+:type: int
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.n_post_periods
+```
+
+````
+
+````{py:property} last_post_period
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.last_post_period
+:type: pandas.Period
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.last_post_period
+```
+
+````
+
+````{py:property} design_type
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.design_type
+:type: typing.Literal[canonical_2x2, simultaneous_adoption, staggered_adoption]
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.design_type
+```
+
+````
+
+````{py:property} has_covariates
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.has_covariates
+:type: bool
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.has_covariates
+```
+
+````
+
+````{py:property} has_cluster
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.has_cluster
+:type: bool
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.has_cluster
+```
+
+````
+
+````{py:method} df_analysis() -> pandas.DataFrame
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.df_analysis
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.df_analysis
+```
+
+````
+
+````{py:method} covariate_frame() -> pandas.DataFrame
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.covariate_frame
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.covariate_frame
+```
+
+````
+
+````{py:method} cluster_series() -> pandas.Series
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.cluster_series
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.cluster_series
+```
+
+````
+
+````{py:method} cohort_units(cohort: causalis.data_contracts.panel_data_did.TimeLike) -> typing.Sequence[typing.Hashable]
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.cohort_units
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.cohort_units
+```
+
+````
+
+````{py:method} not_yet_treated_units(time: causalis.data_contracts.panel_data_did.TimeLike, *, include_never: bool = True) -> typing.Sequence[typing.Hashable]
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.not_yet_treated_units
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.not_yet_treated_units
+```
+
+````
+
+````{py:method} comparison_units(cohort: causalis.data_contracts.panel_data_did.TimeLike, time: causalis.data_contracts.panel_data_did.TimeLike, *, control_group: causalis.data_contracts.panel_data_did.ComparisonGroup = 'not_yet_or_never') -> typing.Sequence[typing.Hashable]
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.comparison_units
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.comparison_units
+```
+
+````
+
+````{py:method} df_for_did(*, treated_group_col: str = 'treated_group', post_col: str = 'post', cohort_col: str = 'cohort', event_time_col: str = 'event_time') -> pandas.DataFrame
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.df_for_did
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.df_for_did
+```
+
+````
+
+````{py:method} pre_times(cohort: typing.Optional[causalis.data_contracts.panel_data_did.TimeLike] = None) -> typing.Sequence[pandas.Period]
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.pre_times
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.pre_times
+```
+
+````
+
+````{py:method} post_times(cohort: typing.Optional[causalis.data_contracts.panel_data_did.TimeLike] = None) -> typing.Sequence[pandas.Period]
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.post_times
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.post_times
+```
+
+````
+
+````{py:method} analysis_times() -> typing.Sequence[pandas.Period]
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.analysis_times
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.analysis_times
+```
+
+````
+
+````{py:method} time_to_index() -> dict[pandas.Period, int]
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.time_to_index
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.time_to_index
+```
+
+````
+
+````{py:method} treatment_start_idx(cohort: typing.Optional[causalis.data_contracts.panel_data_did.TimeLike] = None) -> int
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.treatment_start_idx
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.treatment_start_idx
+```
+
+````
+
+````{py:method} att_gt_cells(*, control_group: causalis.data_contracts.panel_data_did.ComparisonGroup = 'not_yet_or_never', anticipation: int = 0, base_period: typing.Literal[universal, varying] = 'universal', include_pre_periods: bool = False, include_unsupported: bool = False) -> pandas.DataFrame
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.att_gt_cells
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.att_gt_cells
+```
+
+````
+
+````{py:method} cell_counts() -> pandas.DataFrame
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.cell_counts
+
+```{autodoc2-docstring} causalis.data_contracts.panel_data_did.PanelDataDID.cell_counts
+```
+
+````
+
+````{py:method} __repr__() -> str
+:canonical: causalis.data_contracts.panel_data_did.PanelDataDID.__repr__
+
+````
+
+`````

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>causalis.scenarios.did.dgp &#8212; Causalis API Reference  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="causalis.scenarios.did.model" href="causalis.scenarios.did.model.html" />
+    <link rel="prev" title="causalis.scenarios.did.refutation.post_inference" href="causalis.scenarios.did.refutation.post_inference.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-causalis.scenarios.did.dgp">
+<span id="causalis-scenarios-did-dgp"></span><h1><a class="reference internal" href="#module-causalis.scenarios.did.dgp" title="causalis.scenarios.did.dgp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.did.dgp</span></code></a><a class="headerlink" href="#module-causalis.scenarios.did.dgp" title="Link to this heading">¶</a></h1>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.did.dgp.generate_did_gamma_26" title="causalis.scenarios.did.dgp.generate_did_gamma_26"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_did_gamma_26</span></code></a></p></td>
+<td><p>Generate a staggered-adoption Gamma DID panel for CSA estimators.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="data">
+<h3>Data<a class="headerlink" href="#data" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.did.dgp.PanelOutput" title="causalis.scenarios.did.dgp.PanelOutput"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PanelOutput</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.did.dgp.generate_staggered_did_gamma_26" title="causalis.scenarios.did.dgp.generate_staggered_did_gamma_26"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_staggered_did_gamma_26</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.did.dgp.__all__" title="causalis.scenarios.did.dgp.__all__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__all__</span></code></a></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
+<dl class="py data">
+<dt class="sig sig-object py" id="causalis.scenarios.did.dgp.PanelOutput">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.did.dgp.</span></span><span class="sig-name descname"><span class="pre">PanelOutput</span></span><a class="headerlink" href="#causalis.scenarios.did.dgp.PanelOutput" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.did.dgp.generate_did_gamma_26">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.did.dgp.</span></span><span class="sig-name descname"><span class="pre">generate_did_gamma_26</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_panel_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_oracles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_treated_units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_control_units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">60</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_pre_periods</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_post_periods</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_cohorts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">_DEFAULT_N_COHORTS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment_effect_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment_effect_slope</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment_effect_heterogeneity_std</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.025</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parallel_trend_violation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calendar_start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'2021-01'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_freq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'M'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treated_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'treated_market_'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'control_market_'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">advanced_params</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#causalis.scenarios.did.dgp.PanelOutput" title="causalis.scenarios.did.dgp.PanelOutput"><span class="pre">causalis.scenarios.did.dgp.PanelOutput</span></a></span></span><a class="headerlink" href="#causalis.scenarios.did.dgp.generate_did_gamma_26" title="Link to this definition">¶</a></dt>
+<dd><p>Generate a staggered-adoption Gamma DID panel for CSA estimators.</p>
+<p>The returned panel is long-format with absorbing treatment, multiple
+first-treatment cohorts, never-treated controls, baseline-compatible
+covariates, cluster labels, and optional oracle counterfactual/effect
+columns. It is intended to be consumed directly by
+:class:<code class="docutils literal notranslate"><span class="pre">causalis.scenarios.did.model.CallawaySantAnnaDID</span></code>.</p>
+<p class="rubric" id="id1">Parameters</p>
+<p>seed : int, default 42
+Random seed for reproducibility.
+return_panel_data : bool, default True
+If True, returns a :class:<code class="docutils literal notranslate"><span class="pre">PanelDataDID</span></code> contract; if False, returns a raw
+:class:<code class="docutils literal notranslate"><span class="pre">pd.DataFrame</span></code>.
+include_oracles : bool, default True
+Whether to include ground-truth columns (e.g., <code class="docutils literal notranslate"><span class="pre">y_cf</span></code>, <code class="docutils literal notranslate"><span class="pre">tau_mean_true</span></code>).
+n_treated_units : int, default 20
+Number of units that will eventually receive treatment.
+n_control_units : int, default 60
+Number of never-treated units.
+n_pre_periods : int, optional
+Number of periods before any treatment starts. Defaults to 24.
+n_post_periods : int, optional
+Number of periods after the first treatment cohort starts. Defaults to 8.
+n_cohorts : int, default 4
+Number of distinct treatment-start times (cohorts) among treated units.
+treatment_effect_rate : float, default 0.08
+Base treatment effect as a fraction of the counterfactual outcome.
+treatment_effect_slope : float, default 0.0
+The rate at which the treatment effect grows or decays per period after start.
+treatment_effect_heterogeneity_std : float, default 0.025
+Standard deviation of unit-level treatment effect multipliers.
+parallel_trend_violation : float, default 0.0
+Strength of a differential trend between treated and control units (0 = parallel).
+calendar_start : str, default “2021-01”
+The starting period string for the pandas index.
+time_freq : str, default “M”
+The pandas frequency alias (e.g., “M”, “W”, “D”).
+treated_prefix : str, default “treated_market_”
+Prefix for treated unit IDs.
+control_prefix : str, default “control_market_”
+Prefix for control unit IDs.
+**advanced_params : dict
+Reserved for future parameters.</p>
+<p class="rubric" id="id2">Returns</p>
+<p>PanelDataDID or pd.DataFrame
+The generated panel dataset.</p>
+<p class="rubric" id="id3">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.scenarios.did.dgp import generate_did_gamma_26</p>
+<p class="rubric" id="id4">Generate default panel data</p>
+<p>data = generate_did_gamma_26(n_treated_units=10, n_control_units=30, seed=123)
+type(data)
+&lt;class ‘causalis.data_contracts.panel_data_did.PanelDataDID’&gt;</p>
+<p class="rubric" id="id5">Access the underlying dataframe</p>
+<p>df = data.df
+df[[‘unit_id’, ‘calendar_time’, ‘y’, ‘treated_time’]].head()
+… # doctest: +SKIP</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+<p class="rubric" id="id6">Notes</p>
+<p>The DGP simulates a complex business environment where the outcome :math:<code class="docutils literal notranslate"><span class="pre">Y_{it}</span></code>
+(e.g., revenue) follows a Gamma distribution:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Y_{it} \sim \text{Gamma}\left( \text{shape}=\kappa, \text{scale}=\frac{\mu_{it}}{\kappa} \right)
+</pre></div>
+</div>
+<p>The mean :math:<code class="docutils literal notranslate"><span class="pre">\mu_{it}</span></code> is decomposed into a counterfactual :math:<code class="docutils literal notranslate"><span class="pre">\mu_{it}(0)</span></code> and a
+treatment effect :math:<code class="docutils literal notranslate"><span class="pre">\tau_{it}</span></code>:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\mu_{it}(1) = \mu_{it}(0) \cdot (1 + \tau_{it})
+</pre></div>
+</div>
+<p>The counterfactual mean :math:<code class="docutils literal notranslate"><span class="pre">\mu_{it}(0)</span></code> is modeled as a product of exposure,
+conversion rate, and average order value (AOV), each subject to macro-economic
+cycles, seasonality, and unit-level trends:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\ln \mu_{it}(0) = \ln(\text{Exposure}_{it}) + \ln(\text{ConvRate}_{it}) + \ln(\text{AOV}_{it})
+</pre></div>
+</div>
+<p>where each component follows an AR(1) process with latent confounding.
+The treatment effect :math:<code class="docutils literal notranslate"><span class="pre">\tau_{it}</span></code> for a unit :math:<code class="docutils literal notranslate"><span class="pre">i</span></code> treated at time :math:<code class="docutils literal notranslate"><span class="pre">G_i</span></code> is:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\tau_{it} = (\theta_{rate} + \theta_{slope} \cdot (t - G_i)) \cdot \text{Ramp}(t - G_i) \cdot \eta_i
+</pre></div>
+</div>
+<p>where :math:<code class="docutils literal notranslate"><span class="pre">\text{Ramp}(\cdot)</span></code> is an exponential adoption curve and :math:<code class="docutils literal notranslate"><span class="pre">\eta_i</span></code> is unit-level
+heterogeneity. Parallel trend violations are introduced by adding a differential
+linear trend to treated units’ counterfactuals.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="causalis.scenarios.did.dgp.generate_staggered_did_gamma_26">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.did.dgp.</span></span><span class="sig-name descname"><span class="pre">generate_staggered_did_gamma_26</span></span><a class="headerlink" href="#causalis.scenarios.did.dgp.generate_staggered_did_gamma_26" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="causalis.scenarios.did.dgp.__all__">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.did.dgp.</span></span><span class="sig-name descname"><span class="pre">__all__</span></span><a class="headerlink" href="#causalis.scenarios.did.dgp.__all__" title="Link to this definition">¶</a></dt>
+<dd><p>[‘generate_did_gamma_26’, ‘generate_staggered_did_gamma_26’]</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../reference.html">Causalis API Reference</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../reference.html">Documentation overview</a><ul>
+  <li><a href="../index.html">API Modules</a><ul>
+  <li><a href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a><ul>
+  <li><a href="causalis.scenarios.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios</span></code></a><ul>
+  <li><a href="causalis.scenarios.did.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.did</span></code></a><ul>
+      <li>Previous: <a href="causalis.scenarios.did.refutation.post_inference.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.did.refutation.post_inference</span></code></a></li>
+      <li>Next: <a href="causalis.scenarios.did.model.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.did.model</span></code></a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../../_sources/apidocs/causalis/causalis.scenarios.did.dgp.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

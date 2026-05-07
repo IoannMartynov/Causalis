@@ -1,0 +1,111 @@
+# {py:mod}`causalis.scenarios.did.refutation.diagnostics`
+
+```{py:module} causalis.scenarios.did.refutation.diagnostics
+```
+
+```{autodoc2-docstring} causalis.scenarios.did.refutation.diagnostics
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`did_support_table <causalis.scenarios.did.refutation.diagnostics.did_support_table>`
+  - ```{autodoc2-docstring} causalis.scenarios.did.refutation.diagnostics.did_support_table
+    :summary:
+    ```
+* - {py:obj}`raw_did_event_study_table <causalis.scenarios.did.refutation.diagnostics.raw_did_event_study_table>`
+  - ```{autodoc2-docstring} causalis.scenarios.did.refutation.diagnostics.raw_did_event_study_table
+    :summary:
+    ```
+* - {py:obj}`did_covariate_balance_table <causalis.scenarios.did.refutation.diagnostics.did_covariate_balance_table>`
+  - ```{autodoc2-docstring} causalis.scenarios.did.refutation.diagnostics.did_covariate_balance_table
+    :summary:
+    ```
+* - {py:obj}`did_base_design_table <causalis.scenarios.did.refutation.diagnostics.did_base_design_table>`
+  - ```{autodoc2-docstring} causalis.scenarios.did.refutation.diagnostics.did_base_design_table
+    :summary:
+    ```
+* - {py:obj}`run_did_diagnostics <causalis.scenarios.did.refutation.diagnostics.run_did_diagnostics>`
+  - ```{autodoc2-docstring} causalis.scenarios.did.refutation.diagnostics.run_did_diagnostics
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`BasePeriod <causalis.scenarios.did.refutation.diagnostics.BasePeriod>`
+  - ```{autodoc2-docstring} causalis.scenarios.did.refutation.diagnostics.BasePeriod
+    :summary:
+    ```
+* - {py:obj}`__all__ <causalis.scenarios.did.refutation.diagnostics.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.did.refutation.diagnostics.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} BasePeriod
+:canonical: causalis.scenarios.did.refutation.diagnostics.BasePeriod
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.did.refutation.diagnostics.BasePeriod
+```
+
+````
+
+````{py:function} did_support_table(data: causalis.data_contracts.PanelDataDID, *, control_group: causalis.data_contracts.panel_data_did.ComparisonGroup = 'not_yet_or_never', anticipation: int = 0, base_period: causalis.scenarios.did.refutation.diagnostics.BasePeriod = 'universal', include_pre_periods: bool = False) -> pandas.DataFrame
+:canonical: causalis.scenarios.did.refutation.diagnostics.did_support_table
+
+```{autodoc2-docstring} causalis.scenarios.did.refutation.diagnostics.did_support_table
+```
+````
+
+````{py:function} raw_did_event_study_table(data: causalis.data_contracts.PanelDataDID, *, control_group: causalis.data_contracts.panel_data_did.ComparisonGroup = 'not_yet_or_never', anticipation: int = 0, base_period: causalis.scenarios.did.refutation.diagnostics.BasePeriod = 'varying', include_pre_periods: bool = True) -> pandas.DataFrame
+:canonical: causalis.scenarios.did.refutation.diagnostics.raw_did_event_study_table
+
+```{autodoc2-docstring} causalis.scenarios.did.refutation.diagnostics.raw_did_event_study_table
+```
+````
+
+````{py:function} did_covariate_balance_table(data: causalis.data_contracts.PanelDataDID, *, control_group: causalis.data_contracts.panel_data_did.ComparisonGroup = 'not_yet_or_never', anticipation: int = 0, base_period: causalis.scenarios.did.refutation.diagnostics.BasePeriod = 'universal', include_pre_periods: bool = False, post_only: bool = True) -> pandas.DataFrame
+:canonical: causalis.scenarios.did.refutation.diagnostics.did_covariate_balance_table
+
+```{autodoc2-docstring} causalis.scenarios.did.refutation.diagnostics.did_covariate_balance_table
+```
+````
+
+````{py:function} did_base_design_table(data: causalis.data_contracts.PanelDataDID, *, control_group: causalis.data_contracts.panel_data_did.ComparisonGroup = 'not_yet_or_never', anticipation: int = 0, base_period: causalis.scenarios.did.refutation.diagnostics.BasePeriod = 'universal', include_pre_periods: bool = False, post_only: bool = True) -> pandas.DataFrame
+:canonical: causalis.scenarios.did.refutation.diagnostics.did_base_design_table
+
+```{autodoc2-docstring} causalis.scenarios.did.refutation.diagnostics.did_base_design_table
+```
+````
+
+````{py:function} run_did_diagnostics(data: causalis.data_contracts.PanelDataDID, *, control_group: causalis.data_contracts.panel_data_did.ComparisonGroup = 'not_yet_or_never', anticipation: int = 0, base_period: causalis.scenarios.did.refutation.diagnostics.BasePeriod = 'universal', include_pre_periods: bool = False, min_treated_per_cell: int = 30, min_control_per_cell: int = 30, min_control_to_treated_ratio: float = 1.0, min_pair_completion_rate: float = 0.8, min_control_pool_retention: float = 0.25, max_unsupported_cell_share: float = 0.25, min_pre_periods: int = 2, max_abs_pretrend_t_stat: float = 2.0, max_abs_covariate_smd: float = 0.25, max_condition_number: float = _DEFAULT_MAX_CONDITION_NUMBER, min_clusters: int = 2) -> pandas.DataFrame
+:canonical: causalis.scenarios.did.refutation.diagnostics.run_did_diagnostics
+
+```{autodoc2-docstring} causalis.scenarios.did.refutation.diagnostics.run_did_diagnostics
+```
+````
+
+````{py:data} __all__
+:canonical: causalis.scenarios.did.refutation.diagnostics.__all__
+:value: >
+   ['did_support_table', 'raw_did_event_study_table', 'did_covariate_balance_table', 'did_base_design_t...
+
+```{autodoc2-docstring} causalis.scenarios.did.refutation.diagnostics.__all__
+```
+
+````

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from .causaldata import CausalData
 from .multicausaldata import MultiCausalData
-from .causaldata_instrumental import CausalDataInstrumental
 from .panel_data_did import PanelDataDID
 from .panel_data_scm import PanelDataSCM
 from .panel_did_estimate import CallawaySantAnnaDIDEstimate, PanelDIDDiagnosticData, PanelDIDEstimate
@@ -12,6 +11,11 @@ from .gate_estimate import GateEstimate
 from .gate_contrast_estimate import GateContrastEstimate
 from .causal_diagnostic_data import DiagnosticData, UnconfoundednessDiagnosticData, RegressionChecks
 from .sensitivity_analysis_result import SensitivityAnalysisResult
+from ..dgp import CausalDatasetGenerator, generate_rct, generate_classic_rct, classic_rct_gamma, obs_linear_effect, \
+    make_gold_linear, generate_cuped_binary
+from ..scenarios.classic_rct.dgp import generate_classic_rct_26, classic_rct_gamma_26
+from ..scenarios.cuped.dgp import make_cuped_binary_26
+from ..scenarios.unconfoundedness.dgp import obs_linear_26_dataset
 
 _DGP_EXPORTS = {
     "generate_rct",
@@ -30,7 +34,6 @@ _DGP_EXPORTS = {
 __all__ = [
     "CausalData",
     "MultiCausalData",
-    "CausalDataInstrumental",
     "PanelDataDID",
     "PanelDataSCM",
     "PanelDIDDiagnosticData",

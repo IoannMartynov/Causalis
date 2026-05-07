@@ -1,0 +1,81 @@
+# {py:mod}`causalis.scenarios.did.dgp`
+
+```{py:module} causalis.scenarios.did.dgp
+```
+
+```{autodoc2-docstring} causalis.scenarios.did.dgp
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`generate_did_gamma_26 <causalis.scenarios.did.dgp.generate_did_gamma_26>`
+  - ```{autodoc2-docstring} causalis.scenarios.did.dgp.generate_did_gamma_26
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`PanelOutput <causalis.scenarios.did.dgp.PanelOutput>`
+  - ```{autodoc2-docstring} causalis.scenarios.did.dgp.PanelOutput
+    :summary:
+    ```
+* - {py:obj}`generate_staggered_did_gamma_26 <causalis.scenarios.did.dgp.generate_staggered_did_gamma_26>`
+  - ```{autodoc2-docstring} causalis.scenarios.did.dgp.generate_staggered_did_gamma_26
+    :summary:
+    ```
+* - {py:obj}`__all__ <causalis.scenarios.did.dgp.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.did.dgp.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} PanelOutput
+:canonical: causalis.scenarios.did.dgp.PanelOutput
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.did.dgp.PanelOutput
+```
+
+````
+
+````{py:function} generate_did_gamma_26(*, seed: int = 42, return_panel_data: bool = True, include_oracles: bool = True, n_treated_units: int = 20, n_control_units: int = 60, n_pre_periods: typing.Optional[int] = None, n_post_periods: typing.Optional[int] = None, n_cohorts: int = _DEFAULT_N_COHORTS, treatment_effect_rate: float = 0.08, treatment_effect_slope: float = 0.0, treatment_effect_heterogeneity_std: float = 0.025, parallel_trend_violation: float = 0.0, calendar_start: str = '2021-01', time_freq: str = 'M', treated_prefix: str = 'treated_market_', control_prefix: str = 'control_market_', **advanced_params) -> causalis.scenarios.did.dgp.PanelOutput
+:canonical: causalis.scenarios.did.dgp.generate_did_gamma_26
+
+```{autodoc2-docstring} causalis.scenarios.did.dgp.generate_did_gamma_26
+```
+````
+
+````{py:data} generate_staggered_did_gamma_26
+:canonical: causalis.scenarios.did.dgp.generate_staggered_did_gamma_26
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.did.dgp.generate_staggered_did_gamma_26
+```
+
+````
+
+````{py:data} __all__
+:canonical: causalis.scenarios.did.dgp.__all__
+:value: >
+   ['generate_did_gamma_26', 'generate_staggered_did_gamma_26']
+
+```{autodoc2-docstring} causalis.scenarios.did.dgp.__all__
+```
+
+````
