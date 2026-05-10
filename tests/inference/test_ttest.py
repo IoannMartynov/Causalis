@@ -169,12 +169,10 @@ def test_ttest_error_non_binary_treatment(test_data):
     df_multi = test_data['df'].copy()
     df_multi['treatment'] = np.random.choice([0, 1, 2], size=test_data['n'])
     
-    ck_multi = CausalData(
-        df=df_multi,
-        outcome='outcome',
-        confounders=['age', 'gender'],
-        treatment='treatment'
-    )
-    
-    with pytest.raises(ValueError):
-        ttest(ck_multi)
+    with pytest.raises(ValueError, match="binary encoded"):
+        CausalData(
+            df=df_multi,
+            outcome='outcome',
+            confounders=['age', 'gender'],
+            treatment='treatment'
+        )

@@ -4,7 +4,7 @@ import pytest
 
 from causalis.dgp.causaldata import CausalData
 from causalis.scenarios.cuped.model import CUPEDModel
-from causalis.scenarios.cuped.diagnostics import (
+from causalis.scenarios.cuped.refutation import (
     regression_assumptions_table_from_data,
     regression_assumptions_table_from_estimate,
 )
@@ -22,7 +22,7 @@ def _make_data(n: int = 280, seed: int = 17) -> CausalData:
 
 def test_regression_assumptions_table_from_estimate_has_expected_columns():
     data = _make_data()
-    estimate = CUPEDModel(check_action="ignore").fit(data, covariates=["x1", "x2"]).estimate()
+    estimate = CUPEDModel().fit(data, covariates=["x1", "x2"]).estimate()
     table = regression_assumptions_table_from_estimate(
         data,
         estimate,
@@ -37,7 +37,7 @@ def test_regression_assumptions_table_from_estimate_has_expected_columns():
 
 def test_regression_assumptions_table_from_estimate_keeps_estimate_only_call():
     data = _make_data()
-    estimate = CUPEDModel(check_action="ignore").fit(data, covariates=["x1", "x2"]).estimate()
+    estimate = CUPEDModel().fit(data, covariates=["x1", "x2"]).estimate()
     table = regression_assumptions_table_from_estimate(
         estimate,
         style_regression_assumptions_table=lambda t: t,
@@ -58,7 +58,7 @@ def test_regression_assumptions_table_from_data_runs_end_to_end():
 
 def test_regression_assumptions_table_from_estimate_validates_data_alignment():
     data = _make_data()
-    estimate = CUPEDModel(check_action="ignore").fit(data, covariates=["x1", "x2"]).estimate()
+    estimate = CUPEDModel().fit(data, covariates=["x1", "x2"]).estimate()
 
     bad_df = data.df.copy()
     bad_df["d_other"] = bad_df["d"]

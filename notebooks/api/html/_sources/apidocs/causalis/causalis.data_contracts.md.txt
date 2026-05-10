@@ -20,7 +20,8 @@ causalis.data_contracts.causal_diagnostic_data
 causalis.data_contracts.causal_estimate
 causalis.data_contracts.panel_data_scm
 causalis.data_contracts.panel_estimate
-causalis.data_contracts.causaldata_instrumental
+causalis.data_contracts.iv_causal_data
+causalis.data_contracts.iv_causal_estimate
 causalis.data_contracts.multicausal_estimate
 causalis.data_contracts.panel_data_did
 causalis.data_contracts.causaldata
@@ -59,7 +60,7 @@ causalis.data_contracts.multicausaldata
 ````{py:data} __all__
 :canonical: causalis.data_contracts.__all__
 :value: >
-   ['CausalData', 'MultiCausalData', 'CausalDataInstrumental', 'PanelDataDID', 'PanelDataSCM', 'PanelDI...
+   ['CausalData', 'IVCausalData', 'MultiCausalData', 'PanelDataDID', 'PanelDataSCM', 'PanelDIDDiagnosti...
 
 ```{autodoc2-docstring} causalis.data_contracts.__all__
 ```

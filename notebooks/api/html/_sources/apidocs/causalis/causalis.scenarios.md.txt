@@ -20,6 +20,7 @@ causalis.scenarios.synthetic_control
 causalis.scenarios.unconfoundedness
 causalis.scenarios.uplift
 causalis.scenarios.gate
+causalis.scenarios.iv
 causalis.scenarios.multi_unconfoundedness
 ```
 
@@ -42,7 +43,7 @@ causalis.scenarios.multi_unconfoundedness
 ````{py:data} __all__
 :canonical: causalis.scenarios.__all__
 :value: >
-   ['classic_rct', 'unconfoundedness', 'cuped', 'synthetic_control', 'gate', 'uplift']
+   ['classic_rct', 'unconfoundedness', 'cuped', 'synthetic_control', 'gate', 'uplift', 'iv']
 
 ```{autodoc2-docstring} causalis.scenarios.__all__
 ```

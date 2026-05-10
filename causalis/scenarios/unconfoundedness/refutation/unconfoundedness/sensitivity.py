@@ -1,8 +1,21 @@
-"""
-Sensitivity functions refactored into a dedicated module.
+r"""
+Sensitivity analysis and benchmarking for unconfoundedness.
 
-This module centralizes bias-aware sensitivity helpers and the public
-entry points used by refutation utilities for unconfoundedness.
+This module provides tools to assess the robustness of causal estimates to
+potential unobserved confounding. It implements the sensitivity framework
+based on partial $R^2$ as described in Cinelli & Hazlett (2020), adapted for
+non-linear and semi-parametric models via influence functions.
+
+The framework assumes the existence of an unobserved confounder $U$ and
+quantifies the bias as a function of:
+- $R^2_{Y \sim U | D, X}$: How much of the outcome variance $U$ explains.
+- $R^2_{D \sim U | X}$: How much of the treatment variance $U$ explains.
+
+The bias-aware estimate is then:
+
+.. math::
+
+    \hat{\tau}_{adj} = \hat{\tau} \pm \text{bias}(R^2_{Y \sim U}, R^2_{D \sim U})
 """
 from __future__ import annotations
 
@@ -897,6 +910,24 @@ def get_sensitivity_summary(
     -------
     Optional[str]
         Formatted summary string or None if extraction fails.
+
+    Notes
+    -----
+    The summary reports the point estimate, standard error, and confidence
+    intervals under both the null (no unobserved confounding) and the assumed
+    level of confounding ($R^2_Y, R^2_D$).
+
+    It also includes the Robustness Value (RV), which is the minimum strength
+    of confounding ($R^2_Y = R^2_D$) required to change the conclusion
+    (e.g., make the estimate non-significant or zero).
+
+    Examples
+    --------
+    >>> from causalis.scenarios.unconfoundedness.refutation.unconfoundedness import sensitivity_analysis, get_sensitivity_summary
+    >>> # Assuming 'estimate' is a fitted CausalEstimate from IRM
+    >>> res = sensitivity_analysis(estimate, r2_y=0.05, r2_d=0.05) # doctest: +SKIP
+    >>> summary = get_sensitivity_summary(estimate) # doctest: +SKIP
+    >>> print(summary) # doctest: +SKIP
     """
     if isinstance(effect_estimation, SensitivityAnalysisResult):
         return effect_estimation.text_summary()
@@ -983,7 +1014,7 @@ def sensitivity_benchmark(
     benchmarking_set: List[str] | Literal["all"],
     fit_args: Optional[Dict[str, Any]] = None,
 ) -> pd.DataFrame:
-    """
+    r"""
     Benchmark confounders one by one by refitting a short IRM that excludes each
     requested confounder from the supplied ``CausalData``.
 
@@ -1015,6 +1046,30 @@ def sensitivity_benchmark(
         A long-form DataFrame with one row per benchmarked confounder and
         columns ``benchmark_confounder``, ``r2_y``, ``r2_d``, ``rho``,
         ``theta_long``, ``theta_short``, and ``delta``.
+
+    Notes
+    -----
+    Benchmarking allows the user to judge the plausibility of unobserved
+    confounding by comparing it to the strength of observed confounders.
+    For each confounder $X_k$, we calculate:
+    - $R^2_{Y \sim X_k | D, X_{-k}}$: The partial $R^2$ of the outcome on $X_k$.
+    - $R^2_{D \sim X_k | X_{-k}}$: The partial $R^2$ of the treatment on $X_k$.
+
+    These values can then be used as $R^2_Y$ and $R^2_D$ in
+    `sensitivity_analysis`.
+
+    Examples
+    --------
+    >>> from causalis.dgp import obs_linear_26_dataset
+    >>> from causalis.scenarios.unconfoundedness.model import IRM
+    >>> from causalis.scenarios.unconfoundedness.refutation import sensitivity_benchmark
+    >>> # 1. Fit a model
+    >>> data = obs_linear_26_dataset(n=1000, seed=42, return_causal_data=True)
+    >>> irm = IRM(data=data).fit()
+    >>> estimate = irm.estimate()
+    >>> # 2. Benchmark specific confounders
+    >>> benchmarks = sensitivity_benchmark(estimate, data, benchmarking_set=['x1', 'x2']) # doctest: +SKIP
+    >>> print(benchmarks[['benchmark_confounder', 'r2_y', 'r2_d']]) # doctest: +SKIP
     """
     model = None
     if isinstance(effect_estimation, dict):
@@ -1332,7 +1387,7 @@ def sensitivity_analysis(
     alpha: float = 0.05,
     use_signed_rr: bool = False,
 ) -> Dict[str, Any]:
-    """Compute bias-aware components and cache them.
+    r"""Compute bias-aware components and cache them.
 
     This function turns a fitted estimate into a simple hidden-confounding
     stress test. In the default mode, the bound width is
@@ -1488,6 +1543,19 @@ def interpret_sensitivity_analysis(
           - raw: the output of ``sensitivity_analysis(...)``
           - interpretation: machine-readable interpretation fields
           - summary: compact human-readable interpretation
+
+    Notes
+    -----
+    This function wraps `sensitivity_analysis` and provides a textual
+    interpretation of the results, including whether the estimate remains
+    significant under the assumed confounding.
+
+    Examples
+    --------
+    >>> from causalis.scenarios.unconfoundedness.refutation.unconfoundedness import interpret_sensitivity_analysis
+    >>> # Assuming 'estimate' is a fitted CausalEstimate
+    >>> interpretation = interpret_sensitivity_analysis(estimate, r2_y=0.01, r2_d=0.01) # doctest: +SKIP
+    >>> print(interpretation["summary"]) # doctest: +SKIP
     """
     res = sensitivity_analysis(
         effect_estimation,

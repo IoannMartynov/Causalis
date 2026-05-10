@@ -13,7 +13,7 @@
 :titlesonly:
 :maxdepth: 3
 
-causalis.scenarios.cuped.diagnostics
+causalis.scenarios.cuped.refutation
 ```
 
 ## Submodules

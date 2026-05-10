@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>causalis.scenarios.iv.dgp &#8212; Causalis API Reference  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="causalis.scenarios.iv.model" href="causalis.scenarios.iv.model.html" />
+    <link rel="prev" title="causalis.scenarios.iv.refutation.iv_confounders_balance" href="causalis.scenarios.iv.refutation.iv_confounders_balance.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-causalis.scenarios.iv.dgp">
+<span id="causalis-scenarios-iv-dgp"></span><h1><a class="reference internal" href="#module-causalis.scenarios.iv.dgp" title="causalis.scenarios.iv.dgp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.iv.dgp</span></code></a><a class="headerlink" href="#module-causalis.scenarios.iv.dgp" title="Link to this heading">¶</a></h1>
+<p>High-level instrumental-variable DGPs with realistic business covariates.</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.iv.dgp.generate_offer_iv_26" title="causalis.scenarios.iv.dgp.generate_offer_iv_26"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_offer_iv_26</span></code></a></p></td>
+<td><p>Generate a realistic IV dataset with a positive business effect.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="data">
+<h3>Data<a class="headerlink" href="#data" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.iv.dgp.__all__" title="causalis.scenarios.iv.dgp.__all__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__all__</span></code></a></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.iv.dgp.generate_offer_iv_26">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.iv.dgp.</span></span><span class="sig-name descname"><span class="pre">generate_offer_iv_26</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_oracle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_causal_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">deterministic_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="causalis.data_contracts.iv_causal_data.html#causalis.data_contracts.iv_causal_data.IVCausalData" title="causalis.data_contracts.iv_causal_data.IVCausalData"><span class="pre">causalis.data_contracts.iv_causal_data.IVCausalData</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.iv.dgp.generate_offer_iv_26" title="Link to this definition">¶</a></dt>
+<dd><p>Generate a realistic IV dataset with a positive business effect.</p>
+<p>This scenario mimics an offer-eligibility experiment in a customer product:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">offer_eligible</span></code> is the binary instrument (Z). It affects whether customers
+can accept an offer, but it has no direct outcome effect in the DGP.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">accepted_offer</span></code> is the binary endogenous treatment (D).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">net_revenue_90d</span></code> is a continuous outcome (Y) with a positive heterogeneous
+treatment effect among customers induced into treatment by eligibility.</p></li>
+</ul>
+<p>The DGP follows a structural model where unobserved confounders :math:<code class="docutils literal notranslate"><span class="pre">U</span></code>
+affect both treatment :math:<code class="docutils literal notranslate"><span class="pre">D</span></code> and outcome :math:<code class="docutils literal notranslate"><span class="pre">Y</span></code>, but not the
+instrument :math:<code class="docutils literal notranslate"><span class="pre">Z</span></code>:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Z &amp;= f_Z(X, \epsilon_Z) \
+D &amp;= f_D(Z, X, U, \epsilon_D) \
+Y &amp;= f_Y(D, X, U, \epsilon_Y)
+</pre></div>
+</div>
+<p class="rubric" id="id1">Parameters</p>
+<p>n : int, default 20_000
+Number of observations to generate.
+seed : int, default 42
+Random seed for reproducibility.
+include_oracle : bool, default True
+Whether to include latent variables (ITE, LATE, etc.) in the output DataFrame.
+return_causal_data : bool, default True
+If True, returns an :class:<code class="docutils literal notranslate"><span class="pre">~causalis.data_contracts.iv_causal_data.IVCausalData</span></code> object.
+If False, returns a :class:<code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code>.
+deterministic_ids : bool, default True
+Whether to generate stable, deterministic user IDs.</p>
+<p class="rubric" id="id2">Returns</p>
+<p>Union[pd.DataFrame, IVCausalData]
+The generated dataset.</p>
+<p class="rubric" id="id3">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.scenarios.iv.dgp import generate_offer_iv_26</p>
+<p class="rubric" id="id4">Generate data as a pandas DataFrame</p>
+<p>data = generate_offer_iv_26(n=5000, return_causal_data=False)
+data[[‘offer_eligible’, ‘accepted_offer’, ‘net_revenue_90d’]].head()</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="causalis.scenarios.iv.dgp.__all__">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.iv.dgp.</span></span><span class="sig-name descname"><span class="pre">__all__</span></span><a class="headerlink" href="#causalis.scenarios.iv.dgp.__all__" title="Link to this definition">¶</a></dt>
+<dd><p>[‘generate_offer_iv_26’]</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../reference.html">Causalis API Reference</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../reference.html">Documentation overview</a><ul>
+  <li><a href="../index.html">API Modules</a><ul>
+  <li><a href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a><ul>
+  <li><a href="causalis.scenarios.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios</span></code></a><ul>
+  <li><a href="causalis.scenarios.iv.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.iv</span></code></a><ul>
+      <li>Previous: <a href="causalis.scenarios.iv.refutation.iv_confounders_balance.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.iv.refutation.iv_confounders_balance</span></code></a></li>
+      <li>Next: <a href="causalis.scenarios.iv.model.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.iv.model</span></code></a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../../_sources/apidocs/causalis/causalis.scenarios.iv.dgp.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

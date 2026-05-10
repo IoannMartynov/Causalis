@@ -272,7 +272,7 @@ def plot_influence_instability(
     save_dpi: Optional[int] = None,
     transparent: bool = False,
 ) -> plt.Figure:
-    """
+    r"""
     Plot only the most influential score contributions.
 
     Panels

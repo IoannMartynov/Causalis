@@ -11,35 +11,64 @@ from causalis.data_contracts import CausalData
 
 
 def ttest(data: CausalData, alpha: float = 0.05) -> Dict[str, Any]:
-    """
-    Perform a Welch two-sample t-test comparing outcomes between treated (D=1)
-    and control (D=0) groups.
+    r"""
+    Perform a Welch two-sample t-test comparing outcomes between groups.
+
+    The Welch t-test (also known as the unequal variances t-test) is used to
+    test the hypothesis that two populations have equal means. It is more
+    robust than Student's t-test when the two samples have unequal variances
+    and/or unequal sample sizes.
+
+    Notes
+    -----
+    The Welch t-statistic is calculated as:
+
+    .. math::
+
+        t = \frac{\bar{Y}_1 - \bar{Y}_0}{\sqrt{\frac{s_1^2}{n_1} + \frac{s_0^2}{n_0}}}
+
+    The degrees of freedom $\nu$ are approximated using the Welch-Satterthwaite
+    equation:
+
+    .. math::
+
+        \nu \approx \frac{\left(\frac{s_1^2}{n_1} + \frac{s_0^2}{n_0}\right)^2}
+        {\frac{(s_1^2/n_1)^2}{n_1-1} + \frac{(s_0^2/n_0)^2}{n_0-1}}
+
+    For the relative difference (percent lift), the variance is estimated
+    using the Delta method:
+
+    .. math::
+
+        Var\left(\frac{\bar{Y}_1}{\bar{Y}_0}\right) \approx
+        \frac{1}{\bar{Y}_0^2} Var(\bar{Y}_1) + \frac{\bar{Y}_1^2}{\bar{Y}_0^4} Var(\bar{Y}_0)
+
+    Examples
+    --------
+    >>> from causalis.scenarios.classic_rct.dgp import generate_classic_rct_26
+    >>> from causalis.scenarios.classic_rct.inference.ttest import ttest
+    >>> data = generate_classic_rct_26(n=2000, seed=42)
+    >>> results = ttest(data)
+    >>> print(f"P-value: {results['p_value']:.4f}")
+    0.1685
+
+    Parameters
+    ----------
+    data : CausalData
+        The CausalData object containing treatment and outcome variables.
+    alpha : float, default 0.05
+        The significance level for calculating confidence intervals.
 
     Returns
     -------
     Dict[str, Any]
-        - p_value: Welch t-test p-value for H0: E[Y|D=1] - E[Y|D=0] = 0
-        - absolute_difference: treatment_mean - control_mean
-        - absolute_ci: (lower, upper) CI for absolute_difference using Welch df
-        - relative_difference: signed percent change = 100 * (treatment_mean / control_mean - 1)
-        - relative_se: delta-method SE of relative_difference (percent scale)
-        - relative_ci: (lower, upper) CI for relative_difference using delta method (+ Satterthwaite df)
-
-    Notes
-    -----
-    Delta method for relative percent change:
-      r_hat = 100 * (Ybar1/Ybar0 - 1)
-
-    With independent groups and CLT:
-      Var(Ybar1) ≈ s1^2/n1
-      Var(Ybar0) ≈ s0^2/n2
-      Cov(Ybar1, Ybar0) ≈ 0
-
-    Gradient of g(a,b)=a/b - 1 is (1/b, -a/b^2), so:
-      Var(r_hat/100) ≈ (1/Ybar0)^2 * (s1^2/n1) + (Ybar1/Ybar0^2)^2 * (s0^2/n2)
-
-    CI uses t-critical with Satterthwaite df; falls back to z if df is invalid.
-    If control_mean is near 0, relative stats are undefined/unstable and return inf/nan sentinels.
+        A dictionary containing:
+        - `p_value`: Welch t-test p-value.
+        - `absolute_difference`: $\bar{Y}_1 - \bar{Y}_0$.
+        - `absolute_ci`: (lower, upper) CI for absolute difference.
+        - `relative_difference`: Percent change relative to control.
+        - `relative_se`: Delta-method standard error for the relative difference.
+        - `relative_ci`: (lower, upper) CI for relative difference.
     """
     treatment_var = data.treatment
     outcome_var = data.outcome

@@ -59,13 +59,9 @@ def test_irm_raises_on_non_binary_treatment():
     # Modify treatment to be non-binary
     df = cd.df.copy()
     df[cd.treatment.name] = df[cd.treatment.name].replace({1: 2})
-    cd_bad = CausalData(df=df, treatment=cd.treatment.name, outcome=cd.outcome.name, confounders=cd.confounders)
 
-    ml_g = RandomForestRegressor(n_estimators=10, random_state=0)
-    ml_m = RandomForestClassifier(n_estimators=10, random_state=0)
-
-    with pytest.raises(ValueError):
-        IRM(cd_bad, ml_g=ml_g, ml_m=ml_m, n_folds=2).fit()
+    with pytest.raises(ValueError, match="binary encoded"):
+        CausalData(df=df, treatment=cd.treatment.name, outcome=cd.outcome.name, confounders=cd.confounders)
 
 
 def test_irm_raises_early_when_n_folds_exceeds_minority_class_size():

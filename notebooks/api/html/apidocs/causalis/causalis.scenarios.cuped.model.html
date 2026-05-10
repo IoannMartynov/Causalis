@@ -35,6 +35,11 @@
             
   <section id="module-causalis.scenarios.cuped.model">
 <span id="causalis-scenarios-cuped-model"></span><h1><a class="reference internal" href="#module-causalis.scenarios.cuped.model" title="causalis.scenarios.cuped.model"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.cuped.model</span></code></a><a class="headerlink" href="#module-causalis.scenarios.cuped.model" title="Link to this heading">¶</a></h1>
+<p>Controlled-experiment Using Pre-Experiment Data (CUPED) scenario.</p>
+<p>This module provides the <code class="docutils literal notranslate"><span class="pre">CUPEDModel</span></code> which implements regression-adjusted
+inference for Randomized Controlled Trials (RCTs) using pre-treatment covariates.
+It primarily implements the Lin (2013) fully interacted OLS specification,
+which is a robust generalization of the canonical CUPED estimator.</p>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
 <section id="classes">
@@ -51,26 +56,66 @@
 <h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="causalis.scenarios.cuped.model.CUPEDModel">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.model.</span></span><span class="sig-name descname"><span class="pre">CUPEDModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cov_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'HC2'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict_binary_treatment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_t_auto_n_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative_ci_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal[delta_nocov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bootstrap]</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'delta_nocov'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative_ci_bootstrap_draws</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative_ci_bootstrap_seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">covariate_variance_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">condition_number_warn_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_regression_checks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_action</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal[ignore</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raise]</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ignore'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raise_on_yellow</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">corr_near_one_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vif_warn_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">winsor_q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tiny_one_minus_h_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-08</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#causalis.scenarios.cuped.model.CUPEDModel" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.model.</span></span><span class="sig-name descname"><span class="pre">CUPEDModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cov_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'HC2'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_t_auto_n_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative_ci_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">delta</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bootstrap</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'delta'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative_denominator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">adjusted_control</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">raw_control</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'adjusted_control'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative_ci_bootstrap_draws</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative_ci_bootstrap_seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refutation_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="causalis.scenarios.cuped.refutation.config.html#causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig" title="causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig"><span class="pre">causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">covariate_variance_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-12</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#causalis.scenarios.cuped.model.CUPEDModel" title="Link to this definition">¶</a></dt>
 <dd><p>CUPED-style regression adjustment estimator for ATE/ITT in randomized experiments.</p>
-<p>Fits an outcome regression with pre-treatment covariates (always centered
-over the full sample, never within treatment groups)
-implemented as Lin (2013) fully interacted OLS:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Y ~ 1 + D + X^c + D * X^c
+<p>The CUPED estimator uses pre-experiment data (covariates) to reduce the
+variance of the treatment effect estimate without introducing bias. While
+the canonical CUPED estimator uses a single variance-reduction parameter $\theta$,
+this implementation follows Lin (2013) and uses a fully interacted OLS
+specification.</p>
+<p class="rubric" id="id2">Notes</p>
+<p>The canonical CUPED adjusted outcome is defined as:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Y_{cuped} = Y - \theta (X - E[X])
 </pre></div>
 </div>
-<p>The reported effect is the coefficient on D, with robust covariance as requested.
-This specification ensures the coefficient on D is the ATE/ITT even if the
-treatment effect is heterogeneous with respect to covariates.
-This is broader than canonical single-theta CUPED (<code class="docutils literal notranslate"><span class="pre">Y</span> <span class="pre">-</span> <span class="pre">theta*(X</span> <span class="pre">-</span> <span class="pre">mean(X))</span></code>).</p>
-<p class="rubric" id="id1">Parameters</p>
+<p>where $\theta = \frac{Cov(Y, X)}{Var(X)}$ minimizes $Var(Y_{cuped})$.</p>
+<p>This model implements the Lin (2013) specification, which is equivalent to
+saturated OLS and robust to heterogeneous treatment effects:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Y = \alpha + \tau D + \beta (X - \bar{X}) + \gamma D(X - \bar{X}) + \epsilon
+</pre></div>
+</div>
+<p>where:</p>
+<ul class="simple">
+<li><p>$D$ is the binary treatment indicator ($D=1$ for treatment, $D=0$ for control).</p></li>
+<li><p>$X$ are the pre-treatment covariates (centered globally).</p></li>
+<li><p>$\tau$ is the Average Treatment Effect (ATE).</p></li>
+</ul>
+<p>Centering covariates at their global mean $\bar{X}$ ensures that the
+coefficient $\tau$ on the treatment indicator $D$ directly estimates the ATE.</p>
+<p class="rubric" id="id3">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.scenarios.cuped.dgp import generate_cuped_tweedie_26
+from causalis.scenarios.cuped.model import CUPEDModel
+from causalis.data_contracts import CausalData</p>
+<p class="rubric" id="id4">Generate synthetic data with pre-treatment covariate</p>
+<p>data = generate_cuped_tweedie_26(seed=42, return_causal_data=False)
+causaldata = CausalData(
+…     df=data,
+…     treatment=’d’,
+…     outcome=’y’,
+…     confounders=[‘y_pre’]
+… )</p>
+<p class="rubric" id="id5">Fit CUPED model adjusting for ‘y_pre’</p>
+<p>model = CUPEDModel().fit(causaldata, covariates=[‘y_pre’])</p>
+<p class="rubric" id="id6">Estimate ATE</p>
+<p>estimate = model.estimate()
+print(f”ATE: {estimate.value:.4f}”)
+ATE: 0.6937
+print(f”P-value: {estimate.p_value:.4f}”)
+P-value: 0.0000</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+<p class="rubric" id="id7">Parameters</p>
 <p>cov_type : str, default=”HC2”
 Covariance estimator passed to statsmodels (e.g., “nonrobust”, “HC0”, “HC1”, “HC2”, “HC3”).
 Note: for cluster-randomized designs, use cluster-robust SEs (not implemented here).
 alpha : float, default=0.05
 Significance level for confidence intervals.
-strict_binary_treatment : bool, default=True
-If True, require treatment to be binary {0,1}.
 use_t : bool | None, default=None
 If bool, passed to statsmodels <code class="docutils literal notranslate"><span class="pre">.fit(...,</span> <span class="pre">use_t=use_t)</span></code> directly.
 If None, automatic policy is used: for robust HC* covariances,
@@ -79,35 +124,26 @@ For non-robust covariance, <code class="docutils literal notranslate"><span clas
 use_t_auto_n_threshold : int, default=5000
 Sample-size threshold for automatic <code class="docutils literal notranslate"><span class="pre">use_t</span></code> selection when <code class="docutils literal notranslate"><span class="pre">use_t=None</span></code>
 and covariance is HC* robust.
-relative_ci_method : {“delta_nocov”, “bootstrap”}, default=”delta_nocov”
-Method for relative CI of <code class="docutils literal notranslate"><span class="pre">100</span> <span class="pre">*</span> <span class="pre">tau</span> <span class="pre">/</span> <span class="pre">mu_c</span></code>.
-- “delta_nocov”: delta method using robust <code class="docutils literal notranslate"><span class="pre">Var(tau)</span></code> and <code class="docutils literal notranslate"><span class="pre">Var(mu_c)</span></code> while
-setting <code class="docutils literal notranslate"><span class="pre">Cov(tau,</span> <span class="pre">mu_c)=0</span></code> (safe fallback without unsupported hybrid IF covariance).
+relative_ci_method : {“delta”, “bootstrap”}, default=”delta”
+Method for relative CI of <code class="docutils literal notranslate"><span class="pre">100</span> <span class="pre">*</span> <span class="pre">tau</span> <span class="pre">/</span> <span class="pre">denominator</span></code>.
+- “delta”: joint delta method that accounts for covariance between the
+adjusted ATE and the selected denominator.
 - “bootstrap”: percentile bootstrap CI on the relative effect.
+relative_denominator : {“adjusted_control”, “raw_control”}, default=”adjusted_control”
+Denominator used for relative effects.
+- “adjusted_control”: model-implied control mean at the full-sample covariate mean.
+- “raw_control”: observed control-group outcome mean.
 relative_ci_bootstrap_draws : int, default=1000
 Number of bootstrap resamples used when <code class="docutils literal notranslate"><span class="pre">relative_ci_method=&quot;bootstrap&quot;</span></code>.
 relative_ci_bootstrap_seed : int | None, default=None
 RNG seed used for bootstrap relative CI.
+refutation_config : CUPEDRefutationConfig | None, default=None
+Grouped configuration for regression checks, refutation thresholds, and
+check actions.
 covariate_variance_min : float, default=1e-12
 Minimum variance threshold for retaining a CUPED covariate. Covariates with
-variance less than or equal to this threshold are dropped before fitting.
-condition_number_warn_threshold : float, default=1e8
-Trigger diagnostics signal when the design matrix condition number exceeds this threshold.
-run_regression_checks : bool, default=True
-Whether to compute regression diagnostics payload during <code class="docutils literal notranslate"><span class="pre">fit()</span></code>.
-check_action : {“ignore”, “raise”}, default=”ignore”
-Action used when a diagnostics threshold is violated.
-raise_on_yellow : bool, default=False
-When <code class="docutils literal notranslate"><span class="pre">check_action=&quot;raise&quot;</span></code>, also raise on YELLOW assumption flags.
-corr_near_one_tol : float, default=1e-10
-Correlation tolerance used to mark near-duplicate centered covariates.
-vif_warn_threshold : float, default=20.0
-VIF threshold that triggers a diagnostics signal.
-winsor_q : float | None, default=0.01
-Quantile used for winsor sensitivity refit. Set <code class="docutils literal notranslate"><span class="pre">None</span></code> to disable.
-tiny_one_minus_h_tol : float, default=1e-8
-Threshold for flagging near-degenerate <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">-</span> <span class="pre">leverage</span></code> terms in HC2/HC3.</p>
-<p class="rubric" id="id2">Notes</p>
+variance less than or equal to this threshold are dropped before fitting.</p>
+<p class="rubric" id="id8">Notes</p>
 <ul class="simple">
 <li><p>Validity requires covariates be pre-treatment. Post-treatment covariates can bias estimates.</p></li>
 <li><p>Covariates are globally centered over the full sample only. This centering
@@ -121,7 +157,7 @@ in RCTs.</p></li>
 <dt class="sig sig-object py" id="causalis.scenarios.cuped.model.CUPEDModel.fit">
 <span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">causalis.dgp.causaldata.CausalData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">covariates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_checks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#causalis.scenarios.cuped.model.CUPEDModel" title="causalis.scenarios.cuped.model.CUPEDModel"><span class="pre">causalis.scenarios.cuped.model.CUPEDModel</span></a></span></span><a class="headerlink" href="#causalis.scenarios.cuped.model.CUPEDModel.fit" title="Link to this definition">¶</a></dt>
 <dd><p>Fit CUPED-style regression adjustment (Lin-interacted OLS) on a CausalData object.</p>
-<p class="rubric" id="id3">Parameters</p>
+<p class="rubric" id="id9">Parameters</p>
 <p>data : CausalData
 Validated dataset with columns: outcome (post), treatment, and confounders (pre covariates).
 covariates : Sequence[str], required
@@ -129,7 +165,7 @@ Explicit subset of <code class="docutils literal notranslate"><span class="pre">
 Pass <code class="docutils literal notranslate"><span class="pre">[]</span></code> for an unadjusted (naive) fit.
 run_checks : bool | None, optional
 Override whether regression checks are computed in this fit call.
-If <code class="docutils literal notranslate"><span class="pre">None</span></code>, uses <code class="docutils literal notranslate"><span class="pre">self.run_regression_checks</span></code>.</p>
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, uses <code class="docutils literal notranslate"><span class="pre">self.refutation_config.run_regression_checks</span></code>.</p>
 <p class="rubric" id="returns">Returns</p>
 <p>CUPEDModel
 Fitted estimator.</p>
@@ -137,7 +173,6 @@ Fitted estimator.</p>
 <p>ValueError
 If <code class="docutils literal notranslate"><span class="pre">covariates</span></code> is omitted, not a sequence of strings, contains columns missing from the
 DataFrame, contains columns outside <code class="docutils literal notranslate"><span class="pre">data_contracts.confounders_names</span></code>,
-treatment is not binary when <code class="docutils literal notranslate"><span class="pre">strict_binary_treatment=True</span></code>,
 or the design matrix is rank deficient.</p>
 </dd></dl>
 
@@ -145,12 +180,12 @@ or the design matrix is rank deficient.</p>
 <dt class="sig sig-object py" id="causalis.scenarios.cuped.model.CUPEDModel.estimate">
 <span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diagnostic_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="causalis.data_contracts.causal_estimate.html#causalis.data_contracts.causal_estimate.CausalEstimate" title="causalis.data_contracts.causal_estimate.CausalEstimate"><span class="pre">causalis.data_contracts.causal_estimate.CausalEstimate</span></a></span></span><a class="headerlink" href="#causalis.scenarios.cuped.model.CUPEDModel.estimate" title="Link to this definition">¶</a></dt>
 <dd><p>Return the adjusted ATE/ITT estimate and inference.</p>
-<p class="rubric" id="id4">Parameters</p>
+<p class="rubric" id="id10">Parameters</p>
 <p>alpha : float, optional
 Override the instance significance level for confidence intervals.
 diagnostic_data : bool, default True
 Whether to include diagnostic data_contracts in the result.</p>
-<p class="rubric" id="id5">Returns</p>
+<p class="rubric" id="id11">Returns</p>
 <p>CausalEstimate
 A results object containing effect estimates and inference.</p>
 </dd></dl>
@@ -159,12 +194,12 @@ A results object containing effect estimates and inference.</p>
 <dt class="sig sig-object py" id="causalis.scenarios.cuped.model.CUPEDModel.summary_dict">
 <span class="sig-name descname"><span class="pre">summary_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.model.CUPEDModel.summary_dict" title="Link to this definition">¶</a></dt>
 <dd><p>Convenience JSON/logging output.</p>
-<p class="rubric" id="id6">Parameters</p>
+<p class="rubric" id="id12">Parameters</p>
 <p>alpha : float, optional
 Override the instance significance level for confidence intervals.</p>
-<p class="rubric" id="id7">Returns</p>
+<p class="rubric" id="id13">Returns</p>
 <p>dict
-Dictionary with estimates, inference, and diagnostics.</p>
+Dictionary with estimates, inference, and refutation checks.</p>
 </dd></dl>
 
 <dl class="py method">

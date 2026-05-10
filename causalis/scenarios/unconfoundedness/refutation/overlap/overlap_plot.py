@@ -1,4 +1,4 @@
-"""Plotting helpers for overlap diagnostics and propensity score geometry."""
+r"""Plotting helpers for overlap diagnostics and propensity score geometry."""
 
 from typing import Tuple, Optional, Any, Union
 import numpy as np
@@ -49,7 +49,7 @@ def plot_m_overlap(
     color_t: Optional[Any] = None,
     color_c: Optional[Any] = None,
 ) -> plt.Figure:
-    """
+    r"""
     Overlap plot for m(x)=P(D=1|X) with high-res rendering.
     - x in [0,1]
     - Stable NumPy KDE w/ boundary reflection (no SciPy warnings)

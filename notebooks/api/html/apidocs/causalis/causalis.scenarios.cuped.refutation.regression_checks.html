@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>causalis.scenarios.cuped.refutation.regression_checks &#8212; Causalis API Reference  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="causalis.scenarios.cuped.refutation.config" href="causalis.scenarios.cuped.refutation.config.html" />
+    <link rel="prev" title="causalis.scenarios.cuped.refutation" href="causalis.scenarios.cuped.refutation.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-causalis.scenarios.cuped.refutation.regression_checks">
+<span id="causalis-scenarios-cuped-refutation-regression-checks"></span><h1><a class="reference internal" href="#module-causalis.scenarios.cuped.refutation.regression_checks" title="causalis.scenarios.cuped.refutation.regression_checks"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks</span></code></a><a class="headerlink" href="#module-causalis.scenarios.cuped.refutation.regression_checks" title="Link to this heading">¶</a></h1>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks" title="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RegressionChecks</span></code></a></p></td>
+<td><p>Lightweight OLS/regression health checks for CUPED refutation.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.design_matrix_checks" title="causalis.scenarios.cuped.refutation.regression_checks.design_matrix_checks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">design_matrix_checks</span></code></a></p></td>
+<td><p>Return rank/conditioning refutation checks for a numeric design matrix.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.near_duplicate_corr_pairs" title="causalis.scenarios.cuped.refutation.regression_checks.near_duplicate_corr_pairs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">near_duplicate_corr_pairs</span></code></a></p></td>
+<td><p>Find pairs with absolute correlation very close to one.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.vif_from_corr" title="causalis.scenarios.cuped.refutation.regression_checks.vif_from_corr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">vif_from_corr</span></code></a></p></td>
+<td><p>Approximate VIF from inverse correlation matrix of standardized covariates..</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.leverage_and_cooks" title="causalis.scenarios.cuped.refutation.regression_checks.leverage_and_cooks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">leverage_and_cooks</span></code></a></p></td>
+<td><p>Compute leverage, Cook’s distance, and internally studentized residuals.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.winsor_fit_tau" title="causalis.scenarios.cuped.refutation.regression_checks.winsor_fit_tau"><code class="xref py py-obj docutils literal notranslate"><span class="pre">winsor_fit_tau</span></code></a></p></td>
+<td><p>Refit OLS on winsorized outcome and return treatment coefficient.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.run_regression_checks" title="causalis.scenarios.cuped.refutation.regression_checks.run_regression_checks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_regression_checks</span></code></a></p></td>
+<td><p>Build a compact payload with design, residual, and influence refutation checks.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.assumption_design_rank" title="causalis.scenarios.cuped.refutation.regression_checks.assumption_design_rank"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assumption_design_rank</span></code></a></p></td>
+<td><p>Check that the design matrix is full rank.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.assumption_condition_number" title="causalis.scenarios.cuped.refutation.regression_checks.assumption_condition_number"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assumption_condition_number</span></code></a></p></td>
+<td><p>Check global collinearity via condition number.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.assumption_near_duplicates" title="causalis.scenarios.cuped.refutation.regression_checks.assumption_near_duplicates"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assumption_near_duplicates</span></code></a></p></td>
+<td><p>Check near-duplicate centered covariate pairs.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.assumption_vif" title="causalis.scenarios.cuped.refutation.regression_checks.assumption_vif"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assumption_vif</span></code></a></p></td>
+<td><p>Check VIF from centered main-effect covariates.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.assumption_ate_gap" title="causalis.scenarios.cuped.refutation.regression_checks.assumption_ate_gap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assumption_ate_gap</span></code></a></p></td>
+<td><p>Check adjusted-vs-naive ATE gap relative to naive SE.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.assumption_residual_tails" title="causalis.scenarios.cuped.refutation.regression_checks.assumption_residual_tails"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assumption_residual_tails</span></code></a></p></td>
+<td><p>Check residual extremes using max standardized residual only.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.assumption_leverage" title="causalis.scenarios.cuped.refutation.regression_checks.assumption_leverage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assumption_leverage</span></code></a></p></td>
+<td><p>Check leverage concentration.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.assumption_cooks" title="causalis.scenarios.cuped.refutation.regression_checks.assumption_cooks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assumption_cooks</span></code></a></p></td>
+<td><p>Check Cook’s distance influence refutation checks.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.assumption_hc23_stability" title="causalis.scenarios.cuped.refutation.regression_checks.assumption_hc23_stability"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assumption_hc23_stability</span></code></a></p></td>
+<td><p>Check HC2/HC3 stability when leverage terms approach one.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.assumption_winsor_sensitivity" title="causalis.scenarios.cuped.refutation.regression_checks.assumption_winsor_sensitivity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assumption_winsor_sensitivity</span></code></a></p></td>
+<td><p>Check sensitivity of adjusted ATE to winsorized-outcome refit.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.regression_assumption_rows_from_checks" title="causalis.scenarios.cuped.refutation.regression_checks.regression_assumption_rows_from_checks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">regression_assumption_rows_from_checks</span></code></a></p></td>
+<td><p>Run all CUPED regression assumption tests and return row payloads.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.regression_assumptions_table_from_checks" title="causalis.scenarios.cuped.refutation.regression_checks.regression_assumptions_table_from_checks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">regression_assumptions_table_from_checks</span></code></a></p></td>
+<td><p>Return a table of GREEN/YELLOW/RED assumption flags from checks payload.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.regression_assumptions_table_from_diagnostic_data" title="causalis.scenarios.cuped.refutation.regression_checks.regression_assumptions_table_from_diagnostic_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">regression_assumptions_table_from_diagnostic_data</span></code></a></p></td>
+<td><p>Build assumption table from <code class="docutils literal notranslate"><span class="pre">CUPEDDiagnosticData</span></code> payload.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.regression_assumptions_table_from_estimate" title="causalis.scenarios.cuped.refutation.regression_checks.regression_assumptions_table_from_estimate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">regression_assumptions_table_from_estimate</span></code></a></p></td>
+<td><p>Build assumptions table from a CUPED estimate.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.regression_assumptions_table_from_data" title="causalis.scenarios.cuped.refutation.regression_checks.regression_assumptions_table_from_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">regression_assumptions_table_from_data</span></code></a></p></td>
+<td><p>Fit CUPED on <code class="docutils literal notranslate"><span class="pre">CausalData</span></code> and return the assumptions flag table.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.overall_assumption_flag" title="causalis.scenarios.cuped.refutation.regression_checks.overall_assumption_flag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">overall_assumption_flag</span></code></a></p></td>
+<td><p>Return overall GREEN/YELLOW/RED status from an assumptions table.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.style_regression_assumptions_table" title="causalis.scenarios.cuped.refutation.regression_checks.style_regression_assumptions_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">style_regression_assumptions_table</span></code></a></p></td>
+<td><p>Return pandas Styler with colored flag cells for notebook display.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="data">
+<h3>Data<a class="headerlink" href="#data" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.FLAG_GREEN" title="causalis.scenarios.cuped.refutation.regression_checks.FLAG_GREEN"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FLAG_GREEN</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.FLAG_YELLOW" title="causalis.scenarios.cuped.refutation.regression_checks.FLAG_YELLOW"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FLAG_YELLOW</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.FLAG_RED" title="causalis.scenarios.cuped.refutation.regression_checks.FLAG_RED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FLAG_RED</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.FLAG_LEVEL" title="causalis.scenarios.cuped.refutation.regression_checks.FLAG_LEVEL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FLAG_LEVEL</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.FLAG_COLOR" title="causalis.scenarios.cuped.refutation.regression_checks.FLAG_COLOR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FLAG_COLOR</span></code></a></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
+<dl class="py data">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.FLAG_GREEN">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">FLAG_GREEN</span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.FLAG_GREEN" title="Link to this definition">¶</a></dt>
+<dd><p>‘GREEN’</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.FLAG_YELLOW">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">FLAG_YELLOW</span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.FLAG_YELLOW" title="Link to this definition">¶</a></dt>
+<dd><p>‘YELLOW’</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.FLAG_RED">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">FLAG_RED</span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.FLAG_RED" title="Link to this definition">¶</a></dt>
+<dd><p>‘RED’</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.FLAG_LEVEL">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">FLAG_LEVEL</span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.FLAG_LEVEL" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.FLAG_COLOR">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">FLAG_COLOR</span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.FLAG_COLOR" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">RegressionChecks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">pydantic.BaseModel</span></code></p>
+<p>Lightweight OLS/regression health checks for CUPED refutation.</p>
+<p class="rubric">Initialization</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code class="docutils literal notranslate"><span class="pre">ValidationError</span></code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code class="docutils literal notranslate"><span class="pre">self</span></code> is explicitly positional-only to allow <code class="docutils literal notranslate"><span class="pre">self</span></code> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.ate_naive">
+<span class="sig-name descname"><span class="pre">ate_naive</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.ate_naive" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.ate_adj">
+<span class="sig-name descname"><span class="pre">ate_adj</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.ate_adj" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.ate_gap">
+<span class="sig-name descname"><span class="pre">ate_gap</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.ate_gap" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.ate_gap_over_se_naive">
+<span class="sig-name descname"><span class="pre">ate_gap_over_se_naive</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.ate_gap_over_se_naive" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.k">
+<span class="sig-name descname"><span class="pre">k</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.k" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.rank">
+<span class="sig-name descname"><span class="pre">rank</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.rank" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.full_rank">
+<span class="sig-name descname"><span class="pre">full_rank</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.full_rank" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.condition_number">
+<span class="sig-name descname"><span class="pre">condition_number</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.condition_number" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.p_main_covariates">
+<span class="sig-name descname"><span class="pre">p_main_covariates</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.p_main_covariates" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.near_duplicate_pairs">
+<span class="sig-name descname"><span class="pre">near_duplicate_pairs</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.near_duplicate_pairs" title="Link to this definition">¶</a></dt>
+<dd><p>‘Field(…)’</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.vif">
+<span class="sig-name descname"><span class="pre">vif</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.vif" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.resid_scale_mad">
+<span class="sig-name descname"><span class="pre">resid_scale_mad</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.resid_scale_mad" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.n_std_resid_gt_3">
+<span class="sig-name descname"><span class="pre">n_std_resid_gt_3</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.n_std_resid_gt_3" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.n_std_resid_gt_4">
+<span class="sig-name descname"><span class="pre">n_std_resid_gt_4</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.n_std_resid_gt_4" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.max_abs_std_resid">
+<span class="sig-name descname"><span class="pre">max_abs_std_resid</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.max_abs_std_resid" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.max_leverage">
+<span class="sig-name descname"><span class="pre">max_leverage</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.max_leverage" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.leverage_cutoff">
+<span class="sig-name descname"><span class="pre">leverage_cutoff</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.leverage_cutoff" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.n_high_leverage">
+<span class="sig-name descname"><span class="pre">n_high_leverage</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.n_high_leverage" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.max_cooks">
+<span class="sig-name descname"><span class="pre">max_cooks</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.max_cooks" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.cooks_cutoff">
+<span class="sig-name descname"><span class="pre">cooks_cutoff</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.cooks_cutoff" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.n_high_cooks">
+<span class="sig-name descname"><span class="pre">n_high_cooks</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.n_high_cooks" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.min_one_minus_h">
+<span class="sig-name descname"><span class="pre">min_one_minus_h</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.min_one_minus_h" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.n_tiny_one_minus_h">
+<span class="sig-name descname"><span class="pre">n_tiny_one_minus_h</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.n_tiny_one_minus_h" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.winsor_q">
+<span class="sig-name descname"><span class="pre">winsor_q</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.winsor_q" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.ate_adj_winsor">
+<span class="sig-name descname"><span class="pre">ate_adj_winsor</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.ate_adj_winsor" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.ate_adj_winsor_gap">
+<span class="sig-name descname"><span class="pre">ate_adj_winsor_gap</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks.ate_adj_winsor_gap" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.design_matrix_checks">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">design_matrix_checks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">design</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.design_matrix_checks" title="Link to this definition">¶</a></dt>
+<dd><p>Return rank/conditioning refutation checks for a numeric design matrix.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.near_duplicate_corr_pairs">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">near_duplicate_corr_pairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_pairs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.near_duplicate_corr_pairs" title="Link to this definition">¶</a></dt>
+<dd><p>Find pairs with absolute correlation very close to one.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.vif_from_corr">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">vif_from_corr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.vif_from_corr" title="Link to this definition">¶</a></dt>
+<dd><p>Approximate VIF from inverse correlation matrix of standardized covariates..</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.leverage_and_cooks">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">leverage_and_cooks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.leverage_and_cooks" title="Link to this definition">¶</a></dt>
+<dd><p>Compute leverage, Cook’s distance, and internally studentized residuals.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.winsor_fit_tau">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">winsor_fit_tau</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">design</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_t_fit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">winsor_q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.winsor_fit_tau" title="Link to this definition">¶</a></dt>
+<dd><p>Refit OLS on winsorized outcome and return treatment coefficient.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.run_regression_checks">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">run_regression_checks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">design</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_naive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_t_fit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">corr_near_one_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tiny_one_minus_h_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">winsor_q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks" title="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks</span></a></span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.run_regression_checks" title="Link to this definition">¶</a></dt>
+<dd><p>Build a compact payload with design, residual, and influence refutation checks.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.assumption_design_rank">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">assumption_design_rank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks" title="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.assumption_design_rank" title="Link to this definition">¶</a></dt>
+<dd><p>Check that the design matrix is full rank.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.assumption_condition_number">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">assumption_condition_number</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks" title="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">warn_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">red_multiplier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.assumption_condition_number" title="Link to this definition">¶</a></dt>
+<dd><p>Check global collinearity via condition number.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.assumption_near_duplicates">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">assumption_near_duplicates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks" title="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">red_pairs_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.assumption_near_duplicates" title="Link to this definition">¶</a></dt>
+<dd><p>Check near-duplicate centered covariate pairs.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.assumption_vif">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">assumption_vif</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks" title="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">warn_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">red_multiplier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.assumption_vif" title="Link to this definition">¶</a></dt>
+<dd><p>Check VIF from centered main-effect covariates.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.assumption_ate_gap">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">assumption_ate_gap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks" title="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">yellow_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">red_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2.5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.assumption_ate_gap" title="Link to this definition">¶</a></dt>
+<dd><p>Check adjusted-vs-naive ATE gap relative to naive SE.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.assumption_residual_tails">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">assumption_residual_tails</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks" title="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">yellow_abs_std_resid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">7.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">red_abs_std_resid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.assumption_residual_tails" title="Link to this definition">¶</a></dt>
+<dd><p>Check residual extremes using max standardized residual only.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.assumption_leverage">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">assumption_leverage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks" title="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">yellow_multiplier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">red_multiplier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">red_floor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.assumption_leverage" title="Link to this definition">¶</a></dt>
+<dd><p>Check leverage concentration.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.assumption_cooks">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">assumption_cooks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks" title="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">yellow_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">red_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.assumption_cooks" title="Link to this definition">¶</a></dt>
+<dd><p>Check Cook’s distance influence refutation checks.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.assumption_hc23_stability">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">assumption_hc23_stability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks" title="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tiny_one_minus_h_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-08</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.assumption_hc23_stability" title="Link to this definition">¶</a></dt>
+<dd><p>Check HC2/HC3 stability when leverage terms approach one.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.assumption_winsor_sensitivity">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">assumption_winsor_sensitivity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks" title="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">winsor_reference_se</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yellow_sigma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">red_sigma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yellow_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">red_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.25</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.assumption_winsor_sensitivity" title="Link to this definition">¶</a></dt>
+<dd><p>Check sensitivity of adjusted ATE to winsorized-outcome refit.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.regression_assumption_rows_from_checks">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">regression_assumption_rows_from_checks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks" title="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'HC2'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">condition_number_warn_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vif_warn_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tiny_one_minus_h_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">winsor_reference_se</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.regression_assumption_rows_from_checks" title="Link to this definition">¶</a></dt>
+<dd><p>Run all CUPED regression assumption tests and return row payloads.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.regression_assumptions_table_from_checks">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">regression_assumptions_table_from_checks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks" title="causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'HC2'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">condition_number_warn_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vif_warn_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tiny_one_minus_h_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">winsor_reference_se</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.regression_assumptions_table_from_checks" title="Link to this definition">¶</a></dt>
+<dd><p>Return a table of GREEN/YELLOW/RED assumption flags from checks payload.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.regression_assumptions_table_from_diagnostic_data">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">regression_assumptions_table_from_diagnostic_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">diagnostic_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="causalis.data_contracts.causal_diagnostic_data.html#causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData" title="causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData"><span class="pre">causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'HC2'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">condition_number_warn_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vif_warn_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tiny_one_minus_h_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">winsor_reference_se</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.regression_assumptions_table_from_diagnostic_data" title="Link to this definition">¶</a></dt>
+<dd><p>Build assumption table from <code class="docutils literal notranslate"><span class="pre">CUPEDDiagnosticData</span></code> payload.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.regression_assumptions_table_from_estimate">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">regression_assumptions_table_from_estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_or_estimate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">causalis.dgp.causaldata.CausalData</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="causalis.data_contracts.causal_estimate.html#causalis.data_contracts.causal_estimate.CausalEstimate" title="causalis.data_contracts.causal_estimate.CausalEstimate"><span class="pre">causalis.data_contracts.causal_estimate.CausalEstimate</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="causalis.data_contracts.causal_estimate.html#causalis.data_contracts.causal_estimate.CausalEstimate" title="causalis.data_contracts.causal_estimate.CausalEstimate"><span class="pre">causalis.data_contracts.causal_estimate.CausalEstimate</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_regression_assumptions_table</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.DataFrame</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">condition_number_warn_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vif_warn_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tiny_one_minus_h_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-08</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.regression_assumptions_table_from_estimate" title="Link to this definition">¶</a></dt>
+<dd><p>Build assumptions table from a CUPED estimate.</p>
+<p>Supports both call styles:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">regression_assumptions_table_from_estimate(estimate,</span> <span class="pre">...)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">regression_assumptions_table_from_estimate(data,</span> <span class="pre">estimate,</span> <span class="pre">...)</span></code></p></li>
+</ol>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.regression_assumptions_table_from_data">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">regression_assumptions_table_from_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">causalis.dgp.causaldata.CausalData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">covariates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.regression_assumptions_table_from_data" title="Link to this definition">¶</a></dt>
+<dd><p>Fit CUPED on <code class="docutils literal notranslate"><span class="pre">CausalData</span></code> and return the assumptions flag table.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.overall_assumption_flag">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">overall_assumption_flag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.overall_assumption_flag" title="Link to this definition">¶</a></dt>
+<dd><p>Return overall GREEN/YELLOW/RED status from an assumptions table.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.cuped.refutation.regression_checks.style_regression_assumptions_table">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.refutation.regression_checks.</span></span><span class="sig-name descname"><span class="pre">style_regression_assumptions_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#causalis.scenarios.cuped.refutation.regression_checks.style_regression_assumptions_table" title="Link to this definition">¶</a></dt>
+<dd><p>Return pandas Styler with colored flag cells for notebook display.</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../reference.html">Causalis API Reference</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../reference.html">Documentation overview</a><ul>
+  <li><a href="../index.html">API Modules</a><ul>
+  <li><a href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a><ul>
+  <li><a href="causalis.scenarios.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios</span></code></a><ul>
+  <li><a href="causalis.scenarios.cuped.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.cuped</span></code></a><ul>
+  <li><a href="causalis.scenarios.cuped.refutation.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.cuped.refutation</span></code></a><ul>
+      <li>Previous: <a href="causalis.scenarios.cuped.refutation.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.cuped.refutation</span></code></a></li>
+      <li>Next: <a href="causalis.scenarios.cuped.refutation.config.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.cuped.refutation.config</span></code></a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../../_sources/apidocs/causalis/causalis.scenarios.cuped.refutation.regression_checks.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

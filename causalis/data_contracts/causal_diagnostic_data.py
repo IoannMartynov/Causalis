@@ -3,10 +3,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import numpy as np
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 if TYPE_CHECKING:
-    from causalis.scenarios.cuped.diagnostics.regression_checks import RegressionChecks
+    from causalis.scenarios.cuped.refutation.regression_checks import RegressionChecks
 else:
     RegressionChecks = Any
 
@@ -75,6 +75,35 @@ class MultiUnconfoundednessDiagnosticData(DiagnosticData):
     residual_plot_cache: Optional[Dict[str, Any]] = None
 
 
+class IVDiagnosticData(DiagnosticData):
+    """Diagnostic payload for instrumental-variable estimators."""
+
+    y: np.ndarray
+    d: np.ndarray
+    z: np.ndarray
+    x: Optional[np.ndarray] = None
+    x_names: List[str] = Field(default_factory=list)
+    g0_hat: np.ndarray
+    g1_hat: np.ndarray
+    m_hat: np.ndarray
+    m_hat_raw: Optional[np.ndarray] = None
+    r0_hat: np.ndarray
+    r1_hat: np.ndarray
+    folds: Optional[np.ndarray] = None
+    psi: np.ndarray
+    psi_a: np.ndarray
+    psi_b: np.ndarray
+    phi_y: np.ndarray
+    phi_d: np.ndarray
+    score: str = "LATE"
+    trimming_threshold: float = 0.0
+    normalize_ipw: Optional[bool] = None
+    instrument_overlap: Optional[Dict[str, Any]] = None
+    first_stage: Optional[Dict[str, Any]] = None
+    reduced_form: Optional[Dict[str, Any]] = None
+    diagnostics: Dict[str, Any] = Field(default_factory=dict)
+
+
 class DiffInMeansDiagnosticData(DiagnosticData):
     """Diagnostic data_contracts for Difference-in-Means model."""
 
@@ -86,7 +115,8 @@ class CUPEDDiagnosticData(DiagnosticData):
 
     ate_naive: float
     se_naive: float
-    se_reduction_pct_same_cov: float
+    variance_reduction_pct_same_cov: float
+    standard_error_reduction_pct_same_cov: float
     r2_naive: float
     r2_adj: float
     beta_covariates: np.ndarray

@@ -1,0 +1,53 @@
+# {py:mod}`causalis.scenarios.classic_rct.inference.welch_permutation_t_test`
+
+```{py:module} causalis.scenarios.classic_rct.inference.welch_permutation_t_test
+```
+
+```{autodoc2-docstring} causalis.scenarios.classic_rct.inference.welch_permutation_t_test
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`welch_permutation_t_test <causalis.scenarios.classic_rct.inference.welch_permutation_t_test.welch_permutation_t_test>`
+  - ```{autodoc2-docstring} causalis.scenarios.classic_rct.inference.welch_permutation_t_test.welch_permutation_t_test
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`Alternative <causalis.scenarios.classic_rct.inference.welch_permutation_t_test.Alternative>`
+  - ```{autodoc2-docstring} causalis.scenarios.classic_rct.inference.welch_permutation_t_test.Alternative
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} Alternative
+:canonical: causalis.scenarios.classic_rct.inference.welch_permutation_t_test.Alternative
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.scenarios.classic_rct.inference.welch_permutation_t_test.Alternative
+```
+
+````
+
+````{py:function} welch_permutation_t_test(data: causalis.dgp.causaldata.CausalData, alpha: float = 0.05, B: int = 10000, alternative: causalis.scenarios.classic_rct.inference.welch_permutation_t_test.Alternative = 'two-sided', seed: typing.Optional[int] = None) -> typing.Dict[str, typing.Any]
+:canonical: causalis.scenarios.classic_rct.inference.welch_permutation_t_test.welch_permutation_t_test
+
+```{autodoc2-docstring} causalis.scenarios.classic_rct.inference.welch_permutation_t_test.welch_permutation_t_test
+```
+````

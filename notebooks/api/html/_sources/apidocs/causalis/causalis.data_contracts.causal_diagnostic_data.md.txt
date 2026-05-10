@@ -27,6 +27,10 @@
   - ```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.MultiUnconfoundednessDiagnosticData
     :summary:
     ```
+* - {py:obj}`IVDiagnosticData <causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData>`
+  - ```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData
+    :summary:
+    ```
 * - {py:obj}`DiffInMeansDiagnosticData <causalis.data_contracts.causal_diagnostic_data.DiffInMeansDiagnosticData>`
   - ```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.DiffInMeansDiagnosticData
     :summary:
@@ -581,6 +585,286 @@ Bases: {py:obj}`causalis.data_contracts.causal_diagnostic_data.DiagnosticData`
 
 `````
 
+`````{py:class} IVDiagnosticData(/, **data: typing.Any)
+:canonical: causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData
+
+Bases: {py:obj}`causalis.data_contracts.causal_diagnostic_data.DiagnosticData`
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData
+```
+
+```{rubric} Initialization
+```
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.__init__
+```
+
+````{py:attribute} y
+:canonical: causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.y
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.y
+```
+
+````
+
+````{py:attribute} d
+:canonical: causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.d
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.d
+```
+
+````
+
+````{py:attribute} z
+:canonical: causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.z
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.z
+```
+
+````
+
+````{py:attribute} x
+:canonical: causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.x
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.x
+```
+
+````
+
+````{py:attribute} x_names
+:canonical: causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.x_names
+:type: typing.List[str]
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.x_names
+```
+
+````
+
+````{py:attribute} g0_hat
+:canonical: causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.g0_hat
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.g0_hat
+```
+
+````
+
+````{py:attribute} g1_hat
+:canonical: causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.g1_hat
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.g1_hat
+```
+
+````
+
+````{py:attribute} m_hat
+:canonical: causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.m_hat
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.m_hat
+```
+
+````
+
+````{py:attribute} m_hat_raw
+:canonical: causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.m_hat_raw
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.m_hat_raw
+```
+
+````
+
+````{py:attribute} r0_hat
+:canonical: causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.r0_hat
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.r0_hat
+```
+
+````
+
+````{py:attribute} r1_hat
+:canonical: causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.r1_hat
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.r1_hat
+```
+
+````
+
+````{py:attribute} folds
+:canonical: causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.folds
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.folds
+```
+
+````
+
+````{py:attribute} psi
+:canonical: causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.psi
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.psi
+```
+
+````
+
+````{py:attribute} psi_a
+:canonical: causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.psi_a
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.psi_a
+```
+
+````
+
+````{py:attribute} psi_b
+:canonical: causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.psi_b
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.psi_b
+```
+
+````
+
+````{py:attribute} phi_y
+:canonical: causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.phi_y
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.phi_y
+```
+
+````
+
+````{py:attribute} phi_d
+:canonical: causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.phi_d
+:type: numpy.ndarray
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.phi_d
+```
+
+````
+
+````{py:attribute} score
+:canonical: causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.score
+:type: str
+:value: >
+   'LATE'
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.score
+```
+
+````
+
+````{py:attribute} trimming_threshold
+:canonical: causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.trimming_threshold
+:type: float
+:value: >
+   0.0
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.trimming_threshold
+```
+
+````
+
+````{py:attribute} normalize_ipw
+:canonical: causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.normalize_ipw
+:type: typing.Optional[bool]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.normalize_ipw
+```
+
+````
+
+````{py:attribute} instrument_overlap
+:canonical: causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.instrument_overlap
+:type: typing.Optional[typing.Dict[str, typing.Any]]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.instrument_overlap
+```
+
+````
+
+````{py:attribute} first_stage
+:canonical: causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.first_stage
+:type: typing.Optional[typing.Dict[str, typing.Any]]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.first_stage
+```
+
+````
+
+````{py:attribute} reduced_form
+:canonical: causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.reduced_form
+:type: typing.Optional[typing.Dict[str, typing.Any]]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.reduced_form
+```
+
+````
+
+````{py:attribute} diagnostics
+:canonical: causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.diagnostics
+:type: typing.Dict[str, typing.Any]
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData.diagnostics
+```
+
+````
+
+`````
+
 ````{py:class} DiffInMeansDiagnosticData(/, **data: typing.Any)
 :canonical: causalis.data_contracts.causal_diagnostic_data.DiffInMeansDiagnosticData
 
@@ -633,13 +917,24 @@ Bases: {py:obj}`causalis.data_contracts.causal_diagnostic_data.DiagnosticData`
 
 ````
 
-````{py:attribute} se_reduction_pct_same_cov
-:canonical: causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.se_reduction_pct_same_cov
+````{py:attribute} variance_reduction_pct_same_cov
+:canonical: causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.variance_reduction_pct_same_cov
 :type: float
 :value: >
    None
 
-```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.se_reduction_pct_same_cov
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.variance_reduction_pct_same_cov
+```
+
+````
+
+````{py:attribute} standard_error_reduction_pct_same_cov
+:canonical: causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.standard_error_reduction_pct_same_cov
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.standard_error_reduction_pct_same_cov
 ```
 
 ````
@@ -723,7 +1018,7 @@ Bases: {py:obj}`causalis.data_contracts.causal_diagnostic_data.DiagnosticData`
 
 ````{py:attribute} regression_checks
 :canonical: causalis.data_contracts.causal_diagnostic_data.CUPEDDiagnosticData.regression_checks
-:type: typing.Optional[causalis.scenarios.cuped.diagnostics.regression_checks.RegressionChecks]
+:type: typing.Optional[causalis.scenarios.cuped.refutation.regression_checks.RegressionChecks]
 :value: >
    None
 

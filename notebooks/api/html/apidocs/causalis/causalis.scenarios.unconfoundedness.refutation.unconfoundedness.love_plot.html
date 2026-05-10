@@ -86,6 +86,41 @@ Whether to save with transparency.</p>
 <p class="rubric" id="id2">Returns</p>
 <p>matplotlib.figure.Figure
 The generated figure.</p>
+<p class="rubric" id="id3">Notes</p>
+<p>The Love plot visualizes the Absolute Standardized Mean Difference (ASMD)
+for each confounder both before and after weighting. The ASMD for confounder
+:math:<code class="docutils literal notranslate"><span class="pre">X_j</span></code> is defined as:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\mathrm{ASMD}_j = \frac{|\bar{X}_{j,1} - \bar{X}_{j,0}|}{\sqrt{(s_{j,1}^2 + s_{j,0}^2)/2}}
+</pre></div>
+</div>
+<p>where :math:<code class="docutils literal notranslate"><span class="pre">\bar{X}_{j,d}</span></code> and :math:<code class="docutils literal notranslate"><span class="pre">s_{j,d}^2</span></code> are the weighted mean and
+variance of :math:<code class="docutils literal notranslate"><span class="pre">X_j</span></code> in treatment group :math:<code class="docutils literal notranslate"><span class="pre">d</span></code>. In the unweighted
+case, all weights are 1.</p>
+<p>Good balance is typically indicated by ASMD values below a threshold
+(e.g., 0.10) for all confounders after weighting.</p>
+<p class="rubric" id="id4">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from causalis.dgp import obs_linear_26_dataset
+from causalis.scenarios.unconfoundedness.model import IRM</p>
+<p class="rubric" id="id5">1. Generate data</p>
+<p>data = obs_linear_26_dataset(n=1000, seed=42, return_causal_data=True)</p>
+<p class="rubric" id="id6">2. Fit model with diagnostics enabled</p>
+<p>irm = IRM(
+…     data=data,
+…     ml_g=RandomForestRegressor(random_state=42),
+…     ml_m=RandomForestClassifier(random_state=42),
+…     store_diagnostics=True
+… )
+estimate = irm.fit().estimate()</p>
+<p class="rubric" id="id7">3. Generate Love plot</p>
+<p>fig = love_plot(data, estimate, threshold=0.1) # doctest: +SKIP</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py data">

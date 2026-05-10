@@ -21,26 +21,114 @@
     ```
 ````
 
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`IVCausalDatasetGenerator <causalis.dgp.causaldata_instrumental.base.IVCausalDatasetGenerator>`
+  - ```{autodoc2-docstring} causalis.dgp.causaldata_instrumental.base.IVCausalDatasetGenerator
+    :summary:
+    ```
+````
+
 ### API
 
 `````{py:class} InstrumentalGenerator
 :canonical: causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator
 
+Bases: {py:obj}`causalis.dgp.causaldata.base.CausalDatasetGenerator`
+
 ```{autodoc2-docstring} causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator
 ```
 
-````{py:attribute} seed
-:canonical: causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.seed
-:type: typing.Optional[int]
+````{py:attribute} instrument_name
+:canonical: causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.instrument_name
+:type: str
 :value: >
-   None
+   'z'
 
-```{autodoc2-docstring} causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.seed
+```{autodoc2-docstring} causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.instrument_name
 ```
 
 ````
 
-````{py:method} generate(n: int) -> pandas.DataFrame
+````{py:attribute} first_stage
+:canonical: causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.first_stage
+:type: float
+:value: >
+   1.25
+
+```{autodoc2-docstring} causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.first_stage
+```
+
+````
+
+````{py:attribute} beta_z
+:canonical: causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.beta_z
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.beta_z
+```
+
+````
+
+````{py:attribute} g_z
+:canonical: causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.g_z
+:type: typing.Optional[typing.Callable[[numpy.ndarray], numpy.ndarray]]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.g_z
+```
+
+````
+
+````{py:attribute} alpha_z
+:canonical: causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.alpha_z
+:type: float
+:value: >
+   0.0
+
+```{autodoc2-docstring} causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.alpha_z
+```
+
+````
+
+````{py:attribute} target_z_rate
+:canonical: causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.target_z_rate
+:type: typing.Optional[float]
+:value: >
+   0.5
+
+```{autodoc2-docstring} causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.target_z_rate
+```
+
+````
+
+````{py:attribute} instrument_sharpness
+:canonical: causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.instrument_sharpness
+:type: float
+:value: >
+   1.0
+
+```{autodoc2-docstring} causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.instrument_sharpness
+```
+
+````
+
+````{py:method} __post_init__() -> None
+:canonical: causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.__post_init__
+
+```{autodoc2-docstring} causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.__post_init__
+```
+
+````
+
+````{py:method} generate(n: int, U: typing.Optional[numpy.ndarray] = None) -> pandas.DataFrame
 :canonical: causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.generate
 
 ```{autodoc2-docstring} causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.generate
@@ -48,4 +136,22 @@
 
 ````
 
+````{py:method} to_iv_causal_data(n: int, confounders: typing.Optional[typing.Union[str, typing.List[str]]] = None) -> causalis.data_contracts.iv_causal_data.IVCausalData
+:canonical: causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.to_iv_causal_data
+
+```{autodoc2-docstring} causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.to_iv_causal_data
+```
+
+````
+
 `````
+
+````{py:data} IVCausalDatasetGenerator
+:canonical: causalis.dgp.causaldata_instrumental.base.IVCausalDatasetGenerator
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.dgp.causaldata_instrumental.base.IVCausalDatasetGenerator
+```
+
+````

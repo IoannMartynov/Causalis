@@ -84,13 +84,15 @@ did_panel.design_type
 <p>Synthetic data-generating processes (DGPs) for causal benchmarking and examples.</p>
 <p>This package collects the public dataset builders used across <code class="docutils literal notranslate"><span class="pre">causalis</span></code> for
 single-treatment tabular data, multi-treatment data, instrumental-variable
-placeholders, and synthetic-control style panel data.</p>
+data, and synthetic-control style panel data.</p>
 <p>The most commonly used entry points are:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">generate_rct</span></code> for randomized experiments with optional oracle columns and
 optional pre-period covariates.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">obs_linear_effect</span></code> and <code class="docutils literal notranslate"><span class="pre">obs_linear_26_dataset</span></code> for observational data
 with confounding and ground-truth nuisance objects.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">generate_iv_data</span></code> for binary-instrument IV data compatible with
+<code class="docutils literal notranslate"><span class="pre">IVCausalData</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">generate_scm_data</span></code> for synthetic panel data with one treated unit and a
 donor pool.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">generate_did_data</span></code> for simultaneous-adoption panel data with treated and

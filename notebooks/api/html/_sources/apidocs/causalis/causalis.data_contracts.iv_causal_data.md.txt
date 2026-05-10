@@ -1,0 +1,91 @@
+# {py:mod}`causalis.data_contracts.iv_causal_data`
+
+```{py:module} causalis.data_contracts.iv_causal_data
+```
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_data
+:allowtitles:
+```
+
+## Module Contents
+
+### Classes
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`IVCausalData <causalis.data_contracts.iv_causal_data.IVCausalData>`
+  - ```{autodoc2-docstring} causalis.data_contracts.iv_causal_data.IVCausalData
+    :summary:
+    ```
+````
+
+### API
+
+`````{py:class} IVCausalData(/, **data: typing.Any)
+:canonical: causalis.data_contracts.iv_causal_data.IVCausalData
+
+Bases: {py:obj}`causalis.data_contracts.causaldata.CausalData`
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_data.IVCausalData
+```
+
+```{rubric} Initialization
+```
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_data.IVCausalData.__init__
+```
+
+````{py:attribute} instruments_names
+:canonical: causalis.data_contracts.iv_causal_data.IVCausalData.instruments_names
+:type: typing.List[str]
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_data.IVCausalData.instruments_names
+```
+
+````
+
+````{py:method} from_df(df: pandas.DataFrame, treatment: str, outcome: str, instruments: typing.Union[str, typing.List[str]], confounders: typing.Optional[typing.Union[str, typing.List[str]]] = None, user_id: typing.Optional[str] = None, **kwargs: typing.Any) -> causalis.data_contracts.iv_causal_data.IVCausalData
+:canonical: causalis.data_contracts.iv_causal_data.IVCausalData.from_df
+:classmethod:
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_data.IVCausalData.from_df
+```
+
+````
+
+````{py:property} instruments
+:canonical: causalis.data_contracts.iv_causal_data.IVCausalData.instruments
+:type: typing.List[str]
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_data.IVCausalData.instruments
+```
+
+````
+
+````{py:property} Z
+:canonical: causalis.data_contracts.iv_causal_data.IVCausalData.Z
+:type: pandas.DataFrame
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_data.IVCausalData.Z
+```
+
+````
+
+````{py:method} get_df(columns: typing.Optional[typing.List[str]] = None, include_treatment: bool = True, include_outcome: bool = True, include_confounders: bool = True, include_user_id: bool = False, include_instruments: bool = True) -> pandas.DataFrame
+:canonical: causalis.data_contracts.iv_causal_data.IVCausalData.get_df
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_data.IVCausalData.get_df
+```
+
+````
+
+````{py:method} __repr__() -> str
+:canonical: causalis.data_contracts.iv_causal_data.IVCausalData.__repr__
+
+````
+
+`````

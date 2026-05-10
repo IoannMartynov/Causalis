@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>causalis.scenarios.iv.model &#8212; Causalis API Reference  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="causalis.scenarios.multi_unconfoundedness" href="causalis.scenarios.multi_unconfoundedness.html" />
+    <link rel="prev" title="causalis.scenarios.iv.dgp" href="causalis.scenarios.iv.dgp.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-causalis.scenarios.iv.model">
+<span id="causalis-scenarios-iv-model"></span><h1><a class="reference internal" href="#module-causalis.scenarios.iv.model" title="causalis.scenarios.iv.model"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.iv.model</span></code></a><a class="headerlink" href="#module-causalis.scenarios.iv.model" title="Link to this heading">¶</a></h1>
+<p>Instrumental Interactive Regression Model for binary IV LATE estimation.</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.iv.model.IIVM" title="causalis.scenarios.iv.model.IIVM"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IIVM</span></code></a></p></td>
+<td><p>DoubleML-style IIVM estimator for LATE with binary treatment and IV.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="data">
+<h3>Data<a class="headerlink" href="#data" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.iv.model.__all__" title="causalis.scenarios.iv.model.__all__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__all__</span></code></a></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="causalis.scenarios.iv.model.IIVM">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">causalis.scenarios.iv.model.</span></span><span class="sig-name descname"><span class="pre">IIVM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="causalis.data_contracts.iv_causal_data.html#causalis.data_contracts.iv_causal_data.IVCausalData" title="causalis.data_contracts.iv_causal_data.IVCausalData"><span class="pre">causalis.data_contracts.iv_causal_data.IVCausalData</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ml_g</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ml_m</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ml_r</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_folds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_rep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize_ipw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trimming_rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'truncate'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trimming_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weak_iv_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#causalis.scenarios.iv.model.IIVM" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">sklearn.base.BaseEstimator</span></code></p>
+<p>DoubleML-style IIVM estimator for LATE with binary treatment and IV.</p>
+<p>The model consumes :class:<code class="docutils literal notranslate"><span class="pre">~causalis.data_contracts.IVCausalData</span></code>, which
+stores exactly one binary instrument. It cross-fits nuisance functions:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>g_0(z, X) = \mathbb{E}[Y \mid Z=z, X],
+\quad
+r_0(z, X) = \mathbb{E}[D \mid Z=z, X],
+\quad
+m_0(X) = \mathbb{P}(Z=1 \mid X).
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">estimate(score=&quot;LATE&quot;)</span></code> then solves the linear orthogonal score</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\psi(W; \theta, \eta) = \phi_Y(W; \eta) - \theta \phi_D(W; \eta),
+</pre></div>
+</div>
+<p>returning</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\hat\theta = \mathbb{E}_n[\phi_Y] / \mathbb{E}_n[\phi_D].
+</pre></div>
+</div>
+<p>where the orthogonal signals are:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\phi_Y(W; \eta) &amp;= g(1, X) - g(0, X) + \frac{Z(Y - g(1, X))}{m(X)} - \frac{(1-Z)(Y - g(0, X))}{1 - m(X)} \\
+\phi_D(W; \eta) &amp;= r(1, X) - r(0, X) + \frac{Z(D - r(1, X))}{m(X)} - \frac{(1-Z)(D - r(0, X))}{1 - m(X)}
+</pre></div>
+</div>
+<p class="rubric" id="id1">Notes</p>
+<p>The Local Average Treatment Effect (LATE) is the effect of the treatment among “compliers”
+— those whose treatment status is changed by the instrument.</p>
+<p class="rubric" id="id2">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.scenarios.iv.dgp import generate_offer_iv_26
+from causalis.data_contracts.iv_causal_data import IVCausalData
+from causalis.scenarios.iv.model import IIVM
+data = generate_offer_iv_26(n=5000, return_causal_data=False)
+causal_data = IVCausalData.from_df(
+…     df=data,
+…     treatment=’accepted_offer’,
+…     outcome=’net_revenue_90d’,
+…     instruments=’offer_eligible’,
+…     confounders=[‘age’, ‘tenure_months’, ‘annual_income’]
+… )
+model = IIVM()
+model.fit(causal_data)
+result = model.estimate(score=”LATE”)
+result.summary()</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+<p class="rubric">Initialization</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.scenarios.iv.model.IIVM.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="causalis.data_contracts.iv_causal_data.html#causalis.data_contracts.iv_causal_data.IVCausalData" title="causalis.data_contracts.iv_causal_data.IVCausalData"><span class="pre">causalis.data_contracts.iv_causal_data.IVCausalData</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#causalis.scenarios.iv.model.IIVM" title="causalis.scenarios.iv.model.IIVM"><span class="pre">causalis.scenarios.iv.model.IIVM</span></a></span></span><a class="headerlink" href="#causalis.scenarios.iv.model.IIVM.fit" title="Link to this definition">¶</a></dt>
+<dd><p>Fit cross-fitted nuisance functions for IIVM.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.scenarios.iv.model.IIVM.estimate">
+<span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">score</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'LATE'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="causalis.data_contracts.iv_causal_estimate.html#causalis.data_contracts.iv_causal_estimate.IVCausalEstimate" title="causalis.data_contracts.iv_causal_estimate.IVCausalEstimate"><span class="pre">causalis.data_contracts.iv_causal_estimate.IVCausalEstimate</span></a></span></span><a class="headerlink" href="#causalis.scenarios.iv.model.IIVM.estimate" title="Link to this definition">¶</a></dt>
+<dd><p>Estimate LATE from cross-fitted IIVM nuisance predictions.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="causalis.scenarios.iv.model.IIVM.diagnostics_">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">diagnostics_</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.scenarios.iv.model.IIVM.diagnostics_" title="Link to this definition">¶</a></dt>
+<dd><p>Return fit-time diagnostic arrays.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="causalis.scenarios.iv.model.IIVM.coef">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">coef</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span></span><a class="headerlink" href="#causalis.scenarios.iv.model.IIVM.coef" title="Link to this definition">¶</a></dt>
+<dd><p>Return the estimated coefficient.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="causalis.scenarios.iv.model.IIVM.se">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">se</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span></span><a class="headerlink" href="#causalis.scenarios.iv.model.IIVM.se" title="Link to this definition">¶</a></dt>
+<dd><p>Return the standard error.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="causalis.scenarios.iv.model.IIVM.pvalues">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">pvalues</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span></span><a class="headerlink" href="#causalis.scenarios.iv.model.IIVM.pvalues" title="Link to this definition">¶</a></dt>
+<dd><p>Return p-values.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="causalis.scenarios.iv.model.IIVM.summary">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">summary</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></span><a class="headerlink" href="#causalis.scenarios.iv.model.IIVM.summary" title="Link to this definition">¶</a></dt>
+<dd><p>Return the latest estimate summary table.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.scenarios.iv.model.IIVM.confint">
+<span class="sig-name descname"><span class="pre">confint</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.scenarios.iv.model.IIVM.confint" title="Link to this definition">¶</a></dt>
+<dd><p>Return the latest confidence interval as a DataFrame.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.scenarios.iv.model.IIVM.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#causalis.scenarios.iv.model.IIVM.__repr__" title="Link to this definition">¶</a></dt>
+<dd><p>Concise representation of IIVM to avoid verbose learner output.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="causalis.scenarios.iv.model.__all__">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.iv.model.</span></span><span class="sig-name descname"><span class="pre">__all__</span></span><a class="headerlink" href="#causalis.scenarios.iv.model.__all__" title="Link to this definition">¶</a></dt>
+<dd><p>[‘IIVM’, ‘IVCausalEstimate’]</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../reference.html">Causalis API Reference</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../reference.html">Documentation overview</a><ul>
+  <li><a href="../index.html">API Modules</a><ul>
+  <li><a href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a><ul>
+  <li><a href="causalis.scenarios.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios</span></code></a><ul>
+  <li><a href="causalis.scenarios.iv.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.iv</span></code></a><ul>
+      <li>Previous: <a href="causalis.scenarios.iv.dgp.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.iv.dgp</span></code></a></li>
+      <li>Next: <a href="causalis.scenarios.multi_unconfoundedness.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.multi_unconfoundedness</span></code></a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../../_sources/apidocs/causalis/causalis.scenarios.iv.model.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

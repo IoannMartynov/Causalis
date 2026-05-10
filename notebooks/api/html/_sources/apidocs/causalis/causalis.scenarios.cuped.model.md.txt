@@ -23,7 +23,7 @@
 
 ### API
 
-`````{py:class} CUPEDModel(cov_type: str = 'HC2', alpha: float = 0.05, strict_binary_treatment: bool = True, use_t: typing.Optional[bool] = None, use_t_auto_n_threshold: int = 5000, relative_ci_method: typing.Literal[delta_nocov, bootstrap] = 'delta_nocov', relative_ci_bootstrap_draws: int = 1000, relative_ci_bootstrap_seed: typing.Optional[int] = None, covariate_variance_min: float = 1e-12, condition_number_warn_threshold: float = 100000000.0, run_regression_checks: bool = True, check_action: typing.Literal[ignore, raise] = 'ignore', raise_on_yellow: bool = False, corr_near_one_tol: float = 1e-10, vif_warn_threshold: float = 20.0, winsor_q: typing.Optional[float] = 0.01, tiny_one_minus_h_tol: float = 1e-08)
+`````{py:class} CUPEDModel(cov_type: str = 'HC2', alpha: float = 0.05, use_t: typing.Optional[bool] = None, use_t_auto_n_threshold: int = 5000, relative_ci_method: typing.Literal[delta, bootstrap] = 'delta', relative_denominator: typing.Literal[adjusted_control, raw_control] = 'adjusted_control', relative_ci_bootstrap_draws: int = 1000, relative_ci_bootstrap_seed: typing.Optional[int] = None, refutation_config: typing.Optional[causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig] = None, covariate_variance_min: float = 1e-12)
 :canonical: causalis.scenarios.cuped.model.CUPEDModel
 
 ```{autodoc2-docstring} causalis.scenarios.cuped.model.CUPEDModel

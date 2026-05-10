@@ -281,7 +281,7 @@ class IRM(BaseEstimator):
             if self.ml_m is None:
                 self.ml_m = CatBoostClassifier(
                     thread_count=-1,
-                    verbose=False,
+                    logging_level='Silent',
                     allow_writing_files=False,
                     random_seed=self.random_state,
                 )
@@ -298,14 +298,14 @@ class IRM(BaseEstimator):
                 if y_is_binary:
                     self.ml_g = CatBoostClassifier(
                         thread_count=-1,
-                        verbose=False,
+                        logging_level='Silent',
                         allow_writing_files=False,
                         random_seed=self.random_state,
                     )
                 else:
                     self.ml_g = CatBoostRegressor(
                         thread_count=-1,
-                        verbose=False,
+                        logging_level='Silent',
                         allow_writing_files=False,
                         random_seed=self.random_state,
                     )
@@ -364,7 +364,7 @@ class IRM(BaseEstimator):
         if self.ml_m is None:
             self.ml_m = CatBoostClassifier(
                 thread_count=-1,
-                verbose=False,
+                logging_level='Silent',
                 allow_writing_files=False,
                 random_seed=self.random_state,
             )
@@ -373,14 +373,14 @@ class IRM(BaseEstimator):
             if y_is_binary:
                 self.ml_g = CatBoostClassifier(
                     thread_count=-1,
-                    verbose=False,
+                    logging_level='Silent',
                     allow_writing_files=False,
                     random_seed=self.random_state,
                 )
             else:
                 self.ml_g = CatBoostRegressor(
                     thread_count=-1,
-                    verbose=False,
+                    logging_level='Silent',
                     allow_writing_files=False,
                     random_seed=self.random_state,
                 )
@@ -1620,3 +1620,11 @@ class IRM(BaseEstimator):
             {f"{alpha/2*100:.1f} %": [ci_low], f"{(1-alpha/2)*100:.1f} %": [ci_high]},
             index=[self.data.treatment.name],
         )
+
+    def __repr__(self) -> str:
+        """Concise representation of IRM to avoid verbose learner output."""
+        status = "fitted" if hasattr(self, "g0_hat_") else "unfitted"
+        return f"IRM(status='{status}', n_folds={self.n_folds}, random_state={self.random_state})"
+
+    _repr_html_ = None
+    _repr_mimebundle_ = None

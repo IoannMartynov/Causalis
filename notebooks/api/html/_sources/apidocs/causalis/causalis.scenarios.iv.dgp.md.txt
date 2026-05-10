@@ -1,0 +1,53 @@
+# {py:mod}`causalis.scenarios.iv.dgp`
+
+```{py:module} causalis.scenarios.iv.dgp
+```
+
+```{autodoc2-docstring} causalis.scenarios.iv.dgp
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`generate_offer_iv_26 <causalis.scenarios.iv.dgp.generate_offer_iv_26>`
+  - ```{autodoc2-docstring} causalis.scenarios.iv.dgp.generate_offer_iv_26
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.scenarios.iv.dgp.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.iv.dgp.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} generate_offer_iv_26(n: int = 20000, seed: int = 42, include_oracle: bool = True, return_causal_data: bool = True, *, deterministic_ids: bool = True) -> typing.Union[pandas.DataFrame, causalis.data_contracts.iv_causal_data.IVCausalData]
+:canonical: causalis.scenarios.iv.dgp.generate_offer_iv_26
+
+```{autodoc2-docstring} causalis.scenarios.iv.dgp.generate_offer_iv_26
+```
+````
+
+````{py:data} __all__
+:canonical: causalis.scenarios.iv.dgp.__all__
+:value: >
+   ['generate_offer_iv_26']
+
+```{autodoc2-docstring} causalis.scenarios.iv.dgp.__all__
+```
+
+````

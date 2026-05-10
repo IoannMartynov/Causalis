@@ -36,7 +36,7 @@ causalis.dgp.causaldata_instrumental.base
 ````{py:data} __all__
 :canonical: causalis.dgp.causaldata_instrumental.__all__
 :value: >
-   ['InstrumentalGenerator', 'generate_iv_data']
+   ['IVCausalData', 'InstrumentalGenerator', 'IVCausalDatasetGenerator', 'generate_iv_data']
 
 ```{autodoc2-docstring} causalis.dgp.causaldata_instrumental.__all__
 ```

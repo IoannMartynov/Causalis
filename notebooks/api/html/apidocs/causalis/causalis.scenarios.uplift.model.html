@@ -35,7 +35,9 @@
             
   <section id="module-causalis.scenarios.uplift.model">
 <span id="causalis-scenarios-uplift-model"></span><h1><a class="reference internal" href="#module-causalis.scenarios.uplift.model" title="causalis.scenarios.uplift.model"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.uplift.model</span></code></a><a class="headerlink" href="#module-causalis.scenarios.uplift.model" title="Link to this heading">¶</a></h1>
-<p>Lazy CATE/uplift scoring helpers for fitted unconfoundedness models.</p>
+<p>Lazy Conditional Average Treatment Effect (CATE) and uplift scoring helpers.</p>
+<p>This module provides functionality to predict heterogeneous treatment effects (CATE)
+for new observations using models fitted under the unconfoundedness assumption.</p>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
 <section id="functions">
@@ -43,7 +45,7 @@
 <table class="autosummary longtable docutils align-left">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.uplift.model.predict_cate" title="causalis.scenarios.uplift.model.predict_cate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict_cate</span></code></a></p></td>
-<td><p>Predict CATE/uplift for new rows from a fitted binary-treatment IRM.</p></td>
+<td><p>Predict Conditional Average Treatment Effect (CATE), or uplift, for new observations.</p></td>
 </tr>
 </tbody>
 </table>
@@ -63,10 +65,68 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="causalis.scenarios.uplift.model.predict_cate">
 <span class="sig-prename descclassname"><span class="pre">causalis.scenarios.uplift.model.</span></span><span class="sig-name descname"><span class="pre">predict_cate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">irm_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="headerlink" href="#causalis.scenarios.uplift.model.predict_cate" title="Link to this definition">¶</a></dt>
-<dd><p>Predict CATE/uplift for new rows from a fitted binary-treatment IRM.</p>
-<p>The first call trains final full-sample outcome models for <code class="docutils literal notranslate"><span class="pre">D=0</span></code> and
-<code class="docutils literal notranslate"><span class="pre">D=1</span></code> and caches them on <code class="docutils literal notranslate"><span class="pre">irm_model</span></code>. Existing <code class="docutils literal notranslate"><span class="pre">fit()</span></code> and
-<code class="docutils literal notranslate"><span class="pre">estimate()</span></code> paths do not train or store these scoring models.</p>
+<dd><p>Predict Conditional Average Treatment Effect (CATE), or uplift, for new observations.</p>
+<p>This function implements a “lazy” T-learner approach. On its first call for a given
+fitted :class:<code class="docutils literal notranslate"><span class="pre">~causalis.scenarios.unconfoundedness.model.IRM</span></code> model, it trains two
+separate full-sample outcome models—one for the control group ($D=0$) and one for the
+treatment group ($D=1$). These models are then cached on the <code class="docutils literal notranslate"><span class="pre">irm_model</span></code> object for
+subsequent calls.</p>
+<p class="rubric" id="id1">Mathematical Note</p>
+<p>The CATE at a point $x$ is defined as the difference in potential outcomes:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\tau(x) = \mathbb{E}[Y(1) - Y(0) \mid X = x]
+</pre></div>
+</div>
+<p>Under the assumption of unconfoundedness (no unmeasured confounders), this can be
+estimated as:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\tau(x) = \mathbb{E}[Y \mid X = x, D = 1] - \mathbb{E}[Y \mid X = x, D = 0]
+</pre></div>
+</div>
+<p>The estimator $\hat{\tau}(x)$ used here is:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\hat{\tau}(x) = \hat{g}_1(x) - \hat{g}_0(x)
+</pre></div>
+</div>
+<p>where $\hat{g}_1$ is a machine learning model (cloned from <code class="docutils literal notranslate"><span class="pre">irm_model.ml_g</span></code>) trained
+on the subset of the original training data where $D_i = 1$, and $\hat{g}_0$ is
+similarly trained on the subset where $D_i = 0$.</p>
+<p class="rubric" id="id2">Parameters</p>
+<p>irm_model : IRM
+A fitted :class:<code class="docutils literal notranslate"><span class="pre">~causalis.scenarios.unconfoundedness.model.IRM</span></code> object.
+The model must have been fitted using :meth:<code class="docutils literal notranslate"><span class="pre">~causalis.scenarios.unconfoundedness.model.IRM.fit</span></code>.
+X : pd.DataFrame or np.ndarray
+New observations for which to predict the CATE.
+If a DataFrame, it must contain the same confounder columns as used during fit.
+If an ndarray, it must have the same number of columns as the fitted confounders.</p>
+<p class="rubric" id="id3">Returns</p>
+<p>np.ndarray
+A 1D array of predicted CATE/uplift values for each row in <code class="docutils literal notranslate"><span class="pre">X</span></code>.</p>
+<p class="rubric" id="id4">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>import pandas as pd
+import numpy as np
+from causalis.scenarios.unconfoundedness.model import IRM
+from causalis.scenarios.unconfoundedness.dgp import generate_obs_hte_26
+from causalis.scenarios.uplift.model import predict_cate</p>
+<p class="rubric" id="id5">Generate data</p>
+<p>data = generate_obs_hte_26(n=1000, seed=42)</p>
+<p class="rubric" id="id6">Fit IRM model</p>
+<p>irm = IRM(data=data).fit()</p>
+<p class="rubric" id="id7">Predict uplift for new data</p>
+<p>X_new = data.df.loc[:5, data.confounders]
+uplift = predict_cate(irm, X_new)
+print(uplift.shape)
+(6,)</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+<p class="rubric" id="id8">Notes</p>
+<p>The models trained for prediction use the full sample (split by treatment arm)
+available at fit time, whereas the :meth:<code class="docutils literal notranslate"><span class="pre">~causalis.scenarios.unconfoundedness.model.IRM.fit</span></code>
+method uses cross-fitting for nuisance estimation.</p>
 </dd></dl>
 
 <dl class="py data">

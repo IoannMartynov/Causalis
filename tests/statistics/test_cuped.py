@@ -7,6 +7,7 @@ from causalis.dgp.causaldata.preperiod import corr_on_scale
 from causalis.data_contracts.causal_estimate import CausalEstimate
 from causalis.scenarios.cuped.dgp import generate_cuped_tweedie_26, _resolve_second_pre_target
 from causalis.scenarios.cuped.model import CUPEDModel
+from causalis.scenarios.cuped.refutation import CUPEDRefutationConfig
 
 @pytest.fixture
 def sample_data():
@@ -58,23 +59,29 @@ def test_cuped_diagnostics_se_reduction_and_r2(sample_data):
 
     se_adj = float(np.asarray(model._result.bse, dtype=float)[1])
     se_naive = float(np.asarray(model._result_naive.bse, dtype=float)[1])
-    expected = 100.0 * (1.0 - (se_adj ** 2) / (se_naive ** 2)) if se_naive > 0 else np.nan
+    expected_variance = 100.0 * (1.0 - (se_adj ** 2) / (se_naive ** 2)) if se_naive > 0 else np.nan
+    expected_se = 100.0 * (1.0 - se_adj / se_naive) if se_naive > 0 else np.nan
 
-    assert np.isclose(diag.se_reduction_pct_same_cov, expected, rtol=1e-12, atol=1e-12)
+    assert np.isclose(diag.variance_reduction_pct_same_cov, expected_variance, rtol=1e-12, atol=1e-12)
+    assert np.isclose(diag.standard_error_reduction_pct_same_cov, expected_se, rtol=1e-12, atol=1e-12)
     assert np.isclose(diag.r2_naive, float(model._result_naive.rsquared), rtol=1e-12, atol=1e-12)
     assert np.isclose(diag.r2_adj, float(model._result.rsquared), rtol=1e-12, atol=1e-12)
     assert len(diag.covariate_outcome_corr) == 1
     assert np.isfinite(diag.covariate_outcome_corr[0])
 
     summary = model.summary_dict()
-    assert "se_reduction_pct_same_cov" in summary
+    assert "variance_reduction_pct_same_cov" in summary
+    assert "standard_error_reduction_pct_same_cov" in summary
     assert "r2_naive" in summary
     assert "r2_adj" in summary
     assert "covariate_outcome_corr" in summary
     assert summary["centering_scope"] == "global"
+    assert summary["relative_ci_method"] == "delta"
+    assert summary["relative_denominator"] == "adjusted_control"
+    assert "run_regression_checks" not in summary
+    assert "check_action" not in summary
     assert "dropped_covariates" in summary
     assert summary["dropped_covariates"] == []
-    assert "variance_reduction_pct" not in summary
 
 
 def test_cuped_beta_gamma_extraction_matches_design_names():
@@ -123,6 +130,43 @@ def test_cuped_tau_invariant_to_constant_covariate_shift(sample_data):
     est_shifted = model_shifted.estimate()
 
     assert np.isclose(est_base.value, est_shifted.value, rtol=1e-12, atol=1e-12)
+
+
+def test_cuped_tau_equals_average_fitted_contrast_under_global_centering():
+    rng = np.random.default_rng(101)
+    n = 600
+    x1 = rng.normal(loc=3.0, scale=1.2, size=n)
+    x2 = rng.normal(loc=-2.0, scale=0.8, size=n)
+    d = rng.binomial(1, 0.45, size=n)
+    y = 1.5 + 0.8 * d + 0.4 * x1 - 0.2 * x2 + 1.1 * d * x1 - 0.7 * d * x2 + rng.normal(scale=0.3, size=n)
+    data = CausalData(
+        df=pd.DataFrame({"y": y, "d": d, "x1": x1, "x2": x2}),
+        treatment="d",
+        outcome="y",
+        confounders=["x1", "x2"],
+    )
+
+    model = CUPEDModel(cov_type="HC2").fit(data, covariates=["x1", "x2"])
+    estimate = model.estimate()
+
+    params = np.asarray(model._result.params, dtype=float)
+    design = pd.DataFrame(
+        np.asarray(model._result.model.exog, dtype=float),
+        columns=list(model._result.model.exog_names),
+    )
+    design_control = design.copy()
+    design_treated = design.copy()
+    design_control["d"] = 0.0
+    design_treated["d"] = 1.0
+    for name in design.columns:
+        if name.startswith("d:"):
+            raw_name = name.split(":", 1)[1]
+            design_control[name] = 0.0
+            design_treated[name] = design[f"{raw_name}__centered"]
+
+    with np.errstate(divide="ignore", over="ignore", invalid="ignore"):
+        fitted_contrast = design_treated.to_numpy() @ params - design_control.to_numpy() @ params
+    assert np.isclose(float(np.mean(fitted_contrast)), estimate.value, rtol=1e-12, atol=1e-12)
 
 def test_cuped_lin_with_interactions():
     # Data with true interaction
@@ -206,7 +250,33 @@ def test_cuped_rejects_invalid_relative_ci_method():
         CUPEDModel(relative_ci_method="unknown")  # type: ignore[arg-type]
 
 
+def test_cuped_rejects_invalid_relative_denominator():
+    with pytest.raises(ValueError, match="relative_denominator"):
+        CUPEDModel(relative_denominator="unknown")  # type: ignore[arg-type]
 
+
+def test_cuped_accepts_grouped_refutation_config(sample_data):
+    config = CUPEDRefutationConfig(
+        run_regression_checks=False,
+        check_action="ignore",
+        condition_number_warn_threshold=123.0,
+        vif_warn_threshold=7.0,
+        winsor_q=None,
+    )
+    model = CUPEDModel(refutation_config=config).fit(sample_data, covariates=["x1"])
+    estimate = model.estimate()
+
+    assert model.refutation_config == config
+    assert estimate.model_options["refutation_config"]["run_regression_checks"] is False
+    assert estimate.model_options["refutation_config"]["condition_number_warn_threshold"] == 123.0
+    assert "run_regression_checks" not in estimate.model_options
+    assert "check_action" not in estimate.model_options
+    assert estimate.diagnostic_data.regression_checks is None
+
+
+def test_cuped_rejects_invalid_refutation_config_type():
+    with pytest.raises(TypeError, match="refutation_config"):
+        CUPEDModel(refutation_config={"check_action": "ignore"})  # type: ignore[arg-type]
 
 
 def test_cuped_raises_when_condition_number_huge():
@@ -223,8 +293,10 @@ def test_cuped_raises_when_condition_number_huge():
     )
     with pytest.raises(ValueError, match="ill-conditioned"):
         CUPEDModel(
-            condition_number_warn_threshold=1e-3,
-            check_action="raise",
+            refutation_config=CUPEDRefutationConfig(
+                condition_number_warn_threshold=1e-3,
+                check_action="raise",
+            ),
         ).fit(data, covariates=["x1"])
 
 

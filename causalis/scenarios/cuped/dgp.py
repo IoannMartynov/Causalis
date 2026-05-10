@@ -1,3 +1,12 @@
+r"""
+Data Generating Processes (DGPs) for the CUPED scenario.
+
+This module provides pre-configured synthetic datasets for testing CUPED and
+other regression-adjusted estimators. It includes complex, skewed outcomes
+(Tweedie) and binary outcomes, both featuring pre-treatment covariates
+calibrated to specific target correlations.
+"""
+
 from __future__ import annotations
 import numpy as np
 import pandas as pd
@@ -75,11 +84,39 @@ def generate_cuped_tweedie_26(
     return_causal_data: bool = True,
     theta_log: float = 0.38
 ) -> Union[pd.DataFrame, CausalData]:
-    """
+    r"""
     Gold standard Tweedie-like DGP with mixed marginals and structured HTE.
-    Features many zeros and a heavy right tail. 
-    Includes two pre-period covariates by default: 'y_pre' and 'y_pre_2'.
-    Wrapper for make_tweedie().
+
+    This DGP generates a dataset representing a typical e-commerce scenario with
+    many zeros and a heavy right tail (e.g., revenue). It features pre-treatment
+    covariates ('y_pre', 'y_pre_2') that are calibrated to have a specific
+    correlation with the post-treatment outcome.
+
+    Notes
+    -----
+    The outcome $Y$ follows a Tweedie-like distribution where the mean is a
+    function of treatment $D$ and latent factors $A$ and $X$:
+
+    .. math::
+
+        E[Y | D, A, X] = \exp(\alpha + \theta D + \beta X + \gamma D X + A)
+
+    The pre-period covariate $X_{pre}$ (e.g., `y_pre`) is generated to satisfy:
+
+    .. math::
+
+        Corr(X_{pre}, Y | D=0) \approx \rho
+
+    where $\rho$ is the `pre_target_corr`. This allows for realistic testing of
+    variance reduction techniques.
+
+    Examples
+    --------
+    >>> from causalis.scenarios.cuped.dgp import generate_cuped_tweedie_26
+    >>> # Generate data with two pre-period covariates
+    >>> data = generate_cuped_tweedie_26(n=1000, seed=42, return_causal_data=False)
+    >>> print(data.columns.tolist())
+    ['y', 'd', 'tenure_months', 'avg_sessions_week', 'spend_last_month', 'discount_rate', 'platform_ios', 'platform_web', 'y_pre', 'y_pre_2']
 
     Parameters
     ----------
@@ -266,10 +303,29 @@ def make_cuped_binary_26(
     return_causal_data: bool = True,
     theta_logit: float = 0.38
 ) -> Union[pd.DataFrame, CausalData]:
-    """
+    r"""
     Binary CUPED benchmark with richer confounders and structured HTE.
-    Includes a calibrated pre-period covariate 'y_pre' by default.
-    Wrapper for generate_cuped_binary().
+
+    This DGP generates a binary outcome (e.g., conversion) with a calibrated
+    pre-period covariate.
+
+    Notes
+    -----
+    The outcome $Y$ is binary and follows:
+
+    .. math::
+
+        P(Y=1 | D, X) = \text{logit}^{-1}(\alpha + \theta D + \beta X)
+
+    The pre-period covariate is calibrated such that its correlation with $Y$
+    in the control group matches `pre_target_corr`.
+
+    Examples
+    --------
+    >>> from causalis.scenarios.cuped.dgp import make_cuped_binary_26
+    >>> data = make_cuped_binary_26(n=1000, seed=42, return_causal_data=False)
+    >>> print(data.columns.tolist()[:7])
+    ['y', 'd', 'tenure_months', 'spend_last_month', 'discount_rate', 'support_tickets', 'email_open_rate']
 
     Parameters
     ----------

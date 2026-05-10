@@ -1,4 +1,4 @@
-"""Overlap diagnostics and plotting utilities for propensity scores.
+r"""Overlap diagnostics and plotting utilities for propensity scores.
 
 These tools help answer three basic overlap questions after fitting IRM:
 

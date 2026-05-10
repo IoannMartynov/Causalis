@@ -1,0 +1,139 @@
+# {py:mod}`causalis.scenarios.iv.model`
+
+```{py:module} causalis.scenarios.iv.model
+```
+
+```{autodoc2-docstring} causalis.scenarios.iv.model
+:allowtitles:
+```
+
+## Module Contents
+
+### Classes
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`IIVM <causalis.scenarios.iv.model.IIVM>`
+  - ```{autodoc2-docstring} causalis.scenarios.iv.model.IIVM
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.scenarios.iv.model.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.iv.model.__all__
+    :summary:
+    ```
+````
+
+### API
+
+`````{py:class} IIVM(data: typing.Optional[causalis.data_contracts.iv_causal_data.IVCausalData] = None, ml_g: typing.Any = None, ml_m: typing.Any = None, ml_r: typing.Any = None, *, n_folds: int = 5, n_rep: int = 1, normalize_ipw: bool = False, trimming_rule: str = 'truncate', trimming_threshold: float = 0.01, weak_iv_threshold: float = 0.01, random_state: typing.Optional[int] = None, n_jobs: int = 1)
+:canonical: causalis.scenarios.iv.model.IIVM
+
+Bases: {py:obj}`sklearn.base.BaseEstimator`
+
+```{autodoc2-docstring} causalis.scenarios.iv.model.IIVM
+```
+
+```{rubric} Initialization
+```
+
+```{autodoc2-docstring} causalis.scenarios.iv.model.IIVM.__init__
+```
+
+````{py:method} fit(data: typing.Optional[causalis.data_contracts.iv_causal_data.IVCausalData] = None) -> causalis.scenarios.iv.model.IIVM
+:canonical: causalis.scenarios.iv.model.IIVM.fit
+
+```{autodoc2-docstring} causalis.scenarios.iv.model.IIVM.fit
+```
+
+````
+
+````{py:method} estimate(score: str = 'LATE', alpha: float = 0.05) -> causalis.data_contracts.iv_causal_estimate.IVCausalEstimate
+:canonical: causalis.scenarios.iv.model.IIVM.estimate
+
+```{autodoc2-docstring} causalis.scenarios.iv.model.IIVM.estimate
+```
+
+````
+
+````{py:property} diagnostics_
+:canonical: causalis.scenarios.iv.model.IIVM.diagnostics_
+:type: typing.Dict[str, typing.Any]
+
+```{autodoc2-docstring} causalis.scenarios.iv.model.IIVM.diagnostics_
+```
+
+````
+
+````{py:property} coef
+:canonical: causalis.scenarios.iv.model.IIVM.coef
+:type: numpy.ndarray
+
+```{autodoc2-docstring} causalis.scenarios.iv.model.IIVM.coef
+```
+
+````
+
+````{py:property} se
+:canonical: causalis.scenarios.iv.model.IIVM.se
+:type: numpy.ndarray
+
+```{autodoc2-docstring} causalis.scenarios.iv.model.IIVM.se
+```
+
+````
+
+````{py:property} pvalues
+:canonical: causalis.scenarios.iv.model.IIVM.pvalues
+:type: numpy.ndarray
+
+```{autodoc2-docstring} causalis.scenarios.iv.model.IIVM.pvalues
+```
+
+````
+
+````{py:property} summary
+:canonical: causalis.scenarios.iv.model.IIVM.summary
+:type: pandas.DataFrame
+
+```{autodoc2-docstring} causalis.scenarios.iv.model.IIVM.summary
+```
+
+````
+
+````{py:method} confint() -> pandas.DataFrame
+:canonical: causalis.scenarios.iv.model.IIVM.confint
+
+```{autodoc2-docstring} causalis.scenarios.iv.model.IIVM.confint
+```
+
+````
+
+````{py:method} __repr__() -> str
+:canonical: causalis.scenarios.iv.model.IIVM.__repr__
+
+```{autodoc2-docstring} causalis.scenarios.iv.model.IIVM.__repr__
+```
+
+````
+
+`````
+
+````{py:data} __all__
+:canonical: causalis.scenarios.iv.model.__all__
+:value: >
+   ['IIVM', 'IVCausalEstimate']
+
+```{autodoc2-docstring} causalis.scenarios.iv.model.__all__
+```
+
+````

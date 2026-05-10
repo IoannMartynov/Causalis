@@ -147,4 +147,12 @@ Bases: {py:obj}`sklearn.base.BaseEstimator`
 
 ````
 
+````{py:method} __repr__() -> str
+:canonical: causalis.scenarios.unconfoundedness.model.IRM.__repr__
+
+```{autodoc2-docstring} causalis.scenarios.unconfoundedness.model.IRM.__repr__
+```
+
+````
+
 `````

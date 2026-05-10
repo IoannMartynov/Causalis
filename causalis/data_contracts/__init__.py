@@ -1,21 +1,23 @@
 from __future__ import annotations
 
 from .causaldata import CausalData
+from .iv_causal_data import IVCausalData
 from .multicausaldata import MultiCausalData
 from .panel_data_did import PanelDataDID
 from .panel_data_scm import PanelDataSCM
 from .panel_did_estimate import CallawaySantAnnaDIDEstimate, PanelDIDDiagnosticData, PanelDIDEstimate
 from .panel_estimate import PanelEstimate
 from .causal_estimate import CausalEstimate
+from .iv_causal_estimate import IVCausalEstimate
 from .gate_estimate import GateEstimate
 from .gate_contrast_estimate import GateContrastEstimate
-from .causal_diagnostic_data import DiagnosticData, UnconfoundednessDiagnosticData, RegressionChecks
+from .causal_diagnostic_data import (
+    DiagnosticData,
+    IVDiagnosticData,
+    RegressionChecks,
+    UnconfoundednessDiagnosticData,
+)
 from .sensitivity_analysis_result import SensitivityAnalysisResult
-from ..dgp import CausalDatasetGenerator, generate_rct, generate_classic_rct, classic_rct_gamma, obs_linear_effect, \
-    make_gold_linear, generate_cuped_binary
-from ..scenarios.classic_rct.dgp import generate_classic_rct_26, classic_rct_gamma_26
-from ..scenarios.cuped.dgp import make_cuped_binary_26
-from ..scenarios.unconfoundedness.dgp import obs_linear_26_dataset
 
 _DGP_EXPORTS = {
     "generate_rct",
@@ -29,10 +31,14 @@ _DGP_EXPORTS = {
     "generate_cuped_binary",
     "make_cuped_binary_26",
     "CausalDatasetGenerator",
+    "generate_iv_data",
+    "InstrumentalGenerator",
+    "IVCausalDatasetGenerator",
 }
 
 __all__ = [
     "CausalData",
+    "IVCausalData",
     "MultiCausalData",
     "PanelDataDID",
     "PanelDataSCM",
@@ -41,9 +47,11 @@ __all__ = [
     "CallawaySantAnnaDIDEstimate",
     "PanelEstimate",
     "CausalEstimate",
+    "IVCausalEstimate",
     "GateEstimate",
     "GateContrastEstimate",
     "DiagnosticData",
+    "IVDiagnosticData",
     "UnconfoundednessDiagnosticData",
     "RegressionChecks",
     "SensitivityAnalysisResult",
@@ -58,6 +66,9 @@ __all__ = [
     "generate_cuped_binary",
     "make_cuped_binary_26",
     "CausalDatasetGenerator",
+    "generate_iv_data",
+    "InstrumentalGenerator",
+    "IVCausalDatasetGenerator",
 ]
 
 

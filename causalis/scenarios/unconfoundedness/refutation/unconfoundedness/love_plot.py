@@ -80,7 +80,7 @@ def love_plot(
     save_dpi: Optional[int] = None,
     transparent: bool = False,
 ) -> plt.Figure:
-    """
+    r"""
     Plot covariate balance before and after weighting implied by an estimate.
 
     Parameters
@@ -108,6 +108,41 @@ def love_plot(
     -------
     matplotlib.figure.Figure
         The generated figure.
+
+    Notes
+    -----
+    The Love plot visualizes the Absolute Standardized Mean Difference (ASMD)
+    for each confounder both before and after weighting. The ASMD for confounder
+    :math:`X_j` is defined as:
+
+    .. math::
+
+        \mathrm{ASMD}_j = \frac{|\bar{X}_{j,1} - \bar{X}_{j,0}|}{\sqrt{(s_{j,1}^2 + s_{j,0}^2)/2}}
+
+    where :math:`\bar{X}_{j,d}` and :math:`s_{j,d}^2` are the weighted mean and
+    variance of :math:`X_j` in treatment group :math:`d`. In the unweighted
+    case, all weights are 1.
+
+    Good balance is typically indicated by ASMD values below a threshold
+    (e.g., 0.10) for all confounders after weighting.
+
+    Examples
+    --------
+    >>> from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+    >>> from causalis.dgp import obs_linear_26_dataset
+    >>> from causalis.scenarios.unconfoundedness.model import IRM
+    >>> # 1. Generate data
+    >>> data = obs_linear_26_dataset(n=1000, seed=42, return_causal_data=True)
+    >>> # 2. Fit model with diagnostics enabled
+    >>> irm = IRM(
+    ...     data=data,
+    ...     ml_g=RandomForestRegressor(random_state=42),
+    ...     ml_m=RandomForestClassifier(random_state=42),
+    ...     store_diagnostics=True
+    ... )
+    >>> estimate = irm.fit().estimate()
+    >>> # 3. Generate Love plot
+    >>> fig = love_plot(data, estimate, threshold=0.1) # doctest: +SKIP
     """
     report = run_unconfoundedness_diagnostics(
         data=data,

@@ -4,6 +4,7 @@ import pytest
 
 from causalis.dgp.causaldata import CausalData
 from causalis.scenarios.cuped.model import CUPEDModel
+from causalis.scenarios.cuped.refutation import CUPEDRefutationConfig
 
 
 def _make_data(n: int = 350, seed: int = 123) -> CausalData:
@@ -28,7 +29,7 @@ def _make_rank_deficient_df(n: int = 220, seed: int = 19) -> pd.DataFrame:
 
 def test_cuped_regression_checks_attached_by_default():
     data = _make_data()
-    model = CUPEDModel(check_action="ignore").fit(data, covariates=["x1", "x2"])
+    model = CUPEDModel().fit(data, covariates=["x1", "x2"])
     estimate = model.estimate()
 
     checks = estimate.diagnostic_data.regression_checks
@@ -44,12 +45,16 @@ def test_cuped_regression_checks_attached_by_default():
 def test_cuped_regression_checks_can_be_disabled_or_enabled_per_fit():
     data = _make_data()
 
-    model = CUPEDModel(run_regression_checks=False, check_action="ignore").fit(data, covariates=["x1"])
+    model = CUPEDModel(
+        refutation_config=CUPEDRefutationConfig(run_regression_checks=False)
+    ).fit(data, covariates=["x1"])
     estimate = model.estimate()
     assert model._regression_checks is None
     assert estimate.diagnostic_data.regression_checks is None
 
-    model = CUPEDModel(run_regression_checks=False, check_action="ignore").fit(
+    model = CUPEDModel(
+        refutation_config=CUPEDRefutationConfig(run_regression_checks=False)
+    ).fit(
         data,
         covariates=["x1"],
         run_checks=True,
@@ -73,7 +78,9 @@ def test_cuped_regression_checks_raise_on_rank_deficiency_even_with_checks_disab
 
 def test_cuped_raise_on_yellow_option():
     data = _make_data()
-    model = CUPEDModel(check_action="raise").fit(data, covariates=["x1", "x2"])
+    model = CUPEDModel(
+        refutation_config=CUPEDRefutationConfig(check_action="raise")
+    ).fit(data, covariates=["x1", "x2"])
     table = pd.DataFrame(
         [
             {
@@ -90,7 +97,9 @@ def test_cuped_raise_on_yellow_option():
     # Default behavior keeps YELLOW silent.
     model._signal_assumption_flags(table)
 
-    strict_model = CUPEDModel(check_action="raise", raise_on_yellow=True).fit(
+    strict_model = CUPEDModel(
+        refutation_config=CUPEDRefutationConfig(check_action="raise", raise_on_yellow=True)
+    ).fit(
         data,
         covariates=["x1", "x2"],
     )

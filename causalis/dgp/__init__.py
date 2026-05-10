@@ -3,7 +3,7 @@ Synthetic data-generating processes (DGPs) for causal benchmarking and examples.
 
 This package collects the public dataset builders used across ``causalis`` for
 single-treatment tabular data, multi-treatment data, instrumental-variable
-placeholders, and synthetic-control style panel data.
+data, and synthetic-control style panel data.
 
 The most commonly used entry points are:
 
@@ -11,6 +11,8 @@ The most commonly used entry points are:
   optional pre-period covariates.
 - ``obs_linear_effect`` and ``obs_linear_26_dataset`` for observational data
   with confounding and ground-truth nuisance objects.
+- ``generate_iv_data`` for binary-instrument IV data compatible with
+  ``IVCausalData``.
 - ``generate_scm_data`` for synthetic panel data with one treated unit and a
   donor pool.
 - ``generate_did_data`` for simultaneous-adoption panel data with treated and
@@ -71,6 +73,11 @@ from .causaldata import (
     generate_cuped_binary, make_cuped_binary_26
 )
 from .panel_data_scm import generate_scm_data
+from .causaldata_instrumental import (
+    InstrumentalGenerator,
+    IVCausalDatasetGenerator,
+    generate_iv_data,
+)
 from .panel_data_did import (
     generate_did_data,
     generate_did_gamma,
@@ -92,6 +99,9 @@ __all__ = [
     "generate_cuped_tweedie_26",
     "generate_cuped_binary",
     "make_cuped_binary_26",
+    "InstrumentalGenerator",
+    "IVCausalDatasetGenerator",
+    "generate_iv_data",
     "generate_scm_data",
     "generate_did_data",
     "generate_did_gamma",

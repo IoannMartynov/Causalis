@@ -14,7 +14,7 @@
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="causalis.scenarios.classic_rct.inference.bootstrap_diff_in_means" href="causalis.scenarios.classic_rct.inference.bootstrap_diff_in_means.html" />
+    <link rel="next" title="causalis.scenarios.classic_rct.inference.welch_permutation_t_test" href="causalis.scenarios.classic_rct.inference.welch_permutation_t_test.html" />
     <link rel="prev" title="causalis.scenarios.classic_rct.inference" href="causalis.scenarios.classic_rct.inference.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
@@ -43,8 +43,7 @@
 <table class="autosummary longtable docutils align-left">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.classic_rct.inference.ttest.ttest" title="causalis.scenarios.classic_rct.inference.ttest.ttest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ttest</span></code></a></p></td>
-<td><p>Perform a Welch two-sample t-test comparing outcomes between treated (D=1)
-and control (D=0) groups.</p></td>
+<td><p>Perform a Welch two-sample t-test comparing outcomes between groups.</p></td>
 </tr>
 </tbody>
 </table>
@@ -54,27 +53,58 @@ and control (D=0) groups.</p></td>
 <dl class="py function">
 <dt class="sig sig-object py" id="causalis.scenarios.classic_rct.inference.ttest.ttest">
 <span class="sig-prename descclassname"><span class="pre">causalis.scenarios.classic_rct.inference.ttest.</span></span><span class="sig-name descname"><span class="pre">ttest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">causalis.data_contracts.CausalData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.classic_rct.inference.ttest.ttest" title="Link to this definition">¶</a></dt>
-<dd><p>Perform a Welch two-sample t-test comparing outcomes between treated (D=1)
-and control (D=0) groups.</p>
-<p class="rubric" id="id1">Returns</p>
+<dd><p>Perform a Welch two-sample t-test comparing outcomes between groups.</p>
+<p>The Welch t-test (also known as the unequal variances t-test) is used to
+test the hypothesis that two populations have equal means. It is more
+robust than Student’s t-test when the two samples have unequal variances
+and/or unequal sample sizes.</p>
+<p class="rubric" id="id1">Notes</p>
+<p>The Welch t-statistic is calculated as:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>t = \frac{\bar{Y}_1 - \bar{Y}_0}{\sqrt{\frac{s_1^2}{n_1} + \frac{s_0^2}{n_0}}}
+</pre></div>
+</div>
+<p>The degrees of freedom $\nu$ are approximated using the Welch-Satterthwaite
+equation:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\nu \approx \frac{\left(\frac{s_1^2}{n_1} + \frac{s_0^2}{n_0}\right)^2}
+{\frac{(s_1^2/n_1)^2}{n_1-1} + \frac{(s_0^2/n_0)^2}{n_0-1}}
+</pre></div>
+</div>
+<p>For the relative difference (percent lift), the variance is estimated
+using the Delta method:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Var\left(\frac{\bar{Y}_1}{\bar{Y}_0}\right) \approx
+\frac{1}{\bar{Y}_0^2} Var(\bar{Y}_1) + \frac{\bar{Y}_1^2}{\bar{Y}_0^4} Var(\bar{Y}_0)
+</pre></div>
+</div>
+<p class="rubric" id="id2">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.scenarios.classic_rct.dgp import generate_classic_rct_26
+from causalis.scenarios.classic_rct.inference.ttest import ttest
+data = generate_classic_rct_26(n=2000, seed=42)
+results = ttest(data)
+print(f”P-value: {results[‘p_value’]:.4f}”)
+0.1685</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+<p class="rubric" id="id3">Parameters</p>
+<p>data : CausalData
+The CausalData object containing treatment and outcome variables.
+alpha : float, default 0.05
+The significance level for calculating confidence intervals.</p>
+<p class="rubric" id="id4">Returns</p>
 <p>Dict[str, Any]
-- p_value: Welch t-test p-value for H0: E[Y|D=1] - E[Y|D=0] = 0
-- absolute_difference: treatment_mean - control_mean
-- absolute_ci: (lower, upper) CI for absolute_difference using Welch df
-- relative_difference: signed percent change = 100 * (treatment_mean / control_mean - 1)
-- relative_se: delta-method SE of relative_difference (percent scale)
-- relative_ci: (lower, upper) CI for relative_difference using delta method (+ Satterthwaite df)</p>
-<p class="rubric" id="id2">Notes</p>
-<p>Delta method for relative percent change:
-r_hat = 100 * (Ybar1/Ybar0 - 1)</p>
-<p>With independent groups and CLT:
-Var(Ybar1) ≈ s1^2/n1
-Var(Ybar0) ≈ s0^2/n2
-Cov(Ybar1, Ybar0) ≈ 0</p>
-<p>Gradient of g(a,b)=a/b - 1 is (1/b, -a/b^2), so:
-Var(r_hat/100) ≈ (1/Ybar0)^2 * (s1^2/n1) + (Ybar1/Ybar0^2)^2 * (s0^2/n2)</p>
-<p>CI uses t-critical with Satterthwaite df; falls back to z if df is invalid.
-If control_mean is near 0, relative stats are undefined/unstable and return inf/nan sentinels.</p>
+A dictionary containing:
+- <code class="docutils literal notranslate"><span class="pre">p_value</span></code>: Welch t-test p-value.
+- <code class="docutils literal notranslate"><span class="pre">absolute_difference</span></code>: $\bar{Y}_1 - \bar{Y}_0$.
+- <code class="docutils literal notranslate"><span class="pre">absolute_ci</span></code>: (lower, upper) CI for absolute difference.
+- <code class="docutils literal notranslate"><span class="pre">relative_difference</span></code>: Percent change relative to control.
+- <code class="docutils literal notranslate"><span class="pre">relative_se</span></code>: Delta-method standard error for the relative difference.
+- <code class="docutils literal notranslate"><span class="pre">relative_ci</span></code>: (lower, upper) CI for relative difference.</p>
 </dd></dl>
 
 </section>
@@ -124,7 +154,7 @@ If control_mean is near 0, relative stats are undefined/unstable and return inf/
   <li><a href="causalis.scenarios.classic_rct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.classic_rct</span></code></a><ul>
   <li><a href="causalis.scenarios.classic_rct.inference.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.classic_rct.inference</span></code></a><ul>
       <li>Previous: <a href="causalis.scenarios.classic_rct.inference.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.classic_rct.inference</span></code></a></li>
-      <li>Next: <a href="causalis.scenarios.classic_rct.inference.bootstrap_diff_in_means.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.classic_rct.inference.bootstrap_diff_in_means</span></code></a></li>
+      <li>Next: <a href="causalis.scenarios.classic_rct.inference.welch_permutation_t_test.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.classic_rct.inference.welch_permutation_t_test</span></code></a></li>
   </ul></li>
   </ul></li>
   </ul></li>

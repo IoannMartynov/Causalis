@@ -35,6 +35,25 @@
             
   <section id="module-causalis.dgp.causaldata_instrumental.base">
 <span id="causalis-dgp-causaldata-instrumental-base"></span><h1><a class="reference internal" href="#module-causalis.dgp.causaldata_instrumental.base" title="causalis.dgp.causaldata_instrumental.base"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.dgp.causaldata_instrumental.base</span></code></a><a class="headerlink" href="#module-causalis.dgp.causaldata_instrumental.base" title="Link to this heading">¶</a></h1>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.dgp.causaldata_instrumental.base import InstrumentalGenerator
+gen = InstrumentalGenerator(k=2, first_stage=1.5, seed=3141)
+df = gen.generate(500)
+{“y”, “d”, “z”, “x1”, “x2”}.issubset(df.columns)
+True</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</section>
+<p>Low-level generators for instrumental-variable synthetic causal datasets.</p>
+<p>The central class in this module is :class:<code class="docutils literal notranslate"><span class="pre">InstrumentalGenerator</span></code>, which
+builds cross-sectional datasets with one binary instrument, one binary
+endogenous treatment, optional observed confounders, and optional latent
+confounding between treatment and outcome.</p>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
 <section id="classes">
@@ -42,7 +61,17 @@
 <table class="autosummary longtable docutils align-left">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator" title="causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InstrumentalGenerator</span></code></a></p></td>
-<td><p>Generator for synthetic causal inference datasets with instrumental variables.</p></td>
+<td><p>Generate synthetic datasets for binary instrumental-variable estimation.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="data">
+<h3>Data<a class="headerlink" href="#data" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.dgp.causaldata_instrumental.base.IVCausalDatasetGenerator" title="causalis.dgp.causaldata_instrumental.base.IVCausalDatasetGenerator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IVCausalDatasetGenerator</span></code></a></p></td>
+<td></td>
 </tr>
 </tbody>
 </table>
@@ -52,29 +81,134 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">causalis.dgp.causaldata_instrumental.base.</span></span><span class="sig-name descname"><span class="pre">InstrumentalGenerator</span></span><a class="headerlink" href="#causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator" title="Link to this definition">¶</a></dt>
-<dd><p>Generator for synthetic causal inference datasets with instrumental variables.</p>
-<p>Placeholder implementation for future use.</p>
+<dd><p>Bases: <a class="reference internal" href="causalis.dgp.causaldata.base.html#causalis.dgp.causaldata.base.CausalDatasetGenerator" title="causalis.dgp.causaldata.base.CausalDatasetGenerator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">causalis.dgp.causaldata.base.CausalDatasetGenerator</span></code></a></p>
+<p>Generate synthetic datasets for binary instrumental-variable estimation.</p>
+<p>The generated structural system is:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">X</span></code> is sampled with the same confounder machinery as
+:class:<code class="docutils literal notranslate"><span class="pre">~causalis.dgp.causaldata.base.CausalDatasetGenerator</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Z</span></code> is a binary instrument generated from <code class="docutils literal notranslate"><span class="pre">P(Z=1|X)</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">D</span></code> is a binary endogenous treatment generated from
+<code class="docutils literal notranslate"><span class="pre">P(D=1|Z,X,U)</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Y</span></code> depends on <code class="docutils literal notranslate"><span class="pre">D</span></code>, <code class="docutils literal notranslate"><span class="pre">X</span></code>, and optionally the latent <code class="docutils literal notranslate"><span class="pre">U</span></code>, but has no
+direct dependence on <code class="docutils literal notranslate"><span class="pre">Z</span></code>.</p></li>
+</ul>
+<p>Parameters inherited from <code class="docutils literal notranslate"><span class="pre">CausalDatasetGenerator</span></code> keep their usual
+meaning for the outcome equation and the non-instrument part of the
+treatment equation. In particular, <code class="docutils literal notranslate"><span class="pre">beta_d</span></code>, <code class="docutils literal notranslate"><span class="pre">g_d</span></code>, <code class="docutils literal notranslate"><span class="pre">alpha_d</span></code>,
+<code class="docutils literal notranslate"><span class="pre">target_d_rate</span></code>, and <code class="docutils literal notranslate"><span class="pre">u_strength_d</span></code> affect treatment assignment.</p>
 <p class="rubric" id="id1">Parameters</p>
-<p>seed : int, optional
-Random seed for reproducibility.</p>
+<p>instrument_name : str, default=”z”
+Column name for the binary instrument.
+first_stage : float, default=1.25
+Additive log-odds effect of <code class="docutils literal notranslate"><span class="pre">Z</span></code> on treatment assignment. Positive
+values make the instrument encourage treatment.
+beta_z : array-like, optional
+Linear coefficients of confounders in the instrument propensity.
+g_z : callable, optional
+Nonlinear instrument score <code class="docutils literal notranslate"><span class="pre">g_z(X)</span> <span class="pre">-&gt;</span> <span class="pre">shape</span> <span class="pre">(n,)</span></code>.
+alpha_z : float, default=0.0
+Instrument propensity intercept. If <code class="docutils literal notranslate"><span class="pre">target_z_rate</span></code> is set, this is
+calibrated on each generated sample.
+target_z_rate : float, optional
+Target marginal instrument rate. Defaults to <code class="docutils literal notranslate"><span class="pre">0.5</span></code>.
+instrument_sharpness : float, default=1.0
+Multiplier on the X-driven instrument score.
+include_oracle : bool, default=True
+Whether to include oracle columns for IV nuisance functions and
+treatment potential-outcome means.</p>
+<p class="rubric" id="id2">Notes</p>
+<p>With <code class="docutils literal notranslate"><span class="pre">include_oracle=True</span></code>, returned oracle columns include:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">m</span></code>: instrument propensity <code class="docutils literal notranslate"><span class="pre">P(Z=1|X)</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">r_z0</span></code> and <code class="docutils literal notranslate"><span class="pre">r_z1</span></code>: first-stage nuisances
+<code class="docutils literal notranslate"><span class="pre">P(D=1|Z=0,X)</span></code> and <code class="docutils literal notranslate"><span class="pre">P(D=1|Z=1,X)</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">g_z0</span></code> and <code class="docutils literal notranslate"><span class="pre">g_z1</span></code>: reduced-form nuisances
+<code class="docutils literal notranslate"><span class="pre">E[Y|Z=0,X]</span></code> and <code class="docutils literal notranslate"><span class="pre">E[Y|Z=1,X)</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">iv_first_stage</span></code> and <code class="docutils literal notranslate"><span class="pre">iv_reduced_form</span></code>: conditional differences in
+the first stage and reduced form.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">late_x</span></code> and <code class="docutils literal notranslate"><span class="pre">late</span></code>: conditional and sample-average Wald ratios.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">g_d0</span></code>, <code class="docutils literal notranslate"><span class="pre">g_d1</span></code>, and <code class="docutils literal notranslate"><span class="pre">cate</span></code>: treatment potential-outcome means and
+their natural-scale contrast.</p></li>
+</ul>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.seed">
-<span class="sig-name descname"><span class="pre">seed</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.seed" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.instrument_name">
+<span class="sig-name descname"><span class="pre">instrument_name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.instrument_name" title="Link to this definition">¶</a></dt>
+<dd><p>‘z’</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.first_stage">
+<span class="sig-name descname"><span class="pre">first_stage</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.first_stage" title="Link to this definition">¶</a></dt>
+<dd><p>1.25</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.beta_z">
+<span class="sig-name descname"><span class="pre">beta_z</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.beta_z" title="Link to this definition">¶</a></dt>
 <dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.g_z">
+<span class="sig-name descname"><span class="pre">g_z</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.g_z" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.alpha_z">
+<span class="sig-name descname"><span class="pre">alpha_z</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.alpha_z" title="Link to this definition">¶</a></dt>
+<dd><p>0.0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.target_z_rate">
+<span class="sig-name descname"><span class="pre">target_z_rate</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.target_z_rate" title="Link to this definition">¶</a></dt>
+<dd><p>0.5</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.instrument_sharpness">
+<span class="sig-name descname"><span class="pre">instrument_sharpness</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.instrument_sharpness" title="Link to this definition">¶</a></dt>
+<dd><p>1.0</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.__post_init__">
+<span class="sig-name descname"><span class="pre">__post_init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.__post_init__" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize RNG and validate IV-specific configuration.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.generate">
-<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.generate" title="Link to this definition">¶</a></dt>
-<dd><p>Draw a synthetic dataset of size <code class="docutils literal notranslate"><span class="pre">n</span></code>.</p>
-<p class="rubric" id="id2">Parameters</p>
+<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">U</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.generate" title="Link to this definition">¶</a></dt>
+<dd><p>Draw a synthetic IV dataset of size <code class="docutils literal notranslate"><span class="pre">n</span></code>.</p>
+<p class="rubric" id="id3">Parameters</p>
 <p>n : int
-Number of samples to generate.</p>
+Number of samples to generate.
+U : numpy.ndarray, optional
+Latent confounder. If omitted, sampled from <code class="docutils literal notranslate"><span class="pre">N(0,</span> <span class="pre">1)</span></code>.</p>
 <p class="rubric" id="returns">Returns</p>
 <p>pandas.DataFrame
-An empty DataFrame (placeholder).</p>
+Generated dataset with outcome <code class="docutils literal notranslate"><span class="pre">y</span></code>, treatment <code class="docutils literal notranslate"><span class="pre">d</span></code>, instrument
+<code class="docutils literal notranslate"><span class="pre">z</span></code> (or <code class="docutils literal notranslate"><span class="pre">instrument_name</span></code>), confounders, and optional oracle
+columns.</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.to_iv_causal_data">
+<span class="sig-name descname"><span class="pre">to_iv_causal_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confounders</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="causalis.data_contracts.iv_causal_data.html#causalis.data_contracts.iv_causal_data.IVCausalData" title="causalis.data_contracts.iv_causal_data.IVCausalData"><span class="pre">causalis.data_contracts.iv_causal_data.IVCausalData</span></a></span></span><a class="headerlink" href="#causalis.dgp.causaldata_instrumental.base.InstrumentalGenerator.to_iv_causal_data" title="Link to this definition">¶</a></dt>
+<dd><p>Generate a dataset and convert it to :class:<code class="docutils literal notranslate"><span class="pre">IVCausalData</span></code>.</p>
+<p>Oracle columns are intentionally not included as confounders when
+<code class="docutils literal notranslate"><span class="pre">confounders</span></code> is omitted.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="causalis.dgp.causaldata_instrumental.base.IVCausalDatasetGenerator">
+<span class="sig-prename descclassname"><span class="pre">causalis.dgp.causaldata_instrumental.base.</span></span><span class="sig-name descname"><span class="pre">IVCausalDatasetGenerator</span></span><a class="headerlink" href="#causalis.dgp.causaldata_instrumental.base.IVCausalDatasetGenerator" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
 </dd></dl>
 
 </section>

@@ -23,11 +23,12 @@ Optimized for binary conversion outcomes.
     $$CI = [L_1 - U_0, U_1 - L_0]$$  
     where $[L_i, U_i]$ are the Wilson score bounds for proportion $p_i$.  
   
-**Bootstrap (`bootstrap`)**  
-Non-parametric estimation by resampling data with replacement $B$ times.  
-*   **Absolute CI:** Percentile-based interval $(\hat{\tau}^*_{[\alpha/2]}, \hat{\tau}^*_{[1-\alpha/2]})$.  
-*   **P-value:** Normal approximation using the bootstrap standard error $s_{boot}$:  
-    $$Z = \frac{\hat{\tau}}{s_{boot}}, \quad p = 2 \cdot (1 - \Phi(|Z|))$$  
+**Welch Permutation T-Test (`welch_permutation_t_test`)**  
+Uses the Welch statistic, but estimates the p-value by repeatedly permuting treatment labels while preserving group sizes.  
+*   **Statistic:** $t = \frac{\bar{Y}_1 - \bar{Y}_0}{\sqrt{s_1^2/n_1 + s_0^2/n_0}}$.  
+*   **Absolute CI:** Welch-Satterthwaite interval for $\hat{\tau}$.  
+*   **P-value:** Monte Carlo permutation p-value with a +1 correction:  
+    $$p = \frac{1 + \sum_{b=1}^{B} I(|t_b^*| \ge |t_{obs}|)}{B + 1}$$  
   
 # Relative Lift and Delta Method  
 The relative lift is calculated as:  
@@ -50,8 +51,8 @@ class DiffInMeans:
     def estimate(method="ttest", alpha=0.05, **kwargs):        
 	    if method == "ttest":            
 		    res = ttest_inference(self.data, alpha)        
-	    elif method == "bootstrap":            
-		    res = bootstrap_inference(self.data, alpha, **kwargs)        
+	    elif method == "welch_permutation_t_test":            
+		    res = welch_permutation_t_test(self.data, alpha, **kwargs)        
 	    elif method == "conversion_ztest":            
 		    res = ztest_inference(self.data, alpha, **kwargs)                
 	    return CausalEstimate(
@@ -147,28 +148,34 @@ def conversion_ztest(data, alpha, ci_method="newcombe", se_for_test="pooled"):
     }
 
 ```
-#### Bootstrap Inference 
+#### Welch Permutation T-Test Inference 
 
 ```python  
-def bootstrap_inference(data, alpha, n_simul=10000):
+def welch_permutation_t_test(data, alpha, B=10000, alternative="two-sided", seed=None):
     y1, y0 = data.split_by_treatment()
 
-    boot_diffs = []
-    for _ in range(n_simul):
-        s1 = resample(y1)
-        s0 = resample(y0)
-        boot_diffs.append(mean(s1) - mean(s0))
-
     abs_diff = mean(y1) - mean(y0)
-    abs_ci = (
-        quantile(boot_diffs, alpha / 2),
-        quantile(boot_diffs, 1 - alpha / 2),
-    )
+    t_obs = welch_t_stat(y1, y0)
 
-    se_boot = std(boot_diffs)
-    p_val = 2 * (1 - norm.cdf(abs(abs_diff / se_boot)))
+    extreme = 0
+    z = concatenate(y1, y0)
+    for _ in range(B):
+        z_perm = random_permutation(z)
+        y1_perm = z_perm[:len(y1)]
+        y0_perm = z_perm[len(y1):]
+        t_perm = welch_t_stat(y1_perm, y0_perm)
 
-    return {abs_diff, p_val, abs_ci, ...}
+        if alternative == "two-sided" and abs(t_perm) >= abs(t_obs):
+            extreme += 1
+        elif alternative == "greater" and t_perm >= t_obs:
+            extreme += 1
+        elif alternative == "less" and t_perm <= t_obs:
+            extreme += 1
+
+    p_val = (extreme + 1) / (B + 1)
+    abs_ci = welch_satterthwaite_ci(y1, y0, alpha)
+
+    return {abs_diff, t_obs, p_val, abs_ci, ...}
   
 ```
 
@@ -213,20 +220,11 @@ def bootstrap_inference(data, alpha, n_simul=10000):
 - **Agresti & Caffo (2000)** — simple adjusted intervals for proportions _and differences_ (alternative to Newcombe; useful “related work” citation). ([Statistics](https://users.stat.ufl.edu/~aa/articles/agresti_caffo_2000.pdf?utm_source=chatgpt.com "Simple and Effective Confidence Intervals for Proportions and ..."))
     
 
-## Bootstrap percentile CI + bootstrap SE / normal-approx p-value
+## Permutation tests
 
-Foundational bootstrap + CI methodology:
-
-- **Efron (1979)** — original bootstrap paper; standard citation for nonparametric bootstrap resampling logic. DOI: 10.1214/aos/1176344552. ([Project Euclid](https://projecteuclid.org/journals/annals-of-statistics/volume-7/issue-1/Bootstrap-Methods-Another-Look-at-the-Jackknife/10.1214/aos/1176344552.full?utm_source=chatgpt.com "Bootstrap Methods: Another Look at the Jackknife"))
+- **Fisher (1935)** — randomization/permutation testing as exact design-based inference under random assignment.
     
-- **Efron (1987)** — improved bootstrap CIs (BC/BCa ideas; useful if you later add BCa). DOI: 10.1080/01621459.1987.10478410. ([Taylor & Francis Online](https://www.tandfonline.com/doi/abs/10.1080/01621459.1987.10478410?utm_source=chatgpt.com "Better Bootstrap Confidence Intervals"))
-    
-- **DiCiccio & Efron (1996)** — survey of bootstrap confidence intervals (nice umbrella reference). DOI: 10.1214/ss/1032280214. ([Project Euclid](https://projecteuclid.org/journals/statistical-science/volume-11/issue-3/Bootstrap-confidence-intervals/10.1214/ss/1032280214.pdf?utm_source=chatgpt.com "Bootstrap Confidence Intervals"))
-    
-- **Hall (1992)** — theory/Edgeworth accuracy; useful if you want to justify why percentile vs studentized/BCa differ in coverage. ([liu.w.waseda.jp](https://liu.w.waseda.jp/English/private/boot.pdf?utm_source=chatgpt.com "Peter Hall[1992] The Bootstrap and Edgeworth Expansion"))
-    
-
-(If you want a single “practitioner-friendly” bootstrap reference for SE/percentiles, you can also cite Efron & Tibshirani’s book—common but a book, not a paper.) ([Amazon](https://www.amazon.nl/-/en/Introduction-Bootstrap-Bradley-Efron/dp/0412042312?utm_source=chatgpt.com "An Introduction to the Bootstrap : Efron, Bradley, Tibshirani ..."))
+- **Good (2005)** — practical reference for permutation, parametric, and bootstrap tests, including Monte Carlo permutation p-values.
 
 ## Relative lift (ratio) + Delta method variance
 
