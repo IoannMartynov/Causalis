@@ -20,37 +20,66 @@ def conversion_ztest(
     ci_method: Literal["newcombe", "wald_unpooled", "wald_pooled"] = "newcombe",
     se_for_test: Literal["pooled", "unpooled"] = "pooled",
 ) -> Dict[str, Any]:
-    """
-    Perform a two-proportion z-test on a CausalData object with a binary outcome (conversion).
+    r"""
+    Perform a two-proportion z-test on a CausalData object with a binary outcome.
+
+    The z-test for proportions is used to compare the conversion rates of two
+    independent groups. It assumes that the number of successes and failures
+    in each group is sufficiently large (typically $n \cdot p > 5$ and
+    $n \cdot (1-p) > 5$).
+
+    Notes
+    -----
+    The z-statistic for testing $H_0: p_1 = p_0$ is calculated as:
+
+    .. math::
+
+        z = \frac{\hat{p}_1 - \hat{p}_0}{SE}
+
+    By default (`se_for_test="pooled"`), the pooled standard error is used:
+
+    .. math::
+
+        SE_{pooled} = \sqrt{\hat{p}(1-\hat{p})\left(\frac{1}{n_1} + \frac{1}{n_0}\right)}
+
+    where $\hat{p} = \frac{x_1 + x_0}{n_1 + n_0}$ is the pooled proportion.
+
+    Confidence intervals for the difference $p_1 - p_0$ can be calculated using
+    several methods. The "newcombe" method (Newcombe's hybrid score interval)
+    is generally recommended as it performs better than the Wald interval
+    when proportions are near 0 or 1.
+
+    Examples
+    --------
+    >>> from causalis.scenarios.classic_rct.dgp import generate_classic_rct_26
+    >>> from causalis.scenarios.classic_rct.inference.conversion_ztest import conversion_ztest
+    >>> data = generate_classic_rct_26(n=2000, seed=42)
+    >>> results = conversion_ztest(data)
+    >>> print(f"Conversion Rate (Control): {data.df[data.df['d']==0]['conversion'].mean():.4f}")
+    0.1349
+    >>> print(f"P-value: {results['p_value']:.4f}")
+    0.1688
 
     Parameters
     ----------
     data : CausalData
         The CausalData object containing treatment and outcome variables.
     alpha : float, default 0.05
-        The significance level for calculating confidence intervals (between 0 and 1).
+        The significance level for calculating confidence intervals.
     ci_method : {"newcombe", "wald_unpooled", "wald_pooled"}, default "newcombe"
         Method for calculating the confidence interval for the absolute difference.
-        "newcombe" is the most robust default for conversion rates.
     se_for_test : {"pooled", "unpooled"}, default "pooled"
         Method for calculating the standard error for the z-test p-value.
-        "pooled" (score test) is generally preferred for testing equality of proportions.
 
     Returns
     -------
     Dict[str, Any]
         A dictionary containing:
-        - p_value: Two-sided p-value from the z-test
-        - absolute_difference: Difference in conversion rates (treated - control)
-        - absolute_ci: Tuple (lower, upper) for the absolute difference CI
-        - relative_difference: Percentage change relative to control rate
-        - relative_ci: Tuple (lower, upper) for the relative difference CI (delta method)
-
-    Raises
-    ------
-    ValueError
-        If treatment/outcome are missing, treatment is not binary, outcome is not binary,
-        groups are empty, or alpha is outside (0, 1).
+        - `p_value`: Two-sided p-value from the z-test.
+        - `absolute_difference`: Difference in conversion rates ($p_1 - p_0$).
+        - `absolute_ci`: (lower, upper) CI for the absolute difference.
+        - `relative_difference`: Percentage change relative to control.
+        - `relative_ci`: (lower, upper) CI for the relative difference (delta method).
     """
     if not 0 < alpha < 1:
         raise ValueError("alpha must be between 0 and 1 (exclusive)")

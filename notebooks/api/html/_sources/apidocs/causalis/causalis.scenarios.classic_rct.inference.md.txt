@@ -14,7 +14,7 @@
 :maxdepth: 1
 
 causalis.scenarios.classic_rct.inference.ttest
-causalis.scenarios.classic_rct.inference.bootstrap_diff_in_means
+causalis.scenarios.classic_rct.inference.welch_permutation_t_test
 causalis.scenarios.classic_rct.inference.conversion_ztest
 ```
 
@@ -37,7 +37,7 @@ causalis.scenarios.classic_rct.inference.conversion_ztest
 ````{py:data} __all__
 :canonical: causalis.scenarios.classic_rct.inference.__all__
 :value: >
-   ['ttest', 'conversion_ztest', 'bootstrap_diff_means']
+   ['ttest', 'conversion_ztest', 'welch_permutation_t_test']
 
 ```{autodoc2-docstring} causalis.scenarios.classic_rct.inference.__all__
 ```

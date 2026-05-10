@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>causalis.scenarios.iv.refutation.diagnostics &#8212; Causalis API Reference  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="causalis.scenarios.iv.refutation.iv_confounders_balance" href="causalis.scenarios.iv.refutation.iv_confounders_balance.html" />
+    <link rel="prev" title="causalis.scenarios.iv.refutation" href="causalis.scenarios.iv.refutation.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-causalis.scenarios.iv.refutation.diagnostics">
+<span id="causalis-scenarios-iv-refutation-diagnostics"></span><h1><a class="reference internal" href="#module-causalis.scenarios.iv.refutation.diagnostics" title="causalis.scenarios.iv.refutation.diagnostics"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.iv.refutation.diagnostics</span></code></a><a class="headerlink" href="#module-causalis.scenarios.iv.refutation.diagnostics" title="Link to this heading">¶</a></h1>
+<p>Post-inference diagnostics for binary instrumental-variable estimates.</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.iv.refutation.diagnostics.compute_instrument_overlap_diagnostics" title="causalis.scenarios.iv.refutation.diagnostics.compute_instrument_overlap_diagnostics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_instrument_overlap_diagnostics</span></code></a></p></td>
+<td><p>Compute instrument propensity/overlap diagnostics from IV diagnostic data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.iv.refutation.diagnostics.compute_first_stage_diagnostics" title="causalis.scenarios.iv.refutation.diagnostics.compute_first_stage_diagnostics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_first_stage_diagnostics</span></code></a></p></td>
+<td><p>Compute controlled first-stage diagnostics: D ~ 1 + Z + X.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.iv.refutation.diagnostics.compute_reduced_form_diagnostics" title="causalis.scenarios.iv.refutation.diagnostics.compute_reduced_form_diagnostics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_reduced_form_diagnostics</span></code></a></p></td>
+<td><p>Compute simple reduced-form diagnostics: Y ~ 1 + Z.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.iv.refutation.diagnostics.instrument_overlap" title="causalis.scenarios.iv.refutation.diagnostics.instrument_overlap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">instrument_overlap</span></code></a></p></td>
+<td><p>Return instrument propensity/overlap diagnostics for an IV result.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.iv.refutation.diagnostics.first_stage" title="causalis.scenarios.iv.refutation.diagnostics.first_stage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">first_stage</span></code></a></p></td>
+<td><p>Return first-stage diagnostics for an IV result.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.iv.refutation.diagnostics.reduced_form" title="causalis.scenarios.iv.refutation.diagnostics.reduced_form"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reduced_form</span></code></a></p></td>
+<td><div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Return reduced-form sanity diagnostics for an IV result.
+
+The reduced form is the regression of the outcome on the instrument.
+Under the IV assumptions, the LATE is the ratio of the reduced-form
+effect to the first-stage effect.
+
+.. math::
+
+            heta = 
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.iv.refutation.diagnostics.instrument_overlap_plot" title="causalis.scenarios.iv.refutation.diagnostics.instrument_overlap_plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">instrument_overlap_plot</span></code></a></p></td>
+<td><p>Plot instrument propensity distributions by observed instrument group.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="data">
+<h3>Data<a class="headerlink" href="#data" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.iv.refutation.diagnostics.__all__" title="causalis.scenarios.iv.refutation.diagnostics.__all__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__all__</span></code></a></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.iv.refutation.diagnostics.compute_instrument_overlap_diagnostics">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.iv.refutation.diagnostics.</span></span><span class="sig-name descname"><span class="pre">compute_instrument_overlap_diagnostics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">diag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="causalis.data_contracts.causal_diagnostic_data.html#causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData" title="causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData"><span class="pre">causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.iv.refutation.diagnostics.compute_instrument_overlap_diagnostics" title="Link to this definition">¶</a></dt>
+<dd><p>Compute instrument propensity/overlap diagnostics from IV diagnostic data.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.iv.refutation.diagnostics.compute_first_stage_diagnostics">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.iv.refutation.diagnostics.</span></span><span class="sig-name descname"><span class="pre">compute_first_stage_diagnostics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">diag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="causalis.data_contracts.causal_diagnostic_data.html#causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData" title="causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData"><span class="pre">causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">weak_iv_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.iv.refutation.diagnostics.compute_first_stage_diagnostics" title="Link to this definition">¶</a></dt>
+<dd><p>Compute controlled first-stage diagnostics: D ~ 1 + Z + X.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.iv.refutation.diagnostics.compute_reduced_form_diagnostics">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.iv.refutation.diagnostics.</span></span><span class="sig-name descname"><span class="pre">compute_reduced_form_diagnostics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">diag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="causalis.data_contracts.causal_diagnostic_data.html#causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData" title="causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData"><span class="pre">causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">late_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.iv.refutation.diagnostics.compute_reduced_form_diagnostics" title="Link to this definition">¶</a></dt>
+<dd><p>Compute simple reduced-form diagnostics: Y ~ 1 + Z.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.iv.refutation.diagnostics.instrument_overlap">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.iv.refutation.diagnostics.</span></span><span class="sig-name descname"><span class="pre">instrument_overlap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.scenarios.iv.refutation.diagnostics.instrument_overlap" title="Link to this definition">¶</a></dt>
+<dd><p>Return instrument propensity/overlap diagnostics for an IV result.</p>
+<p>Checks how well the instrument can be predicted from covariates and whether
+there is sufficient overlap in instrument assignment.</p>
+<p class="rubric" id="id7">Parameters</p>
+<p>result : IIVM or IVCausalEstimate
+The fitted IV model or its estimation result.</p>
+<p class="rubric" id="id8">Returns</p>
+<p>pd.DataFrame
+A table with diagnostic metrics (AUC, KS, ESS ratio).</p>
+<p class="rubric" id="id9">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.scenarios.iv.refutation import instrument_overlap</p>
+<p class="rubric" id="id10">Assuming ‘result’ is obtained from model.estimate()</p>
+<p>instrument_overlap(result)</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.iv.refutation.diagnostics.first_stage">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.iv.refutation.diagnostics.</span></span><span class="sig-name descname"><span class="pre">first_stage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.scenarios.iv.refutation.diagnostics.first_stage" title="Link to this definition">¶</a></dt>
+<dd><p>Return first-stage diagnostics for an IV result.</p>
+<p>Checks the strength of the relationship between the instrument and the treatment.
+A weak first stage (F-statistic &lt; 10 or similar) can lead to biased and
+unstable IV estimates.</p>
+<p class="rubric" id="id11">Parameters</p>
+<p>result : IIVM or IVCausalEstimate
+The fitted IV model or its estimation result.</p>
+<p class="rubric" id="id12">Returns</p>
+<p>pd.DataFrame
+A table with first-stage metrics (Effect, F-statistic, Partial R2, etc.).</p>
+<p class="rubric" id="id13">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.scenarios.iv.refutation import first_stage</p>
+<p class="rubric" id="id14">Assuming ‘result’ is obtained from model.estimate()</p>
+<p>first_stage(result)</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.iv.refutation.diagnostics.reduced_form">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.iv.refutation.diagnostics.</span></span><span class="sig-name descname"><span class="pre">reduced_form</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.scenarios.iv.refutation.diagnostics.reduced_form" title="Link to this definition">¶</a></dt>
+<dd><div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Return reduced-form sanity diagnostics for an IV result.
+
+The reduced form is the regression of the outcome on the instrument.
+Under the IV assumptions, the LATE is the ratio of the reduced-form
+effect to the first-stage effect.
+
+.. math::
+
+            heta = 
+</pre></div>
+</div>
+<p>rac{\mathbb{E}[Y|Z=1] - \mathbb{E}[Y|Z=0]}{\mathbb{E}[D|Z=1] - \mathbb{E}[D|Z=0]}</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Parameters
+----------
+result : IIVM or IVCausalEstimate
+    The fitted IV model or its estimation result.
+
+Returns
+-------
+pd.DataFrame
+    A table with reduced-form metrics.
+
+Examples
+--------
+&gt;&gt;&gt; from causalis.scenarios.iv.refutation import reduced_form
+&gt;&gt;&gt; # Assuming &#39;result&#39; is obtained from model.estimate()
+&gt;&gt;&gt; reduced_form(result)
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.iv.refutation.diagnostics.instrument_overlap_plot">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.iv.refutation.diagnostics.</span></span><span class="sig-name descname"><span class="pre">instrument_overlap_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'fd'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(8.0,</span> <span class="pre">4.5)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">150</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="headerlink" href="#causalis.scenarios.iv.refutation.diagnostics.instrument_overlap_plot" title="Link to this definition">¶</a></dt>
+<dd><p>Plot instrument propensity distributions by observed instrument group.</p>
+<p>Visualizes the overlap of :math:<code class="docutils literal notranslate"><span class="pre">\mathbb{P}(Z=1|X)</span></code> between the :math:<code class="docutils literal notranslate"><span class="pre">Z=0</span></code> and
+:math:<code class="docutils literal notranslate"><span class="pre">Z=1</span></code> groups. Good overlap is essential for reliable IV estimation.</p>
+<p class="rubric" id="id15">Parameters</p>
+<p>result : IIVM or IVCausalEstimate
+The fitted IV model or its estimation result.
+bins : str or int, default “fd”
+Binning strategy for histograms.
+ax : matplotlib.axes.Axes, optional
+Pre-existing axes to plot on.
+figsize : tuple, default (8.0, 4.5)
+Figure size.
+dpi : int, default 150
+Resolution.
+save : str, optional
+Path to save the figure.</p>
+<p class="rubric" id="id16">Returns</p>
+<p>matplotlib.figure.Figure
+The generated figure.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="causalis.scenarios.iv.refutation.diagnostics.__all__">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.iv.refutation.diagnostics.</span></span><span class="sig-name descname"><span class="pre">__all__</span></span><a class="headerlink" href="#causalis.scenarios.iv.refutation.diagnostics.__all__" title="Link to this definition">¶</a></dt>
+<dd><p>[‘compute_first_stage_diagnostics’, ‘compute_instrument_overlap_diagnostics’, ‘compute_reduced_form_…</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../reference.html">Causalis API Reference</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../reference.html">Documentation overview</a><ul>
+  <li><a href="../index.html">API Modules</a><ul>
+  <li><a href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a><ul>
+  <li><a href="causalis.scenarios.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios</span></code></a><ul>
+  <li><a href="causalis.scenarios.iv.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.iv</span></code></a><ul>
+  <li><a href="causalis.scenarios.iv.refutation.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.iv.refutation</span></code></a><ul>
+      <li>Previous: <a href="causalis.scenarios.iv.refutation.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.iv.refutation</span></code></a></li>
+      <li>Next: <a href="causalis.scenarios.iv.refutation.iv_confounders_balance.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.iv.refutation.iv_confounders_balance</span></code></a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../../_sources/apidocs/causalis/causalis.scenarios.iv.refutation.diagnostics.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

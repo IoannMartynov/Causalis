@@ -15,7 +15,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="causalis.scenarios.cuped.model" href="causalis.scenarios.cuped.model.html" />
-    <link rel="prev" title="causalis.scenarios.cuped.diagnostics.forest_plot" href="causalis.scenarios.cuped.diagnostics.forest_plot.html" />
+    <link rel="prev" title="causalis.scenarios.cuped.refutation.forest_plot" href="causalis.scenarios.cuped.refutation.forest_plot.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -35,6 +35,11 @@
             
   <section id="module-causalis.scenarios.cuped.dgp">
 <span id="causalis-scenarios-cuped-dgp"></span><h1><a class="reference internal" href="#module-causalis.scenarios.cuped.dgp" title="causalis.scenarios.cuped.dgp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.cuped.dgp</span></code></a><a class="headerlink" href="#module-causalis.scenarios.cuped.dgp" title="Link to this heading">¶</a></h1>
+<p>Data Generating Processes (DGPs) for the CUPED scenario.</p>
+<p>This module provides pre-configured synthetic datasets for testing CUPED and
+other regression-adjusted estimators. It includes complex, skewed outcomes
+(Tweedie) and binary outcomes, both featuring pre-treatment covariates
+calibrated to specific target correlations.</p>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
 <section id="functions">
@@ -42,15 +47,10 @@
 <table class="autosummary longtable docutils align-left">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.dgp.generate_cuped_tweedie_26" title="causalis.scenarios.cuped.dgp.generate_cuped_tweedie_26"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_cuped_tweedie_26</span></code></a></p></td>
-<td><p>Gold standard Tweedie-like DGP with mixed marginals and structured HTE.
-Features many zeros and a heavy right tail.
-Includes two pre-period covariates by default: ‘y_pre’ and ‘y_pre_2’.
-Wrapper for make_tweedie().</p></td>
+<td><p>Gold standard Tweedie-like DGP with mixed marginals and structured HTE.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.cuped.dgp.make_cuped_binary_26" title="causalis.scenarios.cuped.dgp.make_cuped_binary_26"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_cuped_binary_26</span></code></a></p></td>
-<td><p>Binary CUPED benchmark with richer confounders and structured HTE.
-Includes a calibrated pre-period covariate ‘y_pre’ by default.
-Wrapper for generate_cuped_binary().</p></td>
+<td><p>Binary CUPED benchmark with richer confounders and structured HTE.</p></td>
 </tr>
 </tbody>
 </table>
@@ -60,11 +60,38 @@ Wrapper for generate_cuped_binary().</p></td>
 <dl class="py function">
 <dt class="sig sig-object py" id="causalis.scenarios.cuped.dgp.generate_cuped_tweedie_26">
 <span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.dgp.</span></span><span class="sig-name descname"><span class="pre">generate_cuped_tweedie_26</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_pre</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'y_pre'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_name_2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_target_corr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.82</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_target_corr_2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="causalis.dgp.causaldata.preperiod.html#causalis.dgp.causaldata.preperiod.PreCorrSpec" title="causalis.dgp.causaldata.preperiod.PreCorrSpec"><span class="pre">causalis.dgp.causaldata.preperiod.PreCorrSpec</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_oracle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_causal_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_log</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.38</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">causalis.dgp.causaldata.CausalData</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.dgp.generate_cuped_tweedie_26" title="Link to this definition">¶</a></dt>
-<dd><p>Gold standard Tweedie-like DGP with mixed marginals and structured HTE.
-Features many zeros and a heavy right tail.
-Includes two pre-period covariates by default: ‘y_pre’ and ‘y_pre_2’.
-Wrapper for make_tweedie().</p>
-<p class="rubric" id="id3">Parameters</p>
+<dd><p>Gold standard Tweedie-like DGP with mixed marginals and structured HTE.</p>
+<p>This DGP generates a dataset representing a typical e-commerce scenario with
+many zeros and a heavy right tail (e.g., revenue). It features pre-treatment
+covariates (‘y_pre’, ‘y_pre_2’) that are calibrated to have a specific
+correlation with the post-treatment outcome.</p>
+<p class="rubric" id="id5">Notes</p>
+<p>The outcome $Y$ follows a Tweedie-like distribution where the mean is a
+function of treatment $D$ and latent factors $A$ and $X$:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>E[Y | D, A, X] = \exp(\alpha + \theta D + \beta X + \gamma D X + A)
+</pre></div>
+</div>
+<p>The pre-period covariate $X_{pre}$ (e.g., <code class="docutils literal notranslate"><span class="pre">y_pre</span></code>) is generated to satisfy:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Corr(X_{pre}, Y | D=0) \approx \rho
+</pre></div>
+</div>
+<p>where $\rho$ is the <code class="docutils literal notranslate"><span class="pre">pre_target_corr</span></code>. This allows for realistic testing of
+variance reduction techniques.</p>
+<p class="rubric" id="id6">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.scenarios.cuped.dgp import generate_cuped_tweedie_26</p>
+<p class="rubric" id="id7">Generate data with two pre-period covariates</p>
+<p>data = generate_cuped_tweedie_26(n=1000, seed=42, return_causal_data=False)
+print(data.columns.tolist())
+[‘y’, ‘d’, ‘tenure_months’, ‘avg_sessions_week’, ‘spend_last_month’, ‘discount_rate’, ‘platform_ios’, ‘platform_web’, ‘y_pre’, ‘y_pre_2’]</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+<p class="rubric" id="id8">Parameters</p>
 <p>n : int, default=10000
 Number of samples to generate.
 seed : int, default=42
@@ -89,17 +116,36 @@ return_causal_data : bool, default=True
 Whether to return a CausalData object.
 theta_log : float, default=0.38
 The log-uplift theta parameter for the treatment effect.</p>
-<p class="rubric" id="id4">Returns</p>
+<p class="rubric" id="id9">Returns</p>
 <p>pd.DataFrame or CausalData</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="causalis.scenarios.cuped.dgp.make_cuped_binary_26">
 <span class="sig-prename descclassname"><span class="pre">causalis.scenarios.cuped.dgp.</span></span><span class="sig-name descname"><span class="pre">make_cuped_binary_26</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_pre</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'y_pre'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_target_corr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.65</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="causalis.dgp.causaldata.preperiod.html#causalis.dgp.causaldata.preperiod.PreCorrSpec" title="causalis.dgp.causaldata.preperiod.PreCorrSpec"><span class="pre">causalis.dgp.causaldata.preperiod.PreCorrSpec</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_oracle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_causal_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_logit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.38</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">causalis.dgp.causaldata.CausalData</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.cuped.dgp.make_cuped_binary_26" title="Link to this definition">¶</a></dt>
-<dd><p>Binary CUPED benchmark with richer confounders and structured HTE.
-Includes a calibrated pre-period covariate ‘y_pre’ by default.
-Wrapper for generate_cuped_binary().</p>
-<p class="rubric" id="id5">Parameters</p>
+<dd><p>Binary CUPED benchmark with richer confounders and structured HTE.</p>
+<p>This DGP generates a binary outcome (e.g., conversion) with a calibrated
+pre-period covariate.</p>
+<p class="rubric" id="id10">Notes</p>
+<p>The outcome $Y$ is binary and follows:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>P(Y=1 | D, X) = \text{logit}^{-1}(\alpha + \theta D + \beta X)
+</pre></div>
+</div>
+<p>The pre-period covariate is calibrated such that its correlation with $Y$
+in the control group matches <code class="docutils literal notranslate"><span class="pre">pre_target_corr</span></code>.</p>
+<p class="rubric" id="id11">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.scenarios.cuped.dgp import make_cuped_binary_26
+data = make_cuped_binary_26(n=1000, seed=42, return_causal_data=False)
+print(data.columns.tolist()[:7])
+[‘y’, ‘d’, ‘tenure_months’, ‘spend_last_month’, ‘discount_rate’, ‘support_tickets’, ‘email_open_rate’]</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+<p class="rubric" id="id12">Parameters</p>
 <p>n : int, default=10000
 Number of samples to generate.
 seed : int, default=42
@@ -118,7 +164,7 @@ return_causal_data : bool, default=True
 Whether to return a CausalData object.
 theta_logit : float, default=0.38
 Baseline log-odds uplift scale for heterogeneous treatment effects.</p>
-<p class="rubric" id="id6">Returns</p>
+<p class="rubric" id="id13">Returns</p>
 <p>pd.DataFrame or CausalData</p>
 </dd></dl>
 
@@ -167,7 +213,7 @@ Baseline log-odds uplift scale for heterogeneous treatment effects.</p>
   <li><a href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a><ul>
   <li><a href="causalis.scenarios.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios</span></code></a><ul>
   <li><a href="causalis.scenarios.cuped.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.cuped</span></code></a><ul>
-      <li>Previous: <a href="causalis.scenarios.cuped.diagnostics.forest_plot.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.cuped.diagnostics.forest_plot</span></code></a></li>
+      <li>Previous: <a href="causalis.scenarios.cuped.refutation.forest_plot.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.cuped.refutation.forest_plot</span></code></a></li>
       <li>Next: <a href="causalis.scenarios.cuped.model.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.cuped.model</span></code></a></li>
   </ul></li>
   </ul></li>

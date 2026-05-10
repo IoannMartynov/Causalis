@@ -1,4 +1,4 @@
-"""Balance and sensitivity diagnostics for unconfoundedness.
+r"""Balance and sensitivity diagnostics for unconfoundedness.
 
 These utilities help answer three practical questions after fitting an
 unconfoundedness model such as :class:`~causalis.scenarios.unconfoundedness.model.IRM`:
@@ -71,6 +71,7 @@ from .sensitivity import (
     get_sensitivity_summary,
     sensitivity_benchmark,
     compute_bias_aware_ci,
+    interpret_sensitivity_analysis,
 )
 
 __all__ = [
@@ -80,4 +81,5 @@ __all__ = [
     "get_sensitivity_summary",
     "sensitivity_benchmark",
     "compute_bias_aware_ci",
+    "interpret_sensitivity_analysis",
 ]

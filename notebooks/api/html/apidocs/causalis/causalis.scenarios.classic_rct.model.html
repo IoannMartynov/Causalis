@@ -35,6 +35,11 @@
             
   <section id="module-causalis.scenarios.classic_rct.model">
 <span id="causalis-scenarios-classic-rct-model"></span><h1><a class="reference internal" href="#module-causalis.scenarios.classic_rct.model" title="causalis.scenarios.classic_rct.model"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.classic_rct.model</span></code></a><a class="headerlink" href="#module-causalis.scenarios.classic_rct.model" title="Link to this heading">¶</a></h1>
+<p>Difference-in-Means (RCT) scenario.</p>
+<p>This module provides the <code class="docutils literal notranslate"><span class="pre">DiffInMeans</span></code> model, which implements standard inference
+methods for Randomized Controlled Trials (RCTs). It supports absolute and relative
+treatment effect estimation using t-tests, permutation tests, and z-tests for
+proportions.</p>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
 <section id="classes">
@@ -42,8 +47,7 @@
 <table class="autosummary longtable docutils align-left">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.classic_rct.model.DiffInMeans" title="causalis.scenarios.classic_rct.model.DiffInMeans"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DiffInMeans</span></code></a></p></td>
-<td><p>Difference-in-means model for CausalData.
-Wraps common RCT inference methods: t-test, bootstrap, and conversion z-test.</p></td>
+<td><p>Difference-in-means model for Randomized Controlled Trials (RCT).</p></td>
 </tr>
 </tbody>
 </table>
@@ -53,41 +57,105 @@ Wraps common RCT inference methods: t-test, bootstrap, and conversion z-test.</p
 <dl class="py class">
 <dt class="sig sig-object py" id="causalis.scenarios.classic_rct.model.DiffInMeans">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">causalis.scenarios.classic_rct.model.</span></span><span class="sig-name descname"><span class="pre">DiffInMeans</span></span><a class="headerlink" href="#causalis.scenarios.classic_rct.model.DiffInMeans" title="Link to this definition">¶</a></dt>
-<dd><p>Difference-in-means model for CausalData.
-Wraps common RCT inference methods: t-test, bootstrap, and conversion z-test.</p>
+<dd><p>Difference-in-means model for Randomized Controlled Trials (RCT).</p>
+<p>The difference-in-means estimator is the simplest way to estimate the
+Average Treatment Effect (ATE) in a randomized experiment. Because
+treatment assignment is random, the difference in sample means between
+the treated and control groups is an unbiased estimator of the ATE.</p>
+<p class="rubric" id="id1">Notes</p>
+<p>The Average Treatment Effect (ATE) is defined as:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\tau = E[Y(1) - Y(0)]
+</pre></div>
+</div>
+<p>In an RCT, $D \perp (Y(0), Y(1))$, so:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\tau = E[Y | D=1] - E[Y | D=0]
+</pre></div>
+</div>
+<p>The estimator implemented here is the simple difference in sample means:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\hat{\tau} = \frac{1}{n_1} \sum_{i: D_i=1} Y_i - \frac{1}{n_0} \sum_{i: D_i=0} Y_i
+</pre></div>
+</div>
+<p>Standard errors and confidence intervals are computed using Welch’s t-test
+by default, which does not assume equal variances between groups:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>SE(\hat{\tau}) = \sqrt{\frac{s_1^2}{n_1} + \frac{s_0^2}{n_0}}
+</pre></div>
+</div>
+<p>where $s_g^2$ is the sample variance in group $g$.</p>
+<p class="rubric" id="id2">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.scenarios.classic_rct.dgp import generate_classic_rct_26
+from causalis.scenarios.classic_rct.model import DiffInMeans</p>
+<p class="rubric" id="id3">Generate synthetic RCT data</p>
+<p>data = generate_classic_rct_26(seed=42)</p>
+<p class="rubric" id="id4">Fit the model</p>
+<p>model = DiffInMeans().fit(data)</p>
+<p class="rubric" id="id5">Estimate ATE using standard t-test</p>
+<p>estimate = model.estimate(method=”ttest”)
+print(f”ATE: {estimate.value:.4f}”)
+ATE: 0.0339
+print(f”P-value: {estimate.p_value:.4f}”)
+P-value: 0.0000</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+<p class="rubric" id="id6">Attributes</p>
+<p>data : CausalData or None
+The dataset used for fitting and estimation.</p>
 <p class="rubric">Initialization</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="causalis.scenarios.classic_rct.model.DiffInMeans.fit">
 <span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">causalis.dgp.causaldata.CausalData</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#causalis.scenarios.classic_rct.model.DiffInMeans" title="causalis.scenarios.classic_rct.model.DiffInMeans"><span class="pre">causalis.scenarios.classic_rct.model.DiffInMeans</span></a></span></span><a class="headerlink" href="#causalis.scenarios.classic_rct.model.DiffInMeans.fit" title="Link to this definition">¶</a></dt>
 <dd><p>Fit the model by storing the CausalData object.</p>
+<p>In the <code class="docutils literal notranslate"><span class="pre">DiffInMeans</span></code> scenario, “fitting” primarily involves validating
+the data structure and storing it for subsequent estimation.</p>
 <p class="rubric" id="parameters">Parameters</p>
 <p>data : CausalData
-The CausalData object containing treatment and outcome variables.</p>
+The CausalData object containing treatment and outcome variables.
+Treatment must be binary (0/1).</p>
 <p class="rubric" id="returns">Returns</p>
 <p>DiffInMeans
-The fitted model.</p>
+The fitted model instance.</p>
+<p class="rubric" id="raises">Raises</p>
+<p>ValueError
+If the input is not a <code class="docutils literal notranslate"><span class="pre">CausalData</span></code> object.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="causalis.scenarios.classic_rct.model.DiffInMeans.estimate">
-<span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">causalis.scenarios.classic_rct.inference.ttest</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bootstrap</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">causalis.scenarios.classic_rct.inference.conversion_ztest</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ttest'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diagnostic_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="causalis.data_contracts.causal_estimate.html#causalis.data_contracts.causal_estimate.CausalEstimate" title="causalis.data_contracts.causal_estimate.CausalEstimate"><span class="pre">causalis.data_contracts.causal_estimate.CausalEstimate</span></a></span></span><a class="headerlink" href="#causalis.scenarios.classic_rct.model.DiffInMeans.estimate" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">causalis.scenarios.classic_rct.inference.ttest</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">causalis.scenarios.classic_rct.inference.welch_permutation_t_test</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">causalis.scenarios.classic_rct.inference.conversion_ztest</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ttest'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diagnostic_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="causalis.data_contracts.causal_estimate.html#causalis.data_contracts.causal_estimate.CausalEstimate" title="causalis.data_contracts.causal_estimate.CausalEstimate"><span class="pre">causalis.data_contracts.causal_estimate.CausalEstimate</span></a></span></span><a class="headerlink" href="#causalis.scenarios.classic_rct.model.DiffInMeans.estimate" title="Link to this definition">¶</a></dt>
 <dd><p>Compute the treatment effect using the specified method.</p>
-<p class="rubric" id="id1">Parameters</p>
-<p>method : {“ttest”, “bootstrap”, “conversion_ztest”}, default “ttest”
-The inference method to use.
-- “ttest”: Standard independent two-sample t-test.
-- “bootstrap”: Bootstrap-based inference for difference in means.
-- “conversion_ztest”: Two-proportion z-test for binary outcomes.
+<p class="rubric" id="id7">Parameters</p>
+<p>method : {“ttest”, “welch_permutation_t_test”, “conversion_ztest”}, default “ttest”
+The inference method to use:
+- “ttest”: Standard Welch’s two-sample t-test (handles unequal variances).
+- “welch_permutation_t_test”: Permutation-based p-value using the Welch statistic.
+- “conversion_ztest”: Z-test for proportions, suitable for binary (0/1) outcomes.
 alpha : float, default 0.05
-The significance level for calculating confidence intervals.
+Significance level for calculating confidence intervals.
 diagnostic_data : bool, default True
-Whether to include diagnostic data_contracts in the result.
+Whether to include diagnostic data in the result (e.g., covariate balance if confounders exist).
 **kwargs : Any
-Additional arguments passed to the underlying inference function.
-- For “bootstrap”: can pass <code class="docutils literal notranslate"><span class="pre">n_simul</span></code>, <code class="docutils literal notranslate"><span class="pre">batch_size</span></code>, <code class="docutils literal notranslate"><span class="pre">seed</span></code>, <code class="docutils literal notranslate"><span class="pre">index_dtype</span></code>.</p>
-<p class="rubric" id="id2">Returns</p>
+Additional arguments passed to the underlying inference function:
+- For “welch_permutation_t_test”: <code class="docutils literal notranslate"><span class="pre">B</span></code> (iterations), <code class="docutils literal notranslate"><span class="pre">alternative</span></code>, <code class="docutils literal notranslate"><span class="pre">seed</span></code>.
+- For “conversion_ztest”: <code class="docutils literal notranslate"><span class="pre">ci_method</span></code>, <code class="docutils literal notranslate"><span class="pre">se_for_test</span></code>.</p>
+<p class="rubric" id="id8">Returns</p>
 <p>CausalEstimate
-A results object containing effect estimates and inference.</p>
+A results object containing:
+- <code class="docutils literal notranslate"><span class="pre">value</span></code>: The estimated ATE (absolute difference).
+- <code class="docutils literal notranslate"><span class="pre">p_value</span></code>: The statistical significance.
+- <code class="docutils literal notranslate"><span class="pre">ci_lower_absolute</span></code>, <code class="docutils literal notranslate"><span class="pre">ci_upper_absolute</span></code>: Confidence interval bounds.
+- <code class="docutils literal notranslate"><span class="pre">value_relative</span></code>: The relative effect (% lift).</p>
+<p class="rubric" id="id9">Raises</p>
+<p>RuntimeError
+If the model has not been fitted yet.
+ValueError
+If an unsupported method is specified.</p>
 </dd></dl>
 
 <dl class="py method">

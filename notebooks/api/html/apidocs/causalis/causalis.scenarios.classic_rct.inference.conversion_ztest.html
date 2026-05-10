@@ -15,7 +15,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="causalis.scenarios.classic_rct.dgp" href="causalis.scenarios.classic_rct.dgp.html" />
-    <link rel="prev" title="causalis.scenarios.classic_rct.inference.bootstrap_diff_in_means" href="causalis.scenarios.classic_rct.inference.bootstrap_diff_in_means.html" />
+    <link rel="prev" title="causalis.scenarios.classic_rct.inference.welch_permutation_t_test" href="causalis.scenarios.classic_rct.inference.welch_permutation_t_test.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -45,7 +45,7 @@ Returns p-value, absolute/relative differences, and their confidence intervals</
 <table class="autosummary longtable docutils align-left">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.classic_rct.inference.conversion_ztest.conversion_ztest" title="causalis.scenarios.classic_rct.inference.conversion_ztest.conversion_ztest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">conversion_ztest</span></code></a></p></td>
-<td><p>Perform a two-proportion z-test on a CausalData object with a binary outcome (conversion).</p></td>
+<td><p>Perform a two-proportion z-test on a CausalData object with a binary outcome.</p></td>
 </tr>
 </tbody>
 </table>
@@ -55,30 +55,59 @@ Returns p-value, absolute/relative differences, and their confidence intervals</
 <dl class="py function">
 <dt class="sig sig-object py" id="causalis.scenarios.classic_rct.inference.conversion_ztest.conversion_ztest">
 <span class="sig-prename descclassname"><span class="pre">causalis.scenarios.classic_rct.inference.conversion_ztest.</span></span><span class="sig-name descname"><span class="pre">conversion_ztest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">causalis.dgp.causaldata.CausalData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ci_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">newcombe</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">wald_unpooled</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">wald_pooled</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'newcombe'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">se_for_test</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">pooled</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">unpooled</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'pooled'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.classic_rct.inference.conversion_ztest.conversion_ztest" title="Link to this definition">¶</a></dt>
-<dd><p>Perform a two-proportion z-test on a CausalData object with a binary outcome (conversion).</p>
-<p class="rubric" id="id1">Parameters</p>
+<dd><p>Perform a two-proportion z-test on a CausalData object with a binary outcome.</p>
+<p>The z-test for proportions is used to compare the conversion rates of two
+independent groups. It assumes that the number of successes and failures
+in each group is sufficiently large (typically $n \cdot p &gt; 5$ and
+$n \cdot (1-p) &gt; 5$).</p>
+<p class="rubric" id="id1">Notes</p>
+<p>The z-statistic for testing $H_0: p_1 = p_0$ is calculated as:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>z = \frac{\hat{p}_1 - \hat{p}_0}{SE}
+</pre></div>
+</div>
+<p>By default (<code class="docutils literal notranslate"><span class="pre">se_for_test=&quot;pooled&quot;</span></code>), the pooled standard error is used:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>SE_{pooled} = \sqrt{\hat{p}(1-\hat{p})\left(\frac{1}{n_1} + \frac{1}{n_0}\right)}
+</pre></div>
+</div>
+<p>where $\hat{p} = \frac{x_1 + x_0}{n_1 + n_0}$ is the pooled proportion.</p>
+<p>Confidence intervals for the difference $p_1 - p_0$ can be calculated using
+several methods. The “newcombe” method (Newcombe’s hybrid score interval)
+is generally recommended as it performs better than the Wald interval
+when proportions are near 0 or 1.</p>
+<p class="rubric" id="id2">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.scenarios.classic_rct.dgp import generate_classic_rct_26
+from causalis.scenarios.classic_rct.inference.conversion_ztest import conversion_ztest
+data = generate_classic_rct_26(n=2000, seed=42)
+results = conversion_ztest(data)
+print(f”Conversion Rate (Control): {data.df[data.df[‘d’]==0][‘conversion’].mean():.4f}”)
+0.1349
+print(f”P-value: {results[‘p_value’]:.4f}”)
+0.1688</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+<p class="rubric" id="id3">Parameters</p>
 <p>data : CausalData
 The CausalData object containing treatment and outcome variables.
 alpha : float, default 0.05
-The significance level for calculating confidence intervals (between 0 and 1).
+The significance level for calculating confidence intervals.
 ci_method : {“newcombe”, “wald_unpooled”, “wald_pooled”}, default “newcombe”
 Method for calculating the confidence interval for the absolute difference.
-“newcombe” is the most robust default for conversion rates.
 se_for_test : {“pooled”, “unpooled”}, default “pooled”
-Method for calculating the standard error for the z-test p-value.
-“pooled” (score test) is generally preferred for testing equality of proportions.</p>
-<p class="rubric" id="id2">Returns</p>
+Method for calculating the standard error for the z-test p-value.</p>
+<p class="rubric" id="id4">Returns</p>
 <p>Dict[str, Any]
 A dictionary containing:
-- p_value: Two-sided p-value from the z-test
-- absolute_difference: Difference in conversion rates (treated - control)
-- absolute_ci: Tuple (lower, upper) for the absolute difference CI
-- relative_difference: Percentage change relative to control rate
-- relative_ci: Tuple (lower, upper) for the relative difference CI (delta method)</p>
-<p class="rubric" id="id3">Raises</p>
-<p>ValueError
-If treatment/outcome are missing, treatment is not binary, outcome is not binary,
-groups are empty, or alpha is outside (0, 1).</p>
+- <code class="docutils literal notranslate"><span class="pre">p_value</span></code>: Two-sided p-value from the z-test.
+- <code class="docutils literal notranslate"><span class="pre">absolute_difference</span></code>: Difference in conversion rates ($p_1 - p_0$).
+- <code class="docutils literal notranslate"><span class="pre">absolute_ci</span></code>: (lower, upper) CI for the absolute difference.
+- <code class="docutils literal notranslate"><span class="pre">relative_difference</span></code>: Percentage change relative to control.
+- <code class="docutils literal notranslate"><span class="pre">relative_ci</span></code>: (lower, upper) CI for the relative difference (delta method).</p>
 </dd></dl>
 
 </section>
@@ -127,7 +156,7 @@ groups are empty, or alpha is outside (0, 1).</p>
   <li><a href="causalis.scenarios.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios</span></code></a><ul>
   <li><a href="causalis.scenarios.classic_rct.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.classic_rct</span></code></a><ul>
   <li><a href="causalis.scenarios.classic_rct.inference.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.classic_rct.inference</span></code></a><ul>
-      <li>Previous: <a href="causalis.scenarios.classic_rct.inference.bootstrap_diff_in_means.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.classic_rct.inference.bootstrap_diff_in_means</span></code></a></li>
+      <li>Previous: <a href="causalis.scenarios.classic_rct.inference.welch_permutation_t_test.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.classic_rct.inference.welch_permutation_t_test</span></code></a></li>
       <li>Next: <a href="causalis.scenarios.classic_rct.dgp.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.classic_rct.dgp</span></code></a></li>
   </ul></li>
   </ul></li>

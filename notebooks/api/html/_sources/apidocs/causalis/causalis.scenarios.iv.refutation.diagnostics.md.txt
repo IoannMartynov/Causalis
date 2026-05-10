@@ -1,0 +1,119 @@
+# {py:mod}`causalis.scenarios.iv.refutation.diagnostics`
+
+```{py:module} causalis.scenarios.iv.refutation.diagnostics
+```
+
+```{autodoc2-docstring} causalis.scenarios.iv.refutation.diagnostics
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`compute_instrument_overlap_diagnostics <causalis.scenarios.iv.refutation.diagnostics.compute_instrument_overlap_diagnostics>`
+  - ```{autodoc2-docstring} causalis.scenarios.iv.refutation.diagnostics.compute_instrument_overlap_diagnostics
+    :summary:
+    ```
+* - {py:obj}`compute_first_stage_diagnostics <causalis.scenarios.iv.refutation.diagnostics.compute_first_stage_diagnostics>`
+  - ```{autodoc2-docstring} causalis.scenarios.iv.refutation.diagnostics.compute_first_stage_diagnostics
+    :summary:
+    ```
+* - {py:obj}`compute_reduced_form_diagnostics <causalis.scenarios.iv.refutation.diagnostics.compute_reduced_form_diagnostics>`
+  - ```{autodoc2-docstring} causalis.scenarios.iv.refutation.diagnostics.compute_reduced_form_diagnostics
+    :summary:
+    ```
+* - {py:obj}`instrument_overlap <causalis.scenarios.iv.refutation.diagnostics.instrument_overlap>`
+  - ```{autodoc2-docstring} causalis.scenarios.iv.refutation.diagnostics.instrument_overlap
+    :summary:
+    ```
+* - {py:obj}`first_stage <causalis.scenarios.iv.refutation.diagnostics.first_stage>`
+  - ```{autodoc2-docstring} causalis.scenarios.iv.refutation.diagnostics.first_stage
+    :summary:
+    ```
+* - {py:obj}`reduced_form <causalis.scenarios.iv.refutation.diagnostics.reduced_form>`
+  - ```{autodoc2-docstring} causalis.scenarios.iv.refutation.diagnostics.reduced_form
+    :summary:
+    ```
+* - {py:obj}`instrument_overlap_plot <causalis.scenarios.iv.refutation.diagnostics.instrument_overlap_plot>`
+  - ```{autodoc2-docstring} causalis.scenarios.iv.refutation.diagnostics.instrument_overlap_plot
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.scenarios.iv.refutation.diagnostics.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.iv.refutation.diagnostics.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} compute_instrument_overlap_diagnostics(diag: causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData) -> typing.Dict[str, typing.Any]
+:canonical: causalis.scenarios.iv.refutation.diagnostics.compute_instrument_overlap_diagnostics
+
+```{autodoc2-docstring} causalis.scenarios.iv.refutation.diagnostics.compute_instrument_overlap_diagnostics
+```
+````
+
+````{py:function} compute_first_stage_diagnostics(diag: causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData, *, weak_iv_threshold: float = 0.01) -> typing.Dict[str, typing.Any]
+:canonical: causalis.scenarios.iv.refutation.diagnostics.compute_first_stage_diagnostics
+
+```{autodoc2-docstring} causalis.scenarios.iv.refutation.diagnostics.compute_first_stage_diagnostics
+```
+````
+
+````{py:function} compute_reduced_form_diagnostics(diag: causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData, *, late_value: typing.Optional[float] = None) -> typing.Dict[str, typing.Any]
+:canonical: causalis.scenarios.iv.refutation.diagnostics.compute_reduced_form_diagnostics
+
+```{autodoc2-docstring} causalis.scenarios.iv.refutation.diagnostics.compute_reduced_form_diagnostics
+```
+````
+
+````{py:function} instrument_overlap(result: typing.Any) -> pandas.DataFrame
+:canonical: causalis.scenarios.iv.refutation.diagnostics.instrument_overlap
+
+```{autodoc2-docstring} causalis.scenarios.iv.refutation.diagnostics.instrument_overlap
+```
+````
+
+````{py:function} first_stage(result: typing.Any) -> pandas.DataFrame
+:canonical: causalis.scenarios.iv.refutation.diagnostics.first_stage
+
+```{autodoc2-docstring} causalis.scenarios.iv.refutation.diagnostics.first_stage
+```
+````
+
+````{py:function} reduced_form(result: typing.Any) -> pandas.DataFrame
+:canonical: causalis.scenarios.iv.refutation.diagnostics.reduced_form
+
+```{autodoc2-docstring} causalis.scenarios.iv.refutation.diagnostics.reduced_form
+```
+````
+
+````{py:function} instrument_overlap_plot(result: typing.Any, *, bins: typing.Any = 'fd', ax: typing.Optional[typing.Any] = None, figsize: typing.Tuple[float, float] = (8.0, 4.5), dpi: int = 150, save: typing.Optional[str] = None) -> typing.Any
+:canonical: causalis.scenarios.iv.refutation.diagnostics.instrument_overlap_plot
+
+```{autodoc2-docstring} causalis.scenarios.iv.refutation.diagnostics.instrument_overlap_plot
+```
+````
+
+````{py:data} __all__
+:canonical: causalis.scenarios.iv.refutation.diagnostics.__all__
+:value: >
+   ['compute_first_stage_diagnostics', 'compute_instrument_overlap_diagnostics', 'compute_reduced_form_...
+
+```{autodoc2-docstring} causalis.scenarios.iv.refutation.diagnostics.__all__
+```
+
+````

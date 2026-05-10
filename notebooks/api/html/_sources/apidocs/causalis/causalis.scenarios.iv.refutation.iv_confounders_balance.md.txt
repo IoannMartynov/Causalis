@@ -1,0 +1,53 @@
+# {py:mod}`causalis.scenarios.iv.refutation.iv_confounders_balance`
+
+```{py:module} causalis.scenarios.iv.refutation.iv_confounders_balance
+```
+
+```{autodoc2-docstring} causalis.scenarios.iv.refutation.iv_confounders_balance
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`iv_confounders_balance <causalis.scenarios.iv.refutation.iv_confounders_balance.iv_confounders_balance>`
+  - ```{autodoc2-docstring} causalis.scenarios.iv.refutation.iv_confounders_balance.iv_confounders_balance
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.scenarios.iv.refutation.iv_confounders_balance.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.iv.refutation.iv_confounders_balance.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:function} iv_confounders_balance(data: causalis.data_contracts.iv_causal_data.IVCausalData) -> pandas.DataFrame
+:canonical: causalis.scenarios.iv.refutation.iv_confounders_balance.iv_confounders_balance
+
+```{autodoc2-docstring} causalis.scenarios.iv.refutation.iv_confounders_balance.iv_confounders_balance
+```
+````
+
+````{py:data} __all__
+:canonical: causalis.scenarios.iv.refutation.iv_confounders_balance.__all__
+:value: >
+   ['iv_confounders_balance']
+
+```{autodoc2-docstring} causalis.scenarios.iv.refutation.iv_confounders_balance.__all__
+```
+
+````

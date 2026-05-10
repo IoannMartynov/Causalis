@@ -1,4 +1,4 @@
-from . import classic_rct, unconfoundedness, cuped, synthetic_control, gate, uplift
+from . import classic_rct, unconfoundedness, cuped, synthetic_control, gate, uplift, iv
 
 __all__ = [
     "classic_rct",
@@ -7,4 +7,5 @@ __all__ = [
     "synthetic_control",
     "gate",
     "uplift",
+    "iv",
 ]

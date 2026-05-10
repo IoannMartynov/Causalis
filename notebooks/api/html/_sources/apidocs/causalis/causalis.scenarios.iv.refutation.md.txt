@@ -1,0 +1,44 @@
+# {py:mod}`causalis.scenarios.iv.refutation`
+
+```{py:module} causalis.scenarios.iv.refutation
+```
+
+```{autodoc2-docstring} causalis.scenarios.iv.refutation
+:allowtitles:
+```
+
+## Submodules
+
+```{toctree}
+:titlesonly:
+:maxdepth: 1
+
+causalis.scenarios.iv.refutation.diagnostics
+causalis.scenarios.iv.refutation.iv_confounders_balance
+```
+
+## Package Contents
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`__all__ <causalis.scenarios.iv.refutation.__all__>`
+  - ```{autodoc2-docstring} causalis.scenarios.iv.refutation.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} __all__
+:canonical: causalis.scenarios.iv.refutation.__all__
+:value: >
+   ['first_stage', 'instrument_overlap', 'instrument_overlap_plot', 'iv_confounders_balance', 'reduced_...
+
+```{autodoc2-docstring} causalis.scenarios.iv.refutation.__all__
+```
+
+````

@@ -41,10 +41,10 @@
 difference (SMD) for each confounder :math:<code class="docutils literal notranslate"><span class="pre">X_j</span></code>:</p>
 <p>.. math::</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\mathrm{SMD}_j =
+\frac{|\mu_{1j}^{(w)} - \mu_{0j}^{(w)}|}
+{\sqrt{(s_{1j}^{2,(w)} + s_{0j}^{2,(w)}) / 2}}.
 </pre></div>
 </div>
-<p>rac{|\mu_{1j}^{(w)} - \mu_{0j}^{(w)}|}
-{\sqrt{(s_{1j}^{2,(w)} + s_{0j}^{2,(w)}) / 2}}.</p>
 <p>Small weighted SMDs mean the treated and control pseudo-populations look
 similar on observed covariates. This is evidence in favor of the design, but
 it does not prove ignorability for unobserved confounders.</p>

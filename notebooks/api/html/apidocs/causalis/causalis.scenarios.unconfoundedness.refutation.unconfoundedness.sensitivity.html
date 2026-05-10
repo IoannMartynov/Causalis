@@ -35,9 +35,22 @@
             
   <section id="module-causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity">
 <span id="causalis-scenarios-unconfoundedness-refutation-unconfoundedness-sensitivity"></span><h1><a class="reference internal" href="#module-causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity" title="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity</span></code></a><a class="headerlink" href="#module-causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity" title="Link to this heading">¶</a></h1>
-<p>Sensitivity functions refactored into a dedicated module.</p>
-<p>This module centralizes bias-aware sensitivity helpers and the public
-entry points used by refutation utilities for unconfoundedness.</p>
+<p>Sensitivity analysis and benchmarking for unconfoundedness.</p>
+<p>This module provides tools to assess the robustness of causal estimates to
+potential unobserved confounding. It implements the sensitivity framework
+based on partial $R^2$ as described in Cinelli &amp; Hazlett (2020), adapted for
+non-linear and semi-parametric models via influence functions.</p>
+<p>The framework assumes the existence of an unobserved confounder $U$ and
+quantifies the bias as a function of:</p>
+<ul class="simple">
+<li><p>$R^2_{Y \sim U | D, X}$: How much of the outcome variance $U$ explains.</p></li>
+<li><p>$R^2_{D \sim U | X}$: How much of the treatment variance $U$ explains.</p></li>
+</ul>
+<p>The bias-aware estimate is then:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\hat{\tau}_{adj} = \hat{\tau} \pm \text{bias}(R^2_{Y \sim U}, R^2_{D \sim U})
+</pre></div>
+</div>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
 <section id="functions">
@@ -105,7 +118,7 @@ requested confounder from the supplied <code class="docutils literal notranslate
 <li><p>bias_aware_ci = [theta - (bound_width + z<em>se), theta + (bound_width + z</em>se)]</p></li>
 <li><p>max_bias_base, max_bias, bound_width and components (sigma2, nu2)</p></li>
 </ul>
-<p class="rubric" id="id9">Parameters</p>
+<p class="rubric" id="id16">Parameters</p>
 <p>effect_estimation : Dict[str, Any] or Any
 The effect estimation object.
 r2_y : float
@@ -122,7 +135,7 @@ use_signed_rr : bool, default False
 Whether to use signed rr in the quadratic combination of sensitivity components.
 If True and m_alpha/rr are available, the bias bound is computed via the
 per-unit quadratic form and RV/RVa are not reported.</p>
-<p class="rubric" id="id10">Returns</p>
+<p class="rubric" id="id17">Returns</p>
 <p>dict
 Dictionary with bias-aware results.</p>
 </dd></dl>
@@ -131,12 +144,12 @@ Dictionary with bias-aware results.</p>
 <dt class="sig sig-object py" id="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.format_bias_aware_summary">
 <span class="sig-prename descclassname"><span class="pre">causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.</span></span><span class="sig-name descname"><span class="pre">format_bias_aware_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">res</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.format_bias_aware_summary" title="Link to this definition">¶</a></dt>
 <dd><p>Render a single, unified bias-aware summary string.</p>
-<p class="rubric" id="id11">Parameters</p>
+<p class="rubric" id="id18">Parameters</p>
 <p>res : Dict[str, Any]
 The result dictionary from compute_bias_aware_ci.
 label : str, optional, default None
 The label for the estimand.</p>
-<p class="rubric" id="id12">Returns</p>
+<p class="rubric" id="id19">Returns</p>
 <p>str
 Formatted summary string.</p>
 </dd></dl>
@@ -147,14 +160,33 @@ Formatted summary string.</p>
 <dd><p>Render a single, unified bias-aware summary string.</p>
 <p>If bias-aware components are missing, shows a sampling-only variant with max_bias=0
 and then formats via <code class="docutils literal notranslate"><span class="pre">format_bias_aware_summary</span></code> for consistency.</p>
-<p class="rubric" id="id13">Parameters</p>
+<p class="rubric" id="id20">Parameters</p>
 <p>effect_estimation : Dict[str, Any] or Any
 The effect estimation object.
 label : str, optional, default None
 The label for the estimand.</p>
-<p class="rubric" id="id14">Returns</p>
+<p class="rubric" id="id21">Returns</p>
 <p>Optional[str]
 Formatted summary string or None if extraction fails.</p>
+<p class="rubric" id="id22">Notes</p>
+<p>The summary reports the point estimate, standard error, and confidence
+intervals under both the null (no unobserved confounding) and the assumed
+level of confounding ($R^2_Y, R^2_D$).</p>
+<p>It also includes the Robustness Value (RV), which is the minimum strength
+of confounding ($R^2_Y = R^2_D$) required to change the conclusion
+(e.g., make the estimate non-significant or zero).</p>
+<p class="rubric" id="id23">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.scenarios.unconfoundedness.refutation.unconfoundedness import sensitivity_analysis, get_sensitivity_summary</p>
+<p class="rubric" id="id24">Assuming ‘estimate’ is a fitted CausalEstimate from IRM</p>
+<p>res = sensitivity_analysis(estimate, r2_y=0.05, r2_d=0.05) # doctest: +SKIP
+summary = get_sensitivity_summary(estimate) # doctest: +SKIP
+print(summary) # doctest: +SKIP</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
@@ -166,7 +198,7 @@ requested confounder from the supplied <code class="docutils literal notranslate
 benchmarked confounder because <code class="docutils literal notranslate"><span class="pre">theta_short</span></code> and <code class="docutils literal notranslate"><span class="pre">delta</span></code> are defined by
 that re-estimation step. The residual-based strengths alone are not enough
 to recover those values.</p>
-<p class="rubric" id="id15">Parameters</p>
+<p class="rubric" id="id25">Parameters</p>
 <p>effect_estimation : dict or Any
 Estimate/model container exposing a fitted IRM-like model.
 data : CausalData
@@ -181,115 +213,131 @@ short model. If <code class="docutils literal notranslate"><span class="pre">sco
 supplied estimate/model, and defaults to ATE. If <code class="docutils literal notranslate"><span class="pre">store_diagnostics</span></code>
 or legacy <code class="docutils literal notranslate"><span class="pre">diagnostic_data</span></code> is omitted, the short benchmark refits use
 <code class="docutils literal notranslate"><span class="pre">store_diagnostics=False</span></code> by default.</p>
-<p class="rubric" id="id16">Returns</p>
+<p class="rubric" id="id26">Returns</p>
 <p>pandas.DataFrame
 A long-form DataFrame with one row per benchmarked confounder and
 columns <code class="docutils literal notranslate"><span class="pre">benchmark_confounder</span></code>, <code class="docutils literal notranslate"><span class="pre">r2_y</span></code>, <code class="docutils literal notranslate"><span class="pre">r2_d</span></code>, <code class="docutils literal notranslate"><span class="pre">rho</span></code>,
 <code class="docutils literal notranslate"><span class="pre">theta_long</span></code>, <code class="docutils literal notranslate"><span class="pre">theta_short</span></code>, and <code class="docutils literal notranslate"><span class="pre">delta</span></code>.</p>
+<p class="rubric" id="id27">Notes</p>
+<p>Benchmarking allows the user to judge the plausibility of unobserved
+confounding by comparing it to the strength of observed confounders.
+For each confounder $X_k$, we calculate:</p>
+<ul class="simple">
+<li><p>$R^2_{Y \sim X_k | D, X_{-k}}$: The partial $R^2$ of the outcome on $X_k$.</p></li>
+<li><p>$R^2_{D \sim X_k | X_{-k}}$: The partial $R^2$ of the treatment on $X_k$.</p></li>
+</ul>
+<p>These values can then be used as $R^2_Y$ and $R^2_D$ in
+<code class="docutils literal notranslate"><span class="pre">sensitivity_analysis</span></code>.</p>
+<p class="rubric" id="id28">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.dgp import obs_linear_26_dataset
+from causalis.scenarios.unconfoundedness.model import IRM
+from causalis.scenarios.unconfoundedness.refutation import sensitivity_benchmark</p>
+<p class="rubric" id="id29">1. Fit a model</p>
+<p>data = obs_linear_26_dataset(n=1000, seed=42, return_causal_data=True)
+irm = IRM(data=data).fit()
+estimate = irm.estimate()</p>
+<p class="rubric" id="id30">2. Benchmark specific confounders</p>
+<p>benchmarks = sensitivity_benchmark(estimate, data, benchmarking_set=[‘x1’, ‘x2’]) # doctest: +SKIP
+print(benchmarks[[‘benchmark_confounder’, ‘r2_y’, ‘r2_d’]]) # doctest: +SKIP</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_analysis">
 <span class="sig-prename descclassname"><span class="pre">causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.</span></span><span class="sig-name descname"><span class="pre">sensitivity_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">effect_estimation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">r2_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r2_d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_signed_rr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_analysis" title="Link to this definition">¶</a></dt>
 <dd><p>Compute bias-aware components and cache them.</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>This function turns a fitted estimate into a simple hidden-confounding
-stress test. In the default mode, the bound width is
-
-.. math::
-
-    |
-</pre></div>
-</div>
-<p>ho| \cdot \sqrt{\sigma^2
-u^2}
+<p>This function turns a fitted estimate into a simple hidden-confounding
+stress test. In the default mode, the bound width is</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>|\rho| \cdot \sqrt{\sigma^2 \nu^2}
 \cdot
-\sqrt{
-rac{r2_y}{1-r2_y}
-rac{r2_d}{1-r2_d}},</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>so the reported confounding interval is
-
-.. math::
-
-    [       heta -  ext{bound\_width},      heta +  ext{bound\_width}].
-
-Here :math:`r2_y` controls how much residual outcome variation an omitted
-confounder could explain, :math:`r2_d` does the same for treatment
-assignment, and :math:`
+\sqrt{\frac{r2_y}{1-r2_y}\frac{r2_d}{1-r2_d}},
 </pre></div>
 </div>
-<p>ho` sets the sign and strength alignment between
+<p>so the reported confounding interval is</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>[\theta - \text{bound\_width}, \theta + \text{bound\_width}].
+</pre></div>
+</div>
+<p>Here :math:<code class="docutils literal notranslate"><span class="pre">r2_y</span></code> controls how much residual outcome variation an omitted
+confounder could explain, :math:<code class="docutils literal notranslate"><span class="pre">r2_d</span></code> does the same for treatment
+assignment, and :math:<code class="docutils literal notranslate"><span class="pre">\rho</span></code> sets the sign and strength alignment between
 the two channels.</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Parameters
-----------
-effect_estimation : Dict[str, Any] or Any
-    The effect estimation object.
+<p class="rubric" id="id31">Parameters</p>
+<p>effect_estimation : Dict[str, Any] or Any
+The effect estimation object.
 r2_y : float
-    Sensitivity parameter for the outcome (R^2 form, R_Y^2; converted to odds form internally).
+Sensitivity parameter for the outcome (R^2 form, R_Y^2; converted to odds form internally).
 r2_d : float
-    Sensitivity parameter for the treatment (R^2 form, R_D^2).
+Sensitivity parameter for the treatment (R^2 form, R_D^2).
 rho : float, default 1.0
-    Correlation parameter.
+Correlation parameter.
 H0 : float, default 0.0
-    Null hypothesis for robustness values.
+Null hypothesis for robustness values.
 alpha : float, default 0.05
-    Significance level.
+Significance level.
 use_signed_rr : bool, default False
-    Whether to use signed rr in the quadratic combination of sensitivity components.
-    If True and m_alpha/rr are available, the bias bound is computed via the
-    per-unit quadratic form and RV/RVa are not reported.
-
-Returns
--------
-dict
-    Dictionary with bias-aware results:
-      - theta, se, alpha, z
-      - sampling_ci
-      - theta_bounds_cofounding = (theta - bound_width, theta + bound_width)
-      - bias_aware_ci = faithful CI for the bounds
-      - max_bias and components (sigma2, nu2)
-      - params (r2_y, r2_d, rho, use_signed_rr)
-
-Examples
---------
-&gt;&gt;&gt; from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-&gt;&gt;&gt; from causalis.dgp import obs_linear_26_dataset
-&gt;&gt;&gt; from causalis.scenarios.unconfoundedness.model import IRM
-&gt;&gt;&gt; data = obs_linear_26_dataset(
-...     n=1000,
-...     seed=3141,
-...     include_oracle=False,
-...     return_causal_data=True,
-... )
-&gt;&gt;&gt; irm = IRM(
-...     data=data,
-...     ml_g=RandomForestRegressor(
-...         n_estimators=200,
-...         max_depth=6,
-...         min_samples_leaf=5,
-...         random_state=3141,
-...     ),
-...     ml_m=RandomForestClassifier(
-...         n_estimators=200,
-...         max_depth=6,
-...         min_samples_leaf=5,
-...         random_state=3141,
-...     ),
-...     n_folds=3,
-...     random_state=3141,
-... )
-&gt;&gt;&gt; estimate = irm.fit().estimate(score=&quot;ATE&quot;)
-&gt;&gt;&gt; out = sensitivity_analysis(estimate, r2_y=0.02, r2_d=0.02, rho=1.0)
-&gt;&gt;&gt; out[&quot;theta_bounds_cofounding&quot;]  # doctest: +SKIP
-&gt;&gt;&gt; out[&quot;bias_aware_ci&quot;]  # doctest: +SKIP
-</pre></div>
-</div>
+Whether to use signed rr in the quadratic combination of sensitivity components.
+If True and m_alpha/rr are available, the bias bound is computed via the
+per-unit quadratic form and RV/RVa are not reported.</p>
+<p class="rubric" id="id32">Returns</p>
+<p>dict
+Dictionary with bias-aware results:
+- theta, se, alpha, z
+- sampling_ci
+- theta_bounds_cofounding = (theta - bound_width, theta + bound_width)
+- bias_aware_ci = faithful CI for the bounds
+- max_bias and components (sigma2, nu2)
+- params (r2_y, r2_d, rho, use_signed_rr)</p>
+<p class="rubric" id="id33">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from causalis.dgp import obs_linear_26_dataset
+from causalis.scenarios.unconfoundedness.model import IRM
+data = obs_linear_26_dataset(
+…     n=1000,
+…     seed=3141,
+…     include_oracle=False,
+…     return_causal_data=True,
+… )
+irm = IRM(
+…     data=data,
+…     ml_g=RandomForestRegressor(
+…         n_estimators=200,
+…         max_depth=6,
+…         min_samples_leaf=5,
+…         random_state=3141,
+…     ),
+…     ml_m=RandomForestClassifier(
+…         n_estimators=200,
+…         max_depth=6,
+…         min_samples_leaf=5,
+…         random_state=3141,
+…     ),
+…     n_folds=3,
+…     random_state=3141,
+… )
+estimate = irm.fit().estimate(score=”ATE”)
+out = sensitivity_analysis(estimate, r2_y=0.02, r2_d=0.02, rho=1.0)
+out[“theta_bounds_cofounding”]  # doctest: +SKIP
+out[“bias_aware_ci”]  # doctest: +SKIP</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.interpret_sensitivity_analysis">
 <span class="sig-prename descclassname"><span class="pre">causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.</span></span><span class="sig-name descname"><span class="pre">interpret_sensitivity_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">effect_estimation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">r2_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r2_d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_signed_rr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.interpret_sensitivity_analysis" title="Link to this definition">¶</a></dt>
 <dd><p>Run sensitivity analysis and return a structured interpretation.</p>
-<p class="rubric" id="id17">Parameters</p>
+<p class="rubric" id="id34">Parameters</p>
 <p>effect_estimation : Dict[str, Any] or Any
 The effect estimation object.
 r2_y : float
@@ -304,12 +352,27 @@ alpha : float, default 0.05
 Significance level.
 use_signed_rr : bool, default False
 Whether to use signed rr in the quadratic sensitivity combination.</p>
-<p class="rubric" id="id18">Returns</p>
+<p class="rubric" id="id35">Returns</p>
 <p>Dict[str, Any]
 Dictionary with:
 - raw: the output of <code class="docutils literal notranslate"><span class="pre">sensitivity_analysis(...)</span></code>
 - interpretation: machine-readable interpretation fields
 - summary: compact human-readable interpretation</p>
+<p class="rubric" id="id36">Notes</p>
+<p>This function wraps <code class="docutils literal notranslate"><span class="pre">sensitivity_analysis</span></code> and provides a textual
+interpretation of the results, including whether the estimate remains
+significant under the assumed confounding.</p>
+<p class="rubric" id="id37">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.scenarios.unconfoundedness.refutation.unconfoundedness import interpret_sensitivity_analysis</p>
+<p class="rubric" id="id38">Assuming ‘estimate’ is a fitted CausalEstimate</p>
+<p>interpretation = interpret_sensitivity_analysis(estimate, r2_y=0.01, r2_d=0.01) # doctest: +SKIP
+print(interpretation[“summary”]) # doctest: +SKIP</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
 </dd></dl>
 
 </section>

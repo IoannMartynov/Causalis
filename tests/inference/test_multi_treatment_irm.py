@@ -599,12 +599,14 @@ def test_default_catboost_parallelism_is_reduced_only_for_internal_defaults(monk
             *,
             thread_count: int = -1,
             verbose: bool = False,
+            logging_level: str | None = None,
             allow_writing_files: bool = False,
             random_seed: int | None = None,
             loss_function: str | None = None,
         ):
             self.thread_count = thread_count
             self.verbose = verbose
+            self.logging_level = logging_level
             self.allow_writing_files = allow_writing_files
             self.random_seed = random_seed
             self.loss_function = loss_function

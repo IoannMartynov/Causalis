@@ -58,3 +58,22 @@ def test_causaldata_x_property_exposes_confounder_matrix():
     assert isinstance(X, pd.DataFrame)
     assert list(X.columns) == ["x1", "x2"]
     assert np.allclose(X.to_numpy(dtype=float), df[["x1", "x2"]].to_numpy(dtype=float))
+
+
+def test_causaldata_requires_binary_treatment_and_casts_to_int8():
+    df = pd.DataFrame(
+        {
+            "y": [0.0, 1.0, 2.0, 3.0],
+            "d": [0.0, 1.0, 0.0, 1.0],
+            "x1": [1.0, 2.0, 3.0, 4.0],
+        }
+    )
+
+    cd = CausalData(df=df, treatment="d", outcome="y", confounders=["x1"])
+    assert str(cd.df["d"].dtype) == "int8"
+    assert cd.df["d"].tolist() == [0, 1, 0, 1]
+
+    df_bad = df.copy()
+    df_bad["d"] = [0.0, 1.0, 2.0, 1.0]
+    with pytest.raises(ValueError, match="binary encoded"):
+        CausalData(df=df_bad, treatment="d", outcome="y", confounders=["x1"])

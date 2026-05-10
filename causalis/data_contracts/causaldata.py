@@ -135,7 +135,7 @@ class CausalData(BaseModel):
         3. Verifies that all specified columns exist in the DataFrame.
         4. Validates types and checks for constant variance in outcome, treatment, and confounders.
         5. Ensures no NaN values are present in used columns.
-        6. Subsets the DataFrame to used columns and coerces booleans to int8.
+        6. Subsets the DataFrame to used columns and coerces binary treatment to int8.
         7. Checks for duplicate column values.
         8. Verifies user_id uniqueness.
 
@@ -228,8 +228,9 @@ class CausalData(BaseModel):
         if df[cols_to_check].isna().any().any():
             raise ValueError("DataFrame contains NaN values in used columns, which are not allowed.")
 
-        # 5. Store only the relevant columns and coerce booleans to int8 (except user_id)
+        # 5. Store only the relevant columns and canonicalize treatment.
         self.df = df[cols_to_check].copy()
+        self.df[treatment] = self._validate_and_cast_binary_treatment(self.df[treatment], treatment)
         for col in self.df.columns:
             if col != user_id and pdtypes.is_bool_dtype(self.df[col]):
                 self.df[col] = self.df[col].astype("int8")
@@ -246,6 +247,31 @@ class CausalData(BaseModel):
         self._check_user_id_uniqueness(self.df)
 
         return self
+
+    @staticmethod
+    def _validate_and_cast_binary_treatment(series: pd.Series, name: str) -> pd.Series:
+        """Validate exact {0,1}/boolean treatment encoding and cast to int8."""
+        if pdtypes.is_bool_dtype(series):
+            return series.astype("int8")
+
+        if not pdtypes.is_numeric_dtype(series):
+            raise ValueError(
+                f"Column '{name}' specified as treatment must contain only int, float, or bool values."
+            )
+
+        values = pd.unique(series)
+        if not np.isfinite(np.asarray(values, dtype=float)).all():
+            raise ValueError(
+                f"Column '{name}' specified as treatment must contain only finite binary values 0/1."
+            )
+
+        value_set = set(np.asarray(values, dtype=float).tolist())
+        if value_set != {0.0, 1.0}:
+            raise ValueError(
+                f"Column '{name}' specified as treatment must be binary encoded in {{0,1}}. "
+                f"Found values: {sorted(value_set)}"
+            )
+        return series.astype("int8")
 
     def _get_roles(self) -> dict[str, str]:
         """
@@ -506,4 +532,3 @@ class CausalData(BaseModel):
             res += f", user_id='{self.user_id_name}'"
         res += ")"
         return res
-

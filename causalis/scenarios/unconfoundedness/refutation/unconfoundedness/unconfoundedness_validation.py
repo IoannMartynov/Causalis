@@ -242,7 +242,7 @@ def run_unconfoundedness_diagnostics(
     normalize: Optional[bool] = None,
     return_summary: bool = True,
 ) -> Dict[str, Any]:
-    """Run covariate-balance diagnostics implied by unconfoundedness.
+    r"""Run covariate-balance diagnostics implied by unconfoundedness.
 
     The diagnostic compares the treated and control pseudo-populations induced
     by the estimated propensity score. For ATE, the effective weights are

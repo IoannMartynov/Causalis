@@ -236,7 +236,7 @@ class MultiTreatmentIRM(BaseEstimator):
                 self.ml_m = CatBoostClassifier(
                     loss_function="MultiClass",
                     thread_count=-1,
-                    verbose=False,
+                    logging_level='Silent',
                     allow_writing_files=False,
                     random_seed=self.random_state,
                 )
@@ -253,7 +253,7 @@ class MultiTreatmentIRM(BaseEstimator):
                 if y_is_binary:
                     self.ml_g = CatBoostClassifier(
                         thread_count=-1,
-                        verbose=False,
+                        logging_level='Silent',
                         allow_writing_files=False,
                         random_seed=self.random_state,
                     )
@@ -261,7 +261,7 @@ class MultiTreatmentIRM(BaseEstimator):
                 else:
                     self.ml_g = CatBoostRegressor(
                         thread_count=-1,
-                        verbose=False,
+                        logging_level='Silent',
                         allow_writing_files=False,
                         random_seed=self.random_state,
                     )
@@ -323,7 +323,7 @@ class MultiTreatmentIRM(BaseEstimator):
         if self.ml_m is None:
             self.ml_m = CatBoostClassifier(
                 thread_count=-1,
-                verbose=False,
+                logging_level='Silent',
                 allow_writing_files=False,
                 random_seed=self.random_state,
             )
@@ -332,14 +332,14 @@ class MultiTreatmentIRM(BaseEstimator):
             if y_is_binary:
                 self.ml_g = CatBoostClassifier(
                     thread_count=-1,
-                    verbose=False,
+                    logging_level='Silent',
                     allow_writing_files=False,
                     random_seed=self.random_state,
                 )
             else:
                 self.ml_g = CatBoostRegressor(
                     thread_count=-1,
-                    verbose=False,
+                    logging_level='Silent',
                     allow_writing_files=False,
                     random_seed=self.random_state,
                 )
@@ -1268,3 +1268,11 @@ class MultiTreatmentIRM(BaseEstimator):
             },
             index=contrast_labels,
         )
+
+    def __repr__(self) -> str:
+        """Concise representation of MultiTreatmentIRM to avoid verbose learner output."""
+        status = "fitted" if hasattr(self, "g_hat_") else "unfitted"
+        return f"MultiTreatmentIRM(status='{status}', n_folds={self.n_folds}, random_state={self.random_state})"
+
+    _repr_html_ = None
+    _repr_mimebundle_ = None

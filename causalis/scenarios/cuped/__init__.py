@@ -1,5 +1,5 @@
 from .model import CUPEDModel
-from .diagnostics import (
+from .refutation import (
     cuped_forest_plot,
     regression_assumptions_table_from_data,
     regression_assumptions_table_from_estimate,

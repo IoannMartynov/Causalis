@@ -35,6 +35,10 @@
             
   <section id="module-causalis.scenarios.classic_rct.dgp">
 <span id="causalis-scenarios-classic-rct-dgp"></span><h1><a class="reference internal" href="#module-causalis.scenarios.classic_rct.dgp" title="causalis.scenarios.classic_rct.dgp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.classic_rct.dgp</span></code></a><a class="headerlink" href="#module-causalis.scenarios.classic_rct.dgp" title="Link to this heading">¶</a></h1>
+<p>Data Generating Processes (DGPs) for the Classic RCT scenario.</p>
+<p>This module provides pre-configured synthetic datasets representing Randomized
+Controlled Trials (RCTs). It includes common experimental setups such as
+binary outcomes (conversions) and continuous/skewed outcomes (revenue).</p>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
 <section id="functions">
@@ -42,16 +46,10 @@
 <table class="autosummary longtable docutils align-left">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.classic_rct.dgp.generate_classic_rct_26" title="causalis.scenarios.classic_rct.dgp.generate_classic_rct_26"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_classic_rct_26</span></code></a></p></td>
-<td><p>A pre-configured classic RCT dataset with 3 binary confounders.
-n=10000, split=0.5, outcome is conversion (binary). Baseline control p=0.10
-and treatment p=0.11 are set on the log-odds scale (X=0), so marginal rates
-and ATE can differ once covariate effects are included. Includes a
-deterministic <code class="docutils literal notranslate"><span class="pre">user_id</span></code> column.</p></td>
+<td><p>A pre-configured classic RCT dataset with a binary (conversion) outcome.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.classic_rct.dgp.classic_rct_gamma_26" title="causalis.scenarios.classic_rct.dgp.classic_rct_gamma_26"><code class="xref py py-obj docutils literal notranslate"><span class="pre">classic_rct_gamma_26</span></code></a></p></td>
-<td><p>A pre-configured classic RCT dataset with a gamma outcome.
-n=10000, split=0.5, mean uplift ~10%.
-Includes deterministic <code class="docutils literal notranslate"><span class="pre">user_id</span></code> and ancillary columns.</p></td>
+<td><p>A pre-configured classic RCT dataset with a Gamma-distributed outcome.</p></td>
 </tr>
 </tbody>
 </table>
@@ -61,73 +59,130 @@ Includes deterministic <code class="docutils literal notranslate"><span class="p
 <dl class="py function">
 <dt class="sig sig-object py" id="causalis.scenarios.classic_rct.dgp.generate_classic_rct_26">
 <span class="sig-prename descclassname"><span class="pre">causalis.scenarios.classic_rct.dgp.</span></span><span class="sig-name descname"><span class="pre">generate_classic_rct_26</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_pre</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome_depends_on_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_oracle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_causal_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_ancillary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deterministic_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#causalis.scenarios.classic_rct.dgp.generate_classic_rct_26" title="Link to this definition">¶</a></dt>
-<dd><p>A pre-configured classic RCT dataset with 3 binary confounders.
-n=10000, split=0.5, outcome is conversion (binary). Baseline control p=0.10
-and treatment p=0.11 are set on the log-odds scale (X=0), so marginal rates
-and ATE can differ once covariate effects are included. Includes a
-deterministic <code class="docutils literal notranslate"><span class="pre">user_id</span></code> column.</p>
-<p class="rubric" id="id3">Parameters</p>
-<p>seed : int, default=42
-Random seed.
-add_pre : bool, default=False
+<dd><p>A pre-configured classic RCT dataset with a binary (conversion) outcome.</p>
+<p>The dataset includes three binary confounders: <code class="docutils literal notranslate"><span class="pre">platform_ios</span></code>,
+<code class="docutils literal notranslate"><span class="pre">country_usa</span></code>, and <code class="docutils literal notranslate"><span class="pre">source_paid</span></code>. Treatment assignment is completely
+random and independent of these confounders.</p>
+<p class="rubric" id="id5">Notes</p>
+<p>The outcome $Y$ (conversion) is generated using a logistic link function:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>P(Y=1 | D, X) = \text{logit}^{-1}(\alpha_y + \theta D + \beta_y X)
+</pre></div>
+</div>
+<p>where:</p>
+<ul class="simple">
+<li><p>$D$ is the binary treatment indicator ($D=1$ for treatment, $D=0$ for control).</p></li>
+<li><p>$X$ are the confounders (platform, country, source).</p></li>
+<li><p>$\alpha_y$ is the baseline log-odds of conversion.</p></li>
+<li><p>$\theta$ is the treatment effect on the log-odds scale.</p></li>
+<li><p>$\beta_y$ are the coefficients for the confounders.</p></li>
+</ul>
+<p>The default parameters set the baseline control rate to ~10% and the
+treatment rate to ~11% (marginal rates may vary due to $X$).</p>
+<p class="rubric" id="id6">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.scenarios.classic_rct.dgp import generate_classic_rct_26
+data = generate_classic_rct_26(n=5000, seed=42)
+print(data.df[“conversion”].mean())  # Approximately 0.22
+0.217
+print(data.df.columns.tolist())
+[‘user_id’, ‘conversion’, ‘d’, ‘platform_ios’, ‘country_usa’, ‘source_paid’]</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+<p class="rubric" id="id7">Parameters</p>
+<p>seed : int, default 42
+Random seed for reproducibility.
+add_pre : bool, default False
 Whether to generate a pre-period covariate (‘y_pre’) and include prognostic signal from X.
 beta_y : array-like, optional
-Linear coefficients for confounders in the outcome model.
-outcome_depends_on_x : bool, default=True
+Linear coefficients for confounders in the outcome model. Default is [0.6, 0.4, 0.8].
+outcome_depends_on_x : bool, default True
 Whether to add default effects for confounders if beta_y is None.
-include_oracle : bool, default=False
+include_oracle : bool, default False
 Whether to include oracle ground-truth columns like ‘cate’, ‘propensity’, etc.
-return_causal_data : bool, default=True
-Whether to return a CausalData object.
-n : int, default=10000
-Number of samples.
-split : float, default=0.5
+return_causal_data : bool, default True
+Whether to return a <code class="docutils literal notranslate"><span class="pre">CausalData</span></code> object or a <code class="docutils literal notranslate"><span class="pre">pd.DataFrame</span></code>.
+n : int, default 10000
+Number of samples to generate.
+split : float, default 0.5
 Proportion of samples assigned to the treatment group.
 outcome_params : dict, optional
 Binary outcome parameters, e.g. {“p”: {“A”: 0.10, “B”: 0.11}}.
-add_ancillary : bool, default=False
+add_ancillary : bool, default False
 Whether to add standard ancillary columns (age, platform, etc.).
-deterministic_ids : bool, default=True
+deterministic_ids : bool, default True
 Whether to generate deterministic user IDs.
-**kwargs :
-Additional arguments passed to <code class="docutils literal notranslate"><span class="pre">generate_classic_rct</span></code>.</p>
-<p class="rubric" id="id4">Returns</p>
-<p>CausalData or pd.DataFrame</p>
+**kwargs : Any
+Additional arguments passed to the underlying <code class="docutils literal notranslate"><span class="pre">generate_classic_rct</span></code>.</p>
+<p class="rubric" id="id8">Returns</p>
+<p>CausalData or pd.DataFrame
+The generated dataset.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="causalis.scenarios.classic_rct.dgp.classic_rct_gamma_26">
 <span class="sig-prename descclassname"><span class="pre">causalis.scenarios.classic_rct.dgp.</span></span><span class="sig-name descname"><span class="pre">classic_rct_gamma_26</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_pre</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome_depends_on_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_oracle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_causal_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_ancillary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deterministic_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#causalis.scenarios.classic_rct.dgp.classic_rct_gamma_26" title="Link to this definition">¶</a></dt>
-<dd><p>A pre-configured classic RCT dataset with a gamma outcome.
-n=10000, split=0.5, mean uplift ~10%.
-Includes deterministic <code class="docutils literal notranslate"><span class="pre">user_id</span></code> and ancillary columns.</p>
-<p class="rubric" id="id5">Parameters</p>
-<p>seed : int, default=42
-Random seed.
-add_pre : bool, default=False
+<dd><p>A pre-configured classic RCT dataset with a Gamma-distributed outcome.</p>
+<p>The dataset is designed to represent skewed metrics like revenue or spend.
+It includes three binary confounders: <code class="docutils literal notranslate"><span class="pre">platform_ios</span></code>, <code class="docutils literal notranslate"><span class="pre">country_usa</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">source_paid</span></code>.</p>
+<p class="rubric" id="id9">Notes</p>
+<p>The outcome $Y$ is generated from a Gamma distribution using a log link for the mean:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Y \sim \text{Gamma}(\kappa, \mu(D, X) / \kappa)
+</pre></div>
+</div>
+<p>where:</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\log(\mu(D, X)) = \alpha_y + \theta D + \beta_y X
+</pre></div>
+</div>
+<p>and $\kappa$ is the shape parameter. This implies multiplicative treatment
+effects on the mean scale.</p>
+<p class="rubric" id="id10">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>from causalis.scenarios.classic_rct.dgp import classic_rct_gamma_26
+data = classic_rct_gamma_26(n=5000, seed=42)
+print(f”{data.df[‘y’].mean():.2f}”)  # Approximately 47.6
+47.58
+print(data.df.columns.tolist())
+[‘user_id’, ‘y’, ‘d’, ‘platform_ios’, ‘country_usa’, ‘source_paid’, ‘age’, ‘platform_android’, ‘platform_ios_anc’, ‘platform_web’]</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+<p class="rubric" id="id11">Parameters</p>
+<p>seed : int, default 42
+Random seed for reproducibility.
+add_pre : bool, default False
 Whether to generate a pre-period covariate (‘y_pre’).
 beta_y : array-like, optional
-Linear coefficients for confounders in the outcome model.
-outcome_depends_on_x : bool, default=True
+Linear coefficients for confounders in the outcome model. Default is [0.25, 0.20, 0.45].
+outcome_depends_on_x : bool, default True
 Whether to add default effects for confounders if beta_y is None.
-include_oracle : bool, default=False
+include_oracle : bool, default False
 Whether to include oracle ground-truth columns like ‘cate’, ‘propensity’, etc.
-return_causal_data : bool, default=True
-Whether to return a CausalData object.
-n : int, default=10000
-Number of samples.
-split : float, default=0.5
+return_causal_data : bool, default True
+Whether to return a <code class="docutils literal notranslate"><span class="pre">CausalData</span></code> object or a <code class="docutils literal notranslate"><span class="pre">pd.DataFrame</span></code>.
+n : int, default 10000
+Number of samples to generate.
+split : float, default 0.5
 Proportion of samples assigned to the treatment group.
 outcome_params : dict, optional
 Gamma outcome parameters, e.g. {“shape”: 2.0, “scale”: {“A”: 15.0, “B”: 16.5}}.
-add_ancillary : bool, default=True
+add_ancillary : bool, default True
 Whether to add standard ancillary columns (age, platform, etc.).
-deterministic_ids : bool, default=True
+deterministic_ids : bool, default True
 Whether to generate deterministic user IDs.
-**kwargs :
-Additional arguments passed to <code class="docutils literal notranslate"><span class="pre">classic_rct_gamma</span></code>.</p>
-<p class="rubric" id="id6">Returns</p>
-<p>CausalData or pd.DataFrame</p>
+**kwargs : Any
+Additional arguments passed to the underlying <code class="docutils literal notranslate"><span class="pre">classic_rct_gamma</span></code>.</p>
+<p class="rubric" id="id12">Returns</p>
+<p>CausalData or pd.DataFrame
+The generated dataset.</p>
 </dd></dl>
 
 </section>

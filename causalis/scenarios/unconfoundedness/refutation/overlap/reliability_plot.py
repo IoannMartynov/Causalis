@@ -1,4 +1,4 @@
-"""Reliability diagram for propensity calibration diagnostics."""
+r"""Reliability diagram for propensity calibration diagnostics."""
 
 from __future__ import annotations
 
@@ -123,7 +123,7 @@ def plot_propensity_reliability(
     save_dpi: Optional[int] = None,
     transparent: bool = False,
 ) -> plt.Figure:
-    """
+    r"""
     Plot a propensity calibration reliability diagram.
 
     The reliability plot groups observations into propensity bins and compares

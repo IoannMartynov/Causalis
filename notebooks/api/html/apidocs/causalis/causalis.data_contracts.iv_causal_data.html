@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>causalis.data_contracts.iv_causal_data &#8212; Causalis API Reference  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="causalis.data_contracts.iv_causal_estimate" href="causalis.data_contracts.iv_causal_estimate.html" />
+    <link rel="prev" title="causalis.data_contracts.panel_estimate" href="causalis.data_contracts.panel_estimate.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-causalis.data_contracts.iv_causal_data">
+<span id="causalis-data-contracts-iv-causal-data"></span><h1><a class="reference internal" href="#module-causalis.data_contracts.iv_causal_data" title="causalis.data_contracts.iv_causal_data"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.data_contracts.iv_causal_data</span></code></a><a class="headerlink" href="#module-causalis.data_contracts.iv_causal_data" title="Link to this heading">¶</a></h1>
+<p>Causalis dataclass for storing cross-sectional DataFrame and column metadata
+for instrumental variables causal inference.</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.data_contracts.iv_causal_data.IVCausalData" title="causalis.data_contracts.iv_causal_data.IVCausalData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IVCausalData</span></code></a></p></td>
+<td><p>Container for instrumental variables causal inference datasets.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="causalis.data_contracts.iv_causal_data.IVCausalData">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">causalis.data_contracts.iv_causal_data.</span></span><span class="sig-name descname"><span class="pre">IVCausalData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#causalis.data_contracts.iv_causal_data.IVCausalData" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="causalis.data_contracts.causaldata.html#causalis.data_contracts.causaldata.CausalData" title="causalis.data_contracts.causaldata.CausalData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">causalis.data_contracts.causaldata.CausalData</span></code></a></p>
+<p>Container for instrumental variables causal inference datasets.</p>
+<p>Extends :class:<code class="docutils literal notranslate"><span class="pre">CausalData</span></code> with exactly one instrument column. The stored
+DataFrame is restricted to outcome, treatment, instrument, confounder, and
+optional user_id columns.</p>
+<p class="rubric" id="id1">Attributes</p>
+<p>df : pd.DataFrame
+DataFrame restricted to the columns used by the IV analysis.
+treatment_name : str
+Column name representing the endogenous treatment variable.
+outcome_name : str
+Column name representing the outcome variable.
+instruments_names : List[str]
+Name of the instrument column, stored as a single-item list.
+confounders_names : List[str]
+Names of the confounder columns (may be empty).
+user_id_name : str, optional
+Column name representing the unique identifier for each observation/user.</p>
+<p class="rubric">Initialization</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code class="docutils literal notranslate"><span class="pre">ValidationError</span></code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code class="docutils literal notranslate"><span class="pre">self</span></code> is explicitly positional-only to allow <code class="docutils literal notranslate"><span class="pre">self</span></code> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="causalis.data_contracts.iv_causal_data.IVCausalData.instruments_names">
+<span class="sig-name descname"><span class="pre">instruments_names</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.data_contracts.iv_causal_data.IVCausalData.instruments_names" title="Link to this definition">¶</a></dt>
+<dd><p>‘Field(…)’</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.data_contracts.iv_causal_data.IVCausalData.from_df">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instruments</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confounders</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#causalis.data_contracts.iv_causal_data.IVCausalData" title="causalis.data_contracts.iv_causal_data.IVCausalData"><span class="pre">causalis.data_contracts.iv_causal_data.IVCausalData</span></a></span></span><a class="headerlink" href="#causalis.data_contracts.iv_causal_data.IVCausalData.from_df" title="Link to this definition">¶</a></dt>
+<dd><p>Friendly constructor for IVCausalData.</p>
+<p class="rubric" id="parameters">Parameters</p>
+<p>df : pd.DataFrame
+The DataFrame containing the data.
+treatment : str
+Column name representing the endogenous treatment variable.
+outcome : str
+Column name representing the outcome variable.
+instruments : Union[str, List[str]]
+Column name(s) representing the instrumental variable(s).
+confounders : Union[str, List[str]], optional
+Column name(s) representing the observed confounders/covariates.
+user_id : str, optional
+Column name representing the unique identifier for each observation/user.
+**kwargs : Any
+Additional arguments passed to the Pydantic model constructor.</p>
+<p class="rubric" id="returns">Returns</p>
+<p>IVCausalData
+A validated IVCausalData instance.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="causalis.data_contracts.iv_causal_data.IVCausalData.instruments">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">instruments</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.data_contracts.iv_causal_data.IVCausalData.instruments" title="Link to this definition">¶</a></dt>
+<dd><p>List of instrument column names.</p>
+<p class="rubric" id="id2">Returns</p>
+<p>List[str]
+Names of the instrument columns.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="causalis.data_contracts.iv_causal_data.IVCausalData.Z">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">Z</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></span><a class="headerlink" href="#causalis.data_contracts.iv_causal_data.IVCausalData.Z" title="Link to this definition">¶</a></dt>
+<dd><p>Design matrix of instruments.</p>
+<p class="rubric" id="id3">Returns</p>
+<p>pd.DataFrame
+The DataFrame containing only instrument columns.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.data_contracts.iv_causal_data.IVCausalData.get_df">
+<span class="sig-name descname"><span class="pre">get_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_treatment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_outcome</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_confounders</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_user_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_instruments</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.data_contracts.iv_causal_data.IVCausalData.get_df" title="Link to this definition">¶</a></dt>
+<dd><p>Get a DataFrame with specified columns.</p>
+<p class="rubric" id="id4">Parameters</p>
+<p>columns : List[str], optional
+Specific column names to include.
+include_treatment : bool, default True
+Whether to include the treatment column.
+include_outcome : bool, default True
+Whether to include the outcome column.
+include_confounders : bool, default True
+Whether to include confounder columns.
+include_user_id : bool, default False
+Whether to include the user_id column.
+include_instruments : bool, default True
+Whether to include instrument columns.</p>
+<p class="rubric" id="id5">Returns</p>
+<p>pd.DataFrame
+A copy of the internal DataFrame with selected columns.</p>
+<p class="rubric" id="raises">Raises</p>
+<p>ValueError
+If any specified columns do not exist.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="causalis.data_contracts.iv_causal_data.IVCausalData.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#causalis.data_contracts.iv_causal_data.IVCausalData.__repr__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../reference.html">Causalis API Reference</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../reference.html">Documentation overview</a><ul>
+  <li><a href="../index.html">API Modules</a><ul>
+  <li><a href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a><ul>
+  <li><a href="causalis.data_contracts.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.data_contracts</span></code></a><ul>
+      <li>Previous: <a href="causalis.data_contracts.panel_estimate.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.data_contracts.panel_estimate</span></code></a></li>
+      <li>Next: <a href="causalis.data_contracts.iv_causal_estimate.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.data_contracts.iv_causal_estimate</span></code></a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../../_sources/apidocs/causalis/causalis.data_contracts.iv_causal_data.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

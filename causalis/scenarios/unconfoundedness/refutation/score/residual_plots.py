@@ -1,4 +1,4 @@
-"""Residual diagnostic plots for nuisance models g0/g1 and m."""
+r"""Residual diagnostic plots for nuisance models g0/g1 and m."""
 
 from __future__ import annotations
 
@@ -245,7 +245,7 @@ def plot_residual_diagnostics(
     save_dpi: Optional[int] = None,
     transparent: bool = False,
 ) -> plt.Figure:
-    """
+    r"""
     Plot residual diagnostics for nuisance models.
 
     Panels

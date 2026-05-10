@@ -1,0 +1,152 @@
+# {py:mod}`causalis.scenarios.cuped.refutation.config`
+
+```{py:module} causalis.scenarios.cuped.refutation.config
+```
+
+```{autodoc2-docstring} causalis.scenarios.cuped.refutation.config
+:allowtitles:
+```
+
+## Module Contents
+
+### Classes
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`CUPEDRefutationConfig <causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig>`
+  - ```{autodoc2-docstring} causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig
+    :summary:
+    ```
+````
+
+### API
+
+`````{py:class} CUPEDRefutationConfig
+:canonical: causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig
+
+```{autodoc2-docstring} causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig
+```
+
+````{py:attribute} run_regression_checks
+:canonical: causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig.run_regression_checks
+:type: bool
+:value: >
+   True
+
+```{autodoc2-docstring} causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig.run_regression_checks
+```
+
+````
+
+````{py:attribute} check_action
+:canonical: causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig.check_action
+:type: typing.Literal[ignore, raise]
+:value: >
+   'ignore'
+
+```{autodoc2-docstring} causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig.check_action
+```
+
+````
+
+````{py:attribute} raise_on_yellow
+:canonical: causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig.raise_on_yellow
+:type: bool
+:value: >
+   False
+
+```{autodoc2-docstring} causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig.raise_on_yellow
+```
+
+````
+
+````{py:attribute} condition_number_warn_threshold
+:canonical: causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig.condition_number_warn_threshold
+:type: float
+:value: >
+   100000000.0
+
+```{autodoc2-docstring} causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig.condition_number_warn_threshold
+```
+
+````
+
+````{py:attribute} corr_near_one_tol
+:canonical: causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig.corr_near_one_tol
+:type: float
+:value: >
+   1e-10
+
+```{autodoc2-docstring} causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig.corr_near_one_tol
+```
+
+````
+
+````{py:attribute} vif_warn_threshold
+:canonical: causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig.vif_warn_threshold
+:type: float
+:value: >
+   20.0
+
+```{autodoc2-docstring} causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig.vif_warn_threshold
+```
+
+````
+
+````{py:attribute} winsor_q
+:canonical: causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig.winsor_q
+:type: typing.Optional[float]
+:value: >
+   0.01
+
+```{autodoc2-docstring} causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig.winsor_q
+```
+
+````
+
+````{py:attribute} tiny_one_minus_h_tol
+:canonical: causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig.tiny_one_minus_h_tol
+:type: float
+:value: >
+   1e-08
+
+```{autodoc2-docstring} causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig.tiny_one_minus_h_tol
+```
+
+````
+
+````{py:method} __post_init__() -> None
+:canonical: causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig.__post_init__
+
+```{autodoc2-docstring} causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig.__post_init__
+```
+
+````
+
+````{py:method} signal_assumption_flags(table: pandas.DataFrame, skip_test_ids: typing.Optional[set[str]] = None) -> None
+:canonical: causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig.signal_assumption_flags
+
+```{autodoc2-docstring} causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig.signal_assumption_flags
+```
+
+````
+
+````{py:method} signal_message(msg: str) -> None
+:canonical: causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig.signal_message
+
+```{autodoc2-docstring} causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig.signal_message
+```
+
+````
+
+````{py:method} to_model_options() -> dict[str, object]
+:canonical: causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig.to_model_options
+
+```{autodoc2-docstring} causalis.scenarios.cuped.refutation.config.CUPEDRefutationConfig.to_model_options
+```
+
+````
+
+`````

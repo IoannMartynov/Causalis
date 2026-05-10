@@ -1,5 +1,7 @@
-from causalis.scenarios.cuped.diagnostics.regression_checks import RegressionChecks
-from causalis.scenarios.cuped.diagnostics import (
+from __future__ import annotations
+
+from causalis.scenarios.cuped.refutation.regression_checks import RegressionChecks
+from causalis.scenarios.cuped.refutation import (
     assumption_cooks,
     assumption_leverage,
     assumption_vif,

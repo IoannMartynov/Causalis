@@ -1,0 +1,278 @@
+# {py:mod}`causalis.data_contracts.iv_causal_estimate`
+
+```{py:module} causalis.data_contracts.iv_causal_estimate
+```
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_estimate
+:allowtitles:
+```
+
+## Module Contents
+
+### Classes
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`IVCausalEstimate <causalis.data_contracts.iv_causal_estimate.IVCausalEstimate>`
+  - ```{autodoc2-docstring} causalis.data_contracts.iv_causal_estimate.IVCausalEstimate
+    :summary:
+    ```
+````
+
+### API
+
+`````{py:class} IVCausalEstimate(/, **data: typing.Any)
+:canonical: causalis.data_contracts.iv_causal_estimate.IVCausalEstimate
+
+Bases: {py:obj}`pydantic.BaseModel`
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_estimate.IVCausalEstimate
+```
+
+```{rubric} Initialization
+```
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.__init__
+```
+
+````{py:attribute} model_config
+:canonical: causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.model_config
+:value: >
+   'ConfigDict(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.model_config
+```
+
+````
+
+````{py:attribute} estimand
+:canonical: causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.estimand
+:type: str
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.estimand
+```
+
+````
+
+````{py:attribute} model
+:canonical: causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.model
+:type: str
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.model
+```
+
+````
+
+````{py:attribute} model_options
+:canonical: causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.model_options
+:type: typing.Dict[str, typing.Any]
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.model_options
+```
+
+````
+
+````{py:attribute} value
+:canonical: causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.value
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.value
+```
+
+````
+
+````{py:attribute} std_error
+:canonical: causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.std_error
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.std_error
+```
+
+````
+
+````{py:attribute} t_stat
+:canonical: causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.t_stat
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.t_stat
+```
+
+````
+
+````{py:attribute} p_value
+:canonical: causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.p_value
+:type: typing.Optional[float]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.p_value
+```
+
+````
+
+````{py:attribute} ci_lower_absolute
+:canonical: causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.ci_lower_absolute
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.ci_lower_absolute
+```
+
+````
+
+````{py:attribute} ci_upper_absolute
+:canonical: causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.ci_upper_absolute
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.ci_upper_absolute
+```
+
+````
+
+````{py:attribute} value_relative
+:canonical: causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.value_relative
+:type: typing.Optional[float]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.value_relative
+```
+
+````
+
+````{py:attribute} ci_lower_relative
+:canonical: causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.ci_lower_relative
+:type: typing.Optional[float]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.ci_lower_relative
+```
+
+````
+
+````{py:attribute} ci_upper_relative
+:canonical: causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.ci_upper_relative
+:type: typing.Optional[float]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.ci_upper_relative
+```
+
+````
+
+````{py:attribute} alpha
+:canonical: causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.alpha
+:type: float
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.alpha
+```
+
+````
+
+````{py:attribute} is_significant
+:canonical: causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.is_significant
+:type: bool
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.is_significant
+```
+
+````
+
+````{py:attribute} outcome
+:canonical: causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.outcome
+:type: str
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.outcome
+```
+
+````
+
+````{py:attribute} treatment
+:canonical: causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.treatment
+:type: str
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.treatment
+```
+
+````
+
+````{py:attribute} instrument
+:canonical: causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.instrument
+:type: str
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.instrument
+```
+
+````
+
+````{py:attribute} confounders
+:canonical: causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.confounders
+:type: typing.List[str]
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.confounders
+```
+
+````
+
+````{py:attribute} time
+:canonical: causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.time
+:type: str
+:value: >
+   'Field(...)'
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.time
+```
+
+````
+
+````{py:attribute} diagnostic_data
+:canonical: causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.diagnostic_data
+:type: typing.Optional[causalis.data_contracts.causal_diagnostic_data.IVDiagnosticData]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.diagnostic_data
+```
+
+````
+
+````{py:method} summary() -> pandas.DataFrame
+:canonical: causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.summary
+
+```{autodoc2-docstring} causalis.data_contracts.iv_causal_estimate.IVCausalEstimate.summary
+```
+
+````
+
+`````

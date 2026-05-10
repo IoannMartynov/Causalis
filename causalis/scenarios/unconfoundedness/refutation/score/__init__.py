@@ -1,4 +1,4 @@
-"""Score-based diagnostics and plots for unconfoundedness.
+r"""Score-based diagnostics and plots for unconfoundedness.
 
 These tools check whether the orthogonal score used by IRM behaves the way it
 should after fitting:
