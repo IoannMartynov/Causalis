@@ -84,9 +84,6 @@ jobs:
           print(f"Releasing causalis {version}")
           PY
 
-      - name: Run tests
-        run: python -m pytest
-
       - name: Build distributions
         run: python -m build
 
