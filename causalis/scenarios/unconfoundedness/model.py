@@ -106,8 +106,11 @@ class IRM(BaseEstimator):
         fitted model. Set to ``False`` for a lighter-weight estimator that still
         supports effect estimation, while only retaining immutable outcome and
         treatment snapshots. In lightweight mode the estimator no longer keeps
-        the confounder matrix, raw propensities, or fold assignments in memory
-        after ``fit()``.
+        the confounder matrix, raw propensities, fold assignments, or compact
+        native feature-importance diagnostics in memory after ``fit()``.
+        When enabled, supported native feature-importance sources are learner
+        ``feature_importances_``, ``coef_``, and CatBoost
+        ``get_feature_importance()``.
 
     Examples
     --------
@@ -275,6 +278,7 @@ class IRM(BaseEstimator):
         self._fit_sample_fingerprint_ = None
         self.folds_ = None
         self.m_hat_raw_ = None
+        self.feature_importance_ = None
 
         # Initialize default learners if not provided
         if HAS_CATBOOST:
@@ -440,6 +444,122 @@ class IRM(BaseEstimator):
         ):
             raise ValueError("trimming_threshold must be finite and in [0, 0.5).")
 
+    def _should_collect_feature_importance(self) -> bool:
+        """Return whether native feature importances should be collected."""
+        return bool(self.store_diagnostics)
+
+    @staticmethod
+    def _coerce_native_feature_importance(
+        values: Any,
+        *,
+        n_features: int,
+    ) -> Optional[np.ndarray]:
+        """Convert a native importance payload into a normalized vector."""
+        try:
+            arr = np.asarray(values, dtype=float)
+        except (TypeError, ValueError):
+            return None
+
+        if arr.ndim == 0:
+            return None
+
+        if arr.ndim == 1:
+            vector = arr
+        elif arr.shape[-1] == n_features:
+            vector = np.mean(np.abs(arr), axis=tuple(range(arr.ndim - 1)))
+        elif arr.shape[0] == n_features:
+            vector = np.mean(np.abs(arr), axis=tuple(range(1, arr.ndim)))
+        else:
+            return None
+
+        vector = np.asarray(vector, dtype=float).ravel()
+        if vector.size != n_features:
+            return None
+
+        vector = np.where(np.isfinite(vector), np.abs(vector), 0.0)
+        total = float(np.sum(vector))
+        if total > 0.0:
+            vector = vector / total
+        return vector.astype(float, copy=False)
+
+    def _extract_native_feature_importance(
+        self,
+        estimator: Any,
+        *,
+        n_features: int,
+    ) -> Optional[np.ndarray]:
+        """Extract normalized native feature importance from a fitted estimator."""
+        candidates: List[Any] = []
+
+        if hasattr(estimator, "get_feature_importance"):
+            try:
+                candidates.append(estimator.get_feature_importance())
+            except Exception:
+                pass
+
+        if hasattr(estimator, "feature_importances_"):
+            candidates.append(getattr(estimator, "feature_importances_", None))
+
+        if hasattr(estimator, "coef_"):
+            candidates.append(getattr(estimator, "coef_", None))
+
+        for candidate in candidates:
+            importance = self._coerce_native_feature_importance(
+                candidate,
+                n_features=n_features,
+            )
+            if importance is not None:
+                return importance
+        return None
+
+    def _summarize_fold_feature_importances(
+        self,
+        fold_importances: List[Optional[Dict[str, Optional[np.ndarray]]]],
+        *,
+        n_features: int,
+    ) -> Dict[str, Any]:
+        """Aggregate fold-level native importances into compact diagnostics."""
+        feature_names = [str(name) for name in list(self.data.confounders)]
+        if len(feature_names) != n_features:
+            feature_names = [f"x{j + 1}" for j in range(n_features)]
+
+        nuisances: Dict[str, Dict[str, Any]] = {}
+        for key in ("m", "g0", "g1"):
+            values = [
+                np.asarray(payload[key], dtype=float).ravel()
+                for payload in fold_importances
+                if payload is not None
+                and payload.get(key) is not None
+                and np.asarray(payload[key]).size == n_features
+            ]
+            if values:
+                stacked = np.vstack(values)
+                nuisances[key] = {
+                    "available": True,
+                    "mean": np.mean(stacked, axis=0),
+                    "std": (
+                        np.std(stacked, axis=0, ddof=1)
+                        if stacked.shape[0] > 1
+                        else np.zeros(n_features)
+                    ),
+                    "n_folds": int(stacked.shape[0]),
+                }
+            else:
+                nuisances[key] = {
+                    "available": False,
+                    "mean": None,
+                    "std": None,
+                    "n_folds": 0,
+                }
+
+        return {
+            "method": "native",
+            "feature_names": feature_names,
+            "n_features": int(n_features),
+            "n_folds": int(len(fold_importances)),
+            "nuisances": nuisances,
+        }
+
     def _validate_treatment_support(self, d: np.ndarray) -> None:
         """Ensure both treatment arms have enough rows for stratified cross-fitting."""
         class_counts = np.bincount(d, minlength=2)
@@ -546,7 +666,7 @@ class IRM(BaseEstimator):
         X_te: np.ndarray,
         y_is_binary: bool,
         empty_group_error: str,
-    ) -> np.ndarray:
+    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
         """Fit one outcome nuisance model (g0 or g1) and predict on test fold."""
         model_g = clone(self.ml_g)
         mask = d_tr == treatment_value
@@ -557,12 +677,18 @@ class IRM(BaseEstimator):
             uniq_y = np.unique(y_g)
             if uniq_y.size == 1:
                 # Single-class folds can skip fitting while preserving cross-fit independence.
-                return np.full(X_te.shape[0], float(uniq_y[0]), dtype=float)
+                return np.full(X_te.shape[0], float(uniq_y[0]), dtype=float), None
         model_g.fit(X_g, y_g)
         pred = _predict_prob_or_value(model_g, X_te, is_propensity=False)
         if y_is_binary:
             pred = np.clip(pred, 1e-12, 1 - 1e-12)
-        return pred
+        importance = None
+        if self._should_collect_feature_importance():
+            importance = self._extract_native_feature_importance(
+                model_g,
+                n_features=X_tr.shape[1],
+            )
+        return pred, importance
 
     def _fit_nuisances_for_fold(
         self,
@@ -574,12 +700,19 @@ class IRM(BaseEstimator):
         y: np.ndarray,
         d: np.ndarray,
         y_is_binary: bool,
-    ) -> Tuple[int, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    ) -> Tuple[
+        int,
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+        Optional[Dict[str, Optional[np.ndarray]]],
+    ]:
         """Fit nuisance models for one fold and return held-out predictions."""
         X_tr, y_tr, d_tr = X[train_idx], y[train_idx], d[train_idx]
         X_te = X[test_idx]
 
-        g0_te = self._fit_outcome_nuisance_for_treatment(
+        g0_te, g0_importance = self._fit_outcome_nuisance_for_treatment(
             treatment_value=0,
             X_tr=X_tr,
             y_tr=y_tr,
@@ -593,7 +726,7 @@ class IRM(BaseEstimator):
             ),
         )
 
-        g1_te = self._fit_outcome_nuisance_for_treatment(
+        g1_te, g1_importance = self._fit_outcome_nuisance_for_treatment(
             treatment_value=1,
             X_tr=X_tr,
             y_tr=y_tr,
@@ -610,8 +743,22 @@ class IRM(BaseEstimator):
         model_m = clone(self.ml_m)
         model_m.fit(X_tr, d_tr)
         m_te = _predict_prob_or_value(model_m, X_te, is_propensity=True)
+        m_importance = None
+        if self._should_collect_feature_importance():
+            m_importance = self._extract_native_feature_importance(
+                model_m,
+                n_features=X_tr.shape[1],
+            )
 
-        return fold_id, test_idx, g0_te, g1_te, m_te
+        fold_importance = None
+        if self._should_collect_feature_importance():
+            fold_importance = {
+                "m": m_importance,
+                "g0": g0_importance,
+                "g1": g1_importance,
+            }
+
+        return fold_id, test_idx, g0_te, g1_te, m_te, fold_importance
 
     def _cross_fit_nuisances(
         self,
@@ -619,13 +766,20 @@ class IRM(BaseEstimator):
         y: np.ndarray,
         d: np.ndarray,
         y_is_binary: bool,
-    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    ) -> Tuple[
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+        Optional[Dict[str, Any]],
+    ]:
         """Run cross-fitting and return nuisance predictions and fold ids."""
         n = X.shape[0]
         g0_hat = np.full(n, np.nan, dtype=float)
         g1_hat = np.full(n, np.nan, dtype=float)
         m_hat = np.full(n, np.nan, dtype=float)
         folds = np.full(n, -1, dtype=int)
+        fold_importances: List[Optional[Dict[str, Optional[np.ndarray]]]] = []
 
         skf = StratifiedKFold(
             n_splits=self.n_folds, shuffle=True, random_state=self.random_state
@@ -659,13 +813,22 @@ class IRM(BaseEstimator):
                 for i, (train_idx, test_idx) in enumerate(splits)
             )
 
-        for fold_id, test_idx, g0_te, g1_te, m_te in fold_results:
+        for fold_id, test_idx, g0_te, g1_te, m_te, fold_importance in fold_results:
             folds[test_idx] = fold_id
             g0_hat[test_idx] = g0_te
             g1_hat[test_idx] = g1_te
             m_hat[test_idx] = m_te
+            if self._should_collect_feature_importance():
+                fold_importances.append(fold_importance)
 
-        return g0_hat, g1_hat, m_hat, folds
+        feature_importance = None
+        if self._should_collect_feature_importance():
+            feature_importance = self._summarize_fold_feature_importances(
+                fold_importances,
+                n_features=X.shape[1],
+            )
+
+        return g0_hat, g1_hat, m_hat, folds, feature_importance
 
     def _store_cross_fitted_predictions(
         self,
@@ -673,6 +836,7 @@ class IRM(BaseEstimator):
         g1_hat: np.ndarray,
         m_hat: np.ndarray,
         folds: np.ndarray,
+        feature_importance: Optional[Dict[str, Any]],
     ) -> None:
         """Validate and store cross-fitted nuisance predictions."""
         if (
@@ -687,9 +851,11 @@ class IRM(BaseEstimator):
         if self.store_diagnostics:
             self.folds_ = folds
             self.m_hat_raw_ = np.asarray(m_hat, dtype=float).copy()
+            self.feature_importance_ = feature_importance
         else:
             self.folds_ = None
             self.m_hat_raw_ = None
+            self.feature_importance_ = None
 
     def _store_fit_sample(self, X: np.ndarray, y: np.ndarray, d: np.ndarray) -> None:
         """Persist immutable fit-time targets and optional diagnostic covariates."""
@@ -891,6 +1057,7 @@ class IRM(BaseEstimator):
         if store_diagnostics is not None:
             self.store_diagnostics = bool(store_diagnostics)
         self._fit_store_diagnostics_ = bool(self.store_diagnostics)
+        self.feature_importance_ = None
         if self.data is None:
             raise ValueError(
                 "Model must be provided with CausalData either in __init__ or in .fit(data_contracts)."
@@ -907,11 +1074,15 @@ class IRM(BaseEstimator):
         self._validate_treatment_support(d)
         self._store_fit_sample(X=X, y=y, d=d)
 
-        g0_hat, g1_hat, m_hat, folds = self._cross_fit_nuisances(
+        g0_hat, g1_hat, m_hat, folds, feature_importance = self._cross_fit_nuisances(
             X=X, y=y, d=d, y_is_binary=y_is_binary
         )
         self._store_cross_fitted_predictions(
-            g0_hat=g0_hat, g1_hat=g1_hat, m_hat=m_hat, folds=folds
+            g0_hat=g0_hat,
+            g1_hat=g1_hat,
+            m_hat=m_hat,
+            folds=folds,
+            feature_importance=feature_importance,
         )
 
         return self
@@ -1344,6 +1515,7 @@ class IRM(BaseEstimator):
             "g0_hat": self.g0_hat_,
             "g1_hat": self.g1_hat_,
             "folds": getattr(self, "folds_", None),
+            "feature_importance": getattr(self, "feature_importance_", None),
         }
 
     # Convenience properties

@@ -123,6 +123,7 @@ def _build_irm_estimate_diagnostic_data(
             g1_hat=g1_hat,
             m_hat=m_hat,
         ),
+        feature_importance=getattr(model, "feature_importance_", None),
         **sens_elements,
     )
     diag._model = model

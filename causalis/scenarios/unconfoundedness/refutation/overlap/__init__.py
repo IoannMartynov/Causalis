@@ -28,6 +28,7 @@ Examples
 ...     run_overlap_diagnostics,
 ...     plot_m_overlap,
 ...     plot_propensity_reliability,
+...     plot_feature_importance,
 ... )
 >>> data = obs_linear_26_dataset(
 ...     n=1000,
@@ -57,6 +58,7 @@ Examples
 >>> report["summary"]  # doctest: +SKIP
 >>> fig1 = plot_m_overlap(estimate)  # doctest: +SKIP
 >>> fig2 = plot_propensity_reliability(estimate, data=data)  # doctest: +SKIP
+>>> fig3 = plot_feature_importance(estimate)  # doctest: +SKIP
 """
 
 from __future__ import annotations
@@ -64,9 +66,11 @@ from __future__ import annotations
 from .overlap_validation import run_overlap_diagnostics
 from .overlap_plot import plot_m_overlap
 from .reliability_plot import plot_propensity_reliability
+from .feature_importance_plot import plot_feature_importance
 
 __all__ = [
     "run_overlap_diagnostics",
     "plot_m_overlap",
     "plot_propensity_reliability",
+    "plot_feature_importance",
 ]

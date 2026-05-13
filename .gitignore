@@ -97,6 +97,8 @@ Thumbs.db
 /notebooks/research/some_testing/
 /some_testing/
 /.venv
+/.venv.*
 /.venv39
+/.venv39.*
 /.pycache_tmp/
 /.local/

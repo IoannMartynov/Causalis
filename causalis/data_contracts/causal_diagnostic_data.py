@@ -46,6 +46,7 @@ class UnconfoundednessDiagnosticData(DiagnosticData):
     sensitivity_analysis: Optional[Dict[str, Any]] = None
     score_plot_cache: Optional[Dict[str, Any]] = None
     residual_plot_cache: Optional[Dict[str, Any]] = None
+    feature_importance: Optional[Dict[str, Any]] = None
 
 
 class MultiUnconfoundednessDiagnosticData(DiagnosticData):
