@@ -3,6 +3,9 @@ Causalis Dataclass for storing Cross-sectional DataFrame and column metadata for
 """
 
 from __future__ import annotations
+
+import hashlib
+
 import pandas as pd
 import numpy as np
 import pandas.api.types as pdtypes
@@ -191,7 +194,7 @@ class CausalData(BaseModel):
         # Outcome
         if not (pdtypes.is_numeric_dtype(df[outcome]) or pdtypes.is_bool_dtype(df[outcome])):
             raise ValueError(f"Column '{outcome}' specified as outcome must contain only int, float, or bool values.")
-        if df[outcome].nunique(dropna=False) <= 1:
+        if self._is_constant_series(df[outcome]):
             raise ValueError(
                 f"Column '{outcome}' specified as outcome is constant (has zero variance / single unique value), "
                 f"which is not allowed for causal inference."
@@ -200,7 +203,7 @@ class CausalData(BaseModel):
         # Treatment
         if not (pdtypes.is_numeric_dtype(df[treatment]) or pdtypes.is_bool_dtype(df[treatment])):
             raise ValueError(f"Column '{treatment}' specified as treatment must contain only int, float, or bool values.")
-        if df[treatment].nunique(dropna=False) <= 1:
+        if self._is_constant_series(df[treatment]):
             raise ValueError(
                 f"Column '{treatment}' specified as treatment is constant (has zero variance / single unique value), "
                 f"which is not allowed for causal inference."
@@ -213,7 +216,7 @@ class CausalData(BaseModel):
             if not (pdtypes.is_numeric_dtype(df[col]) or pdtypes.is_bool_dtype(df[col])):
                 raise ValueError(f"Column '{col}' specified as confounders must contain only int, float, or bool values.")
             
-            if df[col].nunique(dropna=False) <= 1:
+            if self._is_constant_series(df[col]):
                 raise ValueError(
                     f"Column '{col}' specified as confounder is constant (has zero variance / single unique value), "
                     f"which is not allowed for causal inference."
@@ -272,6 +275,18 @@ class CausalData(BaseModel):
                 f"Found values: {sorted(value_set)}"
             )
         return series.astype("int8")
+
+    @staticmethod
+    def _is_constant_series(series: pd.Series) -> bool:
+        """Return whether all values are equal without building a unique-value set."""
+        if len(series) == 0:
+            return True
+
+        values = series.to_numpy(copy=False)
+        try:
+            return bool(np.all(values == values[0]))
+        except (TypeError, ValueError):
+            return bool(series.nunique(dropna=False) <= 1)
 
     def _get_roles(self) -> dict[str, str]:
         """
@@ -356,16 +371,44 @@ class CausalData(BaseModel):
                 b.to_numpy(dtype=object, copy=False),
             )
 
-        for i, col1 in enumerate(cols):
-            for j in range(i + 1, len(cols)):
-                col2 = cols[j]
-                if _values_equal_ignore_dtype(df[col1], df[col2]):
-                    col1_role = self._get_column_type(col1)
-                    col2_role = self._get_column_type(col2)
-                    raise ValueError(
-                        f"Columns '{col1}' ({col1_role}) and '{col2}' ({col2_role}) have identical values, "
-                        f"which is not allowed for causal inference. Only column names differ."
-                    )
+        signatures: dict[tuple[str, int, str], list[str]] = {}
+        for col in cols:
+            signature = self._column_value_signature(df[col])
+            signatures.setdefault(signature, []).append(col)
+
+        for candidates in signatures.values():
+            if len(candidates) < 2:
+                continue
+
+            for i, col1 in enumerate(candidates):
+                for j in range(i + 1, len(candidates)):
+                    col2 = candidates[j]
+                    if _values_equal_ignore_dtype(df[col1], df[col2]):
+                        col1_role = self._get_column_type(col1)
+                        col2_role = self._get_column_type(col2)
+                        raise ValueError(
+                            f"Columns '{col1}' ({col1_role}) and '{col2}' ({col2_role}) have identical values, "
+                            f"which is not allowed for causal inference. Only column names differ."
+                        )
+
+    @staticmethod
+    def _column_value_signature(series: pd.Series) -> tuple[str, int, str]:
+        """Return a dtype-agnostic value fingerprint for duplicate-column screening."""
+        hasher = hashlib.blake2b(digest_size=16)
+
+        if pdtypes.is_numeric_dtype(series) or pdtypes.is_bool_dtype(series):
+            values = series.to_numpy(dtype=np.float64, copy=True)
+            # Keep dtype-agnostic equality consistent for 0.0 and -0.0.
+            values[values == 0.0] = 0.0
+            hasher.update(np.ascontiguousarray(values).view(np.uint8))
+            return ("numeric", len(series), hasher.hexdigest())
+
+        hashed = pd.util.hash_pandas_object(series, index=False, categorize=True).to_numpy(
+            dtype=np.uint64,
+            copy=False,
+        )
+        hasher.update(np.ascontiguousarray(hashed).view(np.uint8))
+        return ("object", len(series), hasher.hexdigest())
 
 
     def _get_column_type(self, column_name: str) -> str:
