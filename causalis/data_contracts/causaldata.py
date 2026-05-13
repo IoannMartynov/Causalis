@@ -5,12 +5,18 @@ Causalis Dataclass for storing Cross-sectional DataFrame and column metadata for
 from __future__ import annotations
 
 import hashlib
+import os
+from concurrent.futures import ThreadPoolExecutor
 
 import pandas as pd
 import numpy as np
 import pandas.api.types as pdtypes
 from typing import Union, List, Optional, Any, ClassVar
 from pydantic import BaseModel, ConfigDict, Field, model_validator, field_validator
+
+
+_PARALLEL_DUPLICATE_CHECK_MIN_CELLS = 5_000_000
+_MAX_DUPLICATE_CHECK_WORKERS = 8
 
 
 class CausalData(BaseModel):
@@ -371,10 +377,7 @@ class CausalData(BaseModel):
                 b.to_numpy(dtype=object, copy=False),
             )
 
-        signatures: dict[tuple[str, int, str], list[str]] = {}
-        for col in cols:
-            signature = self._column_value_signature(df[col])
-            signatures.setdefault(signature, []).append(col)
+        signatures = self._column_value_signatures(df, cols)
 
         for candidates in signatures.values():
             if len(candidates) < 2:
@@ -390,6 +393,45 @@ class CausalData(BaseModel):
                             f"Columns '{col1}' ({col1_role}) and '{col2}' ({col2_role}) have identical values, "
                             f"which is not allowed for causal inference. Only column names differ."
                         )
+
+    @staticmethod
+    def _column_value_signatures(
+        df: pd.DataFrame,
+        cols: list[str],
+    ) -> dict[tuple[str, int, str], list[str]]:
+        """Return value fingerprints grouped by signature, parallelizing for large tables."""
+        n_workers = CausalData._duplicate_check_worker_count(len(df), len(cols))
+
+        if n_workers <= 1:
+            items = ((col, CausalData._column_value_signature(df[col])) for col in cols)
+        else:
+            with ThreadPoolExecutor(max_workers=n_workers) as executor:
+                items = list(
+                    zip(
+                        cols,
+                        executor.map(
+                            CausalData._column_value_signature,
+                            (df[col] for col in cols),
+                        ),
+                    ),
+                )
+
+        signatures: dict[tuple[str, int, str], list[str]] = {}
+        for col, signature in items:
+            signatures.setdefault(signature, []).append(col)
+        return signatures
+
+    @staticmethod
+    def _duplicate_check_worker_count(n_rows: int, n_cols: int) -> int:
+        """Choose the number of duplicate-check workers without changing public API."""
+        if n_cols < 2:
+            return 1
+
+        n_cells = n_rows * n_cols
+        if n_cells < _PARALLEL_DUPLICATE_CHECK_MIN_CELLS:
+            return 1
+
+        return min(_MAX_DUPLICATE_CHECK_WORKERS, os.cpu_count() or 1, n_cols)
 
     @staticmethod
     def _column_value_signature(series: pd.Series) -> tuple[str, int, str]:
