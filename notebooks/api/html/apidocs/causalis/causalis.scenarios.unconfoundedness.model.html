@@ -102,8 +102,11 @@ Whether to retain raw fit-time arrays and diagnostic-only artifacts on the
 fitted model. Set to <code class="docutils literal notranslate"><span class="pre">False</span></code> for a lighter-weight estimator that still
 supports effect estimation, while only retaining immutable outcome and
 treatment snapshots. In lightweight mode the estimator no longer keeps
-the confounder matrix, raw propensities, or fold assignments in memory
-after <code class="docutils literal notranslate"><span class="pre">fit()</span></code>.</p>
+the confounder matrix, raw propensities, fold assignments, or compact
+native feature-importance diagnostics in memory after <code class="docutils literal notranslate"><span class="pre">fit()</span></code>.
+When enabled, supported native feature-importance sources are learner
+<code class="docutils literal notranslate"><span class="pre">feature_importances_</span></code>, <code class="docutils literal notranslate"><span class="pre">coef_</span></code>, and CatBoost
+<code class="docutils literal notranslate"><span class="pre">get_feature_importance()</span></code>.</p>
 <p class="rubric" id="id2">Examples</p>
 <blockquote>
 <div><blockquote>

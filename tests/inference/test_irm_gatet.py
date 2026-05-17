@@ -14,6 +14,7 @@ from causalis.scenarios.gate.model import (
     _coerce_groups_to_partition,
     _compute_gate_signal_from_irm,
     _compute_gatet_signal_from_irm,
+    _estimate_gatet_groupwise_summary_from_partition,
     estimate_gatet_from_irm,
 )
 from causalis.scenarios.unconfoundedness.model import IRM
@@ -98,11 +99,21 @@ def _manual_gatet_stats(
     elif cov_type == "HC1":
         variances[estimable_mask] = hc0[estimable_mask] * (n_obs / (n_obs - k))
     elif cov_type == "HC2":
-        leverage = 1.0 - 1.0 / n_group[estimable_mask].astype(float)
-        variances[estimable_mask] = hc0[estimable_mask] / leverage
+        hcx_mask = estimable_mask & (n_treated > 1)
+        obs_mask = hcx_mask[codes]
+        adjusted_u2 = np.zeros(n_obs, dtype=float)
+        leverage_denom = 1.0 - (d_float[obs_mask] / n_treated[codes[obs_mask]].astype(float))
+        adjusted_u2[obs_mask] = np.square(residual[obs_mask]) / leverage_denom
+        sum_adjusted_u2 = np.bincount(codes, weights=adjusted_u2, minlength=k)
+        variances[hcx_mask] = sum_adjusted_u2[hcx_mask] / np.square(n_treated[hcx_mask].astype(float))
     elif cov_type == "HC3":
-        leverage = 1.0 - 1.0 / n_group[estimable_mask].astype(float)
-        variances[estimable_mask] = hc0[estimable_mask] / np.square(leverage)
+        hcx_mask = estimable_mask & (n_treated > 1)
+        obs_mask = hcx_mask[codes]
+        adjusted_u2 = np.zeros(n_obs, dtype=float)
+        leverage_denom = 1.0 - (d_float[obs_mask] / n_treated[codes[obs_mask]].astype(float))
+        adjusted_u2[obs_mask] = np.square(residual[obs_mask]) / np.square(leverage_denom)
+        sum_adjusted_u2 = np.bincount(codes, weights=adjusted_u2, minlength=k)
+        variances[hcx_mask] = sum_adjusted_u2[hcx_mask] / np.square(n_treated[hcx_mask].astype(float))
     else:
         raise ValueError(cov_type)
 
@@ -230,6 +241,57 @@ def test_gatet_matches_manual_groupwise_formula(cov_type):
         else:
             assert np.isnan(res.std_phi[group_idx])
         assert group_name in partition.group_names
+
+
+def test_gatet_hc3_uses_treated_leverage_not_group_size():
+    z = np.asarray([2.0, 4.0, -1.0, 1.0, 3.0, 6.0, 9.0, -3.0])
+    d = np.asarray([1, 1, 0, 0, 1, 1, 1, 0], dtype=float)
+    m_hat = np.full(z.shape, 0.5, dtype=float)
+    groups = pd.Series(["a", "a", "a", "a", "b", "b", "b", "b"], name="segment")
+    partition = _coerce_groups_to_partition(groups, n_obs=z.shape[0])
+
+    stats = _estimate_gatet_groupwise_summary_from_partition(
+        z=z,
+        d=d,
+        m_hat=m_hat,
+        partition=partition,
+        cov_type="HC3",
+        alpha=0.05,
+    )
+
+    np.testing.assert_array_equal(stats["n_group"], np.asarray([4, 4]))
+    np.testing.assert_array_equal(stats["n_treated"], np.asarray([2, 3]))
+    np.testing.assert_allclose(stats["values"], np.asarray([3.0, 5.0]))
+    np.testing.assert_allclose(np.square(stats["std_errors"]), np.asarray([2.5, 6.25]))
+
+    old_group_leverage_variances = np.asarray([16.0 / 9.0, 160.0 / 27.0])
+    assert not np.allclose(np.square(stats["std_errors"]), old_group_leverage_variances)
+
+
+def test_gatet_hc3_sets_one_treated_group_inference_to_nan():
+    z = np.asarray([2.0, 4.0, -1.0, 1.0, 5.0, -2.0, 1.0, 3.0])
+    d = np.asarray([1, 1, 0, 0, 1, 0, 0, 0], dtype=float)
+    m_hat = np.full(z.shape, 0.5, dtype=float)
+    groups = pd.Series(["a", "a", "a", "a", "b", "b", "b", "b"], name="segment")
+    partition = _coerce_groups_to_partition(groups, n_obs=z.shape[0])
+
+    with pytest.warns(RuntimeWarning, match="only one treated observation"):
+        stats = _estimate_gatet_groupwise_summary_from_partition(
+            z=z,
+            d=d,
+            m_hat=m_hat,
+            partition=partition,
+            cov_type="HC3",
+            alpha=0.05,
+        )
+
+    one_treated_idx = stats["group_names"].index("segment=b")
+    assert stats["n_treated"][one_treated_idx] == 1
+    assert np.isfinite(stats["values"][one_treated_idx])
+    assert np.isnan(stats["std_errors"][one_treated_idx])
+    assert np.isnan(stats["p_values"][one_treated_idx])
+    assert np.isnan(stats["ci_lower"][one_treated_idx])
+    assert np.isnan(stats["ci_upper"][one_treated_idx])
 
 
 def test_gatet_ignores_normalize_ipw_and_cov_kwds():

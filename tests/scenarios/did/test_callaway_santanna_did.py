@@ -55,6 +55,7 @@ def test_dr_att_gt_and_aggregates_match_manual_staggered_did():
     estimate = CallawaySantAnnaDID(control_group="never_treated").fit(panel).estimate()
 
     assert isinstance(estimate, CallawaySantAnnaDIDEstimate)
+    assert estimate.estimand == "average_post_effect"
     assert estimate.model == "CallawaySantAnnaStaggeredDID"
     assert estimate.att_gt["att"].tolist() == pytest.approx([2.0, 2.0, 2.0, 3.0, 3.0])
     assert estimate.att == pytest.approx(2.4)
@@ -66,7 +67,9 @@ def test_dr_att_gt_and_aggregates_match_manual_staggered_did():
 
     cohort = estimate.aggregate("cohort")
     assert cohort["estimate"].tolist() == pytest.approx([2.0, 3.0])
-    assert estimate.summary().loc["model", "value"] == "CallawaySantAnnaStaggeredDID"
+    summary = estimate.summary()
+    assert summary.loc["estimand", "value"] == "average_post_effect"
+    assert summary.loc["model", "value"] == "CallawaySantAnnaStaggeredDID"
 
 
 def test_not_yet_treated_controls_work_without_never_treated_units():
@@ -124,6 +127,7 @@ def test_ipw_and_diagnostics_flag_are_supported_and_or_is_disabled():
         "influence_scores",
         "cell_diagnostics",
     } == set(estimate_ipw.diagnostics)
+    assert estimate_ipw.diagnostics["estimand"] == "average_post_effect"
     assert estimate_ipw.diagnostic_data is estimate_ipw.diagnostics
     with pytest.raises(ValueError, match="OR point estimator is disabled"):
         CallawaySantAnnaDID(estimator="or")
@@ -180,6 +184,24 @@ def test_generated_staggered_gamma_panel_fits_csa_model():
     assert not estimate.att_gt.empty
     assert np.isfinite(estimate.att)
     assert estimate.event_study()["event_time"].min() == 0
+
+
+def test_default_gamma_panel_uses_stable_low_variance_covariate_adjustment():
+    panel = generate_did_gamma_26(seed=42)
+
+    estimate = CallawaySantAnnaDID(estimator="dr").fit(panel).estimate(diagnostic_data=False)
+    rank_deficient = estimate.att_gt["diagnostic_flags"].astype(str).str.contains(
+        "rank_deficient_control_design",
+        regex=False,
+    )
+
+    assert panel.covariates == (
+        "market_traffic",
+        "avg_order_value",
+        "market_competition",
+    )
+    assert not rank_deficient.any()
+    assert estimate.se < 80.0
 
 
 def test_invalid_inputs_and_estimate_before_fit_are_rejected():

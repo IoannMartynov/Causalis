@@ -347,6 +347,17 @@ Bases: {py:obj}`causalis.data_contracts.causal_diagnostic_data.DiagnosticData`
 
 ````
 
+````{py:attribute} feature_importance
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.feature_importance
+:type: typing.Optional[typing.Dict[str, typing.Any]]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.feature_importance
+```
+
+````
+
 `````
 
 `````{py:class} MultiUnconfoundednessDiagnosticData(/, **data: typing.Any)

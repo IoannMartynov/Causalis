@@ -361,8 +361,8 @@ validated to form a valid model.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate.estimand">
-<span class="sig-name descname"><span class="pre">estimand</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">group_time_att</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate.estimand" title="Link to this definition">¶</a></dt>
-<dd><p>‘group_time_att’</p>
+<span class="sig-name descname"><span class="pre">estimand</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">average_post_effect</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate.estimand" title="Link to this definition">¶</a></dt>
+<dd><p>‘average_post_effect’</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -488,25 +488,25 @@ validated to form a valid model.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate.att">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">att</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate.att" title="Link to this definition">¶</a></dt>
-<dd><p>Simple overall ATT, weighting each treated cohort-time observation equally.</p>
+<dd><p>Simple overall post-treatment effect, weighted by treated cohort-time observations.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate.value">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">value</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate.value" title="Link to this definition">¶</a></dt>
-<dd><p>Alias for the simple overall ATT.</p>
+<dd><p>Alias for the simple overall post-treatment effect.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate.se">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">se</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate.se" title="Link to this definition">¶</a></dt>
-<dd><p>Standard error for the simple overall ATT.</p>
+<dd><p>Standard error for the simple overall post-treatment effect.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate.std_error">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">std_error</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate.std_error" title="Link to this definition">¶</a></dt>
-<dd><p>Alias for the simple overall ATT standard error.</p>
+<dd><p>Alias for the simple overall post-treatment effect standard error.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -545,7 +545,7 @@ validated to form a valid model.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate.summary">
 <span class="sig-name descname"><span class="pre">summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate.summary" title="Link to this definition">¶</a></dt>
-<dd><p>Return a compact summary of the simple overall ATT.</p>
+<dd><p>Return a compact summary of the average post-treatment effect.</p>
 </dd></dl>
 
 </dd></dl>

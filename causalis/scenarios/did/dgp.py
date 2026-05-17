@@ -14,15 +14,34 @@ PanelOutput = Union[pd.DataFrame, PanelDataDID]
 _DEFAULT_PRE_PERIODS = 24
 _DEFAULT_POST_PERIODS = 8
 _DEFAULT_N_COHORTS = 4
-_GAMMA_SHAPE = 9.0
-_ORACLE_COLS = ("y_cf", "tau_realized_true", "mu_cf", "mu_treated", "tau_mean_true")
-_INTERNAL_ORACLE_COLS = ("tau_rate_true",)
+_GAMMA_SHAPE = 25.0
 _COVARIATE_COLS = (
-    "exposure",
+    "market_traffic",
     "avg_order_value",
     "market_competition",
     "macro_index",
     "seasonality_index",
+)
+_DID_ADJUSTMENT_COVARIATE_COLS = (
+    "market_traffic",
+    "avg_order_value",
+    "market_competition",
+)
+_PANEL_DATA_DID_COLS = (
+    "unit_id",
+    "calendar_time",
+    "treated_time",
+    "y",
+    "region",
+    *_COVARIATE_COLS,
+)
+_ORACLE_COLS = (
+    "y_cf",
+    "mu_cf",
+    "mu_treated",
+    "tau_mean_true",
+    "tau_realized_true",
+    "tau_rate_true",
 )
 _REGIONS = ("north", "south", "east", "west", "central")
 _SEGMENTS = ("core", "growth", "enterprise")
@@ -206,7 +225,7 @@ def _build_panel_contract(df: pd.DataFrame) -> PanelDataDID:
         unit_col="unit_id",
         time_col="calendar_time",
         treated_time="treated_time",
-        covariates=_COVARIATE_COLS,
+        covariates=_DID_ADJUSTMENT_COVARIATE_COLS,
         cluster_col="region",
     )
     full_df = df.copy()
@@ -221,10 +240,10 @@ def _finalize_output(
     return_panel_data: bool,
     include_oracles: bool,
 ) -> PanelOutput:
-    drop_cols = list(_INTERNAL_ORACLE_COLS)
-    if not include_oracles:
-        drop_cols.extend(_ORACLE_COLS)
-    out = df.drop(columns=drop_cols, errors="ignore")
+    columns = list(_PANEL_DATA_DID_COLS)
+    if include_oracles:
+        columns.extend(_ORACLE_COLS)
+    out = df.loc[:, columns].copy()
     if return_panel_data:
         return _build_panel_contract(out)
     return out
@@ -235,8 +254,8 @@ def generate_did_gamma_26(
     seed: int = 42,
     return_panel_data: bool = True,
     include_oracles: bool = True,
-    n_treated_units: int = 20,
-    n_control_units: int = 60,
+    n_treated_units: int = 200,
+    n_control_units: int = 600,
     n_pre_periods: Optional[int] = None,
     n_post_periods: Optional[int] = None,
     n_cohorts: int = _DEFAULT_N_COHORTS,
@@ -254,8 +273,8 @@ def generate_did_gamma_26(
 
     The returned panel is long-format with absorbing treatment, multiple
     first-treatment cohorts, never-treated controls, baseline-compatible
-    covariates, cluster labels, and optional oracle counterfactual/effect
-    columns. It is intended to be consumed directly by
+    covariates, contextual time indices, cluster labels, and optional oracle
+    counterfactual/effect columns. It is intended to be consumed directly by
     :class:`causalis.scenarios.did.model.CallawaySantAnnaDID`.
 
     Parameters
@@ -329,7 +348,7 @@ def generate_did_gamma_26(
 
         \mu_{it}(1) = \mu_{it}(0) \cdot (1 + \tau_{it})
 
-    The counterfactual mean :math:`\mu_{it}(0)` is modeled as a product of exposure,
+    The counterfactual mean :math:`\mu_{it}(0)` is modeled as a product of market traffic,
     conversion rate, and average order value (AOV), each subject to macro-economic
     cycles, seasonality, and unit-level trends:
 
@@ -338,6 +357,9 @@ def generate_did_gamma_26(
         \ln \mu_{it}(0) = \ln(\text{Exposure}_{it}) + \ln(\text{ConvRate}_{it}) + \ln(\text{AOV}_{it})
 
     where each component follows an AR(1) process with latent confounding.
+    The generated dataframe keeps ``macro_index`` and ``seasonality_index`` as
+    contextual time indices, but the returned :class:`PanelDataDID` contract uses
+    only unit-varying covariates for DID adjustment.
     The treatment effect :math:`\tau_{it}` for a unit :math:`i` treated at time :math:`G_i` is:
 
     .. math::
@@ -495,7 +517,7 @@ def generate_did_gamma_26(
                     "mu_treated": float(mu_treated_full[period_idx, unit_idx] if treated_time else mu_cf[period_idx, unit_idx]),
                     "tau_mean_true": float(tau_mean_full[period_idx, unit_idx] if treated_time else 0.0),
                     "tau_rate_true": float(tau_rate_true[period_idx, unit_idx] if treated_time else 0.0),
-                    "exposure": float(exposure[period_idx, unit_idx] / 1000.0),
+                    "market_traffic": float(exposure[period_idx, unit_idx] / 1000.0),
                     "avg_order_value": float(avg_order_value[period_idx, unit_idx]),
                     "market_competition": float(market_competition[period_idx, unit_idx]),
                     "macro_index": float(macro_index[period_idx]),

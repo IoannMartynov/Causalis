@@ -14,6 +14,7 @@
 :maxdepth: 1
 
 causalis.scenarios.unconfoundedness.refutation.overlap.overlap_validation
+causalis.scenarios.unconfoundedness.refutation.overlap.feature_importance_plot
 causalis.scenarios.unconfoundedness.refutation.overlap.overlap_plot
 causalis.scenarios.unconfoundedness.refutation.overlap.reliability_plot
 ```
@@ -37,7 +38,7 @@ causalis.scenarios.unconfoundedness.refutation.overlap.reliability_plot
 ````{py:data} __all__
 :canonical: causalis.scenarios.unconfoundedness.refutation.overlap.__all__
 :value: >
-   ['run_overlap_diagnostics', 'plot_m_overlap', 'plot_propensity_reliability']
+   ['run_overlap_diagnostics', 'plot_m_overlap', 'plot_propensity_reliability', 'plot_feature_importanc...
 
 ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.overlap.__all__
 ```

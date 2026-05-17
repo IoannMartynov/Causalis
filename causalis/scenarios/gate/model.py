@@ -760,6 +760,16 @@ def _estimate_gatet_groupwise_summary_from_partition(
                 RuntimeWarning,
             )
 
+    one_treated_mask = n_treated == 1
+    if cov_type in {"HC2", "HC3"} and one_treated_mask.any():
+        one_treated_names = [group_names[idx] for idx in np.flatnonzero(one_treated_mask)]
+        warnings.warn(
+            f"GATET groups {one_treated_names} have only one treated observation. "
+            f"{cov_type} covariance is undefined because treated leverage is 1; "
+            "their inference is set to NaN.",
+            RuntimeWarning,
+        )
+
     hc1_scale = np.nan
     if cov_type == "HC1":
         denom = n_obs - k
@@ -804,11 +814,21 @@ def _estimate_gatet_groupwise_summary_from_partition(
     elif cov_type == "HC1":
         variances[estimable_mask] = hc0_var[estimable_mask] * hc1_scale
     elif cov_type == "HC2":
-        leverage = 1.0 - (1.0 / n_group_f[estimable_mask])
-        variances[estimable_mask] = hc0_var[estimable_mask] / leverage
+        hcx_mask = estimable_mask & (n_treated > 1)
+        obs_mask = hcx_mask[codes]
+        adjusted_u2 = np.zeros(n_obs, dtype=float)
+        leverage_denom = 1.0 - (d_float[obs_mask] / n_treated_f[codes[obs_mask]])
+        adjusted_u2[obs_mask] = np.square(u[obs_mask]) / leverage_denom
+        sum_adjusted_u2 = np.bincount(codes, weights=adjusted_u2, minlength=k)
+        variances[hcx_mask] = sum_adjusted_u2[hcx_mask] / np.square(n_treated_f[hcx_mask])
     elif cov_type == "HC3":
-        leverage = 1.0 - (1.0 / n_group_f[estimable_mask])
-        variances[estimable_mask] = hc0_var[estimable_mask] / np.square(leverage)
+        hcx_mask = estimable_mask & (n_treated > 1)
+        obs_mask = hcx_mask[codes]
+        adjusted_u2 = np.zeros(n_obs, dtype=float)
+        leverage_denom = 1.0 - (d_float[obs_mask] / n_treated_f[codes[obs_mask]])
+        adjusted_u2[obs_mask] = np.square(u[obs_mask]) / np.square(leverage_denom)
+        sum_adjusted_u2 = np.bincount(codes, weights=adjusted_u2, minlength=k)
+        variances[hcx_mask] = sum_adjusted_u2[hcx_mask] / np.square(n_treated_f[hcx_mask])
     else:
         raise ValueError(f"Unsupported cov_type: {cov_type!r}")
 
@@ -1221,6 +1241,9 @@ def estimate_gatet_from_irm(
         confidence intervals, covariance matrix, and group-level diagnostics.
         The returned object also supports ``contrast(...)`` and
         ``pairwise_summary(...)`` for formal post-estimation group comparisons.
+        Per-group ``summary()["is_significant"]`` tests each subgroup effect
+        against zero; use formal contrasts to test whether subgroup effects
+        differ from one another.
 
     Examples
     --------

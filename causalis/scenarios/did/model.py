@@ -1196,7 +1196,7 @@ class CallawaySantAnnaDID:
         skipped_cells = self._skipped_cells.copy() if self._skipped_cells is not None else pd.DataFrame()
         weights = pd.concat(weights_parts, ignore_index=True) if weights_parts else pd.DataFrame()
         diagnostics: dict[str, Any] = {
-            "estimand": "group_time_att",
+            "estimand": "average_post_effect",
             "ci_alpha": float(a),
             "diagnostic_data_requested": bool(include_diagnostics),
             "estimator": self.estimator,

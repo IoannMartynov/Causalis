@@ -564,9 +564,9 @@ Bases: {py:obj}`pydantic.BaseModel`
 
 ````{py:attribute} estimand
 :canonical: causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate.estimand
-:type: typing.Literal[group_time_att]
+:type: typing.Literal[average_post_effect]
 :value: >
-   'group_time_att'
+   'average_post_effect'
 
 ```{autodoc2-docstring} causalis.data_contracts.panel_did_estimate.CallawaySantAnnaDIDEstimate.estimand
 ```
