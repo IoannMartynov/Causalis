@@ -217,7 +217,10 @@ covariance formulas implemented in this module.</p>
 Result contract containing subgroup-treated effects, standard errors,
 confidence intervals, covariance matrix, and group-level diagnostics.
 The returned object also supports <code class="docutils literal notranslate"><span class="pre">contrast(...)</span></code> and
-<code class="docutils literal notranslate"><span class="pre">pairwise_summary(...)</span></code> for formal post-estimation group comparisons.</p>
+<code class="docutils literal notranslate"><span class="pre">pairwise_summary(...)</span></code> for formal post-estimation group comparisons.
+Per-group <code class="docutils literal notranslate"><span class="pre">summary()[&quot;is_significant&quot;]</span></code> tests each subgroup effect
+against zero; use formal contrasts to test whether subgroup effects
+differ from one another.</p>
 <p class="rubric" id="id11">Examples</p>
 <blockquote>
 <div><blockquote>

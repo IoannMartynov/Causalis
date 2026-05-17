@@ -53,7 +53,7 @@
 
 ````
 
-````{py:function} generate_did_gamma_26(*, seed: int = 42, return_panel_data: bool = True, include_oracles: bool = True, n_treated_units: int = 20, n_control_units: int = 60, n_pre_periods: typing.Optional[int] = None, n_post_periods: typing.Optional[int] = None, n_cohorts: int = _DEFAULT_N_COHORTS, treatment_effect_rate: float = 0.08, treatment_effect_slope: float = 0.0, treatment_effect_heterogeneity_std: float = 0.025, parallel_trend_violation: float = 0.0, calendar_start: str = '2021-01', time_freq: str = 'M', treated_prefix: str = 'treated_market_', control_prefix: str = 'control_market_', **advanced_params) -> causalis.scenarios.did.dgp.PanelOutput
+````{py:function} generate_did_gamma_26(*, seed: int = 42, return_panel_data: bool = True, include_oracles: bool = True, n_treated_units: int = 200, n_control_units: int = 600, n_pre_periods: typing.Optional[int] = None, n_post_periods: typing.Optional[int] = None, n_cohorts: int = _DEFAULT_N_COHORTS, treatment_effect_rate: float = 0.08, treatment_effect_slope: float = 0.0, treatment_effect_heterogeneity_std: float = 0.025, parallel_trend_violation: float = 0.0, calendar_start: str = '2021-01', time_freq: str = 'M', treated_prefix: str = 'treated_market_', control_prefix: str = 'control_market_', **advanced_params) -> causalis.scenarios.did.dgp.PanelOutput
 :canonical: causalis.scenarios.did.dgp.generate_did_gamma_26
 
 ```{autodoc2-docstring} causalis.scenarios.did.dgp.generate_did_gamma_26

@@ -13,6 +13,14 @@ from causalis.scenarios.did import generate_did_gamma_26
 
 
 ORACLE_COLS = {"y_cf", "tau_realized_true", "mu_cf", "mu_treated", "tau_mean_true"}
+SCENARIO_ORACLE_COLS = {
+    "y_cf",
+    "mu_cf",
+    "mu_treated",
+    "tau_mean_true",
+    "tau_realized_true",
+    "tau_rate_true",
+}
 COVARIATE_COLS = {
     "exposure",
     "avg_order_value",
@@ -20,6 +28,31 @@ COVARIATE_COLS = {
     "macro_index",
     "seasonality_index",
 }
+SCENARIO_PANEL_COLUMNS = [
+    "unit_id",
+    "calendar_time",
+    "treated_time",
+    "y",
+    "region",
+    "market_traffic",
+    "avg_order_value",
+    "market_competition",
+    "macro_index",
+    "seasonality_index",
+]
+SCENARIO_ADJUSTMENT_COVARIATES = (
+    "market_traffic",
+    "avg_order_value",
+    "market_competition",
+)
+SCENARIO_ORACLE_COLUMNS = [
+    "y_cf",
+    "mu_cf",
+    "mu_treated",
+    "tau_mean_true",
+    "tau_realized_true",
+    "tau_rate_true",
+]
 
 
 def test_generate_did_data_returns_contract_with_oracle_effects():
@@ -141,8 +174,11 @@ def test_did_gamma_26_scenario_wrapper_generates_staggered_csa_panel():
     assert scenario_panel.design_type == "staggered_adoption"
     assert len(scenario_panel.cohorts) == 3
     assert len(scenario_panel.never_treated_units) == 8
-    assert ORACLE_COLS.issubset(scenario_panel.df.columns)
-    assert COVARIATE_COLS.issubset(scenario_panel.df.columns)
+    assert scenario_panel.covariates == SCENARIO_ADJUSTMENT_COVARIATES
+    assert list(scenario_panel.df.columns) == SCENARIO_PANEL_COLUMNS + SCENARIO_ORACLE_COLUMNS
+    assert SCENARIO_ORACLE_COLS.issubset(scenario_panel.df.columns)
+    assert set(SCENARIO_PANEL_COLUMNS[5:]).issubset(scenario_panel.df.columns)
+    assert "tau_rate_true" in scenario_panel.df.columns
     assert scenario_panel.att_gt_cells()["is_supported"].all()
 
     scenario_df = generate_did_gamma_26(
@@ -156,5 +192,17 @@ def test_did_gamma_26_scenario_wrapper_generates_staggered_csa_panel():
         n_cohorts=3,
     )
 
-    assert {"y_cf", "tau_mean_true"}.isdisjoint(scenario_df.columns)
-    assert scenario_df["cohort"].nunique(dropna=True) == 3
+    assert list(scenario_df.columns) == SCENARIO_PANEL_COLUMNS
+    assert SCENARIO_ORACLE_COLS.isdisjoint(scenario_df.columns)
+    assert "tau_rate_true" not in scenario_df.columns
+
+    raw_panel = PanelDataDID(
+        df=scenario_df,
+        y="y",
+        unit_col="unit_id",
+        time_col="calendar_time",
+        treated_time="treated_time",
+        covariates=SCENARIO_ADJUSTMENT_COVARIATES,
+        cluster_col="region",
+    )
+    assert len(raw_panel.cohorts) == 3

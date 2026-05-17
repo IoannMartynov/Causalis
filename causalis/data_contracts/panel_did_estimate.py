@@ -228,7 +228,7 @@ class CallawaySantAnnaDIDEstimate(BaseModel):
         validate_assignment=True,
     )
 
-    estimand: Literal["group_time_att"] = "group_time_att"
+    estimand: Literal["average_post_effect"] = "average_post_effect"
     model: str
 
     estimator: str
@@ -256,25 +256,25 @@ class CallawaySantAnnaDIDEstimate(BaseModel):
 
     @property
     def att(self) -> float:
-        """Simple overall ATT, weighting each treated cohort-time observation equally."""
+        """Simple overall post-treatment effect, weighted by treated cohort-time observations."""
 
         return float(self.aggregates["simple"].iloc[0]["estimate"])
 
     @property
     def value(self) -> float:
-        """Alias for the simple overall ATT."""
+        """Alias for the simple overall post-treatment effect."""
 
         return self.att
 
     @property
     def se(self) -> float:
-        """Standard error for the simple overall ATT."""
+        """Standard error for the simple overall post-treatment effect."""
 
         return float(self.aggregates["simple"].iloc[0]["se"])
 
     @property
     def std_error(self) -> float:
-        """Alias for the simple overall ATT standard error."""
+        """Alias for the simple overall post-treatment effect standard error."""
 
         return self.se
 
@@ -378,11 +378,11 @@ class CallawaySantAnnaDIDEstimate(BaseModel):
         return f"{out:.4f}"
 
     def summary(self) -> pd.DataFrame:
-        """Return a compact summary of the simple overall ATT."""
+        """Return a compact summary of the average post-treatment effect."""
 
         row = self.aggregates["simple"].iloc[0]
         values = {
-            "estimand": "ATT",
+            "estimand": self.estimand,
             "model": self.model,
             "estimator": self.estimator,
             "control_group": self.control_group,

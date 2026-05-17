@@ -59,6 +59,7 @@ from causalis.scenarios.unconfoundedness.refutation.overlap import (
 …     run_overlap_diagnostics,
 …     plot_m_overlap,
 …     plot_propensity_reliability,
+…     plot_feature_importance,
 … )
 data = obs_linear_26_dataset(
 …     n=1000,
@@ -87,7 +88,8 @@ estimate = irm.fit().estimate(score=”ATE”)
 report = run_overlap_diagnostics(data, estimate)
 report[“summary”]  # doctest: +SKIP
 fig1 = plot_m_overlap(estimate)  # doctest: +SKIP
-fig2 = plot_propensity_reliability(estimate, data=data)  # doctest: +SKIP</p>
+fig2 = plot_propensity_reliability(estimate, data=data)  # doctest: +SKIP
+fig3 = plot_feature_importance(estimate)  # doctest: +SKIP</p>
 </div></blockquote>
 </div></blockquote>
 </div></blockquote>
@@ -104,6 +106,7 @@ fig2 = plot_propensity_reliability(estimate, data=data)  # doctest: +SKIP</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="causalis.scenarios.unconfoundedness.refutation.overlap.overlap_validation.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.unconfoundedness.refutation.overlap.overlap_validation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="causalis.scenarios.unconfoundedness.refutation.overlap.feature_importance_plot.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.unconfoundedness.refutation.overlap.feature_importance_plot</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="causalis.scenarios.unconfoundedness.refutation.overlap.overlap_plot.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.unconfoundedness.refutation.overlap.overlap_plot</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="causalis.scenarios.unconfoundedness.refutation.overlap.reliability_plot.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.scenarios.unconfoundedness.refutation.overlap.reliability_plot</span></code></a></li>
 </ul>
@@ -126,7 +129,7 @@ fig2 = plot_propensity_reliability(estimate, data=data)  # doctest: +SKIP</p>
 <dl class="py data">
 <dt class="sig sig-object py" id="causalis.scenarios.unconfoundedness.refutation.overlap.__all__">
 <span class="sig-prename descclassname"><span class="pre">causalis.scenarios.unconfoundedness.refutation.overlap.</span></span><span class="sig-name descname"><span class="pre">__all__</span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.refutation.overlap.__all__" title="Link to this definition">¶</a></dt>
-<dd><p>[‘run_overlap_diagnostics’, ‘plot_m_overlap’, ‘plot_propensity_reliability’]</p>
+<dd><p>[‘run_overlap_diagnostics’, ‘plot_m_overlap’, ‘plot_propensity_reliability’, ‘plot_feature_importanc…</p>
 </dd></dl>
 
 </section>
