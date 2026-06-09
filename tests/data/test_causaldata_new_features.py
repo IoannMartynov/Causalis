@@ -28,6 +28,53 @@ def test_causal_data_dtype_agnostic_duplicates():
     with pytest.raises(ValueError, match="have identical values"):
         CausalData(df=df, outcome="y", treatment="d", confounders=["x"])
 
+
+def test_multi_causal_data_dtype_agnostic_duplicates_with_many_columns():
+    df = pd.DataFrame({
+        "user_id": [f"u{i}" for i in range(6)],
+        "y": [0.5, 1.0, 1.5, 2.0, 2.5, 3.0],
+        "d0": [1, 0, 0, 1, 0, 0],
+        "d1": [0, 1, 0, 0, 1, 0],
+        "d2": [0, 0, 1, 0, 0, 1],
+        "x0": [0, 1, 2, 3, 4, 5],
+        "x1": [2, 3, 5, 7, 11, 13],
+        "x2": [1, 4, 9, 16, 25, 36],
+        "x3": [10, 20, 30, 40, 50, 60],
+        "x_dup": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0],
+    })
+
+    with pytest.raises(ValueError, match="Columns 'x0' and 'x_dup' have identical values"):
+        MultiCausalData(
+            df=df,
+            outcome="y",
+            treatment_names=["d0", "d1", "d2"],
+            confounders=["x0", "x1", "x2", "x3", "x_dup"],
+            user_id="user_id",
+            control_treatment="d0",
+        )
+
+
+def test_multi_causal_data_allows_string_user_id_after_optimized_duplicate_check():
+    df = pd.DataFrame({
+        "user_id": ["u0", "u1", "u2", "u3"],
+        "y": [0.5, 1.0, 1.5, 2.0],
+        "d0": [1, 0, 1, 0],
+        "d1": [0, 1, 0, 1],
+        "x": [10, 20, 30, 40],
+    })
+
+    data = MultiCausalData(
+        df=df,
+        outcome="y",
+        treatment_names=["d0", "d1"],
+        confounders=["x"],
+        user_id="user_id",
+        control_treatment="d0",
+    )
+
+    assert list(data.df["user_id"]) == ["u0", "u1", "u2", "u3"]
+
+
 def test_causal_data_get_df_empty():
     df = pd.DataFrame({
         "y": [1, 2, 3],
@@ -218,6 +265,5 @@ def test_multi_causal_data_get_df():
     
     df_empty = mcd.get_df(include_outcome=False, include_confounders=False, include_treatments=False)
     assert df_empty.shape == (3, 0)
-
 
 

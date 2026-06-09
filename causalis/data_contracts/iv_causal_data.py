@@ -209,9 +209,9 @@ class IVCausalData(CausalData):
         bool
             True when all non-missing values are binary.
         """
-        values = series.dropna().unique()
         if pdtypes.is_bool_dtype(series):
             return True
+        values = series.dropna().unique()
         return set(values).issubset({0, 1})
 
     def _check_duplicate_column_values(self, df: pd.DataFrame):
@@ -244,9 +244,16 @@ class IVCausalData(CausalData):
                 b.to_numpy(dtype=object, copy=False),
             )
 
-        for i, col1 in enumerate(cols):
-            for col2 in cols[i + 1 :]:
-                if _values_equal_ignore_dtype(df[col1], df[col2]):
+        signatures = self._column_value_signatures(df, cols)
+
+        for candidates in signatures.values():
+            if len(candidates) < 2:
+                continue
+
+            for i, col1 in enumerate(candidates):
+                for col2 in candidates[i + 1 :]:
+                    if not _values_equal_ignore_dtype(df[col1], df[col2]):
+                        continue
                     col1_role = self._get_column_type(col1)
                     col2_role = self._get_column_type(col2)
                     raise ValueError(

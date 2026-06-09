@@ -23,7 +23,7 @@
 
 ### API
 
-`````{py:class} IRM(data: typing.Optional[causalis.dgp.causaldata.CausalData] = None, ml_g: typing.Any = None, ml_m: typing.Any = None, *, n_folds: int = 5, n_rep: int = 1, normalize_ipw: bool = False, trimming_rule: str = 'truncate', trimming_threshold: float = 0.01, weights: typing.Optional[numpy.ndarray | typing.Dict[str, typing.Any]] = None, relative_baseline_min: float = 1e-08, random_state: typing.Optional[int] = None, n_jobs: int = 1, store_diagnostics: bool = True)
+`````{py:class} IRM(data: typing.Optional[causalis.dgp.causaldata.CausalData] = None, ml_g: typing.Any = None, ml_m: typing.Any = None, *, n_folds: int = 4, n_rep: int = 1, normalize_ipw: bool = False, trimming_rule: str = 'truncate', trimming_threshold: float = 0.01, weights: typing.Optional[numpy.ndarray | typing.Dict[str, typing.Any]] = None, relative_baseline_min: float = 1e-08, random_state: typing.Optional[int] = None, n_jobs: int = 1, store_diagnostics: bool = True)
 :canonical: causalis.scenarios.unconfoundedness.model.IRM
 
 Bases: {py:obj}`sklearn.base.BaseEstimator`

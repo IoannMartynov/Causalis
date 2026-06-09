@@ -100,6 +100,39 @@ def test_iv_causal_data_rejects_invalid_instruments():
         IVCausalData(df=df, treatment="d", outcome="y", instruments="z_same_as_d")
 
 
+def test_iv_causal_data_rejects_instrument_duplicate_values_against_confounder():
+    df = pd.DataFrame(
+        {
+            "y": [1.0, 2.0, 3.0, 4.0],
+            "d": [0, 1, 0, 1],
+            "z": [1, 1, 0, 0],
+            "x_same_as_z": [1.0, 1.0, 0.0, 0.0],
+        }
+    )
+
+    with pytest.raises(ValueError, match="have identical values"):
+        IVCausalData(
+            df=df,
+            treatment="d",
+            outcome="y",
+            instruments="z",
+            confounders=["x_same_as_z"],
+        )
+
+
+def test_iv_causal_data_instrument_nan_uses_inherited_nan_error_path():
+    df = pd.DataFrame(
+        {
+            "y": [1.0, 2.0, 3.0, 4.0],
+            "d": [0, 1, 0, 1],
+            "z": [1.0, 1.0, 0.0, float("nan")],
+        }
+    )
+
+    with pytest.raises(ValueError, match="NaN values in used columns"):
+        IVCausalData(df=df, treatment="d", outcome="y", instruments="z")
+
+
 def test_iv_causal_data_requires_binary_treatment_and_instrument():
     df = pd.DataFrame(
         {

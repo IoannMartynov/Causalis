@@ -10,6 +10,8 @@ import pandas.api.types as pdtypes
 from typing import Union, List, Optional, Any, ClassVar
 from pydantic import BaseModel, ConfigDict, Field, model_validator, field_validator
 
+from causalis.data_contracts.causaldata import CausalData
+
 
 class MultiCausalData(BaseModel):
     """
@@ -315,7 +317,7 @@ class MultiCausalData(BaseModel):
             raise ValueError(f"Column '{outcome}' specified as outcome must contain only int, float, or bool values.")
         if not np.isfinite(df[outcome].to_numpy(dtype=float, copy=False)).all():
             raise ValueError(f"Column '{outcome}' specified as outcome must contain only finite values.")
-        if df[outcome].nunique(dropna=False) <= 1:
+        if CausalData._is_constant_series(df[outcome]):
             raise ValueError(f"Column '{outcome}' specified as outcome is constant (zero variance).")
 
         # 5) confounders type + non-constant
@@ -324,7 +326,7 @@ class MultiCausalData(BaseModel):
                 raise ValueError(f"Column '{c}' specified as confounder must contain only int, float, or bool values.")
             if not np.isfinite(df[c].to_numpy(dtype=float, copy=False)).all():
                 raise ValueError(f"Column '{c}' specified as confounder must contain only finite values.")
-            if df[c].nunique(dropna=False) <= 1:
+            if CausalData._is_constant_series(df[c]):
                 raise ValueError(f"Column '{c}' specified as confounder is constant (zero variance).")
 
         # 5b) treatment type + finite checks (before binary casting)
@@ -408,7 +410,7 @@ class MultiCausalData(BaseModel):
             If the column is not binary or is constant.
         """
         # Non-constant
-        if s.nunique(dropna=False) <= 1:
+        if CausalData._is_constant_series(s):
             raise ValueError(f"Treatment column '{name}' is constant (zero variance).")
 
         # bool already converted to int8 earlier
@@ -463,9 +465,16 @@ class MultiCausalData(BaseModel):
                 b.to_numpy(dtype=object, copy=False),
             )
 
-        for i, c1 in enumerate(cols):
-            for c2 in cols[i + 1 :]:
-                if _eq(df[c1], df[c2]):
+        signatures = CausalData._column_value_signatures(df, cols)
+
+        for candidates in signatures.values():
+            if len(candidates) < 2:
+                continue
+
+            for i, c1 in enumerate(candidates):
+                for c2 in candidates[i + 1 :]:
+                    if not _eq(df[c1], df[c2]):
+                        continue
                     raise ValueError(
                         f"Columns '{c1}' and '{c2}' have identical values, which is not allowed for causal inference."
                     )

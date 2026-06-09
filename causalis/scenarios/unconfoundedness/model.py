@@ -240,7 +240,7 @@ class IRM(BaseEstimator):
         ml_g: Any = None,
         ml_m: Any = None,
         *,
-        n_folds: int = 5,
+        n_folds: int = 4,
         n_rep: int = 1,
         normalize_ipw: bool = False,
         trimming_rule: str = "truncate",
