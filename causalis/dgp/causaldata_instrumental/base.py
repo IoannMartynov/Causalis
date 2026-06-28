@@ -99,7 +99,7 @@ class InstrumentalGenerator(CausalDatasetGenerator):
 
     def __post_init__(self) -> None:
         """Initialize RNG and validate IV-specific configuration."""
-        super().__post_init__()
+        CausalDatasetGenerator.__post_init__(self)
         if not isinstance(self.instrument_name, str) or not self.instrument_name:
             raise ValueError("instrument_name must be a non-empty string.")
         if self.instrument_name in {"y", "d"}:

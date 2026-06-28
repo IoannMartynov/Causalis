@@ -9,6 +9,7 @@ from causalis.data_contracts.causal_diagnostic_data import (
 )
 from causalis.data_contracts.causal_estimate import CausalEstimate
 from causalis.data_contracts.iv_causal_estimate import IVCausalEstimate
+from causalis.data_contracts.multicausal_estimate import MultiCausalEstimate
 
 
 def test_diagnostic_data_instantiation():
@@ -96,6 +97,29 @@ def test_causal_estimate_without_diagnostic_data():
     assert estimate.diagnostic_data is None
 
 
+def test_causal_estimate_summary_starts_with_outcome_column_name():
+    estimate = CausalEstimate(
+        estimand="ATE",
+        model="test_model",
+        value=1.0,
+        ci_upper_absolute=1.5,
+        ci_lower_absolute=0.5,
+        alpha=0.05,
+        is_significant=True,
+        n_treated=10,
+        n_control=10,
+        treatment_mean=1.2,
+        control_mean=0.8,
+        outcome="y",
+        treatment="d",
+    )
+
+    summary = estimate.summary()
+
+    assert summary.index[0] == "outcome"
+    assert summary.iloc[0]["value"] == "y"
+
+
 def test_causal_estimate_with_empty_dict_diagnostic_data():
     estimate = CausalEstimate(
         estimand="ATE",
@@ -171,6 +195,8 @@ def test_iv_causal_estimate_with_diagnostic_data():
     assert estimate.diagnostic_data.first_stage["weak_iv_flag"] == "GREEN"
     assert estimate.diagnostic_data.reduced_form["reduced_form_effect"] == 0.1
     summary = estimate.summary()
+    assert summary.index[0] == "outcome"
+    assert summary.iloc[0]["value"] == "y"
     assert summary.loc["estimand", "value"] == "LATE"
     assert summary.loc["value", "value"] == "1.0000 (ci_abs: 0.8000, 1.2000)"
     assert summary.loc["value_relative", "value"] is None
@@ -200,3 +226,25 @@ def test_iv_causal_estimate_summary_formats_relative_ci():
         estimate.summary().loc["value_relative", "value"]
         == "0.2000 (ci_rel: 0.1000, 0.3000)"
     )
+
+
+def test_multi_causal_estimate_summary_starts_with_outcome_column_name():
+    estimate = MultiCausalEstimate(
+        estimand="ATE",
+        model="test_model",
+        value=np.array([1.0, 2.0]),
+        ci_upper_absolute=np.array([1.5, 2.5]),
+        ci_lower_absolute=np.array([0.5, 1.5]),
+        alpha=0.05,
+        p_value=np.array([0.01, 0.02]),
+        is_significant=[True, True],
+        n_treated=20,
+        n_control=10,
+        outcome="y",
+        treatment=["d0", "d1", "d2"],
+    )
+
+    summary = estimate.summary()
+
+    assert summary.index[0] == "outcome"
+    assert summary.iloc[0].tolist() == ["y", "y"]

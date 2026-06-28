@@ -56,6 +56,7 @@ class IVCausalEstimate(BaseModel):
             )
 
         summary = {
+            "outcome": self.outcome,
             "estimand": self.estimand,
             "model": self.model,
             "value": value_abs,
@@ -65,7 +66,6 @@ class IVCausalEstimate(BaseModel):
             "alpha": _fmt_float(self.alpha),
             "p_value": _fmt_float(self.p_value),
             "is_significant": self.is_significant,
-            "outcome": self.outcome,
             "treatment": self.treatment,
             "instrument": self.instrument,
             "time": self.time,

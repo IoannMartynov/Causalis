@@ -109,6 +109,7 @@ class CausalEstimate(BaseModel):
             )
 
         summary = {
+            "outcome": self.outcome,
             "estimand": self.estimand,
             "model": self.model,
             "value": value_abs,

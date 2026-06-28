@@ -186,6 +186,7 @@ class MultiCausalEstimate(BaseModel):
                 control_mean_i = float(control_mean_by_arm[i])
 
             summary_columns[contrast] = {
+                "outcome": self.outcome,
                 "estimand": self.estimand,
                 "model": self.model,
                 "value": value_abs,

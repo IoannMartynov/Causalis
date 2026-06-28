@@ -133,6 +133,7 @@ def test_multi_treatment_irm_summary_uses_causalestimate_style_with_one_column_p
     assert summary.index.name == "field"
     assert summary.columns.tolist() == ["d1 vs d0", "d2 vs d0"]
     assert summary.index.tolist() == [
+        "outcome",
         "estimand",
         "model",
         "value",
@@ -146,6 +147,7 @@ def test_multi_treatment_irm_summary_uses_causalestimate_style_with_one_column_p
         "control_mean",
         "time",
     ]
+    assert summary.loc["outcome"].tolist() == [data.outcome, data.outcome]
     assert "ci_abs:" in summary.loc["value", "d1 vs d0"]
     assert "ci_abs:" in summary.loc["value", "d2 vs d0"]
     assert summary.loc["n_treated", "d1 vs d0"] == int(np.sum(data.get_df()["d1"].to_numpy() == 1))
