@@ -30,7 +30,7 @@ def test_uncofoundedness_balance_ate(normalize_ipw):
         ml_m=ml_m,
         n_folds=3,
         normalize_ipw=normalize_ipw,
-        trimming_threshold=1e-3,
+        overlap_threshold=1e-3,
         random_state=7,
     ).fit().estimate(alpha=0.10)
 
@@ -80,7 +80,7 @@ def test_uncofoundedness_balance_att(normalize_ipw):
         ml_m=ml_m,
         n_folds=3,
         normalize_ipw=normalize_ipw,
-        trimming_threshold=1e-3,
+        overlap_threshold=1e-3,
         random_state=13,
     ).fit().estimate(score="ATTE", alpha=0.10)
 

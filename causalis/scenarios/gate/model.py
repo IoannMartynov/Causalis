@@ -177,10 +177,22 @@ def _align_groups_to_fit_observations(
     else:
         raise TypeError("groups must be a pandas Series, DataFrame or numpy array.")
 
-    if groups_df.shape[0] != n_obs:
-        raise ValueError(f"groups must have {n_obs} rows, got {groups_df.shape[0]}.")
-
     fit_index, _ = _resolve_fit_observation_index(irm_model=irm_model, n_obs=n_obs, estimand=estimand)
+
+    if groups_df.shape[0] != n_obs:
+        if fit_index.is_unique and groups_df.index.is_unique and set(fit_index).issubset(set(groups_df.index)):
+            aligned = groups_df.reindex(fit_index)
+            if original_is_series:
+                return aligned.iloc[:, 0].rename(original_name)
+            return aligned
+
+        aligned = _align_groups_via_fit_row_index(groups_df=groups_df, irm_model=irm_model, fit_index=fit_index)
+        if aligned is not None:
+            if original_is_series:
+                return aligned.iloc[:, 0].rename(original_name)
+            return aligned
+
+        raise ValueError(f"groups must align to the {n_obs} retained fit observations.")
 
     if not groups_df.index.is_unique:
         raise ValueError("groups index must be unique so rows can be aligned to the fit-time sample.")
@@ -225,6 +237,8 @@ def _align_groups_via_fit_row_index(
 
     if groups_df.index.equals(fit_row_index_resolved):
         groups_by_row = groups_df
+    elif set(fit_row_index_resolved).issubset(set(groups_df.index)):
+        groups_by_row = groups_df.reindex(fit_row_index_resolved)
     elif set(groups_df.index) == set(fit_row_index_resolved):
         groups_by_row = groups_df.reindex(fit_row_index_resolved)
     else:
@@ -948,7 +962,8 @@ def _build_gate_estimate(
         "covariance_structure": "diagonal",
         "cov_kwds": {},
         "cov_kwds_requested": {} if cov_kwds is None else dict(cov_kwds),
-        "trimming_threshold": float(getattr(irm_model, "trimming_threshold", np.nan)),
+        "overlap_policy": str(getattr(irm_model, "overlap_policy", "clip")),
+        "overlap_threshold": float(getattr(irm_model, "overlap_threshold", np.nan)),
         "normalize_ipw_requested": normalize_ipw_requested,
         "normalize_ipw_effective": False,
         "se_approx_hajek": False,

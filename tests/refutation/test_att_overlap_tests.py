@@ -13,7 +13,7 @@ def test_run_overlap_diagnostics_structure_and_basic_flags():
         m_hat=m,
         d=d,
         normalize_ipw=True,
-        trimming_threshold=0.05,
+        overlap_threshold=0.05,
     )
 
     out = run_overlap_diagnostics(data, estimate)

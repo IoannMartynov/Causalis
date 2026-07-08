@@ -17,7 +17,7 @@ from .score_validation import (
     _normalize_score,
     _resolve_ate_weights,
     _resolve_normalize_ipw,
-    _resolve_trimming_threshold,
+    _resolve_overlap_threshold,
     _validate_estimate_matches_data,
 )
 
@@ -67,7 +67,7 @@ def _top_k_indices(abs_psi: np.ndarray, top_k: int) -> np.ndarray:
 def _resolve_inputs(
     estimate: CausalEstimate,
     data: Optional[CausalData],
-    trimming_threshold: Optional[float],
+    overlap_threshold: Optional[float],
     use_estimator_psi: bool,
 ) -> dict[str, object]:
     """Resolve arrays needed for lightweight top-influence plotting."""
@@ -82,8 +82,8 @@ def _resolve_inputs(
         )
 
     cache = getattr(diagnostic_data, "score_plot_cache", None)
-    if isinstance(cache, dict) and use_estimator_psi and trimming_threshold is None:
-        required = {"score", "trimming_threshold", "d", "m_clipped", "psi"}
+    if isinstance(cache, dict) and use_estimator_psi and overlap_threshold is None:
+        required = {"score", "overlap_threshold", "d", "m_clipped", "psi"}
         if required.issubset(set(cache.keys())):
             d_cached = np.asarray(cache.get("d"), dtype=float).ravel()
             m_cached = np.asarray(cache.get("m_clipped"), dtype=float).ravel()
@@ -104,7 +104,7 @@ def _resolve_inputs(
             ):
                 return {
                     "score": str(cache.get("score", "ATE")),
-                    "trimming_threshold": float(cache.get("trimming_threshold", 0.0)),
+                    "overlap_threshold": float(cache.get("overlap_threshold", 0.0)),
                     "d": d_cached,
                     "m_clipped": m_cached,
                     "psi": psi_cached,
@@ -121,7 +121,7 @@ def _resolve_inputs(
         raise ValueError("estimate.diagnostic_data must include `m_hat` and `g0_hat`.")
 
     score = _normalize_score(getattr(diagnostic_data, "score", estimate.estimand))
-    trimming_thr = _resolve_trimming_threshold(trimming_threshold, diagnostic_data, estimate)
+    overlap_thr = _resolve_overlap_threshold(overlap_threshold, diagnostic_data, estimate)
     normalize_ipw = _resolve_normalize_ipw(score, diagnostic_data, estimate)
 
     y_raw = getattr(diagnostic_data, "y", None)
@@ -160,7 +160,7 @@ def _resolve_inputs(
             try:
                 w_model, w_bar_model = model_ref._get_weights(
                     n=n,
-                    m_hat_adj=np.clip(m, trimming_thr, 1.0 - trimming_thr),
+                    m_hat_adj=np.clip(m, overlap_thr, 1.0 - overlap_thr),
                     d=d.astype(int),
                     score="ATE",
                 )
@@ -211,7 +211,7 @@ def _resolve_inputs(
     if score != "ATE":
         p_treated = float(np.mean(d))
         w = d / (p_treated + 1e-12)
-        w_bar = np.clip(m, trimming_thr, 1.0 - trimming_thr) / (p_treated + 1e-12)
+        w_bar = np.clip(m, overlap_thr, 1.0 - overlap_thr) / (p_treated + 1e-12)
 
     theta = float(estimate.value)
     if psi is None:
@@ -223,7 +223,7 @@ def _resolve_inputs(
                 g1=g1,
                 m=m,
                 theta=theta,
-                trimming_threshold=trimming_thr,
+                overlap_threshold=overlap_thr,
                 normalize_ipw=normalize_ipw,
                 w=w,
                 w_bar=w_bar,
@@ -235,14 +235,14 @@ def _resolve_inputs(
                 g0=g0,
                 m=m,
                 theta=theta,
-                trimming_threshold=trimming_thr,
+                overlap_threshold=overlap_thr,
             )
 
     resolved = {
         "score": score,
-        "trimming_threshold": float(trimming_thr),
+        "overlap_threshold": float(overlap_thr),
         "d": d,
-        "m_clipped": np.clip(m, trimming_thr, 1.0 - trimming_thr),
+        "m_clipped": np.clip(m, overlap_thr, 1.0 - overlap_thr),
         "psi": np.asarray(psi, dtype=float).ravel(),
         "row_index": row_index,
         "observation_label": _labels_from_user_id(
@@ -261,7 +261,7 @@ def plot_influence_instability(
     estimate: CausalEstimate,
     data: Optional[CausalData] = None,
     *,
-    trimming_threshold: Optional[float] = None,
+    overlap_threshold: Optional[float] = None,
     use_estimator_psi: bool = True,
     top_k: int = 20,
     annotate: bool = True,
@@ -327,11 +327,11 @@ def plot_influence_instability(
     resolved = _resolve_inputs(
         estimate=estimate,
         data=data,
-        trimming_threshold=trimming_threshold,
+        overlap_threshold=overlap_threshold,
         use_estimator_psi=use_estimator_psi,
     )
     score = str(resolved["score"])
-    trim = float(resolved["trimming_threshold"])
+    overlap = float(resolved["overlap_threshold"])
     d = np.asarray(resolved["d"], dtype=float)
     m_clipped = np.asarray(resolved["m_clipped"], dtype=float)
     psi = np.asarray(resolved["psi"], dtype=float)
@@ -423,8 +423,8 @@ def plot_influence_instability(
                     textcoords="offset points",
                 )
 
-        ax_scatter.axvline(trim, color="0.35", linestyle=":", linewidth=1.1)
-        ax_scatter.axvline(1.0 - trim, color="0.35", linestyle=":", linewidth=1.1)
+        ax_scatter.axvline(overlap, color="0.35", linestyle=":", linewidth=1.1)
+        ax_scatter.axvline(1.0 - overlap, color="0.35", linestyle=":", linewidth=1.1)
         ax_scatter.set_xlim(0.0, 1.0)
         ax_scatter.set_yscale("log")
         ax_scatter.set_xlabel(r"Clipped propensity $m_i$")
@@ -435,7 +435,7 @@ def plot_influence_instability(
         ax_scatter.text(
             0.02,
             0.98,
-            f"score={score}\ntrim={trim:.4f}\ntop_k={top_n}",
+            f"score={score}\noverlap={overlap:.4f}\ntop_k={top_n}",
             transform=ax_scatter.transAxes,
             ha="left",
             va="top",

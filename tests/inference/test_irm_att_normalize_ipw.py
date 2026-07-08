@@ -35,7 +35,7 @@ def fit_irm(normalize_ipw: bool, seed=123):
     ml_m = LogisticRegression(max_iter=1000, solver='lbfgs')
 
     irm = IRM(data=cd, ml_g=ml_g, ml_m=ml_m, n_folds=5, normalize_ipw=normalize_ipw,
-              trimming_threshold=1e-6, random_state=42)
+              overlap_threshold=1e-6, random_state=42)
     irm.fit().estimate(score="ATTE")
     return irm
 

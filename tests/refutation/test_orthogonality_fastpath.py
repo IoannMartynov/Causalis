@@ -28,8 +28,8 @@ def test_score_diagnostics_is_deterministic_for_fixed_estimate():
     data = _make_data(n=240, seed=777)
     estimate = _make_estimate(data)
 
-    out1 = run_score_diagnostics(data, estimate, trimming_threshold=0.01, n_basis_funcs=3, return_summary=True)
-    out2 = run_score_diagnostics(data, estimate, trimming_threshold=0.01, n_basis_funcs=3, return_summary=True)
+    out1 = run_score_diagnostics(data, estimate, overlap_threshold=0.01, n_basis_funcs=3, return_summary=True)
+    out2 = run_score_diagnostics(data, estimate, overlap_threshold=0.01, n_basis_funcs=3, return_summary=True)
 
     assert out1["params"] == out2["params"]
     assert np.isclose(out1["influence_diagnostics"]["se_plugin"], out2["influence_diagnostics"]["se_plugin"])

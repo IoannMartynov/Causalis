@@ -24,11 +24,18 @@ from causalis.data_contracts.causal_diagnostic_data import IVDiagnosticData
 from causalis.data_contracts.iv_causal_estimate import IVCausalEstimate
 from causalis.data_contracts.iv_causal_data import IVCausalData
 from causalis.scenarios.unconfoundedness._utils import (
-    _clip_propensity,
     _is_binary,
     _predict_prob_or_value,
     _safe_is_classifier,
 )
+
+
+def _clip_iv_propensity(p: np.ndarray, threshold: float) -> np.ndarray:
+    """Clip IV propensity scores to the configured trimming interval."""
+    threshold_f = float(threshold)
+    if not np.isfinite(threshold_f) or not (0.0 <= threshold_f < 0.5):
+        raise ValueError("trimming_threshold must be finite and in [0, 0.5).")
+    return np.clip(p, threshold_f, 1.0 - threshold_f)
 
 
 class IIVM(BaseEstimator):
@@ -576,7 +583,7 @@ class IIVM(BaseEstimator):
             "g_hat0": g_hat0,
             "g_hat1": g_hat1,
             "m_hat_raw": m_hat_raw,
-            "m_hat": _clip_propensity(m_hat_raw, self.trimming_threshold),
+            "m_hat": _clip_iv_propensity(m_hat_raw, self.trimming_threshold),
             "r_hat0": r_hat0,
             "r_hat1": r_hat1,
         }

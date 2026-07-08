@@ -47,10 +47,11 @@ from causalis.scenarios.unconfoundedness._score_utils import (
     _use_normalized_ipw as _use_normalized_irm_ipw,
 )
 from causalis.scenarios.unconfoundedness._utils import (
-    _clip_propensity,
+    _apply_overlap_policy,
     _is_binary,
     _predict_prob_or_value,
     _safe_is_classifier,
+    _validate_overlap_config,
 )
 
 
@@ -75,10 +76,13 @@ class IRM(BaseEstimator):
     normalize_ipw : bool, default False
         Whether to normalize IPW terms within the score. Applied to ATE only.
         For ATTE, normalization is ignored to preserve the canonical ATTE EIF.
-    trimming_rule : {"truncate"}, default "truncate"
-        Trimming approach for propensity scores.
-    trimming_threshold : float, default 1e-2
-        Threshold for trimming if rule is "truncate".
+    overlap_policy : {"clip", "drop"}, default "clip"
+        How to handle propensity scores near 0 or 1. ``"clip"`` bounds
+        propensity scores to ``[overlap_threshold, 1 - overlap_threshold]``.
+        ``"drop"`` removes observations outside that interval after
+        cross-fitted propensities are estimated.
+    overlap_threshold : float, default 1e-2
+        Boundary used by the overlap policy. Must be finite and in ``[0, 0.5)``.
     weights : Optional[np.ndarray or Dict], default None
         Optional weights.
         - If array of shape (n,), used as ATE weights (w). Assumed E[w|X] = w.
@@ -173,13 +177,17 @@ class IRM(BaseEstimator):
     :math:`\hat g_1(x) \approx \mathbb{E}[Y \mid D=1, X=x]`,
     :math:`\hat g_0(x) \approx \mathbb{E}[Y \mid D=0, X=x]`, and
     :math:`\hat m(x) \approx \mathbb{P}(D=1 \mid X=x)`.
-    Propensities are trimmed via
+    By default, propensities are clipped via
 
     .. math::
 
         \tilde m(x) = \min\{1-\varepsilon, \max(\hat m(x), \varepsilon)\},
 
-    where :math:`\varepsilon =` ``trimming_threshold``.
+    where :math:`\varepsilon =` ``overlap_threshold``. With
+    ``overlap_policy="drop"``, rows with raw cross-fitted propensity outside
+    :math:`(\varepsilon, 1-\varepsilon)` are removed from the estimation and
+    diagnostic sample instead. The resulting estimand is therefore defined on
+    the retained overlap sample.
 
     Estimation solves the sample moment equation
 
@@ -243,8 +251,8 @@ class IRM(BaseEstimator):
         n_folds: int = 4,
         n_rep: int = 1,
         normalize_ipw: bool = False,
-        trimming_rule: str = "truncate",
-        trimming_threshold: float = 1e-2,
+        overlap_policy: str = "clip",
+        overlap_threshold: float = 1e-2,
         weights: Optional[np.ndarray | Dict[str, Any]] = None,
         relative_baseline_min: float = 1e-8,
         random_state: Optional[int] = None,
@@ -261,8 +269,10 @@ class IRM(BaseEstimator):
         self.n_rep = int(n_rep)
         self.score = "ATE"
         self.normalize_ipw = bool(normalize_ipw)
-        self.trimming_rule = str(trimming_rule)
-        self.trimming_threshold = float(trimming_threshold)
+        self.overlap_policy, self.overlap_threshold = _validate_overlap_config(
+            overlap_policy,
+            overlap_threshold,
+        )
         self.weights = weights
         self.relative_baseline_min = float(relative_baseline_min)
         self.random_state = random_state
@@ -278,6 +288,8 @@ class IRM(BaseEstimator):
         self._fit_sample_fingerprint_ = None
         self.folds_ = None
         self.m_hat_raw_ = None
+        self.overlap_mask_ = None
+        self.overlap_n_dropped_ = 0
         self.feature_importance_ = None
 
         # Initialize default learners if not provided
@@ -317,10 +329,6 @@ class IRM(BaseEstimator):
 
         # If ml_g is still None and HAS_CATBOOST is True, it means data was not provided.
         # It will be initialized in fit().
-        if not np.isfinite(self.trimming_threshold) or not (
-            0.0 <= self.trimming_threshold < 0.5
-        ):
-            raise ValueError("trimming_threshold must be finite and in [0, 0.5).")
         if self.relative_baseline_min < 0.0:
             raise ValueError("relative_baseline_min must be non-negative.")
         if self.n_jobs == 0 or self.n_jobs < -1:
@@ -437,12 +445,10 @@ class IRM(BaseEstimator):
             raise NotImplementedError("IRM currently supports n_rep=1 only.")
         if self.n_folds < 2:
             raise ValueError("n_folds must be at least 2")
-        if self.trimming_rule not in {"truncate"}:
-            raise ValueError("Only trimming_rule='truncate' is supported")
-        if not np.isfinite(self.trimming_threshold) or not (
-            0.0 <= self.trimming_threshold < 0.5
-        ):
-            raise ValueError("trimming_threshold must be finite and in [0, 0.5).")
+        self.overlap_policy, self.overlap_threshold = _validate_overlap_config(
+            self.overlap_policy,
+            self.overlap_threshold,
+        )
 
     def _should_collect_feature_importance(self) -> bool:
         """Return whether native feature importances should be collected."""
@@ -845,12 +851,57 @@ class IRM(BaseEstimator):
             or np.any(np.isnan(g1_hat))
         ):
             raise RuntimeError("Cross-fitted predictions contain NaN values.")
+
+        m_policy, overlap_mask = _apply_overlap_policy(
+            m_hat,
+            policy=self.overlap_policy,
+            threshold=self.overlap_threshold,
+        )
+        overlap_mask = np.asarray(overlap_mask, dtype=bool).ravel()
+        if overlap_mask.size != np.asarray(m_hat).size:
+            raise RuntimeError("Overlap mask has inconsistent length.")
+
+        self.overlap_mask_ = overlap_mask.copy()
+        self.overlap_n_dropped_ = int(overlap_mask.size - int(np.sum(overlap_mask)))
+
+        raw_m_hat = np.asarray(m_hat, dtype=float).ravel()
+        if self.overlap_policy == "drop":
+            if not np.any(overlap_mask):
+                raise ValueError(
+                    "overlap_policy='drop' removed all observations. "
+                    "Lower overlap_threshold or use overlap_policy='clip'."
+                )
+            if self._y is not None:
+                self._y = self._y[overlap_mask]
+            if self._d is not None:
+                self._d = self._d[overlap_mask]
+                n_treated = int(np.sum(self._d == 1))
+                n_control = int(np.sum(self._d == 0))
+                if n_treated == 0 or n_control == 0:
+                    raise ValueError(
+                        "overlap_policy='drop' must retain at least one treated "
+                        "and one control observation."
+                    )
+            if self._X is not None:
+                self._X = self._X[overlap_mask]
+            if self._fit_index_ is not None:
+                self._fit_index_ = pd.Index(self._fit_index_[overlap_mask], name=self._fit_index_.name)
+            if self._fit_row_index_ is not None:
+                self._fit_row_index_ = pd.Index(
+                    self._fit_row_index_[overlap_mask],
+                    name=self._fit_row_index_.name,
+                )
+            g0_hat = np.asarray(g0_hat, dtype=float).ravel()[overlap_mask]
+            g1_hat = np.asarray(g1_hat, dtype=float).ravel()[overlap_mask]
+            folds = np.asarray(folds).ravel()[overlap_mask]
+            raw_m_hat = raw_m_hat[overlap_mask]
+
         self.g0_hat_ = g0_hat
         self.g1_hat_ = g1_hat
-        self.m_hat_ = _clip_propensity(m_hat, self.trimming_threshold)
+        self.m_hat_ = m_policy
         if self.store_diagnostics:
             self.folds_ = folds
-            self.m_hat_raw_ = np.asarray(m_hat, dtype=float).copy()
+            self.m_hat_raw_ = raw_m_hat.copy()
             self.feature_importance_ = feature_importance
         else:
             self.folds_ = None
@@ -1303,8 +1354,9 @@ class IRM(BaseEstimator):
                 "n_folds": self.n_folds,
                 "n_rep": self.n_rep,
                 "normalize_ipw": normalize_ipw_effective,
-                "trimming_rule": self.trimming_rule,
-                "trimming_threshold": self.trimming_threshold,
+                "overlap_policy": self.overlap_policy,
+                "overlap_threshold": self.overlap_threshold,
+                "overlap_n_dropped": int(getattr(self, "overlap_n_dropped_", 0)),
                 "random_state": self.random_state,
                 "n_jobs": self.n_jobs,
                 "std_error": se,
@@ -1512,6 +1564,9 @@ class IRM(BaseEstimator):
         return {
             "m_hat": self.m_hat_,
             "m_hat_raw": getattr(self, "m_hat_raw_", None),
+            "overlap_policy": self.overlap_policy,
+            "overlap_threshold": self.overlap_threshold,
+            "overlap_mask": getattr(self, "overlap_mask_", None),
             "g0_hat": self.g0_hat_,
             "g1_hat": self.g1_hat_,
             "folds": getattr(self, "folds_", None),

@@ -22,7 +22,7 @@ def test_run_score_diagnostics_has_flags_by_default():
         ml_m=LogisticRegression(max_iter=400),
         n_folds=3,
         normalize_ipw=True,
-        trimming_threshold=1e-3,
+        overlap_threshold=1e-3,
         random_state=17,
     ).fit().estimate(score="ATE")
 

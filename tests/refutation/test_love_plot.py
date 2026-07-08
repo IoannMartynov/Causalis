@@ -73,7 +73,7 @@ def _make_data_and_estimate(
     estimate = CausalEstimate(
         estimand="ATE",
         model="IRM",
-        model_options={"normalize_ipw": False, "trimming_threshold": 1e-3},
+        model_options={"normalize_ipw": False, "overlap_threshold": 1e-3},
         value=float(np.mean(y_t) - np.mean(y_c)),
         ci_upper_absolute=0.2,
         ci_lower_absolute=-0.2,

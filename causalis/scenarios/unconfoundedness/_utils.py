@@ -1,4 +1,4 @@
-"""Numeric helpers for unconfoundedness IRM models."""
+"""Numeric helpers for binary-treatment unconfoundedness estimators."""
 from __future__ import annotations
 
 from typing import Any, Optional
@@ -95,10 +95,42 @@ def _predict_prob_or_value(model, X: np.ndarray, is_propensity: bool = False) ->
     return res
 
 
-def _clip_propensity(p: np.ndarray, thr: float) -> np.ndarray:
-    """Clip propensity scores to be within [thr, 1 - thr]."""
-    thr = float(thr)
-    if not np.isfinite(thr) or thr < 0.0 or thr >= 0.5:
-        raise ValueError("trimming_threshold must be finite and in [0, 0.5).")
-    return np.clip(p, thr, 1.0 - thr)
+def _validate_overlap_config(policy: str, threshold: float) -> tuple[str, float]:
+    """Validate and normalize the overlap policy configuration."""
+    policy_norm = str(policy).lower()
+    if policy_norm not in {"clip", "drop"}:
+        raise ValueError("overlap_policy must be either 'clip' or 'drop'.")
 
+    threshold_f = float(threshold)
+    if not np.isfinite(threshold_f) or not (0.0 <= threshold_f < 0.5):
+        raise ValueError("overlap_threshold must be finite and in [0, 0.5).")
+    return policy_norm, threshold_f
+
+
+def _overlap_retained_mask(p: np.ndarray, threshold: float) -> np.ndarray:
+    """Return rows whose propensity scores satisfy strict overlap."""
+    threshold_f = float(threshold)
+    p_arr = np.asarray(p, dtype=float).ravel()
+    return (p_arr > threshold_f) & (p_arr < 1.0 - threshold_f)
+
+
+def _apply_overlap_policy(
+    p: np.ndarray,
+    *,
+    policy: str,
+    threshold: float,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Apply the configured overlap policy to a propensity vector.
+
+    ``clip`` returns a clipped vector with an all-true mask. ``drop`` returns
+    only retained propensity scores and the full-sample boolean retention mask.
+    """
+    policy_norm, threshold_f = _validate_overlap_config(policy, threshold)
+    p_arr = np.asarray(p, dtype=float).ravel()
+
+    if policy_norm == "clip":
+        mask = np.ones(p_arr.shape[0], dtype=bool)
+        return np.clip(p_arr, threshold_f, 1.0 - threshold_f), mask
+
+    mask = _overlap_retained_mask(p_arr, threshold_f)
+    return p_arr[mask], mask

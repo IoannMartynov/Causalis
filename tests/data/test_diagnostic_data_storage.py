@@ -40,7 +40,7 @@ def test_dml_ate_returns_diagnostic_data():
     dd = res.diagnostic_data
     assert dd is not None
     # Check essential fields in UnconfoundednessDiagnosticData
-    for attr in ["m_hat", "g0_hat", "g1_hat", "y", "d", "trimming_threshold"]:
+    for attr in ["m_hat", "g0_hat", "g1_hat", "y", "d", "overlap_threshold"]:
         assert hasattr(dd, attr), f"diagnostic_data missing attribute '{attr}'"
 
     assert len(dd.m_hat) == n

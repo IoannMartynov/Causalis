@@ -20,21 +20,21 @@ from causalis.scenarios.unconfoundedness.refutation._shared import (
 )
 
 
-def _resolve_trimming_threshold(
-    trimming_threshold: Optional[float],
+def _resolve_overlap_threshold(
+    overlap_threshold: Optional[float],
     diagnostic_data: Any,
     estimate: CausalEstimate,
 ) -> float:
     """Resolve the clipping threshold from explicit, diagnostic, or model state."""
-    if trimming_threshold is not None:
-        return float(trimming_threshold)
+    if overlap_threshold is not None:
+        return float(overlap_threshold)
 
-    trim_thr = getattr(diagnostic_data, "trimming_threshold", None)
-    if trim_thr is None:
-        trim_thr = estimate.model_options.get("trimming_threshold", None)
-    if trim_thr is None:
-        trim_thr = 0.01
-    return float(trim_thr)
+    overlap_thr = getattr(diagnostic_data, "overlap_threshold", None)
+    if overlap_thr is None:
+        overlap_thr = estimate.model_options.get("overlap_threshold", None)
+    if overlap_thr is None:
+        overlap_thr = 0.01
+    return float(overlap_thr)
 
 
 def _resolve_normalize_ipw(score: str, diagnostic_data: Any, estimate: CausalEstimate) -> bool:
@@ -54,14 +54,14 @@ def _aipw_score_ate(
     g1: np.ndarray,
     m: np.ndarray,
     theta: float,
-    trimming_threshold: float,
+    overlap_threshold: float,
     *,
     normalize_ipw: bool,
     w: np.ndarray,
     w_bar: np.ndarray,
 ) -> np.ndarray:
     """Compute per-observation ATE score residuals."""
-    m_clipped = np.clip(m, trimming_threshold, 1.0 - trimming_threshold)
+    m_clipped = np.clip(m, overlap_threshold, 1.0 - overlap_threshold)
     h1, h0 = _normalize_ipw_terms(d, m_clipped, normalize_ipw=normalize_ipw)
     u0 = y - g0
     u1 = y - g1
@@ -75,10 +75,10 @@ def _aipw_score_atte(
     g0: np.ndarray,
     m: np.ndarray,
     theta: float,
-    trimming_threshold: float,
+    overlap_threshold: float,
 ) -> np.ndarray:
     """Compute per-observation ATTE score residuals."""
-    m_clipped = np.clip(m, trimming_threshold, 1.0 - trimming_threshold)
+    m_clipped = np.clip(m, overlap_threshold, 1.0 - overlap_threshold)
     p_treated = float(np.mean(d))
     gamma = m_clipped / (1.0 - m_clipped)
     num = d * (y - g0 - theta) - (1.0 - d) * gamma * (y - g0)
@@ -92,7 +92,7 @@ def _orthogonality_derivatives_ate(
     g0: np.ndarray,
     g1: np.ndarray,
     m: np.ndarray,
-    trimming_threshold: float,
+    overlap_threshold: float,
     *,
     normalize_ipw: bool,
     w: np.ndarray,
@@ -100,7 +100,7 @@ def _orthogonality_derivatives_ate(
 ) -> pd.DataFrame:
     """Estimate finite-basis orthogonality derivatives for the ATE score."""
     n, b = x_basis.shape
-    m_clipped = np.clip(m, trimming_threshold, 1.0 - trimming_threshold)
+    m_clipped = np.clip(m, overlap_threshold, 1.0 - overlap_threshold)
     h1, h0 = _normalize_ipw_terms(d, m_clipped, normalize_ipw=normalize_ipw)
 
     dg1_terms = x_basis * (w - w_bar * h1)[:, None]
@@ -140,12 +140,12 @@ def _orthogonality_derivatives_atte(
     d: np.ndarray,
     g0: np.ndarray,
     m: np.ndarray,
-    trimming_threshold: float,
+    overlap_threshold: float,
 ) -> pd.DataFrame:
     """Estimate finite-basis orthogonality derivatives for the ATTE score."""
     n, b = x_basis.shape
     p_treated = float(np.mean(d))
-    m_clipped = np.clip(m, trimming_threshold, 1.0 - trimming_threshold)
+    m_clipped = np.clip(m, overlap_threshold, 1.0 - overlap_threshold)
     odds = m_clipped / (1.0 - m_clipped)
 
     dg0_terms = x_basis * (((1.0 - d) * odds - d) / (p_treated + 1e-12))[:, None]
@@ -180,7 +180,7 @@ def _influence_summary(
     m: np.ndarray,
     theta: float,
     score: str,
-    trimming_threshold: float,
+    overlap_threshold: float,
     *,
     normalize_ipw: bool,
     w: np.ndarray,
@@ -199,13 +199,13 @@ def _influence_summary(
             g1,
             m,
             theta,
-            trimming_threshold,
+            overlap_threshold,
             normalize_ipw=normalize_ipw,
             w=w,
             w_bar=w_bar,
         )
     else:
-        psi = _aipw_score_atte(y, d, g0, m, theta, trimming_threshold)
+        psi = _aipw_score_atte(y, d, g0, m, theta, overlap_threshold)
 
     n = int(psi.size)
     se = float(np.std(psi, ddof=1) / np.sqrt(n)) if n > 1 else 0.0
@@ -346,11 +346,11 @@ def run_score_diagnostics(
     data: CausalData,
     estimate: CausalEstimate,
     *,
-    trimming_threshold: Optional[float] = None,
+    overlap_threshold: Optional[float] = None,
     n_basis_funcs: Optional[int] = None,
     return_summary: bool = True,
 ) -> Dict[str, Any]:
-    """Run orthogonality and influence diagnostics for ATE or ATTE scores.
+    r"""Run orthogonality and influence diagnostics for ATE or ATTE scores.
 
     The main object is the per-observation score contribution. For ATE, this
     diagnostic uses
@@ -381,7 +381,7 @@ def run_score_diagnostics(
     estimate : CausalEstimate
         Effect estimate with ``diagnostic_data`` containing nuisance predictions
         and optionally cached score arrays.
-    trimming_threshold : float, optional
+    overlap_threshold : float, optional
         Propensity clipping threshold. If omitted, the value is inferred from
         diagnostic or model metadata.
     n_basis_funcs : int, optional
@@ -449,7 +449,7 @@ def run_score_diagnostics(
         raise ValueError("estimate.diagnostic_data must include `m_hat` and `g0_hat`.")
 
     score = _normalize_score(getattr(diagnostic_data, "score", estimate.estimand))
-    trimming_thr = _resolve_trimming_threshold(trimming_threshold, diagnostic_data, estimate)
+    overlap_thr = _resolve_overlap_threshold(overlap_threshold, diagnostic_data, estimate)
     normalize_ipw = _resolve_normalize_ipw(score, diagnostic_data, estimate)
 
     y_raw = getattr(diagnostic_data, "y", None)
@@ -494,7 +494,7 @@ def run_score_diagnostics(
             try:
                 w_model, w_bar_model = model_ref._get_weights(
                     n=n,
-                    m_hat_adj=np.clip(m, trimming_thr, 1.0 - trimming_thr),
+                    m_hat_adj=np.clip(m, overlap_thr, 1.0 - overlap_thr),
                     d=d.astype(int),
                     score="ATE",
                 )
@@ -510,7 +510,7 @@ def run_score_diagnostics(
     else:
         p_treated = float(np.mean(d))
         w = d / (p_treated + 1e-12)
-        w_bar = np.clip(m, trimming_thr, 1.0 - trimming_thr) / (p_treated + 1e-12)
+        w_bar = np.clip(m, overlap_thr, 1.0 - overlap_thr) / (p_treated + 1e-12)
 
     psi = None
     if psi_raw is not None:
@@ -583,7 +583,7 @@ def run_score_diagnostics(
         m=m,
         theta=theta,
         score=score,
-        trimming_threshold=trimming_thr,
+        overlap_threshold=overlap_thr,
         normalize_ipw=normalize_ipw,
         w=w,
         w_bar=w_bar,
@@ -598,7 +598,7 @@ def run_score_diagnostics(
             g0=g0,
             g1=g1,
             m=m,
-            trimming_threshold=trimming_thr,
+            overlap_threshold=overlap_thr,
             normalize_ipw=normalize_ipw,
             w=w,
             w_bar=w_bar,
@@ -610,7 +610,7 @@ def run_score_diagnostics(
             d=d,
             g0=g0,
             m=m,
-            trimming_threshold=trimming_thr,
+            overlap_threshold=overlap_thr,
         )
 
     max_t_g1 = float(np.nanmax(np.abs(ortho["t_g1"].to_numpy(dtype=float))))
@@ -667,7 +667,7 @@ def run_score_diagnostics(
     report: Dict[str, Any] = {
         "params": {
             "score": score,
-            "trimming_threshold": float(trimming_thr),
+            "overlap_threshold": float(overlap_thr),
             "normalize_ipw": bool(normalize_ipw),
         },
         "orthogonality_derivatives": ortho,

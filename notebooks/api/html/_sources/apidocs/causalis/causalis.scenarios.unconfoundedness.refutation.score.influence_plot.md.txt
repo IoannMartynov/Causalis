@@ -35,7 +35,7 @@
 
 ### API
 
-````{py:function} plot_influence_instability(estimate: causalis.data_contracts.causal_estimate.CausalEstimate, data: typing.Optional[causalis.dgp.causaldata.CausalData] = None, *, trimming_threshold: typing.Optional[float] = None, use_estimator_psi: bool = True, top_k: int = 20, annotate: bool = True, figsize: typing.Optional[typing.Tuple[float, float]] = None, dpi: int = 220, font_scale: float = 1.1, save: typing.Optional[str] = None, save_dpi: typing.Optional[int] = None, transparent: bool = False) -> matplotlib.pyplot.Figure
+````{py:function} plot_influence_instability(estimate: causalis.data_contracts.causal_estimate.CausalEstimate, data: typing.Optional[causalis.dgp.causaldata.CausalData] = None, *, overlap_threshold: typing.Optional[float] = None, use_estimator_psi: bool = True, top_k: int = 20, annotate: bool = True, figsize: typing.Optional[typing.Tuple[float, float]] = None, dpi: int = 220, font_scale: float = 1.1, save: typing.Optional[str] = None, save_dpi: typing.Optional[int] = None, transparent: bool = False) -> matplotlib.pyplot.Figure
 :canonical: causalis.scenarios.unconfoundedness.refutation.score.influence_plot.plot_influence_instability
 
 ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.score.influence_plot.plot_influence_instability

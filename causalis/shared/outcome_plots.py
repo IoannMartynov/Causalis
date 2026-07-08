@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Optional, Tuple, Union, TYPE_CHECKING
 
+import inspect
 import numpy as np
 import pandas as pd
 import matplotlib as mpl
@@ -91,6 +92,15 @@ def _resolve_palette(treatments, palette, default_cycle):
             return {tr: default_cycle[i % len(default_cycle)] for i, tr in enumerate(treatments)}
         return {tr: palette[i % len(palette)] for i, tr in enumerate(treatments)}
     raise ValueError("palette must be a dict, list/tuple, or None.")
+
+
+def _boxplot_with_tick_labels(ax, data, labels, **kwargs):
+    """
+    Call Axes.boxplot across Matplotlib versions that accept either
+    ``tick_labels`` or the older ``labels`` keyword.
+    """
+    label_kw = "tick_labels" if "tick_labels" in inspect.signature(ax.boxplot).parameters else "labels"
+    return ax.boxplot(data, **{label_kw: labels}, **kwargs)
 
 
 def _looks_like_multicausal_data(data: object) -> bool:
@@ -526,7 +536,8 @@ def outcome_plot_boxplot(
         color_map = _resolve_palette(treatments, palette, cycle)
         colors = [color_map[tr] for tr in treatments]
 
-        bp = ax.boxplot(
+        bp = _boxplot_with_tick_labels(
+            ax,
             plot_data,
             patch_artist=patch_artist,
             labels=[str(tr) for tr in treatments],

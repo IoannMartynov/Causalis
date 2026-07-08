@@ -25,7 +25,7 @@ def test_uncofoundedness_balance_extras_outputs():
         ml_m=ml_m,
         n_folds=3,
         normalize_ipw=True,
-        trimming_threshold=1e-3,
+        overlap_threshold=1e-3,
         random_state=11,
     ).fit().estimate(alpha=0.10)
 

@@ -30,7 +30,7 @@ def test_irm_atte_score_identities(normalize_ipw):
         ml_m=ml_m,
         n_folds=3,
         normalize_ipw=normalize_ipw,
-        trimming_threshold=1e-3,
+        overlap_threshold=1e-3,
         random_state=3,
     ).fit()
     res = irm.estimate(score="ATTE", alpha=0.05)

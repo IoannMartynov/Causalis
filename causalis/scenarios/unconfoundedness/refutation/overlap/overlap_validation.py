@@ -338,7 +338,7 @@ def run_overlap_diagnostics(
     return_summary: bool = True,
     auc_flip_margin: float = 0.05,
 ) -> Dict[str, Any]:
-    """Run overlap and calibration diagnostics for an estimated propensity model.
+    r"""Run overlap and calibration diagnostics for an estimated propensity model.
 
     The core overlap object is the propensity score
 
@@ -545,14 +545,14 @@ def run_overlap_diagnostics(
         "rel_err": att_rel_err,
     }
 
-    trim_thr = getattr(diagnostic_data, "trimming_threshold", None)
-    if trim_thr is None:
-        trim_thr = estimate.model_options.get("trimming_threshold", None)
+    overlap_thr = getattr(diagnostic_data, "overlap_threshold", None)
+    if overlap_thr is None:
+        overlap_thr = estimate.model_options.get("overlap_threshold", None)
 
-    if trim_thr is not None and np.isfinite(float(trim_thr)) and 0.0 < float(trim_thr) < 0.5:
-        trim_thr_f = float(trim_thr)
-        clip_lower = float(np.mean(m_post <= trim_thr_f))
-        clip_upper = float(np.mean(m_post >= 1.0 - trim_thr_f))
+    if overlap_thr is not None and np.isfinite(float(overlap_thr)) and 0.0 < float(overlap_thr) < 0.5:
+        overlap_thr_f = float(overlap_thr)
+        clip_lower = float(np.mean(m_post <= overlap_thr_f))
+        clip_upper = float(np.mean(m_post >= 1.0 - overlap_thr_f))
     else:
         clip_lower = float("nan")
         clip_upper = float("nan")
@@ -680,6 +680,18 @@ def run_overlap_diagnostics(
         "meta": {
             "use_hajek": bool(use_hajek),
             "propensity_source": "m_hat_raw" if getattr(diagnostic_data, "m_hat_raw", None) is not None else "m_hat",
+            "overlap_policy": str(
+                getattr(
+                    diagnostic_data,
+                    "overlap_policy",
+                    estimate.model_options.get("overlap_policy", "clip"),
+                )
+            ),
+            "overlap_threshold": (
+                float(overlap_thr)
+                if overlap_thr is not None and np.isfinite(float(overlap_thr))
+                else None
+            ),
             "thresholds": threshold_values,
             "n_bins": int(n_bins),
         },

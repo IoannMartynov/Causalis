@@ -15,20 +15,26 @@ def _build_score_plot_cache(
     m_hat: np.ndarray,
     psi: np.ndarray,
     score: str,
-    trimming_threshold: float,
+    overlap_policy: str,
+    overlap_threshold: float,
     normalize_ipw_effective: bool,
+    row_index: Optional[np.ndarray] = None,
 ) -> dict[str, Any]:
     """Build cached arrays used by lightweight score influence plots."""
     _ = normalize_ipw_effective
-    m_clipped = np.clip(m_hat, trimming_threshold, 1.0 - trimming_threshold)
+    m_clipped = np.clip(m_hat, overlap_threshold, 1.0 - overlap_threshold)
+    n = np.asarray(d).size
+    if row_index is None:
+        row_index = np.arange(n, dtype=int)
 
     return {
         "score": str(score),
-        "trimming_threshold": float(trimming_threshold),
+        "overlap_policy": str(overlap_policy),
+        "overlap_threshold": float(overlap_threshold),
         "d": np.asarray(d, dtype=float).ravel(),
         "m_clipped": np.asarray(m_clipped, dtype=float).ravel(),
         "psi": np.asarray(psi, dtype=float).ravel(),
-        "row_index": np.arange(np.asarray(d).size, dtype=int),
+        "row_index": np.asarray(row_index, dtype=int).ravel(),
     }
 
 
@@ -105,7 +111,9 @@ def _build_irm_estimate_diagnostic_data(
         w_bar=w_bar,
         psi_b=psi_b,
         folds=getattr(model, "folds_", None),
-        trimming_threshold=model.trimming_threshold,
+        overlap_policy=model.overlap_policy,
+        overlap_threshold=model.overlap_threshold,
+        overlap_mask=getattr(model, "overlap_mask_", None),
         normalize_ipw=normalize_ipw_effective,
         score=score,
         score_plot_cache=_build_score_plot_cache(
@@ -113,8 +121,10 @@ def _build_irm_estimate_diagnostic_data(
             m_hat=m_hat,
             psi=IF,
             score=score,
-            trimming_threshold=model.trimming_threshold,
+            overlap_policy=model.overlap_policy,
+            overlap_threshold=model.overlap_threshold,
             normalize_ipw_effective=normalize_ipw_effective,
+            row_index=np.flatnonzero(getattr(model, "overlap_mask_", np.ones(len(d), dtype=bool))),
         ),
         residual_plot_cache=_build_residual_plot_cache(
             y=y,

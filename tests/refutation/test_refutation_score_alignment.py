@@ -159,7 +159,7 @@ def test_overlap_prefers_raw_propensity_when_available():
         m_hat_raw=m_raw,
         d=d,
         y=y,
-        trimming_threshold=0.1,
+        overlap_threshold=0.1,
     )
     estimate = _build_estimate(data, diag)
 

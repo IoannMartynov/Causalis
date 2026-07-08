@@ -137,6 +137,7 @@ jobs:
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
           gh release create "$RELEASE_TAG" dist/* \
+            --repo "$GITHUB_REPOSITORY" \
             --title "$RELEASE_TAG" \
             --generate-notes \
             --verify-tag

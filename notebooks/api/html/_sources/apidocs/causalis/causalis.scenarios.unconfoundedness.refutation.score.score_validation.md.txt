@@ -35,7 +35,7 @@
 
 ### API
 
-````{py:function} run_score_diagnostics(data: causalis.dgp.causaldata.CausalData, estimate: causalis.data_contracts.causal_estimate.CausalEstimate, *, trimming_threshold: typing.Optional[float] = None, n_basis_funcs: typing.Optional[int] = None, return_summary: bool = True) -> typing.Dict[str, typing.Any]
+````{py:function} run_score_diagnostics(data: causalis.dgp.causaldata.CausalData, estimate: causalis.data_contracts.causal_estimate.CausalEstimate, *, overlap_threshold: typing.Optional[float] = None, n_basis_funcs: typing.Optional[int] = None, return_summary: bool = True) -> typing.Dict[str, typing.Any]
 :canonical: causalis.scenarios.unconfoundedness.refutation.score.score_validation.run_score_diagnostics
 
 ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.score.score_validation.run_score_diagnostics

@@ -20,7 +20,7 @@ def _make_estimate(data: CausalData):
         ml_m=LogisticRegression(max_iter=400),
         n_folds=3,
         normalize_ipw=True,
-        trimming_threshold=1e-3,
+        overlap_threshold=1e-3,
         random_state=29,
     ).fit()
     return model.estimate(score="ATE", alpha=0.10)

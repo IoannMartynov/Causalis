@@ -43,7 +43,7 @@ def _build_data_and_estimate(*, include_yd_in_diag: bool = True):
     estimate = CausalEstimate(
         estimand="ATE",
         model="IRM",
-        model_options={"normalize_ipw": False, "trimming_threshold": 1e-3},
+        model_options={"normalize_ipw": False, "overlap_threshold": 1e-3},
         value=float(np.mean(y_t) - np.mean(y_c)),
         ci_upper_absolute=0.2,
         ci_lower_absolute=-0.2,
@@ -101,5 +101,5 @@ def test_plot_influence_instability_populates_cache_on_first_call():
     assert fig is not None
     cache = estimate_no_cache.diagnostic_data.score_plot_cache
     assert isinstance(cache, dict)
-    assert {"score", "trimming_threshold", "d", "m_clipped", "psi", "row_index"}.issubset(set(cache))
+    assert {"score", "overlap_threshold", "d", "m_clipped", "psi", "row_index"}.issubset(set(cache))
     plt.close(fig)

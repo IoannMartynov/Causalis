@@ -48,7 +48,7 @@ def _fit_irm(
         ml_m=LogisticRegression(max_iter=2000, solver="lbfgs"),
         n_folds=4,
         normalize_ipw=normalize_ipw,
-        trimming_threshold=1e-3,
+        overlap_threshold=1e-3,
         random_state=random_state,
     )
     irm.fit(store_diagnostics=store_diagnostics)

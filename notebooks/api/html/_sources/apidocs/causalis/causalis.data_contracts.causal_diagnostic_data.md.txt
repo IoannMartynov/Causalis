@@ -204,13 +204,35 @@ Bases: {py:obj}`causalis.data_contracts.causal_diagnostic_data.DiagnosticData`
 
 ````
 
-````{py:attribute} trimming_threshold
-:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.trimming_threshold
+````{py:attribute} overlap_policy
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.overlap_policy
+:type: str
+:value: >
+   'clip'
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.overlap_policy
+```
+
+````
+
+````{py:attribute} overlap_threshold
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.overlap_threshold
 :type: float
 :value: >
    0.0
 
-```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.trimming_threshold
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.overlap_threshold
+```
+
+````
+
+````{py:attribute} overlap_mask
+:canonical: causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.overlap_mask
+:type: typing.Optional[numpy.ndarray]
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.data_contracts.causal_diagnostic_data.UnconfoundednessDiagnosticData.overlap_mask
 ```
 
 ````

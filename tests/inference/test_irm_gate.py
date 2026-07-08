@@ -47,11 +47,49 @@ def _fit_irm(
         ml_m=LogisticRegression(max_iter=2000, solver="lbfgs"),
         n_folds=4,
         normalize_ipw=normalize_ipw,
-        trimming_threshold=1e-3,
+        overlap_threshold=1e-3,
         random_state=random_state,
     )
     irm.fit(store_diagnostics=store_diagnostics)
     return irm
+
+
+class _FeaturePropensityModel(BaseEstimator):
+    """Propensity model that predicts the first feature directly."""
+
+    def fit(self, X, y):
+        return self
+
+    def predict(self, X):
+        return np.clip(np.asarray(X, dtype=float)[:, 0], 0.0, 1.0)
+
+
+def _make_overlap_drop_gate_data() -> tuple[CausalData, pd.DataFrame]:
+    p = np.array(
+        [0.02, 0.08, 0.20, 0.35, 0.50, 0.65, 0.80, 0.92, 0.98] * 8,
+        dtype=float,
+    )
+    n = p.size
+    d = np.tile([0, 1], n // 2)
+    y = 1.0 + 1.5 * d + 0.4 * p + np.linspace(-0.1, 0.1, n)
+    user_id = pd.Index([f"drop_u_{i:03d}" for i in range(n)], name="user_id")
+    df = pd.DataFrame(
+        {
+            "user_id": user_id,
+            "y": y,
+            "d": d,
+            "x_propensity": p,
+            "x_trend": np.linspace(-1.0, 1.0, n),
+        }
+    )
+    cd = CausalData(
+        df=df,
+        treatment="d",
+        outcome="y",
+        confounders=["x_propensity", "x_trend"],
+        user_id="user_id",
+    )
+    return cd, df
 
 
 def _make_mock_gate_irm(n: int = 20000, k: int = 64, seed: int = 77):
@@ -81,7 +119,7 @@ def _make_mock_gate_irm(n: int = 20000, k: int = 64, seed: int = 77):
             self._fit_index_ = pd.Index(cd.user_id.copy(), name=cd.user_id_name)
             self._fit_row_index_ = cd.df.index.copy()
             self.store_diagnostics = True
-            self.trimming_threshold = 1e-3
+            self.overlap_threshold = 1e-3
             self.n_folds = 2
             self.random_state = seed
 
@@ -367,6 +405,34 @@ def test_gate_reorders_groups_to_fit_time_user_ids():
 
     np.testing.assert_allclose(second.values, first.values, atol=1e-12)
     np.testing.assert_allclose(second.std_errors, first.std_errors, atol=1e-12)
+
+
+def test_gate_overlap_drop_accepts_full_original_group_index():
+    cd, df = _make_overlap_drop_gate_data()
+    irm = IRM(
+        data=cd,
+        ml_g=LinearRegression(),
+        ml_m=_FeaturePropensityModel(),
+        n_folds=3,
+        overlap_policy="drop",
+        overlap_threshold=0.10,
+        random_state=31,
+    ).fit()
+    groups = pd.Series(
+        np.where(df["x_trend"] >= 0.0, "late", "early"),
+        index=pd.Index(df["user_id"], name="user_id"),
+        name="segment",
+    )
+
+    res = irm.estimate(score="GATE", groups=groups)
+
+    retained = (df["x_propensity"].to_numpy() > 0.10) & (
+        df["x_propensity"].to_numpy() < 0.90
+    )
+    assert isinstance(res, GateEstimate)
+    assert int(res.summary()["n_group"].sum()) == int(np.sum(retained))
+    assert res.model_options["overlap_policy"] == "drop"
+    assert res.model_options["overlap_threshold"] == 0.10
 
 
 def test_gate_accepts_explicit_sequential_integer_user_ids():

@@ -14,7 +14,7 @@ def test_run_overlap_diagnostics_returns_summary_and_meta():
         m_hat=m,
         d=d,
         normalize_ipw=True,
-        trimming_threshold=0.10,
+        overlap_threshold=0.10,
     )
 
     report = run_overlap_diagnostics(data, estimate)

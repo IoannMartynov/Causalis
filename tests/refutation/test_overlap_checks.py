@@ -34,7 +34,7 @@ def test_nearly_separable_propensity_triggers_strong_flags():
     x = rng.standard_normal(n)
     d = (x > 0.0).astype(int)
     m = 1.0 / (1.0 + np.exp(-5.0 * x))
-    data, estimate = make_overlap_data_and_estimate(m_hat=m, d=d, trimming_threshold=0.01)
+    data, estimate = make_overlap_data_and_estimate(m_hat=m, d=d, overlap_threshold=0.01)
 
     report = run_overlap_diagnostics(data, estimate)
 

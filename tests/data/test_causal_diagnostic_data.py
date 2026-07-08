@@ -26,7 +26,8 @@ def test_unconfoundedness_diagnostic_data_instantiation():
     assert np.array_equal(diag.d, d)
     assert diag.y is None
     assert diag.x is None
-    assert diag.trimming_threshold == 0.0
+    assert diag.overlap_policy == "clip"
+    assert diag.overlap_threshold == 0.0
 
 
 def test_unconfoundedness_diagnostic_data_full_instantiation():
@@ -35,14 +36,15 @@ def test_unconfoundedness_diagnostic_data_full_instantiation():
     y = np.array([1.0, 2.0, 3.0])
     x = np.array([[1, 2], [3, 4], [5, 6]])
     diag = UnconfoundednessDiagnosticData(
-        m_hat=m_hat, d=d, y=y, x=x, trimming_threshold=0.1
+        m_hat=m_hat, d=d, y=y, x=x, overlap_policy="drop", overlap_threshold=0.1
     )
     
     assert np.array_equal(diag.m_hat, m_hat)
     assert np.array_equal(diag.d, d)
     assert np.array_equal(diag.y, y)
     assert np.array_equal(diag.x, x)
-    assert diag.trimming_threshold == 0.1
+    assert diag.overlap_policy == "drop"
+    assert diag.overlap_threshold == 0.1
 
 
 def test_unconfoundedness_diagnostic_data_missing_fields():

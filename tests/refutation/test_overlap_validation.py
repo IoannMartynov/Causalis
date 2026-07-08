@@ -25,7 +25,7 @@ def test_hajek_autodetected_from_diagnostic_data():
         m_hat=m,
         d=d,
         normalize_ipw=True,
-        trimming_threshold=0.1,
+        overlap_threshold=0.1,
     )
 
     report = run_overlap_diagnostics(data, estimate)
@@ -34,11 +34,11 @@ def test_hajek_autodetected_from_diagnostic_data():
     assert report["flags"]["clip_m"] in {"GREEN", "YELLOW", "RED"}
 
 
-def test_clip_flag_is_na_without_trimming_threshold():
+def test_clip_flag_is_na_without_overlap_threshold():
     rng = np.random.default_rng(77)
     m = np.clip(rng.uniform(0.1, 0.9, size=200), 1e-6, 1.0 - 1e-6)
     d = rng.integers(0, 2, size=200)
-    data, estimate = make_overlap_data_and_estimate(m_hat=m, d=d, trimming_threshold=None)
+    data, estimate = make_overlap_data_and_estimate(m_hat=m, d=d, overlap_threshold=None)
 
     report = run_overlap_diagnostics(data, estimate)
 

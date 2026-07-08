@@ -31,7 +31,9 @@ class UnconfoundednessDiagnosticData(DiagnosticData):
     w_bar: Optional[np.ndarray] = None  # Representer weights used in estimation
     psi_b: Optional[np.ndarray] = None  # Orthogonal signal (for DML)
     folds: Optional[np.ndarray] = None  # Cross-fitting folds
-    trimming_threshold: float = 0.0
+    overlap_policy: str = "clip"
+    overlap_threshold: float = 0.0
+    overlap_mask: Optional[np.ndarray] = None
     normalize_ipw: Optional[bool] = None
 
     # Sensitivity elements (DoubleML-style)

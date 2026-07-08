@@ -15,7 +15,8 @@ def make_overlap_data_and_estimate(
     d: np.ndarray,
     *,
     normalize_ipw: bool = False,
-    trimming_threshold: Optional[float] = None,
+    overlap_threshold: Optional[float] = None,
+    overlap_policy: str = "clip",
     include_d_in_diag: bool = True,
 ) -> Tuple[CausalData, CausalEstimate]:
     m = np.asarray(m_hat, dtype=float).ravel()
@@ -40,7 +41,8 @@ def make_overlap_data_and_estimate(
     diag = UnconfoundednessDiagnosticData(
         m_hat=m,
         d=d_arr,
-        trimming_threshold=float(trimming_threshold or 0.0),
+        overlap_policy=str(overlap_policy),
+        overlap_threshold=float(overlap_threshold or 0.0),
         normalize_ipw=bool(normalize_ipw),
     )
     if not include_d_in_diag:
@@ -51,9 +53,9 @@ def make_overlap_data_and_estimate(
     y_t = y[d_arr == 1]
     y_c = y[d_arr == 0]
 
-    model_options = {"normalize_ipw": bool(normalize_ipw)}
-    if trimming_threshold is not None:
-        model_options["trimming_threshold"] = float(trimming_threshold)
+    model_options = {"normalize_ipw": bool(normalize_ipw), "overlap_policy": str(overlap_policy)}
+    if overlap_threshold is not None:
+        model_options["overlap_threshold"] = float(overlap_threshold)
 
     estimate = CausalEstimate(
         estimand="ATE",
