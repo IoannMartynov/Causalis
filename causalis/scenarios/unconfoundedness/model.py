@@ -287,6 +287,8 @@ class IRM(BaseEstimator):
         self._fit_store_diagnostics_ = bool(store_diagnostics)
         self._fit_sample_fingerprint_ = None
         self.folds_ = None
+        self._full_sample_folds_ = None
+        self._fixed_fold_assignments_ = None
         self.m_hat_raw_ = None
         self.overlap_mask_ = None
         self.overlap_n_dropped_ = 0
@@ -787,10 +789,30 @@ class IRM(BaseEstimator):
         folds = np.full(n, -1, dtype=int)
         fold_importances: List[Optional[Dict[str, Optional[np.ndarray]]]] = []
 
-        skf = StratifiedKFold(
-            n_splits=self.n_folds, shuffle=True, random_state=self.random_state
-        )
-        splits = list(skf.split(X, d))
+        fixed_folds = getattr(self, "_fixed_fold_assignments_", None)
+        if fixed_folds is None:
+            skf = StratifiedKFold(
+                n_splits=self.n_folds, shuffle=True, random_state=self.random_state
+            )
+            splits = list(skf.split(X, d))
+        else:
+            fixed_folds = np.asarray(fixed_folds, dtype=int).ravel()
+            if fixed_folds.size != n:
+                raise ValueError(
+                    "Fixed fold assignments must match the fitted sample size. "
+                    f"Got {fixed_folds.size} and {n}."
+                )
+            expected_folds = np.arange(self.n_folds, dtype=int)
+            if not np.array_equal(np.unique(fixed_folds), expected_folds):
+                raise ValueError(
+                    "Fixed fold assignments must contain every fold id from 0 to "
+                    f"{self.n_folds - 1}."
+                )
+            all_idx = np.arange(n, dtype=int)
+            splits = [
+                (all_idx[fixed_folds != fold_id], all_idx[fixed_folds == fold_id])
+                for fold_id in expected_folds
+            ]
 
         if self.n_jobs == 1:
             fold_results = [
@@ -852,6 +874,15 @@ class IRM(BaseEstimator):
         ):
             raise RuntimeError("Cross-fitted predictions contain NaN values.")
 
+        full_sample_folds = np.asarray(folds, dtype=int).ravel()
+        if full_sample_folds.size != np.asarray(m_hat).size:
+            raise RuntimeError("Cross-fitting fold assignments have inconsistent length.")
+        # Sensitivity benchmark refits need the original fold assignment even
+        # when overlap_policy='drop' later removes rows from the estimation
+        # sample. This private cache is intentionally independent of the
+        # diagnostics storage setting; ``folds_`` keeps its existing semantics.
+        self._full_sample_folds_ = full_sample_folds.copy()
+
         m_policy, overlap_mask = _apply_overlap_policy(
             m_hat,
             policy=self.overlap_policy,
@@ -893,8 +924,10 @@ class IRM(BaseEstimator):
                 )
             g0_hat = np.asarray(g0_hat, dtype=float).ravel()[overlap_mask]
             g1_hat = np.asarray(g1_hat, dtype=float).ravel()[overlap_mask]
-            folds = np.asarray(folds).ravel()[overlap_mask]
+            folds = full_sample_folds[overlap_mask]
             raw_m_hat = raw_m_hat[overlap_mask]
+        else:
+            folds = full_sample_folds
 
         self.g0_hat_ = g0_hat
         self.g1_hat_ = g1_hat

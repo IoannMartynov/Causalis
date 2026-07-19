@@ -40,6 +40,8 @@ __all_unconf = [
     "get_sensitivity_summary",
     "run_unconfoundedness_diagnostics",
     "sensitivity_benchmark",
+    "sensitivity_benchmark_group",
+    "run_sensitivity_protocol",
 ]
 
 __all__ = ["overlap", "score", "unconfoundedness"] + list(dict.fromkeys([*__all_overlap, *__all_score, *__all_unconf]))

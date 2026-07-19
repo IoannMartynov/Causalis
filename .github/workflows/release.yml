@@ -125,6 +125,14 @@ jobs:
       contents: write
 
     steps:
+      - name: Prepare release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          tag_sha="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" --jq '.object.sha')"
+          gh api "repos/$GITHUB_REPOSITORY/git/tags/$tag_sha" --jq '.message' > release-notes.md
+
       - name: Download distributions
         uses: actions/download-artifact@v5
         with:
@@ -136,8 +144,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
+          release_notes="$(cat release-notes.md)"
           gh release create "$RELEASE_TAG" dist/* \
             --repo "$GITHUB_REPOSITORY" \
             --title "$RELEASE_TAG" \
+            --notes "$release_notes" \
             --generate-notes \
             --verify-tag

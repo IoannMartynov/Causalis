@@ -140,6 +140,8 @@ def test_irm_overlap_policy_clip_bounds_propensity_without_dropping():
     assert np.max(est.m_hat_) <= 0.90
     assert np.min(est.m_hat_raw_) < 0.10
     assert np.max(est.m_hat_raw_) > 0.90
+    assert len(est._full_sample_folds_) == len(cd.df)
+    assert np.array_equal(est._full_sample_folds_, est.folds_)
 
 
 def test_irm_overlap_policy_drop_filters_estimation_and_diagnostics():
@@ -177,6 +179,26 @@ def test_irm_overlap_policy_drop_filters_estimation_and_diagnostics():
     assert len(result.diagnostic_data.m_hat) == expected_n
     assert len(result.diagnostic_data.y) == expected_n
     assert len(result.diagnostic_data.d) == expected_n
+    assert len(est._full_sample_folds_) == len(cd.df)
+    assert len(est.folds_) == expected_n
+
+
+def test_irm_preserves_full_sample_folds_without_diagnostics():
+    cd = make_overlap_policy_data()
+    est = IRM(
+        cd,
+        ml_g=LinearRegression(),
+        ml_m=_FeaturePropensityClassifier(),
+        n_folds=3,
+        overlap_policy="drop",
+        overlap_threshold=0.10,
+        random_state=12,
+        store_diagnostics=False,
+    ).fit()
+
+    assert est.folds_ is None
+    assert len(est._full_sample_folds_) == len(cd.df)
+    assert len(est.m_hat_) < len(est._full_sample_folds_)
 
 
 def test_irm_rejects_invalid_overlap_config():

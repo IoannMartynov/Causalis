@@ -70,6 +70,8 @@ from .sensitivity import (
     sensitivity_analysis,
     get_sensitivity_summary,
     sensitivity_benchmark,
+    sensitivity_benchmark_group,
+    run_sensitivity_protocol,
     compute_bias_aware_ci,
     interpret_sensitivity_analysis,
 )
@@ -80,6 +82,8 @@ __all__ = [
     "sensitivity_analysis",
     "get_sensitivity_summary",
     "sensitivity_benchmark",
+    "sensitivity_benchmark_group",
+    "run_sensitivity_protocol",
     "compute_bias_aware_ci",
     "interpret_sensitivity_analysis",
 ]

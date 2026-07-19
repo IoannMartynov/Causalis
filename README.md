@@ -59,6 +59,52 @@ result = model.estimate(score='ATTE')
 result.summary()
 ```
 
+## Binary sensitivity protocol for observational DML/IRM
+
+Pre-specify a practically meaningful effect boundary and one or more
+domain-justified groups of observed **pre-treatment** confounders. The primary
+decision uses element-based long/short gain statistics for the benchmark
+group. Its `r2_y`, `r2_d`, and `rho` are calibrated jointly from the outcome
+variance, Riesz-representer variance, and actual effect shift. The 2× strength
+and forced `rho=1` scenarios are reported as secondary stress tests.
+
+```python
+from causalis.scenarios.unconfoundedness.refutation import run_sensitivity_protocol
+
+# Example only: replace with a domain-justified, pre-specified group.
+primary_group = list(causaldata.confounders[:2])
+
+protocol = run_sensitivity_protocol(
+    model,
+    causaldata,
+    benchmark_groups={"primary_domain_benchmark": primary_group},
+    decision_threshold=0.0,  # replace with the minimum practical effect
+    direction="positive",
+    preconditions_passed=True,  # causal set, overlap, nuisance quality, stability
+)
+
+print(protocol["status"])
+print(protocol["summary"])
+protocol["primary"]
+protocol["stress"]
+protocol["adversarial"]
+```
+
+`PASS` means every primary benchmark's bias-aware confidence interval remains
+strictly beyond `decision_threshold` in the requested direction. `RV` and
+`RVa` are reported as robustness diagnostics, not compared with universal
+cutoffs. An empty benchmark set, failed external preconditions, unavailable
+sensitivity elements, or strengths outside the finite sensitivity domain
+produce `FAIL`.
+
+Benchmark boundary handling matches DoubleML: raw `cf_y` and `cf_d` are
+clipped to `[0, 1]`. If either long/short gain is not strictly positive,
+primary and stress use `rho=sign(theta_short-theta_long)`; the adversarial
+scenario still forces `rho=1`. `protocol["benchmarks"]` retains raw gains,
+clipping/fallback flags, long/short elements, and warnings for auditability.
+In particular, a negative `cf_d_raw` becomes a numerical `cf_d=0` boundary
+benchmark rather than a missing scenario.
+
 # Pick your scenario
 
 | Scenario                                                                                   | Estimator                                                 | Assumptions                                                                                                                     |

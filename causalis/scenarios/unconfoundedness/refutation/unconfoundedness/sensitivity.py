@@ -19,7 +19,7 @@ The bias-aware estimate is then:
 """
 from __future__ import annotations
 
-from typing import Dict, Any, Optional, List, Literal
+from typing import Dict, Any, Optional, List, Literal, Mapping
 
 import numpy as np
 import pandas as pd
@@ -32,6 +32,8 @@ from causalis.scenarios.unconfoundedness._score_utils import _compute_ipw_compon
 __all__ = [
     "sensitivity_analysis",
     "sensitivity_benchmark",
+    "sensitivity_benchmark_group",
+    "run_sensitivity_protocol",
     "get_sensitivity_summary",
     "interpret_sensitivity_analysis",
 ]
@@ -1008,20 +1010,255 @@ def get_sensitivity_summary(
 
 # ---------------- Benchmarking sensitivity (short vs long model) ----------------
 
-def sensitivity_benchmark(
+_BENCHMARK_RESULT_COLUMNS = [
+    "r2_y",
+    "r2_d",
+    "rho",
+    "theta_long",
+    "theta_short",
+    "delta",
+    "cf_y",
+    "cf_d",
+    "cf_y_raw",
+    "cf_d_raw",
+    "sigma2_long",
+    "sigma2_short",
+    "nu2_long",
+    "nu2_short",
+    "rho_raw",
+    "rho_clipped",
+    "cf_y_clipped",
+    "cf_d_clipped",
+    "rho_fallback",
+    "boundary_calibration",
+    "strengths_valid",
+    "calibration_valid",
+    "calibration_issue",
+    "calibration_warning",
+]
+
+
+def _read_benchmark_sensitivity_elements(model: Any) -> tuple[float, float, str | None]:
+    """Read the two scalar sensitivity elements needed for gain statistics."""
+    try:
+        elements = model._sensitivity_element_est()
+        if not isinstance(elements, dict):
+            raise TypeError("_sensitivity_element_est() did not return a dictionary")
+        sigma2 = float(elements["sigma2"])
+        nu2 = float(elements["nu2"])
+    except (KeyError, TypeError, ValueError, RuntimeError, FloatingPointError) as exc:
+        return np.nan, np.nan, f"sensitivity elements are unavailable: {exc}"
+    return sigma2, nu2, None
+
+
+def _resolve_benchmark_fold_assignments(
+    model: Any,
+    *,
+    full_sample_size: int,
+) -> tuple[np.ndarray | None, str | None]:
+    """Resolve full-sample folds for aligned long/short benchmark refits.
+
+    New IRM fits retain fold ids before applying the overlap policy. Older
+    fitted objects may only expose ``folds_``; those ids are reusable when they
+    still cover the full input sample. If a dropped legacy fit has a fixed
+    random seed, leaving the assignments unset recreates the same stratified
+    split on the unchanged full sample.
+    """
+    full_folds = getattr(model, "_full_sample_folds_", None)
+    if full_folds is not None:
+        full_folds_arr = np.asarray(full_folds, dtype=int).ravel()
+        if full_folds_arr.size == full_sample_size:
+            return full_folds_arr.copy(), None
+        return None, (
+            "stored full-sample cross-fitting assignments have inconsistent "
+            f"length: expected {full_sample_size}, got {full_folds_arr.size}"
+        )
+
+    diagnostic_folds = getattr(model, "folds_", None)
+    if diagnostic_folds is not None:
+        diagnostic_folds_arr = np.asarray(diagnostic_folds, dtype=int).ravel()
+        if diagnostic_folds_arr.size == full_sample_size:
+            return diagnostic_folds_arr.copy(), None
+
+    if getattr(model, "random_state", None) is not None:
+        # The short model receives the same full sample, treatment vector,
+        # n_folds, and seed, so StratifiedKFold recreates the long-model split.
+        return None, None
+
+    return None, (
+        "long/short cross-fitting splits cannot be aligned because the long "
+        "model has no full-sample fold assignments and random_state=None"
+    )
+
+
+def _calibrate_benchmark_gain_statistics(
+    *,
+    theta_long: float,
+    theta_short: float,
+    sigma2_long: float,
+    sigma2_short: float,
+    nu2_long: float,
+    nu2_short: float,
+    element_issue: str | None = None,
+) -> dict[str, Any]:
+    """Calibrate DoubleML-compatible gain statistics and Causalis R2 inputs.
+
+    Raw ``cf_y`` and ``cf_d`` follow the long/short gain-statistic definitions.
+    As in DoubleML, both are clipped to ``[0, 1]``. If the denominator for
+    ``rho`` is not positive, ``rho`` falls back to the sign of the long/short
+    effect shift (and therefore has magnitude one unless the shift is zero).
+    The existing Causalis sensitivity API expects an R2 value for the outcome
+    channel and converts it to odds internally, so ``r2_y`` is the inverse-odds
+    representation of ``cf_y``. ``r2_d`` already has the required form.
+    """
+    result: dict[str, Any] = {
+        "r2_y": np.nan,
+        "r2_d": np.nan,
+        "rho": np.nan,
+        "cf_y": np.nan,
+        "cf_d": np.nan,
+        "cf_y_raw": np.nan,
+        "cf_d_raw": np.nan,
+        "sigma2_long": float(sigma2_long),
+        "sigma2_short": float(sigma2_short),
+        "nu2_long": float(nu2_long),
+        "nu2_short": float(nu2_short),
+        "rho_raw": np.nan,
+        "rho_clipped": False,
+        "cf_y_clipped": False,
+        "cf_d_clipped": False,
+        "rho_fallback": False,
+        "boundary_calibration": False,
+        "strengths_valid": False,
+        "calibration_valid": False,
+        "calibration_issue": None,
+        "calibration_warning": None,
+    }
+    issues: list[str] = []
+    calibration_warnings: list[str] = []
+    if element_issue:
+        issues.append(element_issue)
+
+    scalar_values = np.asarray(
+        [theta_long, theta_short, sigma2_long, sigma2_short, nu2_long, nu2_short],
+        dtype=float,
+    )
+    if not np.isfinite(scalar_values).all():
+        issues.append("long/short estimates and sensitivity elements must be finite")
+
+    if np.isfinite(sigma2_long) and sigma2_long <= 0.0:
+        issues.append("sigma2_long must be positive")
+    if np.isfinite(nu2_long) and nu2_long <= 0.0:
+        issues.append("nu2_long must be positive")
+    if np.isfinite(nu2_short) and nu2_short <= 0.0:
+        issues.append("nu2_short must be positive")
+
+    gap_y = float(sigma2_short - sigma2_long)
+    gap_d = float(nu2_long - nu2_short)
+
+    if not issues:
+        cf_y_raw = float(gap_y / sigma2_long)
+        cf_d_raw = float(gap_d / nu2_short)
+        result["cf_y_raw"] = cf_y_raw
+        result["cf_d_raw"] = cf_d_raw
+        if not np.isfinite(cf_y_raw):
+            issues.append("cf_y_raw must be finite")
+        if not np.isfinite(cf_d_raw):
+            issues.append("cf_d_raw must be finite")
+
+    if not issues:
+        cf_y = float(np.clip(result["cf_y_raw"], 0.0, 1.0))
+        cf_d = float(np.clip(result["cf_d_raw"], 0.0, 1.0))
+        cf_y_clipped = bool(cf_y != result["cf_y_raw"])
+        cf_d_clipped = bool(cf_d != result["cf_d_raw"])
+        result.update(
+            {
+                "cf_y": cf_y,
+                "cf_d": cf_d,
+                "r2_y": float(cf_y / (1.0 + cf_y)),
+                "r2_d": cf_d,
+                "cf_y_clipped": cf_y_clipped,
+                "cf_d_clipped": cf_d_clipped,
+            }
+        )
+        if cf_y_clipped:
+            calibration_warnings.append(
+                f"cf_y_raw={result['cf_y_raw']:.6g} was clipped to {cf_y:.6g}"
+            )
+        if cf_d_clipped:
+            calibration_warnings.append(
+                f"cf_d_raw={result['cf_d_raw']:.6g} was clipped to {cf_d:.6g}"
+            )
+
+        if cf_d >= 1.0:
+            issues.append(
+                "DoubleML-clipped cf_d=1 is outside the finite Causalis sensitivity domain"
+            )
+        else:
+            result["strengths_valid"] = True
+
+        if gap_y > 0.0 and gap_d > 0.0:
+            rho_denom = float(np.sqrt(gap_y * gap_d))
+            rho_raw = float((theta_short - theta_long) / rho_denom)
+            if not np.isfinite(rho_raw):
+                issues.append("rho is not finite")
+            else:
+                rho = float(np.clip(rho_raw, -1.0, 1.0))
+                result.update(
+                    {
+                        "rho_raw": rho_raw,
+                        "rho": rho,
+                        "rho_clipped": bool(
+                            not np.isclose(rho, rho_raw, rtol=0.0, atol=0.0)
+                        ),
+                    }
+                )
+        else:
+            rho = float(np.sign(theta_short - theta_long))
+            result.update(
+                {
+                    "rho": rho,
+                    "rho_fallback": True,
+                }
+            )
+            calibration_warnings.append(
+                "rho used the DoubleML boundary fallback because both gain "
+                "components were not strictly positive"
+            )
+
+    result["boundary_calibration"] = bool(
+        result["cf_y_clipped"]
+        or result["cf_d_clipped"]
+        or result["rho_fallback"]
+    )
+    result["calibration_valid"] = bool(
+        not issues
+        and result["strengths_valid"]
+        and np.isfinite(result["rho"])
+    )
+    result["calibration_issue"] = "; ".join(dict.fromkeys(issues)) or None
+    result["calibration_warning"] = (
+        "; ".join(dict.fromkeys(calibration_warnings)) or None
+    )
+    return result
+
+
+def _sensitivity_benchmark_refits(
     effect_estimation: Dict[str, Any] | Any,
     data: CausalData,
     benchmarking_set: List[str] | Literal["all"],
     fit_args: Optional[Dict[str, Any]] = None,
+    *,
+    grouped: bool = False,
 ) -> pd.DataFrame:
     r"""
-    Benchmark confounders one by one by refitting a short IRM that excludes each
-    requested confounder from the supplied ``CausalData``.
+    Benchmark confounders by refitting short IRMs that exclude either each
+    requested confounder separately or all requested confounders as one group.
 
-    This function intentionally performs a genuine short-model refit for every
-    benchmarked confounder because ``theta_short`` and ``delta`` are defined by
-    that re-estimation step. The residual-based strengths alone are not enough
-    to recover those values.
+    This function performs a genuine short-model refit for every benchmark
+    unit. Outcome strength, treatment/Riesz strength, and adversity are jointly
+    calibrated from the long/short sensitivity elements and the actual change
+    in the effect estimate.
 
     Parameters
     ----------
@@ -1043,20 +1280,19 @@ def sensitivity_benchmark(
     Returns
     -------
     pandas.DataFrame
-        A long-form DataFrame with one row per benchmarked confounder and
-        columns ``benchmark_confounder``, ``r2_y``, ``r2_d``, ``rho``,
-        ``theta_long``, ``theta_short``, and ``delta``.
+        A long-form DataFrame with one row per benchmarked confounder. The
+        original result columns are retained and element-based gain statistics,
+        long/short sensitivity elements, and calibration audit fields are
+        appended.
 
     Notes
     -----
-    Benchmarking allows the user to judge the plausibility of unobserved
-    confounding by comparing it to the strength of observed confounders.
-    For each confounder $X_k$, we calculate:
-    - $R^2_{Y \sim X_k | D, X_{-k}}$: The partial $R^2$ of the outcome on $X_k$.
-    - $R^2_{D \sim X_k | X_{-k}}$: The partial $R^2$ of the treatment on $X_k$.
-
-    These values can then be used as $R^2_Y$ and $R^2_D$ in
-    `sensitivity_analysis`.
+    The gain statistics follow the long/short benchmarking construction and
+    boundary handling used by DoubleML. Raw ``cf_y`` and ``cf_d`` are clipped
+    to ``[0, 1]``. ``rho`` is estimated from the effect shift divided by the
+    geometric mean of positive outcome- and Riesz-representer gains; if either
+    gain is not positive, DoubleML's fallback uses the sign of the effect shift
+    (magnitude one unless the shift is zero).
 
     Examples
     --------
@@ -1201,119 +1437,31 @@ def sensitivity_benchmark(
     estimate_args_base["score"] = resolved_score
 
     theta_long = float(model.coef_[0])
-    y_cached = getattr(model, "_y", None)
-    d_cached = getattr(model, "_d", None)
-    y = np.asarray(
-        df_long[outcome_name].to_numpy(dtype=float) if y_cached is None else y_cached,
-        dtype=float,
+    sigma2_long, nu2_long, long_element_issue = _read_benchmark_sensitivity_elements(model)
+    long_folds, split_issue = _resolve_benchmark_fold_assignments(
+        model,
+        full_sample_size=df_input.shape[0],
     )
-    d = np.asarray(
-        df_long[treatment_name].to_numpy(dtype=float) if d_cached is None else d_cached,
-        dtype=float,
+
+    benchmark_groups = (
+        [tuple(benchmark_confounders)]
+        if grouped
+        else [(confounder,) for confounder in benchmark_confounders]
     )
-    m_hat = np.asarray(model.m_hat_, dtype=float)
-    g0 = np.asarray(model.g0_hat_, dtype=float)
-    g1 = np.asarray(model.g1_hat_, dtype=float)
-    r_y = y - (d * g1 + (1.0 - d) * g0)
-    r_d = d - m_hat
-    p = float(np.mean(d)) if (np.isfinite(np.mean(d)) and np.mean(d) > 0.0) else 1.0
-    w_att = np.where(d > 0.5, 1.0 / max(p, 1e-12), 0.0)
-    weights = w_att if resolved_score.upper().startswith("ATT") else None
-
-    def _center(a: np.ndarray) -> np.ndarray:
-        return a - np.mean(a)
-
-    def _center_w(a: np.ndarray, w: np.ndarray) -> np.ndarray:
-        w = np.asarray(w, float)
-        a = np.asarray(a, float)
-        sw = float(np.sum(w))
-        mu = float(np.sum(w * a)) / (sw if sw > 1e-12 else 1.0)
-        return a - mu
-
-    def _ols_r2_and_fit(yv: np.ndarray, Z: np.ndarray, w: Optional[np.ndarray] = None) -> tuple[float, np.ndarray]:
-        Z = np.asarray(Z, dtype=float)
-        if Z.ndim == 1:
-            Z = Z.reshape(-1, 1)
-        if w is None:
-            yv_c = _center(yv)
-            Zc = Z - np.nanmean(Z, axis=0, keepdims=True)
-            col_std = np.nanstd(Zc, axis=0, ddof=0)
-            valid = np.isfinite(col_std) & (col_std > 1e-12)
-            if not np.any(valid):
-                return 0.0, np.zeros_like(yv_c)
-            Zcs = Zc[:, valid] / col_std[valid]
-            Zcs = np.nan_to_num(Zcs, nan=0.0, posinf=0.0, neginf=0.0)
-            yv_c = np.nan_to_num(np.asarray(yv_c, float), nan=0.0, posinf=0.0, neginf=0.0)
-            from numpy.linalg import lstsq
-            beta, *_ = lstsq(Zcs, yv_c, rcond=1e-12)
-            yhat = Zcs @ beta
-            denom = float(np.dot(yv_c, yv_c))
-            if not np.isfinite(denom) or denom <= 1e-12:
-                return 0.0, np.zeros_like(yv_c)
-            num = float(np.dot(yhat, yhat))
-            if not np.isfinite(num) or num < 0.0:
-                return 0.0, np.zeros_like(yv_c)
-            r2 = float(np.clip(num / denom, 0.0, 1.0))
-            return r2, yhat
-        w = np.asarray(w, float)
-        w = np.nan_to_num(w, nan=0.0, posinf=0.0, neginf=0.0)
-        Z = np.asarray(Z, float)
-        Z = np.nan_to_num(Z, nan=0.0, posinf=0.0, neginf=0.0)
-        sw = float(np.sum(w))
-        if not np.isfinite(sw) or sw <= 1e-12:
-            return 0.0, np.zeros_like(yv, dtype=float)
-        yv_c = _center_w(yv, w)
-        muZ = (w[:, None] * Z).sum(axis=0) / sw
-        Zc = Z - muZ
-        var = (w[:, None] * (Zc * Zc)).sum(axis=0) / sw
-        std = np.sqrt(np.maximum(var, 0.0))
-        valid = np.isfinite(std) & (std > 1e-12)
-        if not np.any(valid):
-            return 0.0, np.zeros_like(yv_c)
-        Zcs = Zc[:, valid] / std[valid]
-        Zcs = np.nan_to_num(Zcs, nan=0.0, posinf=0.0, neginf=0.0)
-        yv_c = np.nan_to_num(np.asarray(yv_c, float), nan=0.0, posinf=0.0, neginf=0.0)
-        swr = np.sqrt(np.clip(w, 0.0, np.inf))
-        Zsw = Zcs * swr[:, None]
-        ysw = yv_c * swr
-        from numpy.linalg import lstsq
-        beta, *_ = lstsq(Zsw, ysw, rcond=1e-12)
-        yhat = Zcs @ beta
-        denom = float(np.dot(ysw, ysw))
-        if not np.isfinite(denom) or denom <= 1e-12:
-            return 0.0, np.zeros_like(yv_c)
-        num = float(np.dot(swr * yhat, swr * yhat))
-        if not np.isfinite(num) or num < 0.0:
-            return 0.0, np.zeros_like(yv_c)
-        r2 = float(np.clip(num / denom, 0.0, 1.0))
-        return r2, yhat
-
-    def _safe_corr(u: np.ndarray, v: np.ndarray, w: Optional[np.ndarray] = None) -> float:
-        if w is None:
-            u = _center(u)
-            v = _center(v)
-            su, sv = np.std(u), np.std(v)
-            if not (np.isfinite(su) and np.isfinite(sv)) or su <= 0 or sv <= 0:
-                return 0.0
-            val = float(np.corrcoef(u, v)[0, 1])
-            return float(np.clip(val, -1.0, 1.0))
-        u = _center_w(u, w); v = _center_w(v, w)
-        sw = float(np.sum(w))
-        su = np.sqrt(max(0.0, float(np.sum(w * u * u)) / (sw if sw > 1e-12 else 1.0)))
-        sv = np.sqrt(max(0.0, float(np.sum(w * v * v)) / (sw if sw > 1e-12 else 1.0)))
-        sv = np.sqrt(max(0.0, float(np.sum(w * v * v)) / (sw if sw > 1e-12 else 1.0)))
-        if su <= 0 or sv <= 0:
-            return 0.0
-        cov = float(np.sum(w * u * v)) / (sw if sw > 1e-12 else 1.0)
-        val = cov / (su * sv)
-        return float(np.clip(val, -1.0, 1.0))
 
     rows: list[dict[str, Any]] = []
-    for confounder in benchmark_confounders:
-        x_list_short = [x for x in data_confounders if x != confounder]
+    for benchmark_group in benchmark_groups:
+        group_set = set(benchmark_group)
+        x_list_short = [x for x in data_confounders if x not in group_set]
         if len(x_list_short) == 0:
+            if not grouped:
+                raise ValueError(
+                    f"Benchmarking confounder {benchmark_group[0]!r} would leave "
+                    "no confounders for the short model."
+                )
             raise ValueError(
-                f"Benchmarking confounder {confounder!r} would leave no confounders for the short model."
+                f"Benchmarking group {list(benchmark_group)!r} would leave no confounders "
+                "for the short model."
             )
 
         data_short = CausalData(
@@ -1340,38 +1488,127 @@ def sensitivity_benchmark(
             random_state=getattr(model, 'random_state', None),
             n_jobs=getattr(model, 'n_jobs', 1),
         )
+        if long_folds is not None:
+            irm_short._fixed_fold_assignments_ = np.asarray(long_folds, dtype=int).copy()
         irm_short.fit(store_diagnostics=store_diagnostics_short)
         irm_short.estimate(**dict(estimate_args_base))
 
-        Z = df_input[[confounder]].to_numpy(dtype=float)
-        r2_y, yhat_u = _ols_r2_and_fit(r_y, Z, w=weights)
-        r2_d, dhat_u = _ols_r2_and_fit(r_d, Z, w=weights)
-        rho = _safe_corr(yhat_u, dhat_u, w=weights)
         theta_short = float(irm_short.coef_[0])
+        sigma2_short, nu2_short, short_element_issue = (
+            _read_benchmark_sensitivity_elements(irm_short)
+        )
+        element_issues = [
+            issue
+            for issue in (long_element_issue, short_element_issue, split_issue)
+            if issue
+        ]
+        calibration = _calibrate_benchmark_gain_statistics(
+            theta_long=theta_long,
+            theta_short=theta_short,
+            sigma2_long=sigma2_long,
+            sigma2_short=sigma2_short,
+            nu2_long=nu2_long,
+            nu2_short=nu2_short,
+            element_issue="; ".join(element_issues) or None,
+        )
+        benchmark_column = "benchmark_group" if grouped else "benchmark_confounder"
+        benchmark_value = tuple(benchmark_group) if grouped else benchmark_group[0]
 
         rows.append(
             {
-                "benchmark_confounder": confounder,
-                "r2_y": float(r2_y),
-                "r2_d": float(r2_d),
-                "rho": float(rho),
+                benchmark_column: benchmark_value,
+                **calibration,
                 "theta_long": theta_long,
                 "theta_short": theta_short,
                 "delta": float(theta_long - theta_short),
             }
         )
 
+    benchmark_column = "benchmark_group" if grouped else "benchmark_confounder"
     return pd.DataFrame(
         rows,
-        columns=[
-            "benchmark_confounder",
-            "r2_y",
-            "r2_d",
-            "rho",
-            "theta_long",
-            "theta_short",
-            "delta",
-        ],
+        columns=[benchmark_column, *_BENCHMARK_RESULT_COLUMNS],
+    )
+
+
+def sensitivity_benchmark(
+    effect_estimation: Dict[str, Any] | Any,
+    data: CausalData,
+    benchmarking_set: List[str] | Literal["all"],
+    fit_args: Optional[Dict[str, Any]] = None,
+) -> pd.DataFrame:
+    r"""
+    Benchmark confounders one by one using genuine short-model IRM refits.
+
+    Each requested confounder is excluded separately. The returned DataFrame
+    therefore contains one row and one short-model estimate per confounder.
+    Pass ``"all"`` to benchmark all confounders in ``data.confounders`` order.
+
+    See Also
+    --------
+    sensitivity_benchmark_group
+        Exclude several confounders together in one short-model refit.
+    """
+    return _sensitivity_benchmark_refits(
+        effect_estimation,
+        data,
+        benchmarking_set,
+        fit_args,
+        grouped=False,
+    )
+
+
+def sensitivity_benchmark_group(
+    effect_estimation: Dict[str, Any] | Any,
+    data: CausalData,
+    benchmarking_group: List[str],
+    fit_args: Optional[Dict[str, Any]] = None,
+) -> pd.DataFrame:
+    r"""
+    Benchmark a group of confounders using one genuine short-model IRM refit.
+
+    All features in ``benchmarking_group`` are excluded together. Group-level
+    confounding strengths and ``rho`` are calibrated jointly from long/short
+    IRM sensitivity elements and the actual effect-estimate shift.
+
+    Parameters
+    ----------
+    effect_estimation : dict or Any
+        Estimate/model container exposing a fitted IRM-like model.
+    data : CausalData
+        The exact causal dataset and row order used to fit the long model.
+    benchmarking_group : list[str]
+        Non-empty group of confounders to exclude together. Duplicate names are
+        ignored while preserving their first occurrence.
+    fit_args : dict, optional
+        Additional keyword arguments passed to ``IRM.estimate(...)`` for the
+        short model. Short-model diagnostics are disabled by default.
+
+    Returns
+    -------
+    pandas.DataFrame
+        One-row DataFrame retaining ``benchmark_group``, ``r2_y``, ``r2_d``,
+        ``rho``, ``theta_long``, ``theta_short``, and ``delta`` and appending
+        element-based gain statistics and calibration audit fields. The group
+        is stored as a tuple in ``benchmark_group``.
+
+    Notes
+    -----
+    At least one long-model confounder must remain after removing the group.
+    Runtime is normally dominated by the single short-model refit.
+    """
+    if not isinstance(benchmarking_group, list):
+        raise TypeError(
+            "benchmarking_group must be a list of confounder names. "
+            f"Got {benchmarking_group!r} of type {type(benchmarking_group)}."
+        )
+
+    return _sensitivity_benchmark_refits(
+        effect_estimation,
+        data,
+        benchmarking_group,
+        fit_args,
+        grouped=True,
     )
 
 
@@ -1624,5 +1861,521 @@ def interpret_sensitivity_analysis(
             "rv": rv,
             "rva": rva,
         },
+        "summary": summary,
+    }
+
+
+# ---------------- Decision protocol for benchmarked sensitivity ----------------
+
+_PROTOCOL_SCENARIO_COLUMNS = [
+    "benchmark",
+    "benchmark_group",
+    "scenario",
+    "multiplier",
+    "r2_y",
+    "r2_d",
+    "rho",
+    "theta_long",
+    "theta_short",
+    "delta",
+    "relative_delta",
+    "theta_lower",
+    "theta_upper",
+    "ci_lower",
+    "ci_upper",
+    "rv",
+    "rva",
+    "scenario_valid",
+    "scenario_issue",
+    "passed",
+]
+
+
+def _scale_partial_r2(r2: float, multiplier: float) -> float:
+    """Scale a partial R-squared on the Cohen f-squared (odds) scale."""
+    r2 = float(r2)
+    if not np.isfinite(r2) or not (0.0 <= r2 < 1.0):
+        raise ValueError(f"Benchmark partial R-squared must be in [0, 1). Got {r2!r}.")
+    f2 = r2 / (1.0 - r2)
+    scaled_f2 = float(multiplier) * f2
+    return float(scaled_f2 / (1.0 + scaled_f2))
+
+
+def _protocol_ci_passes(
+    ci: tuple[float, float],
+    *,
+    direction: Literal["positive", "negative"],
+    decision_threshold: float,
+) -> bool:
+    """Apply the pre-specified directional decision rule to an interval."""
+    lo, hi = map(float, ci)
+    if not (np.isfinite(lo) and np.isfinite(hi)):
+        return False
+    if direction == "positive":
+        return bool(lo > decision_threshold)
+    return bool(hi < decision_threshold)
+
+
+def _protocol_scenario(
+    effect_estimation: Dict[str, Any] | Any,
+    *,
+    benchmark_name: str,
+    benchmark_group: tuple[str, ...],
+    benchmark_row: pd.Series,
+    scenario: str,
+    multiplier: float,
+    r2_y: float,
+    r2_d: float,
+    rho: float,
+    direction: Literal["positive", "negative"],
+    decision_threshold: float,
+    alpha: float,
+) -> tuple[dict[str, Any], Dict[str, Any]]:
+    """Evaluate one sensitivity scenario and return its table row and raw result."""
+    interpreted = interpret_sensitivity_analysis(
+        effect_estimation,
+        r2_y=float(r2_y),
+        r2_d=float(r2_d),
+        rho=float(rho),
+        H0=float(decision_threshold),
+        alpha=float(alpha),
+    )
+    raw = interpreted["raw"]
+    theta_bounds = tuple(map(float, raw["theta_bounds_cofounding"]))
+    bias_aware_ci = tuple(map(float, raw["bias_aware_ci"]))
+    theta_long = float(benchmark_row["theta_long"])
+    delta = float(benchmark_row["delta"])
+    relative_delta = np.nan if abs(theta_long) <= 1e-16 else abs(delta) / abs(theta_long)
+
+    row = {
+        "benchmark": benchmark_name,
+        "benchmark_group": benchmark_group,
+        "scenario": scenario,
+        "multiplier": float(multiplier),
+        "r2_y": float(r2_y),
+        "r2_d": float(r2_d),
+        "rho": float(rho),
+        "theta_long": theta_long,
+        "theta_short": float(benchmark_row["theta_short"]),
+        "delta": delta,
+        "relative_delta": float(relative_delta),
+        "theta_lower": theta_bounds[0],
+        "theta_upper": theta_bounds[1],
+        "ci_lower": bias_aware_ci[0],
+        "ci_upper": bias_aware_ci[1],
+        "rv": float(raw.get("rv", np.nan)),
+        "rva": float(raw.get("rva", np.nan)),
+        "scenario_valid": True,
+        "scenario_issue": None,
+        "passed": _protocol_ci_passes(
+            bias_aware_ci,
+            direction=direction,
+            decision_threshold=decision_threshold,
+        ),
+    }
+    return row, dict(raw)
+
+
+def _invalid_protocol_scenario(
+    *,
+    benchmark_name: str,
+    benchmark_group: tuple[str, ...],
+    benchmark_row: pd.Series,
+    scenario: str,
+    multiplier: float,
+    r2_y: float,
+    r2_d: float,
+    rho: float,
+    issue: str,
+) -> tuple[dict[str, Any], Dict[str, Any]]:
+    """Create a fail-closed scenario row when calibration cannot be evaluated."""
+    theta_long = float(benchmark_row["theta_long"])
+    delta = float(benchmark_row["delta"])
+    relative_delta = np.nan if abs(theta_long) <= 1e-16 else abs(delta) / abs(theta_long)
+    row = {
+        "benchmark": benchmark_name,
+        "benchmark_group": benchmark_group,
+        "scenario": scenario,
+        "multiplier": float(multiplier),
+        "r2_y": float(r2_y),
+        "r2_d": float(r2_d),
+        "rho": float(rho),
+        "theta_long": theta_long,
+        "theta_short": float(benchmark_row["theta_short"]),
+        "delta": delta,
+        "relative_delta": float(relative_delta),
+        "theta_lower": np.nan,
+        "theta_upper": np.nan,
+        "ci_lower": np.nan,
+        "ci_upper": np.nan,
+        "rv": np.nan,
+        "rva": np.nan,
+        "scenario_valid": False,
+        "scenario_issue": issue,
+        "passed": False,
+    }
+    return row, {"scenario_valid": False, "scenario_issue": issue}
+
+
+def run_sensitivity_protocol(
+    effect_estimation: Dict[str, Any] | Any,
+    data: CausalData,
+    *,
+    benchmark_groups: Mapping[str, List[str]],
+    decision_threshold: float,
+    direction: Literal["positive", "negative"],
+    alpha: float = 0.05,
+    stress_multiplier: float = 2.0,
+    preconditions_passed: bool = True,
+    fit_args: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    r"""Run a binary, benchmark-calibrated sensitivity decision protocol.
+
+    The primary decision uses one-times benchmark strength and the benchmark's
+    estimated ``rho``. Every primary benchmark must pass. A benchmark passes
+    when its bias-aware confidence interval lies strictly beyond the
+    pre-specified practical threshold in ``direction``. The two-times and
+    ``rho=1`` adversarial scenarios are reported as stress tests and do not
+    change the primary PASS/FAIL decision.
+
+    Parameters
+    ----------
+    effect_estimation : dict or Any
+        Fitted IRM-like estimate accepted by :func:`sensitivity_analysis`.
+    data : CausalData
+        Exact data and row order used to fit the long model.
+    benchmark_groups : mapping[str, list[str]]
+        Non-empty mapping from meaningful benchmark labels to groups of
+        observed pre-treatment confounders. Each group is omitted in its own
+        genuine short-model refit.
+    decision_threshold : float
+        Pre-specified practically meaningful effect boundary. For a positive
+        claim, the lower bias-aware CI endpoint must exceed this value. For a
+        negative claim, the upper endpoint must be below it.
+    direction : {"positive", "negative"}
+        Direction of the practically meaningful causal claim.
+    alpha : float, default 0.05
+        Two-sided significance level used for bias-aware confidence intervals.
+    stress_multiplier : float, default 2.0
+        Strength multiplier for the secondary stress scenario. Each partial
+        R-squared is multiplied on the odds/Cohen-f-squared scale.
+    preconditions_passed : bool, default True
+        External design gate covering the causal adjustment set, overlap,
+        nuisance-model quality, and estimator stability. ``False`` forces the
+        overall result to FAIL while still returning sensitivity diagnostics.
+    fit_args : dict, optional
+        Additional keyword arguments for each short-model estimate.
+
+    Returns
+    -------
+    dict
+        A report with ``status`` (``"PASS"`` or ``"FAIL"``), ``passed``,
+        benchmark and scenario DataFrames, raw scenario details, warnings, and
+        a standard human-readable conclusion. ``primary`` determines status;
+        ``stress`` and ``adversarial`` describe the robustness margin.
+
+    Notes
+    -----
+    The robustness values ``rv`` and ``rva`` are reported but are not used as
+    universal pass/fail cutoffs. Benchmark selection and ``decision_threshold``
+    must be justified before inspecting the effect estimate. ``rho`` for both
+    singleton and multi-feature benchmarks is calibrated from long/short
+    sensitivity elements. A value of ``+/-1`` in primary or stress can mean
+    either that ``rho_raw`` saturated at the correlation boundary or that
+    DoubleML's non-positive-gain fallback was used. Only the adversarial
+    scenario forces ``rho=1`` independently of the benchmark effect shift.
+
+    DoubleML-compatible boundary calibration clips non-positive raw gains to
+    zero and keeps the scenario numerically evaluable. Raw values and boundary
+    flags remain available in ``benchmarks`` for audit. Missing/non-finite
+    sensitivity elements and an upper-bound ``cf_d=1`` still fail closed,
+    because Causalis sensitivity bounds require finite inputs below one.
+
+    The current IRM estimator supports ``n_rep=1`` only. Repeated cross-fitting
+    stability must therefore be assessed outside this function until IRM adds
+    repeated-split support.
+
+    Examples
+    --------
+    >>> report = run_sensitivity_protocol(  # doctest: +SKIP
+    ...     estimate,
+    ...     data,
+    ...     benchmark_groups={"engagement": ["sessions", "activity_days"]},
+    ...     decision_threshold=0.0,
+    ...     direction="positive",
+    ... )
+    >>> report["status"]  # doctest: +SKIP
+    'PASS'
+    >>> report["primary"][["benchmark", "ci_lower", "ci_upper", "passed"]]  # doctest: +SKIP
+    """
+    if direction not in {"positive", "negative"}:
+        raise ValueError("direction must be either 'positive' or 'negative'.")
+    if not np.isfinite(decision_threshold):
+        raise ValueError("decision_threshold must be finite and pre-specified.")
+    if not (0.0 < float(alpha) < 1.0):
+        raise ValueError("alpha must be in (0, 1).")
+    if not np.isfinite(stress_multiplier) or float(stress_multiplier) <= 1.0:
+        raise ValueError("stress_multiplier must be finite and greater than 1.")
+    if not isinstance(preconditions_passed, (bool, np.bool_)):
+        raise TypeError("preconditions_passed must be a boolean.")
+    if not isinstance(benchmark_groups, Mapping):
+        raise TypeError("benchmark_groups must be a mapping from labels to feature lists.")
+
+    warnings: list[str] = []
+    if not benchmark_groups:
+        empty = pd.DataFrame(columns=_PROTOCOL_SCENARIO_COLUMNS)
+        return {
+            "status": "FAIL",
+            "passed": False,
+            "direction": direction,
+            "decision_threshold": float(decision_threshold),
+            "alpha": float(alpha),
+            "stress_multiplier": float(stress_multiplier),
+            "preconditions_passed": bool(preconditions_passed),
+            "benchmarks": pd.DataFrame(),
+            "primary": empty.copy(),
+            "stress": empty.copy(),
+            "adversarial": empty.copy(),
+            "scenarios": empty.copy(),
+            "details": {},
+            "limited_margin": False,
+            "warnings": ["At least one justified primary benchmark group is required."],
+            "summary": (
+                "FAIL: no primary benchmark group was supplied; hidden-confounding "
+                "robustness is not established."
+            ),
+        }
+
+    normalized_groups: list[tuple[str, List[str]]] = []
+    for raw_name, group in benchmark_groups.items():
+        if not isinstance(raw_name, str) or not raw_name.strip():
+            raise ValueError("Every benchmark label must be a non-empty string.")
+        if not isinstance(group, list):
+            raise TypeError(f"Benchmark {raw_name!r} must be a list of confounder names.")
+        normalized_groups.append((raw_name.strip(), group))
+
+    benchmark_frames: list[pd.DataFrame] = []
+    primary_rows: list[dict[str, Any]] = []
+    stress_rows: list[dict[str, Any]] = []
+    adversarial_rows: list[dict[str, Any]] = []
+    details: dict[str, dict[str, Dict[str, Any]]] = {}
+
+    for benchmark_name, group in normalized_groups:
+        benchmark = sensitivity_benchmark_group(
+            effect_estimation,
+            data,
+            group,
+            fit_args=fit_args,
+        )
+        benchmark = benchmark.copy()
+        benchmark.insert(0, "benchmark", benchmark_name)
+        benchmark_frames.append(benchmark)
+
+        benchmark_row = benchmark.iloc[0]
+        benchmark_group = tuple(benchmark_row["benchmark_group"])
+        if bool(benchmark_row.get("rho_clipped", False)):
+            warnings.append(
+                f"Benchmark {benchmark_name!r} produced |rho_raw| > 1; "
+                "the calibrated primary/stress rho was clipped to +/-1."
+            )
+        if bool(benchmark_row.get("boundary_calibration", False)):
+            boundary_warning = str(
+                benchmark_row.get("calibration_warning")
+                or "DoubleML boundary clipping/fallback was used"
+            )
+            warnings.append(
+                f"Benchmark {benchmark_name!r} used DoubleML boundary "
+                f"calibration: {boundary_warning}."
+            )
+
+        r2_y = float(benchmark_row["r2_y"])
+        r2_d = float(benchmark_row["r2_d"])
+        rho = float(benchmark_row["rho"])
+        strengths_valid = bool(benchmark_row.get("strengths_valid", True))
+        calibration_valid = bool(benchmark_row.get("calibration_valid", True))
+        calibration_issue = str(
+            benchmark_row.get("calibration_issue")
+            or "benchmark gain statistics could not be calibrated"
+        )
+        if not calibration_valid:
+            warnings.append(f"Benchmark {benchmark_name!r} is not calibratable: {calibration_issue}.")
+
+        if strengths_valid:
+            stress_r2_y = _scale_partial_r2(r2_y, float(stress_multiplier))
+            stress_r2_d = _scale_partial_r2(r2_d, float(stress_multiplier))
+        else:
+            stress_r2_y = np.nan
+            stress_r2_d = np.nan
+
+        # Evaluate secondary scenarios first so the final cached analysis on the
+        # estimate corresponds to the primary scenario used for the decision.
+        if calibration_valid:
+            stress_row, stress_raw = _protocol_scenario(
+                effect_estimation,
+                benchmark_name=benchmark_name,
+                benchmark_group=benchmark_group,
+                benchmark_row=benchmark_row,
+                scenario=f"{float(stress_multiplier):g}x",
+                multiplier=float(stress_multiplier),
+                r2_y=stress_r2_y,
+                r2_d=stress_r2_d,
+                rho=rho,
+                direction=direction,
+                decision_threshold=float(decision_threshold),
+                alpha=float(alpha),
+            )
+        else:
+            stress_row, stress_raw = _invalid_protocol_scenario(
+                benchmark_name=benchmark_name,
+                benchmark_group=benchmark_group,
+                benchmark_row=benchmark_row,
+                scenario=f"{float(stress_multiplier):g}x",
+                multiplier=float(stress_multiplier),
+                r2_y=stress_r2_y,
+                r2_d=stress_r2_d,
+                rho=rho,
+                issue=calibration_issue,
+            )
+
+        if strengths_valid:
+            adversarial_row, adversarial_raw = _protocol_scenario(
+                effect_estimation,
+                benchmark_name=benchmark_name,
+                benchmark_group=benchmark_group,
+                benchmark_row=benchmark_row,
+                scenario="adversarial",
+                multiplier=1.0,
+                r2_y=r2_y,
+                r2_d=r2_d,
+                rho=1.0,
+                direction=direction,
+                decision_threshold=float(decision_threshold),
+                alpha=float(alpha),
+            )
+        else:
+            adversarial_row, adversarial_raw = _invalid_protocol_scenario(
+                benchmark_name=benchmark_name,
+                benchmark_group=benchmark_group,
+                benchmark_row=benchmark_row,
+                scenario="adversarial",
+                multiplier=1.0,
+                r2_y=r2_y,
+                r2_d=r2_d,
+                rho=1.0,
+                issue=calibration_issue,
+            )
+
+        if calibration_valid:
+            primary_row, primary_raw = _protocol_scenario(
+                effect_estimation,
+                benchmark_name=benchmark_name,
+                benchmark_group=benchmark_group,
+                benchmark_row=benchmark_row,
+                scenario="primary",
+                multiplier=1.0,
+                r2_y=r2_y,
+                r2_d=r2_d,
+                rho=rho,
+                direction=direction,
+                decision_threshold=float(decision_threshold),
+                alpha=float(alpha),
+            )
+        else:
+            primary_row, primary_raw = _invalid_protocol_scenario(
+                benchmark_name=benchmark_name,
+                benchmark_group=benchmark_group,
+                benchmark_row=benchmark_row,
+                scenario="primary",
+                multiplier=1.0,
+                r2_y=r2_y,
+                r2_d=r2_d,
+                rho=rho,
+                issue=calibration_issue,
+            )
+
+        stress_rows.append(stress_row)
+        adversarial_rows.append(adversarial_row)
+        primary_rows.append(primary_row)
+        details[benchmark_name] = {
+            "primary": primary_raw,
+            "stress": stress_raw,
+            "adversarial": adversarial_raw,
+        }
+
+    benchmarks_df = pd.concat(benchmark_frames, ignore_index=True)
+    primary_df = pd.DataFrame(primary_rows, columns=_PROTOCOL_SCENARIO_COLUMNS)
+    stress_df = pd.DataFrame(stress_rows, columns=_PROTOCOL_SCENARIO_COLUMNS)
+    adversarial_df = pd.DataFrame(adversarial_rows, columns=_PROTOCOL_SCENARIO_COLUMNS)
+    scenarios_df = pd.concat([primary_df, stress_df, adversarial_df], ignore_index=True)
+
+    sensitivity_passed = bool(primary_df["passed"].all())
+    overall_passed = bool(preconditions_passed) and sensitivity_passed
+    stress_passed = bool(stress_df["passed"].all())
+    adversarial_passed = bool(adversarial_df["passed"].all())
+    limited_margin = overall_passed and not (stress_passed and adversarial_passed)
+    status = "PASS" if overall_passed else "FAIL"
+    invalid_primary = primary_df.loc[~primary_df["scenario_valid"], "benchmark"].tolist()
+    if "boundary_calibration" in benchmarks_df.columns:
+        boundary_benchmarks = benchmarks_df.loc[
+            benchmarks_df["boundary_calibration"].astype(bool),
+            "benchmark",
+        ].tolist()
+    else:
+        boundary_benchmarks = []
+
+    if not preconditions_passed:
+        summary = (
+            "FAIL: the external design/overlap/nuisance preconditions did not pass; "
+            "the causal claim is not established."
+        )
+    elif invalid_primary:
+        summary = (
+            "FAIL: primary benchmark gain statistics could not be calibrated for "
+            f"{invalid_primary}; the sensitivity gate fails closed."
+        )
+    elif not sensitivity_passed:
+        failed = primary_df.loc[~primary_df["passed"], "benchmark"].tolist()
+        summary = (
+            "FAIL: under hidden confounding comparable to primary benchmark(s) "
+            f"{failed}, the bias-aware confidence interval crosses the pre-specified "
+            f"decision threshold {float(decision_threshold):g}; the causal claim is not robust."
+        )
+    else:
+        margin = "limited" if limited_margin else "strong"
+        boundary_note = (
+            f" DoubleML boundary calibration was used for {boundary_benchmarks}."
+            if boundary_benchmarks
+            else ""
+        )
+        summary = (
+            "PASS: the practically meaningful effect is robust to hidden confounding "
+            "comparable to every primary benchmark. "
+            f"The reported stress-test margin is {margin}."
+            f"{boundary_note}"
+        )
+
+    model = effect_estimation.get("model") if isinstance(effect_estimation, dict) else effect_estimation
+    if getattr(model, "n_rep", None) == 1:
+        warnings.append(
+            "IRM currently uses n_rep=1; repeated cross-fitting stability must be assessed separately."
+        )
+
+    return {
+        "status": status,
+        "passed": overall_passed,
+        "direction": direction,
+        "decision_threshold": float(decision_threshold),
+        "alpha": float(alpha),
+        "stress_multiplier": float(stress_multiplier),
+        "preconditions_passed": bool(preconditions_passed),
+        "benchmarks": benchmarks_df,
+        "primary": primary_df,
+        "stress": stress_df,
+        "adversarial": adversarial_df,
+        "scenarios": scenarios_df,
+        "details": details,
+        "limited_margin": limited_margin,
+        "boundary_benchmarks": boundary_benchmarks,
+        "warnings": warnings,
         "summary": summary,
     }
