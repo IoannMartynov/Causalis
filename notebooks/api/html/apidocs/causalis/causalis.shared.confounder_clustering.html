@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>causalis.shared.confounder_clustering &#8212; Causalis API Reference  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="causalis.shared.sutva_validation" href="causalis.shared.sutva_validation.html" />
+    <link rel="prev" title="causalis.shared.outcome_stats" href="causalis.shared.outcome_stats.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-causalis.shared.confounder_clustering">
+<span id="causalis-shared-confounder-clustering"></span><h1><a class="reference internal" href="#module-causalis.shared.confounder_clustering" title="causalis.shared.confounder_clustering"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.shared.confounder_clustering</span></code></a><a class="headerlink" href="#module-causalis.shared.confounder_clustering" title="Link to this heading">¶</a></h1>
+<p>Correlation-based clustering of observed confounders.</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.shared.confounder_clustering.cluster_confounders" title="causalis.shared.confounder_clustering.cluster_confounders"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_confounders</span></code></a></p></td>
+<td><p>Cluster confounders using their absolute pairwise correlations.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.shared.confounder_clustering.rank_confounder_clusters" title="causalis.shared.confounder_clustering.rank_confounder_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rank_confounder_clusters</span></code></a></p></td>
+<td><p>Cluster confounders and rank the clusters by joint nuisance importance.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="data">
+<h3>Data<a class="headerlink" href="#data" title="Link to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-left">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.shared.confounder_clustering.CorrelationMethod" title="causalis.shared.confounder_clustering.CorrelationMethod"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CorrelationMethod</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.shared.confounder_clustering.LinkageMethod" title="causalis.shared.confounder_clustering.LinkageMethod"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinkageMethod</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.shared.confounder_clustering.OutcomeImportanceMethod" title="causalis.shared.confounder_clustering.OutcomeImportanceMethod"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OutcomeImportanceMethod</span></code></a></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.shared.confounder_clustering.__all__" title="causalis.shared.confounder_clustering.__all__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__all__</span></code></a></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api">
+<h3>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
+<dl class="py data">
+<dt class="sig sig-object py" id="causalis.shared.confounder_clustering.CorrelationMethod">
+<span class="sig-prename descclassname"><span class="pre">causalis.shared.confounder_clustering.</span></span><span class="sig-name descname"><span class="pre">CorrelationMethod</span></span><a class="headerlink" href="#causalis.shared.confounder_clustering.CorrelationMethod" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="causalis.shared.confounder_clustering.LinkageMethod">
+<span class="sig-prename descclassname"><span class="pre">causalis.shared.confounder_clustering.</span></span><span class="sig-name descname"><span class="pre">LinkageMethod</span></span><a class="headerlink" href="#causalis.shared.confounder_clustering.LinkageMethod" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="causalis.shared.confounder_clustering.OutcomeImportanceMethod">
+<span class="sig-prename descclassname"><span class="pre">causalis.shared.confounder_clustering.</span></span><span class="sig-name descname"><span class="pre">OutcomeImportanceMethod</span></span><a class="headerlink" href="#causalis.shared.confounder_clustering.OutcomeImportanceMethod" title="Link to this definition">¶</a></dt>
+<dd><p>None</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.shared.confounder_clustering.cluster_confounders">
+<span class="sig-prename descclassname"><span class="pre">causalis.shared.confounder_clustering.</span></span><span class="sig-name descname"><span class="pre">cluster_confounders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">causalis.dgp.causaldata.CausalData</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">causalis.dgp.multicausaldata.MultiCausalData</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_abs_correlation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correlation_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.shared.confounder_clustering.CorrelationMethod" title="causalis.shared.confounder_clustering.CorrelationMethod"><span class="pre">causalis.shared.confounder_clustering.CorrelationMethod</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'pearson'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linkage_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.shared.confounder_clustering.LinkageMethod" title="causalis.shared.confounder_clustering.LinkageMethod"><span class="pre">causalis.shared.confounder_clustering.LinkageMethod</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'complete'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">200000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">42</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.shared.confounder_clustering.cluster_confounders" title="Link to this definition">¶</a></dt>
+<dd><p>Cluster confounders using their absolute pairwise correlations.</p>
+<p>The clustering distance is</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>d(X_i, X_j) = 1 - |\operatorname{corr}(X_i, X_j)|.
+</pre></div>
+</div>
+<p>Hierarchical clustering is cut at <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">-</span> <span class="pre">min_abs_correlation</span></code>. Negative
+and positive correlations of the same magnitude are therefore treated as
+equally similar. By default, complete linkage is used, so every pair of
+features in a non-singleton cluster has an absolute correlation at least
+as large as <code class="docutils literal notranslate"><span class="pre">min_abs_correlation</span></code> on the sampled data.</p>
+<p class="rubric" id="id4">Parameters</p>
+<p>data : CausalData or MultiCausalData
+Causal data contract exposing numeric <code class="docutils literal notranslate"><span class="pre">df</span></code> and <code class="docutils literal notranslate"><span class="pre">confounders</span></code>
+attributes.
+min_abs_correlation : float, default 0.7
+Correlation cut-off in the closed interval [0, 1]. Larger values form
+smaller, more strongly related clusters.
+correlation_method : {“pearson”, “spearman”}, default “pearson”
+Pairwise correlation measure. Spearman correlation is useful for
+monotonic non-linear relationships but requires more work and memory.
+linkage_method : {“average”, “complete”, “single”}, default “complete”
+Hierarchical-linkage rule. Only complete linkage guarantees the
+pairwise threshold interpretation described above.
+max_samples : int or None, default 200000
+Maximum number of rows used to estimate correlations. If the dataset
+is larger, rows are sampled without replacement. Pass <code class="docutils literal notranslate"><span class="pre">None</span></code> to use
+all rows.
+random_state : int or None, default 42
+Seed used for row sampling.</p>
+<p class="rubric" id="id5">Returns</p>
+<p>list[list[str]]
+Clusters in the original confounder order. Features within each cluster
+also preserve their original order. Singleton clusters are retained.</p>
+<p class="rubric" id="id6">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>clusters = cluster_confounders(data, min_abs_correlation=0.8)
+strongest_group = clusters[0]
+strongest_group  # doctest: +SKIP
+[‘income’, ‘salary’, ‘credit_limit’]</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+<p class="rubric" id="id7">Notes</p>
+<p>Missing correlations can occur when a rare feature is constant in the
+sampled rows. They are treated as zero correlation, leaving that feature
+separate unless it is linked to another feature by valid correlations.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.shared.confounder_clustering.rank_confounder_clusters">
+<span class="sig-prename descclassname"><span class="pre">causalis.shared.confounder_clustering.</span></span><span class="sig-name descname"><span class="pre">rank_confounder_clusters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">causalis.dgp.causaldata.CausalData</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">causalis.dgp.multicausaldata.MultiCausalData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effect_estimation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_abs_correlation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correlation_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.shared.confounder_clustering.CorrelationMethod" title="causalis.shared.confounder_clustering.CorrelationMethod"><span class="pre">causalis.shared.confounder_clustering.CorrelationMethod</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'pearson'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linkage_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.shared.confounder_clustering.LinkageMethod" title="causalis.shared.confounder_clustering.LinkageMethod"><span class="pre">causalis.shared.confounder_clustering.LinkageMethod</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'complete'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">200000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome_importance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.shared.confounder_clustering.OutcomeImportanceMethod" title="causalis.shared.confounder_clustering.OutcomeImportanceMethod"><span class="pre">causalis.shared.confounder_clustering.OutcomeImportanceMethod</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.shared.confounder_clustering.rank_confounder_clusters" title="Link to this definition">¶</a></dt>
+<dd><p>Cluster confounders and rank the clusters by joint nuisance importance.</p>
+<p>For each correlation cluster :math:<code class="docutils literal notranslate"><span class="pre">C_g</span></code>, the treatment and outcome
+importances are aggregated as</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>I_{D,g} = \sum_{j \in C_g} I_{m,j},
+</pre></div>
+</div>
+<p>and, by default,</p>
+<p>.. math::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>I_{Y,g} = \frac{1}{2}\left(
+    \sum_{j \in C_g} I_{g0,j}
+    + \sum_{j \in C_g} I_{g1,j}
+\right).
+</pre></div>
+</div>
+<p>Clusters are sorted by <code class="docutils literal notranslate"><span class="pre">score</span> <span class="pre">=</span> <span class="pre">importance_d</span> <span class="pre">*</span> <span class="pre">importance_y</span></code> in
+descending order. Native importance vectors are normalized separately for
+<code class="docutils literal notranslate"><span class="pre">m</span></code>, <code class="docutils literal notranslate"><span class="pre">g0</span></code>, and <code class="docutils literal notranslate"><span class="pre">g1</span></code> before aggregation.</p>
+<p class="rubric" id="id8">Parameters</p>
+<p>data : CausalData or MultiCausalData
+Data containing the confounders to cluster.
+effect_estimation : Any
+Fitted IRM, causal estimate with diagnostic data, or dictionary
+containing one of them. Feature importance must have been collected.
+min_abs_correlation, correlation_method, linkage_method, max_samples, random_state
+Forwarded to :func:<code class="docutils literal notranslate"><span class="pre">cluster_confounders</span></code>.
+outcome_importance : {“mean”, “max”}, default “mean”
+Combine the cluster-level <code class="docutils literal notranslate"><span class="pre">g0</span></code> and <code class="docutils literal notranslate"><span class="pre">g1</span></code> importance by their mean or
+maximum. <code class="docutils literal notranslate"><span class="pre">&quot;max&quot;</span></code> is more conservative for features important in only
+one treatment arm.</p>
+<p class="rubric" id="id9">Returns</p>
+<p>pandas.DataFrame
+Cluster ranking with columns <code class="docutils literal notranslate"><span class="pre">cluster_id</span></code>, <code class="docutils literal notranslate"><span class="pre">features</span></code>,
+<code class="docutils literal notranslate"><span class="pre">n_features</span></code>, <code class="docutils literal notranslate"><span class="pre">importance_d</span></code>, <code class="docutils literal notranslate"><span class="pre">importance_g0</span></code>,
+<code class="docutils literal notranslate"><span class="pre">importance_g1</span></code>, <code class="docutils literal notranslate"><span class="pre">importance_y</span></code>, and <code class="docutils literal notranslate"><span class="pre">score</span></code>. Row zero is the
+highest-ranked cluster; <code class="docutils literal notranslate"><span class="pre">features</span></code> can be passed directly to
+<code class="docutils literal notranslate"><span class="pre">sensitivity_benchmark_group</span></code>.</p>
+<p class="rubric" id="id10">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>ranking = rank_confounder_clusters(data, estimate)
+top_group = ranking.loc[0, “features”]</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="causalis.shared.confounder_clustering.__all__">
+<span class="sig-prename descclassname"><span class="pre">causalis.shared.confounder_clustering.</span></span><span class="sig-name descname"><span class="pre">__all__</span></span><a class="headerlink" href="#causalis.shared.confounder_clustering.__all__" title="Link to this definition">¶</a></dt>
+<dd><p>[‘cluster_confounders’, ‘rank_confounder_clusters’]</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../reference.html">Causalis API Reference</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../reference.html">Documentation overview</a><ul>
+  <li><a href="../index.html">API Modules</a><ul>
+  <li><a href="causalis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis</span></code></a><ul>
+  <li><a href="causalis.shared.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.shared</span></code></a><ul>
+      <li>Previous: <a href="causalis.shared.outcome_stats.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.shared.outcome_stats</span></code></a></li>
+      <li>Next: <a href="causalis.shared.sutva_validation.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">causalis.shared.sutva_validation</span></code></a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../../_sources/apidocs/causalis/causalis.shared.confounder_clustering.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

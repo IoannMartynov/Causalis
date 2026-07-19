@@ -1,0 +1,106 @@
+# {py:mod}`causalis.shared.confounder_clustering`
+
+```{py:module} causalis.shared.confounder_clustering
+```
+
+```{autodoc2-docstring} causalis.shared.confounder_clustering
+:allowtitles:
+```
+
+## Module Contents
+
+### Functions
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`cluster_confounders <causalis.shared.confounder_clustering.cluster_confounders>`
+  - ```{autodoc2-docstring} causalis.shared.confounder_clustering.cluster_confounders
+    :summary:
+    ```
+* - {py:obj}`rank_confounder_clusters <causalis.shared.confounder_clustering.rank_confounder_clusters>`
+  - ```{autodoc2-docstring} causalis.shared.confounder_clustering.rank_confounder_clusters
+    :summary:
+    ```
+````
+
+### Data
+
+````{list-table}
+:class: autosummary longtable
+:align: left
+
+* - {py:obj}`CorrelationMethod <causalis.shared.confounder_clustering.CorrelationMethod>`
+  - ```{autodoc2-docstring} causalis.shared.confounder_clustering.CorrelationMethod
+    :summary:
+    ```
+* - {py:obj}`LinkageMethod <causalis.shared.confounder_clustering.LinkageMethod>`
+  - ```{autodoc2-docstring} causalis.shared.confounder_clustering.LinkageMethod
+    :summary:
+    ```
+* - {py:obj}`OutcomeImportanceMethod <causalis.shared.confounder_clustering.OutcomeImportanceMethod>`
+  - ```{autodoc2-docstring} causalis.shared.confounder_clustering.OutcomeImportanceMethod
+    :summary:
+    ```
+* - {py:obj}`__all__ <causalis.shared.confounder_clustering.__all__>`
+  - ```{autodoc2-docstring} causalis.shared.confounder_clustering.__all__
+    :summary:
+    ```
+````
+
+### API
+
+````{py:data} CorrelationMethod
+:canonical: causalis.shared.confounder_clustering.CorrelationMethod
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.shared.confounder_clustering.CorrelationMethod
+```
+
+````
+
+````{py:data} LinkageMethod
+:canonical: causalis.shared.confounder_clustering.LinkageMethod
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.shared.confounder_clustering.LinkageMethod
+```
+
+````
+
+````{py:data} OutcomeImportanceMethod
+:canonical: causalis.shared.confounder_clustering.OutcomeImportanceMethod
+:value: >
+   None
+
+```{autodoc2-docstring} causalis.shared.confounder_clustering.OutcomeImportanceMethod
+```
+
+````
+
+````{py:function} cluster_confounders(data: causalis.dgp.causaldata.CausalData | causalis.dgp.multicausaldata.MultiCausalData, *, min_abs_correlation: float = 0.7, correlation_method: causalis.shared.confounder_clustering.CorrelationMethod = 'pearson', linkage_method: causalis.shared.confounder_clustering.LinkageMethod = 'complete', max_samples: typing.Optional[int] = 200000, random_state: typing.Optional[int] = 42) -> list[list[str]]
+:canonical: causalis.shared.confounder_clustering.cluster_confounders
+
+```{autodoc2-docstring} causalis.shared.confounder_clustering.cluster_confounders
+```
+````
+
+````{py:function} rank_confounder_clusters(data: causalis.dgp.causaldata.CausalData | causalis.dgp.multicausaldata.MultiCausalData, effect_estimation: typing.Any, *, min_abs_correlation: float = 0.7, correlation_method: causalis.shared.confounder_clustering.CorrelationMethod = 'pearson', linkage_method: causalis.shared.confounder_clustering.LinkageMethod = 'complete', max_samples: typing.Optional[int] = 200000, random_state: typing.Optional[int] = 42, outcome_importance: causalis.shared.confounder_clustering.OutcomeImportanceMethod = 'mean') -> pandas.DataFrame
+:canonical: causalis.shared.confounder_clustering.rank_confounder_clusters
+
+```{autodoc2-docstring} causalis.shared.confounder_clustering.rank_confounder_clusters
+```
+````
+
+````{py:data} __all__
+:canonical: causalis.shared.confounder_clustering.__all__
+:value: >
+   ['cluster_confounders', 'rank_confounder_clusters']
+
+```{autodoc2-docstring} causalis.shared.confounder_clustering.__all__
+```
+
+````
