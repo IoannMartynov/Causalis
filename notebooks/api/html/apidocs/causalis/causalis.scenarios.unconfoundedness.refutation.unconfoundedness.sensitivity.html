@@ -70,14 +70,19 @@ quantifies the bias as a function of:</p>
 <td><p>Render a single, unified bias-aware summary string.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_benchmark" title="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_benchmark"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sensitivity_benchmark</span></code></a></p></td>
-<td><p>Benchmark confounders one by one by refitting a short IRM that excludes each
-requested confounder from the supplied <code class="docutils literal notranslate"><span class="pre">CausalData</span></code>.</p></td>
+<td><p>Benchmark confounders one by one using genuine short-model IRM refits.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_analysis" title="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_analysis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sensitivity_analysis</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_benchmark_group" title="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_benchmark_group"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sensitivity_benchmark_group</span></code></a></p></td>
+<td><p>Benchmark a group of confounders using one genuine short-model IRM refit.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_analysis" title="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_analysis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sensitivity_analysis</span></code></a></p></td>
 <td><p>Compute bias-aware components and cache them.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.interpret_sensitivity_analysis" title="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.interpret_sensitivity_analysis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">interpret_sensitivity_analysis</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.interpret_sensitivity_analysis" title="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.interpret_sensitivity_analysis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">interpret_sensitivity_analysis</span></code></a></p></td>
 <td><p>Run sensitivity analysis and return a structured interpretation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.run_sensitivity_protocol" title="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.run_sensitivity_protocol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_sensitivity_protocol</span></code></a></p></td>
+<td><p>Run a binary, benchmark-calibrated sensitivity decision protocol.</p></td>
 </tr>
 </tbody>
 </table>
@@ -97,7 +102,7 @@ requested confounder from the supplied <code class="docutils literal notranslate
 <dl class="py data">
 <dt class="sig sig-object py" id="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.__all__">
 <span class="sig-prename descclassname"><span class="pre">causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.</span></span><span class="sig-name descname"><span class="pre">__all__</span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.__all__" title="Link to this definition">¶</a></dt>
-<dd><p>[‘sensitivity_analysis’, ‘sensitivity_benchmark’, ‘get_sensitivity_summary’, ‘interpret_sensitivity_…</p>
+<dd><p>[‘sensitivity_analysis’, ‘sensitivity_benchmark’, ‘sensitivity_benchmark_group’, ‘run_sensitivity_pr…</p>
 </dd></dl>
 
 <dl class="py function">
@@ -118,7 +123,7 @@ requested confounder from the supplied <code class="docutils literal notranslate
 <li><p>bias_aware_ci = [theta - (bound_width + z<em>se), theta + (bound_width + z</em>se)]</p></li>
 <li><p>max_bias_base, max_bias, bound_width and components (sigma2, nu2)</p></li>
 </ul>
-<p class="rubric" id="id16">Parameters</p>
+<p class="rubric" id="id19">Parameters</p>
 <p>effect_estimation : Dict[str, Any] or Any
 The effect estimation object.
 r2_y : float
@@ -135,7 +140,7 @@ use_signed_rr : bool, default False
 Whether to use signed rr in the quadratic combination of sensitivity components.
 If True and m_alpha/rr are available, the bias bound is computed via the
 per-unit quadratic form and RV/RVa are not reported.</p>
-<p class="rubric" id="id17">Returns</p>
+<p class="rubric" id="id20">Returns</p>
 <p>dict
 Dictionary with bias-aware results.</p>
 </dd></dl>
@@ -144,12 +149,12 @@ Dictionary with bias-aware results.</p>
 <dt class="sig sig-object py" id="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.format_bias_aware_summary">
 <span class="sig-prename descclassname"><span class="pre">causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.</span></span><span class="sig-name descname"><span class="pre">format_bias_aware_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">res</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.format_bias_aware_summary" title="Link to this definition">¶</a></dt>
 <dd><p>Render a single, unified bias-aware summary string.</p>
-<p class="rubric" id="id18">Parameters</p>
+<p class="rubric" id="id21">Parameters</p>
 <p>res : Dict[str, Any]
 The result dictionary from compute_bias_aware_ci.
 label : str, optional, default None
 The label for the estimand.</p>
-<p class="rubric" id="id19">Returns</p>
+<p class="rubric" id="id22">Returns</p>
 <p>str
 Formatted summary string.</p>
 </dd></dl>
@@ -160,27 +165,27 @@ Formatted summary string.</p>
 <dd><p>Render a single, unified bias-aware summary string.</p>
 <p>If bias-aware components are missing, shows a sampling-only variant with max_bias=0
 and then formats via <code class="docutils literal notranslate"><span class="pre">format_bias_aware_summary</span></code> for consistency.</p>
-<p class="rubric" id="id20">Parameters</p>
+<p class="rubric" id="id23">Parameters</p>
 <p>effect_estimation : Dict[str, Any] or Any
 The effect estimation object.
 label : str, optional, default None
 The label for the estimand.</p>
-<p class="rubric" id="id21">Returns</p>
+<p class="rubric" id="id24">Returns</p>
 <p>Optional[str]
 Formatted summary string or None if extraction fails.</p>
-<p class="rubric" id="id22">Notes</p>
+<p class="rubric" id="id25">Notes</p>
 <p>The summary reports the point estimate, standard error, and confidence
 intervals under both the null (no unobserved confounding) and the assumed
 level of confounding ($R^2_Y, R^2_D$).</p>
 <p>It also includes the Robustness Value (RV), which is the minimum strength
 of confounding ($R^2_Y = R^2_D$) required to change the conclusion
 (e.g., make the estimate non-significant or zero).</p>
-<p class="rubric" id="id23">Examples</p>
+<p class="rubric" id="id26">Examples</p>
 <blockquote>
 <div><blockquote>
 <div><blockquote>
 <div><p>from causalis.scenarios.unconfoundedness.refutation.unconfoundedness import sensitivity_analysis, get_sensitivity_summary</p>
-<p class="rubric" id="id24">Assuming ‘estimate’ is a fitted CausalEstimate from IRM</p>
+<p class="rubric" id="id27">Assuming ‘estimate’ is a fitted CausalEstimate from IRM</p>
 <p>res = sensitivity_analysis(estimate, r2_y=0.05, r2_d=0.05) # doctest: +SKIP
 summary = get_sensitivity_summary(estimate) # doctest: +SKIP
 print(summary) # doctest: +SKIP</p>
@@ -192,59 +197,42 @@ print(summary) # doctest: +SKIP</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_benchmark">
 <span class="sig-prename descclassname"><span class="pre">causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.</span></span><span class="sig-name descname"><span class="pre">sensitivity_benchmark</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">effect_estimation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">causalis.dgp.causaldata.CausalData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">benchmarking_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">all</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_benchmark" title="Link to this definition">¶</a></dt>
-<dd><p>Benchmark confounders one by one by refitting a short IRM that excludes each
-requested confounder from the supplied <code class="docutils literal notranslate"><span class="pre">CausalData</span></code>.</p>
-<p>This function intentionally performs a genuine short-model refit for every
-benchmarked confounder because <code class="docutils literal notranslate"><span class="pre">theta_short</span></code> and <code class="docutils literal notranslate"><span class="pre">delta</span></code> are defined by
-that re-estimation step. The residual-based strengths alone are not enough
-to recover those values.</p>
-<p class="rubric" id="id25">Parameters</p>
+<dd><p>Benchmark confounders one by one using genuine short-model IRM refits.</p>
+<p>Each requested confounder is excluded separately. The returned DataFrame
+therefore contains one row and one short-model estimate per confounder.
+Pass <code class="docutils literal notranslate"><span class="pre">&quot;all&quot;</span></code> to benchmark all confounders in <code class="docutils literal notranslate"><span class="pre">data.confounders</span></code> order.</p>
+<p class="rubric" id="id28">See Also</p>
+<p>sensitivity_benchmark_group
+Exclude several confounders together in one short-model refit.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_benchmark_group">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.</span></span><span class="sig-name descname"><span class="pre">sensitivity_benchmark_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">effect_estimation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">causalis.dgp.causaldata.CausalData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">benchmarking_group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.sensitivity_benchmark_group" title="Link to this definition">¶</a></dt>
+<dd><p>Benchmark a group of confounders using one genuine short-model IRM refit.</p>
+<p>All features in <code class="docutils literal notranslate"><span class="pre">benchmarking_group</span></code> are excluded together. Group-level
+confounding strengths and <code class="docutils literal notranslate"><span class="pre">rho</span></code> are calibrated jointly from long/short
+IRM sensitivity elements and the actual effect-estimate shift.</p>
+<p class="rubric" id="id29">Parameters</p>
 <p>effect_estimation : dict or Any
 Estimate/model container exposing a fitted IRM-like model.
 data : CausalData
-The causal dataset used for benchmarking. It must match the fitted long
-model on treatment, outcome, confounders, and row order.
-benchmarking_set : list[str] or “all”
-Confounders to benchmark one by one. Passing <code class="docutils literal notranslate"><span class="pre">&quot;all&quot;</span></code> benchmarks every
-confounder in <code class="docutils literal notranslate"><span class="pre">data.confounders</span></code> in that order.
+The exact causal dataset and row order used to fit the long model.
+benchmarking_group : list[str]
+Non-empty group of confounders to exclude together. Duplicate names are
+ignored while preserving their first occurrence.
 fit_args : dict, optional
-Additional keyword arguments passed to <code class="docutils literal notranslate"><span class="pre">IRM.estimate(...)</span></code> on each
-short model. If <code class="docutils literal notranslate"><span class="pre">score</span></code> is omitted, ATE/ATTE is inferred from the
-supplied estimate/model, and defaults to ATE. If <code class="docutils literal notranslate"><span class="pre">store_diagnostics</span></code>
-or legacy <code class="docutils literal notranslate"><span class="pre">diagnostic_data</span></code> is omitted, the short benchmark refits use
-<code class="docutils literal notranslate"><span class="pre">store_diagnostics=False</span></code> by default.</p>
-<p class="rubric" id="id26">Returns</p>
+Additional keyword arguments passed to <code class="docutils literal notranslate"><span class="pre">IRM.estimate(...)</span></code> for the
+short model. Short-model diagnostics are disabled by default.</p>
+<p class="rubric" id="id30">Returns</p>
 <p>pandas.DataFrame
-A long-form DataFrame with one row per benchmarked confounder and
-columns <code class="docutils literal notranslate"><span class="pre">benchmark_confounder</span></code>, <code class="docutils literal notranslate"><span class="pre">r2_y</span></code>, <code class="docutils literal notranslate"><span class="pre">r2_d</span></code>, <code class="docutils literal notranslate"><span class="pre">rho</span></code>,
-<code class="docutils literal notranslate"><span class="pre">theta_long</span></code>, <code class="docutils literal notranslate"><span class="pre">theta_short</span></code>, and <code class="docutils literal notranslate"><span class="pre">delta</span></code>.</p>
-<p class="rubric" id="id27">Notes</p>
-<p>Benchmarking allows the user to judge the plausibility of unobserved
-confounding by comparing it to the strength of observed confounders.
-For each confounder $X_k$, we calculate:</p>
-<ul class="simple">
-<li><p>$R^2_{Y \sim X_k | D, X_{-k}}$: The partial $R^2$ of the outcome on $X_k$.</p></li>
-<li><p>$R^2_{D \sim X_k | X_{-k}}$: The partial $R^2$ of the treatment on $X_k$.</p></li>
-</ul>
-<p>These values can then be used as $R^2_Y$ and $R^2_D$ in
-<code class="docutils literal notranslate"><span class="pre">sensitivity_analysis</span></code>.</p>
-<p class="rubric" id="id28">Examples</p>
-<blockquote>
-<div><blockquote>
-<div><blockquote>
-<div><p>from causalis.dgp import obs_linear_26_dataset
-from causalis.scenarios.unconfoundedness.model import IRM
-from causalis.scenarios.unconfoundedness.refutation import sensitivity_benchmark</p>
-<p class="rubric" id="id29">1. Fit a model</p>
-<p>data = obs_linear_26_dataset(n=1000, seed=42, return_causal_data=True)
-irm = IRM(data=data).fit()
-estimate = irm.estimate()</p>
-<p class="rubric" id="id30">2. Benchmark specific confounders</p>
-<p>benchmarks = sensitivity_benchmark(estimate, data, benchmarking_set=[‘x1’, ‘x2’]) # doctest: +SKIP
-print(benchmarks[[‘benchmark_confounder’, ‘r2_y’, ‘r2_d’]]) # doctest: +SKIP</p>
-</div></blockquote>
-</div></blockquote>
-</div></blockquote>
+One-row DataFrame retaining <code class="docutils literal notranslate"><span class="pre">benchmark_group</span></code>, <code class="docutils literal notranslate"><span class="pre">r2_y</span></code>, <code class="docutils literal notranslate"><span class="pre">r2_d</span></code>,
+<code class="docutils literal notranslate"><span class="pre">rho</span></code>, <code class="docutils literal notranslate"><span class="pre">theta_long</span></code>, <code class="docutils literal notranslate"><span class="pre">theta_short</span></code>, and <code class="docutils literal notranslate"><span class="pre">delta</span></code> and appending
+element-based gain statistics and calibration audit fields. The group
+is stored as a tuple in <code class="docutils literal notranslate"><span class="pre">benchmark_group</span></code>.</p>
+<p class="rubric" id="id31">Notes</p>
+<p>At least one long-model confounder must remain after removing the group.
+Runtime is normally dominated by the single short-model refit.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -268,7 +256,7 @@ stress test. In the default mode, the bound width is</p>
 confounder could explain, :math:<code class="docutils literal notranslate"><span class="pre">r2_d</span></code> does the same for treatment
 assignment, and :math:<code class="docutils literal notranslate"><span class="pre">\rho</span></code> sets the sign and strength alignment between
 the two channels.</p>
-<p class="rubric" id="id31">Parameters</p>
+<p class="rubric" id="id32">Parameters</p>
 <p>effect_estimation : Dict[str, Any] or Any
 The effect estimation object.
 r2_y : float
@@ -285,7 +273,7 @@ use_signed_rr : bool, default False
 Whether to use signed rr in the quadratic combination of sensitivity components.
 If True and m_alpha/rr are available, the bias bound is computed via the
 per-unit quadratic form and RV/RVa are not reported.</p>
-<p class="rubric" id="id32">Returns</p>
+<p class="rubric" id="id33">Returns</p>
 <p>dict
 Dictionary with bias-aware results:
 - theta, se, alpha, z
@@ -294,7 +282,7 @@ Dictionary with bias-aware results:
 - bias_aware_ci = faithful CI for the bounds
 - max_bias and components (sigma2, nu2)
 - params (r2_y, r2_d, rho, use_signed_rr)</p>
-<p class="rubric" id="id33">Examples</p>
+<p class="rubric" id="id34">Examples</p>
 <blockquote>
 <div><blockquote>
 <div><blockquote>
@@ -337,7 +325,7 @@ out[“bias_aware_ci”]  # doctest: +SKIP</p>
 <dt class="sig sig-object py" id="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.interpret_sensitivity_analysis">
 <span class="sig-prename descclassname"><span class="pre">causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.</span></span><span class="sig-name descname"><span class="pre">interpret_sensitivity_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">effect_estimation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">r2_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r2_d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_signed_rr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.interpret_sensitivity_analysis" title="Link to this definition">¶</a></dt>
 <dd><p>Run sensitivity analysis and return a structured interpretation.</p>
-<p class="rubric" id="id34">Parameters</p>
+<p class="rubric" id="id35">Parameters</p>
 <p>effect_estimation : Dict[str, Any] or Any
 The effect estimation object.
 r2_y : float
@@ -352,24 +340,102 @@ alpha : float, default 0.05
 Significance level.
 use_signed_rr : bool, default False
 Whether to use signed rr in the quadratic sensitivity combination.</p>
-<p class="rubric" id="id35">Returns</p>
+<p class="rubric" id="id36">Returns</p>
 <p>Dict[str, Any]
 Dictionary with:
 - raw: the output of <code class="docutils literal notranslate"><span class="pre">sensitivity_analysis(...)</span></code>
 - interpretation: machine-readable interpretation fields
 - summary: compact human-readable interpretation</p>
-<p class="rubric" id="id36">Notes</p>
+<p class="rubric" id="id37">Notes</p>
 <p>This function wraps <code class="docutils literal notranslate"><span class="pre">sensitivity_analysis</span></code> and provides a textual
 interpretation of the results, including whether the estimate remains
 significant under the assumed confounding.</p>
-<p class="rubric" id="id37">Examples</p>
+<p class="rubric" id="id38">Examples</p>
 <blockquote>
 <div><blockquote>
 <div><blockquote>
 <div><p>from causalis.scenarios.unconfoundedness.refutation.unconfoundedness import interpret_sensitivity_analysis</p>
-<p class="rubric" id="id38">Assuming ‘estimate’ is a fitted CausalEstimate</p>
+<p class="rubric" id="id39">Assuming ‘estimate’ is a fitted CausalEstimate</p>
 <p>interpretation = interpret_sensitivity_analysis(estimate, r2_y=0.01, r2_d=0.01) # doctest: +SKIP
 print(interpretation[“summary”]) # doctest: +SKIP</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.run_sensitivity_protocol">
+<span class="sig-prename descclassname"><span class="pre">causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.</span></span><span class="sig-name descname"><span class="pre">run_sensitivity_protocol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">effect_estimation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">causalis.dgp.causaldata.CausalData</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">benchmark_groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decision_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">positive</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">negative</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stress_multiplier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preconditions_passed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.run_sensitivity_protocol" title="Link to this definition">¶</a></dt>
+<dd><p>Run a binary, benchmark-calibrated sensitivity decision protocol.</p>
+<p>The primary decision uses one-times benchmark strength and the benchmark’s
+estimated <code class="docutils literal notranslate"><span class="pre">rho</span></code>. Every primary benchmark must pass. A benchmark passes
+when its bias-aware confidence interval lies strictly beyond the
+pre-specified practical threshold in <code class="docutils literal notranslate"><span class="pre">direction</span></code>. The two-times and
+<code class="docutils literal notranslate"><span class="pre">rho=1</span></code> adversarial scenarios are reported as stress tests and do not
+change the primary PASS/FAIL decision.</p>
+<p class="rubric" id="id40">Parameters</p>
+<p>effect_estimation : dict or Any
+Fitted IRM-like estimate accepted by :func:<code class="docutils literal notranslate"><span class="pre">sensitivity_analysis</span></code>.
+data : CausalData
+Exact data and row order used to fit the long model.
+benchmark_groups : mapping[str, list[str]]
+Non-empty mapping from meaningful benchmark labels to groups of
+observed pre-treatment confounders. Each group is omitted in its own
+genuine short-model refit.
+decision_threshold : float
+Pre-specified practically meaningful effect boundary. For a positive
+claim, the lower bias-aware CI endpoint must exceed this value. For a
+negative claim, the upper endpoint must be below it.
+direction : {“positive”, “negative”}
+Direction of the practically meaningful causal claim.
+alpha : float, default 0.05
+Two-sided significance level used for bias-aware confidence intervals.
+stress_multiplier : float, default 2.0
+Strength multiplier for the secondary stress scenario. Each partial
+R-squared is multiplied on the odds/Cohen-f-squared scale.
+preconditions_passed : bool, default True
+External design gate covering the causal adjustment set, overlap,
+nuisance-model quality, and estimator stability. <code class="docutils literal notranslate"><span class="pre">False</span></code> forces the
+overall result to FAIL while still returning sensitivity diagnostics.
+fit_args : dict, optional
+Additional keyword arguments for each short-model estimate.</p>
+<p class="rubric" id="id41">Returns</p>
+<p>dict
+A report with <code class="docutils literal notranslate"><span class="pre">status</span></code> (<code class="docutils literal notranslate"><span class="pre">&quot;PASS&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;FAIL&quot;</span></code>), <code class="docutils literal notranslate"><span class="pre">passed</span></code>,
+benchmark and scenario DataFrames, raw scenario details, warnings, and
+a standard human-readable conclusion. <code class="docutils literal notranslate"><span class="pre">primary</span></code> determines status;
+<code class="docutils literal notranslate"><span class="pre">stress</span></code> and <code class="docutils literal notranslate"><span class="pre">adversarial</span></code> describe the robustness margin.</p>
+<p class="rubric" id="id42">Notes</p>
+<p>The robustness values <code class="docutils literal notranslate"><span class="pre">rv</span></code> and <code class="docutils literal notranslate"><span class="pre">rva</span></code> are reported but are not used as
+universal pass/fail cutoffs. Benchmark selection and <code class="docutils literal notranslate"><span class="pre">decision_threshold</span></code>
+must be justified before inspecting the effect estimate. <code class="docutils literal notranslate"><span class="pre">rho</span></code> for both
+singleton and multi-feature benchmarks is calibrated from long/short
+sensitivity elements. A value of <code class="docutils literal notranslate"><span class="pre">+/-1</span></code> in primary or stress can mean
+either that <code class="docutils literal notranslate"><span class="pre">rho_raw</span></code> saturated at the correlation boundary or that
+DoubleML’s non-positive-gain fallback was used. Only the adversarial
+scenario forces <code class="docutils literal notranslate"><span class="pre">rho=1</span></code> independently of the benchmark effect shift.</p>
+<p>DoubleML-compatible boundary calibration clips non-positive raw gains to
+zero and keeps the scenario numerically evaluable. Raw values and boundary
+flags remain available in <code class="docutils literal notranslate"><span class="pre">benchmarks</span></code> for audit. Missing/non-finite
+sensitivity elements and an upper-bound <code class="docutils literal notranslate"><span class="pre">cf_d=1</span></code> still fail closed,
+because Causalis sensitivity bounds require finite inputs below one.</p>
+<p>The current IRM estimator supports <code class="docutils literal notranslate"><span class="pre">n_rep=1</span></code> only. Repeated cross-fitting
+stability must therefore be assessed outside this function until IRM adds
+repeated-split support.</p>
+<p class="rubric" id="id43">Examples</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>report = run_sensitivity_protocol(  # doctest: +SKIP
+…     estimate,
+…     data,
+…     benchmark_groups={“engagement”: [“sessions”, “activity_days”]},
+…     decision_threshold=0.0,
+…     direction=”positive”,
+… )
+report[“status”]  # doctest: +SKIP
+‘PASS’
+report[“primary”][[“benchmark”, “ci_lower”, “ci_upper”, “passed”]]  # doctest: +SKIP</p>
 </div></blockquote>
 </div></blockquote>
 </div></blockquote>

@@ -26,6 +26,7 @@ causalis.shared.outcome_outliers
 causalis.shared.confounders_balance
 causalis.shared.outcome_plots
 causalis.shared.outcome_stats
+causalis.shared.confounder_clustering
 causalis.shared.sutva_validation
 causalis.shared.srm
 ```
@@ -49,7 +50,7 @@ causalis.shared.srm
 ````{py:data} __all__
 :canonical: causalis.shared.__all__
 :value: >
-   ['check_srm', 'SRMResult', 'confounders_balance', 'outcome_stats', 'outcome_outliers', 'outcome_plot...
+   ['check_srm', 'SRMResult', 'confounders_balance', 'cluster_confounders', 'rank_confounder_clusters',...
 
 ```{autodoc2-docstring} causalis.shared.__all__
 ```
