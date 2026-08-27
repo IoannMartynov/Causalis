@@ -6,12 +6,18 @@ from typing import Any, Dict, Optional
 
 import numpy as np
 import pandas as pd
+from scipy.special import logit
 
 from causalis.data_contracts.causal_estimate import CausalEstimate
 from causalis.dgp.causaldata import CausalData
 from causalis.scenarios.unconfoundedness.refutation._shared import (
+    _normalize_score,
     _validate_estimate_matches_data,
 )
+
+_SUPPORT_EPSILON = 1e-8
+_SUPPORT_CALIPER_MULTIPLIER = 0.2
+_SUPPORT_SEARCH_BLOCK_SIZE = 65_536
 
 _DEFAULT_THRESHOLDS: Dict[str, float] = {
     "edge_mass_warn_001": 0.02,
@@ -38,6 +44,8 @@ _DEFAULT_THRESHOLDS: Dict[str, float] = {
     "slope_strong_hi": 1.4,
     "intercept_warn": 0.2,
     "intercept_strong": 0.4,
+    "support_rate_warn": 0.95,
+    "support_rate_strong": 0.90,
 }
 
 
@@ -80,10 +88,8 @@ def _auc_mann_whitney(scores: np.ndarray, labels: np.ndarray) -> float:
     return float(auc)
 
 
-def _ks_statistic(a: np.ndarray, b: np.ndarray) -> float:
-    """Compute the two-sample Kolmogorov-Smirnov statistic."""
-    a = np.sort(np.asarray(a, dtype=float))
-    b = np.sort(np.asarray(b, dtype=float))
+def _ks_statistic_from_sorted(a: np.ndarray, b: np.ndarray) -> float:
+    """Compute the two-sample Kolmogorov-Smirnov statistic from sorted arrays."""
     na, nb = a.size, b.size
     if na == 0 or nb == 0:
         return float("nan")
@@ -92,6 +98,122 @@ def _ks_statistic(a: np.ndarray, b: np.ndarray) -> float:
     cdf_a = np.searchsorted(a, vals, side="right") / na
     cdf_b = np.searchsorted(b, vals, side="right") / nb
     return float(np.max(np.abs(cdf_a - cdf_b)))
+
+
+def _ks_statistic(a: np.ndarray, b: np.ndarray) -> float:
+    """Compute the two-sample Kolmogorov-Smirnov statistic."""
+    a_sorted = np.sort(np.asarray(a, dtype=float))
+    b_sorted = np.sort(np.asarray(b, dtype=float))
+    return _ks_statistic_from_sorted(a_sorted, b_sorted)
+
+
+def _count_with_nearest_support(
+    source_sorted: np.ndarray,
+    target_sorted: np.ndarray,
+    *,
+    caliper: float,
+    block_size: int = _SUPPORT_SEARCH_BLOCK_SIZE,
+) -> int:
+    """Count source values with a target neighbour inside the caliper."""
+    supported = 0
+    target_last = int(target_sorted.size - 1)
+
+    for start in range(0, int(source_sorted.size), int(block_size)):
+        source = source_sorted[start : start + int(block_size)]
+        insertion = np.searchsorted(target_sorted, source, side="left")
+
+        right_index = np.minimum(insertion, target_last)
+        nearest = np.abs(source - target_sorted[right_index])
+
+        has_left = insertion > 0
+        if np.any(has_left):
+            left_distance = np.abs(
+                source[has_left] - target_sorted[insertion[has_left] - 1]
+            )
+            nearest[has_left] = np.minimum(nearest[has_left], left_distance)
+
+        supported += int(np.count_nonzero(nearest <= caliper))
+
+    return supported
+
+
+def _common_support_from_sorted_propensity(
+    treated_sorted: np.ndarray,
+    control_sorted: np.ndarray,
+    *,
+    score: str,
+) -> tuple[float, float, float, float]:
+    """Compute caliper common-support rates using sorted propensity arrays."""
+    n_treated = int(treated_sorted.size)
+    n_control = int(control_sorted.size)
+    if n_treated < 2 or n_control < 2:
+        raise ValueError(
+            "Common-support diagnostics require at least two treated and "
+            "two control observations to compute the pooled within-group "
+            "standard deviation."
+        )
+
+    np.clip(
+        treated_sorted,
+        _SUPPORT_EPSILON,
+        1.0 - _SUPPORT_EPSILON,
+        out=treated_sorted,
+    )
+    np.clip(
+        control_sorted,
+        _SUPPORT_EPSILON,
+        1.0 - _SUPPORT_EPSILON,
+        out=control_sorted,
+    )
+    logit(treated_sorted, out=treated_sorted)
+    logit(control_sorted, out=control_sorted)
+
+    treated_var = float(np.var(treated_sorted, ddof=1))
+    control_var = float(np.var(control_sorted, ddof=1))
+    pooled_var = (
+        (n_treated - 1) * treated_var + (n_control - 1) * control_var
+    ) / (n_treated + n_control - 2)
+    support_caliper = float(
+        _SUPPORT_CALIPER_MULTIPLIER * np.sqrt(max(pooled_var, 0.0))
+    )
+
+    supported_treated = _count_with_nearest_support(
+        treated_sorted,
+        control_sorted,
+        caliper=support_caliper,
+    )
+    supported_control = _count_with_nearest_support(
+        control_sorted,
+        treated_sorted,
+        caliper=support_caliper,
+    )
+    support_rate_treated = float(supported_treated / n_treated)
+    support_rate_control = float(supported_control / n_control)
+    support_rate = (
+        support_rate_treated
+        if score == "ATTE"
+        else min(support_rate_treated, support_rate_control)
+    )
+    return (
+        support_rate_treated,
+        support_rate_control,
+        float(support_rate),
+        support_caliper,
+    )
+
+
+def _grade_support_rate(
+    value: float,
+    *,
+    warn_threshold: float,
+    strong_threshold: float,
+) -> str:
+    """Grade a larger-is-better common-support rate."""
+    if value < strong_threshold:
+        return "RED"
+    if value < warn_threshold:
+        return "YELLOW"
+    return "GREEN"
 
 
 def _ess(weights: np.ndarray) -> float:
@@ -361,8 +483,13 @@ def run_overlap_diagnostics(
 
     - edge mass near `0` and `1`,
     - treated/control separation in propensity space (`KS`, `AUC`),
+    - empirical common support on the logit propensity scale,
     - effective sample size and tail diagnostics for weights,
     - calibration summaries such as `ECE`, recalibration slope, and intercept.
+
+    The ``support_rate`` metric describes empirical common support in the
+    observed sample. It does not prove the theoretical positivity assumption
+    and does not test for unobserved confounding.
 
     Parameters
     ----------
@@ -440,6 +567,11 @@ def run_overlap_diagnostics(
             "Fit IRM with store_diagnostics=True and call estimate() first."
         )
 
+    score_raw = getattr(diagnostic_data, "score", None)
+    if score_raw is None:
+        score_raw = estimate.estimand
+    score = _normalize_score(score_raw)
+
     m_diag = getattr(diagnostic_data, "m_hat", None)
     if m_diag is None:
         raise ValueError("estimate.diagnostic_data must include `m_hat`.")
@@ -471,6 +603,7 @@ def run_overlap_diagnostics(
     n = int(m.size)
     d_bool = d.astype(bool)
     n_treated = int(np.sum(d_bool))
+    n_control = int(n - n_treated)
     p1 = float(n_treated / n)
 
     if use_hajek is None:
@@ -489,12 +622,25 @@ def run_overlap_diagnostics(
         "max_m": float(np.max(m)),
     }
 
-    if n_treated == 0 or n_treated == n:
+    treated_sorted = np.sort(m[d_bool])
+    control_sorted = np.sort(m[~d_bool])
+    if n_treated == 0 or n_control == 0:
         ks = float("nan")
         auc = float("nan")
     else:
-        ks = _ks_statistic(m[d_bool], m[~d_bool])
+        ks = _ks_statistic_from_sorted(treated_sorted, control_sorted)
         auc = _auc_mann_whitney(m, d)
+
+    (
+        support_rate_treated,
+        support_rate_control,
+        support_rate,
+        support_caliper,
+    ) = _common_support_from_sorted_propensity(
+        treated_sorted,
+        control_sorted,
+        score=score,
+    )
 
     with np.errstate(divide="ignore", invalid="ignore"):
         w1 = np.where(d_bool, 1.0 / m, 0.0)
@@ -513,8 +659,7 @@ def run_overlap_diagnostics(
         ess_w1 = float("nan")
         ess_ratio_w1 = float("nan")
 
-    if n_treated < n:
-        n_control = n - n_treated
+    if n_control > 0:
         ess_w0 = float(_ess(w0[~d_bool]))
         ess_ratio_w0 = float(ess_w0 / max(n_control, 1))
     else:
@@ -663,11 +808,20 @@ def run_overlap_diagnostics(
     flags["calibration_ece"] = calibration["flags"]["ece"]
     flags["calibration_slope"] = calibration["flags"]["slope"]
     flags["calibration_intercept"] = calibration["flags"]["intercept"]
+    flags["support_rate"] = _grade_support_rate(
+        support_rate,
+        warn_threshold=threshold_values["support_rate_warn"],
+        strong_threshold=threshold_values["support_rate_strong"],
+    )
 
     report: Dict[str, Any] = {
         "n": n,
         "n_treated": n_treated,
         "p1": p1,
+        "support_rate_treated": support_rate_treated,
+        "support_rate_control": support_rate_control,
+        "support_rate": support_rate,
+        "support_caliper": support_caliper,
         "edge_mass": edge_mass,
         "ks": float(ks),
         "auc": float(auc),
@@ -678,6 +832,7 @@ def run_overlap_diagnostics(
         "calibration": calibration,
         "flags": flags,
         "meta": {
+            "score": score,
             "use_hajek": bool(use_hajek),
             "propensity_source": "m_hat_raw" if getattr(diagnostic_data, "m_hat_raw", None) is not None else "m_hat",
             "overlap_policy": str(
@@ -694,6 +849,8 @@ def run_overlap_diagnostics(
             ),
             "thresholds": threshold_values,
             "n_bins": int(n_bins),
+            "support_epsilon": _SUPPORT_EPSILON,
+            "support_caliper_multiplier": _SUPPORT_CALIPER_MULTIPLIER,
         },
     }
 
@@ -713,6 +870,11 @@ def run_overlap_diagnostics(
                 {"metric": "edge_0.02_above", "value": edge_mass["share_above_002"], "flag": flags["edge_mass_002"]},
                 {"metric": "KS", "value": float(ks), "flag": flags["ks"]},
                 {"metric": "AUC", "value": float(auc), "flag": flags["auc"]},
+                {
+                    "metric": "support_rate",
+                    "value": support_rate,
+                    "flag": flags["support_rate"],
+                },
                 {"metric": "ESS_treated_ratio", "value": ess_ratio_w1, "flag": flags["ess_w1"]},
                 {"metric": "ESS_control_ratio", "value": ess_ratio_w0, "flag": flags["ess_w0"]},
                 {

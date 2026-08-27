@@ -10,7 +10,7 @@ from causalis.dgp.causaldata import CausalData
 from causalis.shared import cluster_confounders, rank_confounder_clusters
 
 
-def _make_data(*, n: int = 2_000, seed: int = 42) -> CausalData:
+def _make_data(*, n: int = 2_000, seed: int = 42, n_features: int = 3) -> CausalData:
     rng = np.random.default_rng(seed)
     x1 = rng.normal(size=n)
     x2 = -x1 + rng.normal(scale=0.02, size=n)
@@ -18,11 +18,14 @@ def _make_data(*, n: int = 2_000, seed: int = 42) -> CausalData:
     d = rng.binomial(1, 1.0 / (1.0 + np.exp(-0.4 * x1)))
     y = d + x1 + 0.2 * x3 + rng.normal(size=n)
     df = pd.DataFrame({"y": y, "d": d, "x1": x1, "x2": x2, "x3": x3})
+    confounders = [f"x{i + 1}" for i in range(n_features)]
+    for feature in confounders[3:]:
+        df[feature] = rng.normal(size=n)
     return CausalData(
         df=df,
         treatment="d",
         outcome="y",
-        confounders=["x1", "x2", "x3"],
+        confounders=confounders,
     )
 
 
@@ -32,15 +35,16 @@ def _make_feature_importance(
     g0: list[float],
     g1: list[float],
 ) -> dict:
+    n_features = len(m)
     return {
         "method": "native",
-        "feature_names": ["x1", "x2", "x3"],
-        "n_features": 3,
+        "feature_names": [f"x{i + 1}" for i in range(n_features)],
+        "n_features": n_features,
         "nuisances": {
             key: {
                 "available": True,
                 "mean": np.asarray(values, dtype=float),
-                "std": np.zeros(3),
+                "std": np.zeros(n_features),
                 "n_folds": 3,
             }
             for key, values in {"m": m, "g0": g0, "g1": g1}.items()
@@ -118,7 +122,8 @@ def test_cluster_confounders_keeps_single_feature_cluster():
     assert cluster_confounders(single) == [["x3"]]
 
 
-def test_rank_confounder_clusters_sorts_by_joint_importance():
+@pytest.mark.parametrize("ranking_method", ["mixed", "joint"])
+def test_rank_confounder_clusters_sorts_by_joint_importance(ranking_method):
     data = _make_data()
     feature_importance = _make_feature_importance(
         m=[0.3, 0.3, 0.4],
@@ -134,6 +139,7 @@ def test_rank_confounder_clusters_sorts_by_joint_importance():
         estimate,
         min_abs_correlation=0.95,
         max_samples=None,
+        ranking_method=ranking_method,
     )
 
     assert list(ranking.columns) == [
@@ -151,6 +157,84 @@ def test_rank_confounder_clusters_sorts_by_joint_importance():
     assert float(ranking.loc[0, "importance_d"]) == pytest.approx(0.6)
     assert float(ranking.loc[0, "importance_y"]) == pytest.approx(0.6)
     assert float(ranking.loc[0, "score"]) == pytest.approx(0.36)
+
+
+@pytest.mark.parametrize(
+    "m, g, joint_order, mixed_order",
+    [
+        pytest.param(
+            [1, 1, 3, 4, 11, 1],
+            [5, 5, 6, 3, 1, 1],
+            [0, 1, 2, 3, 4],
+            [0, 1, 3, 2, 4],
+            id="promote-treatment-cluster",
+        ),
+        pytest.param(
+            [10, 10, 15, 4, 11, 1],
+            [5, 5, 6, 3, 1, 1],
+            [0, 1, 2, 3, 4],
+            [0, 1, 3, 2, 4],
+            id="strongest-treatment-already-selected",
+        ),
+        pytest.param(
+            [1, 1, 3, 4, 6, 6],
+            [10, 10, 12, 4, 1, 2],
+            [0, 1, 2, 4, 3],
+            [0, 1, 4, 2, 3],
+            id="treatment-tie-prefers-joint-score",
+        ),
+        pytest.param(
+            [1, 1, 3, 4, 6, 6],
+            [10, 10, 12, 4, 1, 1],
+            [0, 1, 2, 3, 4],
+            [0, 1, 3, 2, 4],
+            id="treatment-and-score-tie-prefers-original-order",
+        ),
+    ],
+)
+def test_rank_confounder_clusters_mixed_default(m, g, joint_order, mixed_order):
+    data = _make_data(n_features=len(m))
+    importance = _make_feature_importance(m=m, g0=g, g1=g)
+
+    mixed = rank_confounder_clusters(data, importance, min_abs_correlation=0.95)
+    joint = rank_confounder_clusters(
+        data, importance, min_abs_correlation=0.95, ranking_method="joint"
+    )
+
+    assert joint["cluster_id"].tolist() == joint_order
+    assert mixed["cluster_id"].tolist() == mixed_order
+    assert mixed.index.tolist() == list(range(len(mixed)))
+    assert mixed["cluster_id"].is_unique
+    assert joint["score"].is_monotonic_decreasing
+    pd.testing.assert_frame_equal(
+        mixed.sort_values("cluster_id").reset_index(drop=True),
+        joint.sort_values("cluster_id").reset_index(drop=True),
+    )
+
+
+@pytest.mark.parametrize("n_features", [1, 2, 3, 4])
+def test_rank_confounder_clusters_mixed_keeps_small_rankings(n_features):
+    data = _make_data(n_features=n_features)
+    importance = _make_feature_importance(
+        m=list(range(1, n_features + 1)),
+        g0=[1.0] * n_features,
+        g1=[1.0] * n_features,
+    )
+
+    mixed = rank_confounder_clusters(data, importance, min_abs_correlation=0.95)
+    joint = rank_confounder_clusters(
+        data, importance, min_abs_correlation=0.95, ranking_method="joint"
+    )
+
+    assert len(mixed) == max(1, n_features - 1)
+    pd.testing.assert_frame_equal(mixed, joint)
+
+
+def test_rank_confounder_clusters_validates_ranking_method():
+    with pytest.raises(ValueError, match="ranking_method must be 'mixed' or 'joint'"):
+        rank_confounder_clusters(
+            _make_data(), SimpleNamespace(), ranking_method="treatment"
+        )
 
 
 def test_rank_confounder_clusters_supports_model_and_max_outcome_importance():

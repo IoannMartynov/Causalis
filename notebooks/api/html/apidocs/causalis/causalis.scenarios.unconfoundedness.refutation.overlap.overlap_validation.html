@@ -83,9 +83,13 @@ leverage points. The report combines:</p>
 <ul class="simple">
 <li><p>edge mass near <code class="docutils literal notranslate"><span class="pre">0</span></code> and <code class="docutils literal notranslate"><span class="pre">1</span></code>,</p></li>
 <li><p>treated/control separation in propensity space (<code class="docutils literal notranslate"><span class="pre">KS</span></code>, <code class="docutils literal notranslate"><span class="pre">AUC</span></code>),</p></li>
+<li><p>empirical common support on the logit propensity scale,</p></li>
 <li><p>effective sample size and tail diagnostics for weights,</p></li>
 <li><p>calibration summaries such as <code class="docutils literal notranslate"><span class="pre">ECE</span></code>, recalibration slope, and intercept.</p></li>
 </ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">support_rate</span></code> metric describes empirical common support in the
+observed sample. It does not prove the theoretical positivity assumption
+and does not test for unobserved confounding.</p>
 <p class="rubric" id="id1">Parameters</p>
 <p>data : CausalData
 Dataset used to fit the estimator.

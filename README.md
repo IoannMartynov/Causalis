@@ -79,7 +79,7 @@ protocol = run_sensitivity_protocol(
     causaldata,
     benchmark_groups={"primary_domain_benchmark": primary_group},
     decision_threshold=0.0,  # replace with the minimum practical effect
-    direction="positive",
+    direction="auto",  # default: infer direction relative to the threshold
     preconditions_passed=True,  # causal set, overlap, nuisance quality, stability
 )
 
@@ -96,6 +96,17 @@ strictly beyond `decision_threshold` in the requested direction. `RV` and
 cutoffs. An empty benchmark set, failed external preconditions, unavailable
 sensitivity elements, or strengths outside the finite sensitivity domain
 produce `FAIL`.
+
+By default, `direction="auto"` selects positive when the original estimate is
+at or above `decision_threshold`, and negative otherwise. It uses this same
+direction for every scenario and returns it in `protocol["direction"]`, with
+an inference warning in `protocol["warnings"]`. For a negative estimate at a
+zero threshold, every primary CI must have `ci_upper < 0`; touching or crossing
+zero still fails. Thresholds retain their supplied sign, and an estimate equal
+to the threshold does not pass. Use explicit `direction="positive"` or
+`direction="negative"` for a pre-specified directional claim; these choices are
+never overridden. Significance before sensitivity analysis alone does not
+guarantee a pass.
 
 Benchmark boundary handling matches DoubleML: raw `cf_y` and `cf_d` are
 clipped to `[0, 1]`. If either long/short gain is not strictly positive,

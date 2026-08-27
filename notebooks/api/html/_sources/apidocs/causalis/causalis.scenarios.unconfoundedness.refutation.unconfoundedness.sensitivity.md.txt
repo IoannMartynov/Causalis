@@ -133,7 +133,7 @@
 ```
 ````
 
-````{py:function} run_sensitivity_protocol(effect_estimation: typing.Dict[str, typing.Any] | typing.Any, data: causalis.dgp.causaldata.CausalData, *, benchmark_groups: typing.Mapping[str, typing.List[str]], decision_threshold: float, direction: typing.Literal[positive, negative], alpha: float = 0.05, stress_multiplier: float = 2.0, preconditions_passed: bool = True, fit_args: typing.Optional[typing.Dict[str, typing.Any]] = None) -> typing.Dict[str, typing.Any]
+````{py:function} run_sensitivity_protocol(effect_estimation: typing.Dict[str, typing.Any] | typing.Any, data: causalis.dgp.causaldata.CausalData, *, benchmark_groups: typing.Mapping[str, typing.List[str]], decision_threshold: float, direction: typing.Literal[auto, positive, negative] = 'auto', alpha: float = 0.05, stress_multiplier: float = 2.0, preconditions_passed: bool = True, fit_args: typing.Optional[typing.Dict[str, typing.Any]] = None) -> typing.Dict[str, typing.Any]
 :canonical: causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.run_sensitivity_protocol
 
 ```{autodoc2-docstring} causalis.scenarios.unconfoundedness.refutation.unconfoundedness.sensitivity.run_sensitivity_protocol

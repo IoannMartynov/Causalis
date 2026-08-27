@@ -1907,7 +1907,7 @@ def _protocol_ci_passes(
     direction: Literal["positive", "negative"],
     decision_threshold: float,
 ) -> bool:
-    """Apply the pre-specified directional decision rule to an interval."""
+    """Apply the resolved directional decision rule to an interval."""
     lo, hi = map(float, ci)
     if not (np.isfinite(lo) and np.isfinite(hi)):
         return False
@@ -2023,7 +2023,7 @@ def run_sensitivity_protocol(
     *,
     benchmark_groups: Mapping[str, List[str]],
     decision_threshold: float,
-    direction: Literal["positive", "negative"],
+    direction: Literal["auto", "positive", "negative"] = "auto",
     alpha: float = 0.05,
     stress_multiplier: float = 2.0,
     preconditions_passed: bool = True,
@@ -2052,8 +2052,14 @@ def run_sensitivity_protocol(
         Pre-specified practically meaningful effect boundary. For a positive
         claim, the lower bias-aware CI endpoint must exceed this value. For a
         negative claim, the upper endpoint must be below it.
-    direction : {"positive", "negative"}
-        Direction of the practically meaningful causal claim.
+    direction : {"auto", "positive", "negative"}, default "auto"
+        Direction relative to ``decision_threshold``. ``"auto"`` selects
+        ``"positive"`` when the original estimate is at or above the threshold
+        and ``"negative"`` otherwise, using the same direction for every
+        scenario. Automatic selection requires a finite estimate. An estimate
+        equal to the threshold does not pass the strict CI rule. Explicit
+        directions are never overridden; use one for a pre-specified
+        directional causal claim.
     alpha : float, default 0.05
         Two-sided significance level used for bias-aware confidence intervals.
     stress_multiplier : float, default 2.0
@@ -2073,6 +2079,8 @@ def run_sensitivity_protocol(
         benchmark and scenario DataFrames, raw scenario details, warnings, and
         a standard human-readable conclusion. ``primary`` determines status;
         ``stress`` and ``adversarial`` describe the robustness margin.
+        ``direction`` contains the resolved positive/negative direction;
+        ``warnings`` records when it was inferred from the estimate.
 
     Notes
     -----
@@ -2102,14 +2110,14 @@ def run_sensitivity_protocol(
     ...     data,
     ...     benchmark_groups={"engagement": ["sessions", "activity_days"]},
     ...     decision_threshold=0.0,
-    ...     direction="positive",
+    ...     direction="auto",
     ... )
     >>> report["status"]  # doctest: +SKIP
     'PASS'
     >>> report["primary"][["benchmark", "ci_lower", "ci_upper", "passed"]]  # doctest: +SKIP
     """
-    if direction not in {"positive", "negative"}:
-        raise ValueError("direction must be either 'positive' or 'negative'.")
+    if direction not in {"auto", "positive", "negative"}:
+        raise ValueError("direction must be 'auto', 'positive', or 'negative'.")
     if not np.isfinite(decision_threshold):
         raise ValueError("decision_threshold must be finite and pre-specified.")
     if not (0.0 < float(alpha) < 1.0):
@@ -2122,7 +2130,19 @@ def run_sensitivity_protocol(
         raise TypeError("benchmark_groups must be a mapping from labels to feature lists.")
 
     warnings: list[str] = []
+    if direction == "auto":
+        theta, _, _ = _pull_theta_se_ci(effect_estimation, float(alpha))
+        if not np.isfinite(theta):
+            raise ValueError("direction='auto' requires a finite effect estimate (theta).")
+        direction = "positive" if theta >= decision_threshold else "negative"
+        warnings.append(
+            f"direction='auto' inferred '{direction}' from theta={theta:g} "
+            f"relative to decision_threshold={float(decision_threshold):g}; "
+            "use an explicit direction for a pre-specified directional claim."
+        )
+
     if not benchmark_groups:
+        warnings.append("At least one justified primary benchmark group is required.")
         empty = pd.DataFrame(columns=_PROTOCOL_SCENARIO_COLUMNS)
         return {
             "status": "FAIL",
@@ -2139,7 +2159,7 @@ def run_sensitivity_protocol(
             "scenarios": empty.copy(),
             "details": {},
             "limited_margin": False,
-            "warnings": ["At least one justified primary benchmark group is required."],
+            "warnings": warnings,
             "summary": (
                 "FAIL: no primary benchmark group was supplied; hidden-confounding "
                 "robustness is not established."
@@ -2323,6 +2343,11 @@ def run_sensitivity_protocol(
     else:
         boundary_benchmarks = []
 
+    decision_rule = (
+        f"ci_lower > {float(decision_threshold):g}"
+        if direction == "positive"
+        else f"ci_upper < {float(decision_threshold):g}"
+    )
     if not preconditions_passed:
         summary = (
             "FAIL: the external design/overlap/nuisance preconditions did not pass; "
@@ -2337,8 +2362,9 @@ def run_sensitivity_protocol(
         failed = primary_df.loc[~primary_df["passed"], "benchmark"].tolist()
         summary = (
             "FAIL: under hidden confounding comparable to primary benchmark(s) "
-            f"{failed}, the bias-aware confidence interval crosses the pre-specified "
-            f"decision threshold {float(decision_threshold):g}; the causal claim is not robust."
+            f"{failed}, the bias-aware confidence interval does not satisfy the "
+            f"{direction} decision rule ({decision_rule}) at the pre-specified "
+            "decision threshold; the causal claim is not robust."
         )
     else:
         margin = "limited" if limited_margin else "strong"
@@ -2350,6 +2376,8 @@ def run_sensitivity_protocol(
         summary = (
             "PASS: the practically meaningful effect is robust to hidden confounding "
             "comparable to every primary benchmark. "
+            f"Every primary bias-aware confidence interval satisfies the {direction} "
+            f"decision rule ({decision_rule}). "
             f"The reported stress-test margin is {margin}."
             f"{boundary_note}"
         )

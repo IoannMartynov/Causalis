@@ -46,7 +46,7 @@
 <td><p>Cluster confounders using their absolute pairwise correlations.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#causalis.shared.confounder_clustering.rank_confounder_clusters" title="causalis.shared.confounder_clustering.rank_confounder_clusters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rank_confounder_clusters</span></code></a></p></td>
-<td><p>Cluster confounders and rank the clusters by joint nuisance importance.</p></td>
+<td><p>Cluster confounders and rank them by joint and treatment importance.</p></td>
 </tr>
 </tbody>
 </table>
@@ -104,7 +104,7 @@ and positive correlations of the same magnitude are therefore treated as
 equally similar. By default, complete linkage is used, so every pair of
 features in a non-singleton cluster has an absolute correlation at least
 as large as <code class="docutils literal notranslate"><span class="pre">min_abs_correlation</span></code> on the sampled data.</p>
-<p class="rubric" id="id4">Parameters</p>
+<p class="rubric" id="id5">Parameters</p>
 <p>data : CausalData or MultiCausalData
 Causal data contract exposing numeric <code class="docutils literal notranslate"><span class="pre">df</span></code> and <code class="docutils literal notranslate"><span class="pre">confounders</span></code>
 attributes.
@@ -123,11 +123,11 @@ is larger, rows are sampled without replacement. Pass <code class="docutils lite
 all rows.
 random_state : int or None, default 42
 Seed used for row sampling.</p>
-<p class="rubric" id="id5">Returns</p>
+<p class="rubric" id="id6">Returns</p>
 <p>list[list[str]]
 Clusters in the original confounder order. Features within each cluster
 also preserve their original order. Singleton clusters are retained.</p>
-<p class="rubric" id="id6">Examples</p>
+<p class="rubric" id="id7">Examples</p>
 <blockquote>
 <div><blockquote>
 <div><blockquote>
@@ -138,7 +138,7 @@ strongest_group  # doctest: +SKIP
 </div></blockquote>
 </div></blockquote>
 </div></blockquote>
-<p class="rubric" id="id7">Notes</p>
+<p class="rubric" id="id8">Notes</p>
 <p>Missing correlations can occur when a rare feature is constant in the
 sampled rows. They are treated as zero correlation, leaving that feature
 separate unless it is linked to another feature by valid correlations.</p>
@@ -146,8 +146,8 @@ separate unless it is linked to another feature by valid correlations.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="causalis.shared.confounder_clustering.rank_confounder_clusters">
-<span class="sig-prename descclassname"><span class="pre">causalis.shared.confounder_clustering.</span></span><span class="sig-name descname"><span class="pre">rank_confounder_clusters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">causalis.dgp.causaldata.CausalData</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">causalis.dgp.multicausaldata.MultiCausalData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effect_estimation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_abs_correlation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correlation_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.shared.confounder_clustering.CorrelationMethod" title="causalis.shared.confounder_clustering.CorrelationMethod"><span class="pre">causalis.shared.confounder_clustering.CorrelationMethod</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'pearson'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linkage_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.shared.confounder_clustering.LinkageMethod" title="causalis.shared.confounder_clustering.LinkageMethod"><span class="pre">causalis.shared.confounder_clustering.LinkageMethod</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'complete'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">200000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome_importance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.shared.confounder_clustering.OutcomeImportanceMethod" title="causalis.shared.confounder_clustering.OutcomeImportanceMethod"><span class="pre">causalis.shared.confounder_clustering.OutcomeImportanceMethod</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.shared.confounder_clustering.rank_confounder_clusters" title="Link to this definition">¶</a></dt>
-<dd><p>Cluster confounders and rank the clusters by joint nuisance importance.</p>
+<span class="sig-prename descclassname"><span class="pre">causalis.shared.confounder_clustering.</span></span><span class="sig-name descname"><span class="pre">rank_confounder_clusters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">causalis.dgp.causaldata.CausalData</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">causalis.dgp.multicausaldata.MultiCausalData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effect_estimation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_abs_correlation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correlation_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.shared.confounder_clustering.CorrelationMethod" title="causalis.shared.confounder_clustering.CorrelationMethod"><span class="pre">causalis.shared.confounder_clustering.CorrelationMethod</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'pearson'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linkage_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.shared.confounder_clustering.LinkageMethod" title="causalis.shared.confounder_clustering.LinkageMethod"><span class="pre">causalis.shared.confounder_clustering.LinkageMethod</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'complete'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">200000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome_importance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#causalis.shared.confounder_clustering.OutcomeImportanceMethod" title="causalis.shared.confounder_clustering.OutcomeImportanceMethod"><span class="pre">causalis.shared.confounder_clustering.OutcomeImportanceMethod</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ranking_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">mixed</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">joint</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'mixed'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#causalis.shared.confounder_clustering.rank_confounder_clusters" title="Link to this definition">¶</a></dt>
+<dd><p>Cluster confounders and rank them by joint and treatment importance.</p>
 <p>For each correlation cluster :math:<code class="docutils literal notranslate"><span class="pre">C_g</span></code>, the treatment and outcome
 importances are aggregated as</p>
 <p>.. math::</p>
@@ -162,10 +162,12 @@ importances are aggregated as</p>
 \right).
 </pre></div>
 </div>
-<p>Clusters are sorted by <code class="docutils literal notranslate"><span class="pre">score</span> <span class="pre">=</span> <span class="pre">importance_d</span> <span class="pre">*</span> <span class="pre">importance_y</span></code> in
-descending order. Native importance vectors are normalized separately for
-<code class="docutils literal notranslate"><span class="pre">m</span></code>, <code class="docutils literal notranslate"><span class="pre">g0</span></code>, and <code class="docutils literal notranslate"><span class="pre">g1</span></code> before aggregation.</p>
-<p class="rubric" id="id8">Parameters</p>
+<p>The joint score is <code class="docutils literal notranslate"><span class="pre">score</span> <span class="pre">=</span> <span class="pre">importance_d</span> <span class="pre">*</span> <span class="pre">importance_y</span></code>. By default,
+the first two clusters have the highest joint scores, and the third has
+the highest treatment importance among the remaining clusters. All other
+clusters retain descending joint-score order. Native importance vectors
+are normalized separately for <code class="docutils literal notranslate"><span class="pre">m</span></code>, <code class="docutils literal notranslate"><span class="pre">g0</span></code>, and <code class="docutils literal notranslate"><span class="pre">g1</span></code> before aggregation.</p>
+<p class="rubric" id="id9">Parameters</p>
 <p>data : CausalData or MultiCausalData
 Data containing the confounders to cluster.
 effect_estimation : Any
@@ -176,20 +178,36 @@ Forwarded to :func:<code class="docutils literal notranslate"><span class="pre">
 outcome_importance : {“mean”, “max”}, default “mean”
 Combine the cluster-level <code class="docutils literal notranslate"><span class="pre">g0</span></code> and <code class="docutils literal notranslate"><span class="pre">g1</span></code> importance by their mean or
 maximum. <code class="docutils literal notranslate"><span class="pre">&quot;max&quot;</span></code> is more conservative for features important in only
-one treatment arm.</p>
-<p class="rubric" id="id9">Returns</p>
+one treatment arm.
+ranking_method : {“mixed”, “joint”}, default “mixed”
+<code class="docutils literal notranslate"><span class="pre">&quot;mixed&quot;</span></code> selects two clusters by joint score, then the strongest
+remaining treatment cluster, followed by the rest in joint-score
+order. Treatment-importance ties favor higher joint score, then
+original cluster order. With fewer than three clusters, all are
+returned in joint-score order. <code class="docutils literal notranslate"><span class="pre">&quot;joint&quot;</span></code> preserves the legacy
+descending joint-score ordering for every cluster. The initial
+joint-score sort preserves original cluster order for tied scores.</p>
+<p class="rubric" id="id10">Returns</p>
 <p>pandas.DataFrame
 Cluster ranking with columns <code class="docutils literal notranslate"><span class="pre">cluster_id</span></code>, <code class="docutils literal notranslate"><span class="pre">features</span></code>,
 <code class="docutils literal notranslate"><span class="pre">n_features</span></code>, <code class="docutils literal notranslate"><span class="pre">importance_d</span></code>, <code class="docutils literal notranslate"><span class="pre">importance_g0</span></code>,
 <code class="docutils literal notranslate"><span class="pre">importance_g1</span></code>, <code class="docutils literal notranslate"><span class="pre">importance_y</span></code>, and <code class="docutils literal notranslate"><span class="pre">score</span></code>. Row zero is the
 highest-ranked cluster; <code class="docutils literal notranslate"><span class="pre">features</span></code> can be passed directly to
-<code class="docutils literal notranslate"><span class="pre">sensitivity_benchmark_group</span></code>.</p>
-<p class="rubric" id="id10">Examples</p>
+<code class="docutils literal notranslate"><span class="pre">sensitivity_benchmark_group</span></code>. Every cluster appears once, and
+scores are unchanged by the ranking method. Mixed ordering is not
+necessarily globally descending by <code class="docutils literal notranslate"><span class="pre">score</span></code>.</p>
+<p class="rubric" id="id11">Notes</p>
+<p>Ranking reuses native feature importances without fitting additional
+models. These importances are screening heuristics, not calibrated
+sensitivity strengths; mixed ranking does not guarantee higher benchmark
+<code class="docutils literal notranslate"><span class="pre">r2_d</span></code>.</p>
+<p class="rubric" id="id12">Examples</p>
 <blockquote>
 <div><blockquote>
 <div><blockquote>
 <div><p>ranking = rank_confounder_clusters(data, estimate)
-top_group = ranking.loc[0, “features”]</p>
+top3 = ranking.head(3)  # Two by joint score, one by treatment importance.
+joint_ranking = rank_confounder_clusters(data, estimate, ranking_method=”joint”)</p>
 </div></blockquote>
 </div></blockquote>
 </div></blockquote>

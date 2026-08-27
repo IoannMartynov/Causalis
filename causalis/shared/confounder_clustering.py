@@ -258,9 +258,10 @@ def rank_confounder_clusters(
     max_samples: Optional[int] = 200_000,
     random_state: Optional[int] = 42,
     outcome_importance: OutcomeImportanceMethod = "mean",
+    ranking_method: Literal["mixed", "joint"] = "mixed",
 ) -> pd.DataFrame:
     r"""
-    Cluster confounders and rank the clusters by joint nuisance importance.
+    Cluster confounders and rank them by joint and treatment importance.
 
     For each correlation cluster :math:`C_g`, the treatment and outcome
     importances are aggregated as
@@ -278,9 +279,11 @@ def rank_confounder_clusters(
             + \sum_{j \in C_g} I_{g1,j}
         \right).
 
-    Clusters are sorted by ``score = importance_d * importance_y`` in
-    descending order. Native importance vectors are normalized separately for
-    ``m``, ``g0``, and ``g1`` before aggregation.
+    The joint score is ``score = importance_d * importance_y``. By default,
+    the first two clusters have the highest joint scores, and the third has
+    the highest treatment importance among the remaining clusters. All other
+    clusters retain descending joint-score order. Native importance vectors
+    are normalized separately for ``m``, ``g0``, and ``g1`` before aggregation.
 
     Parameters
     ----------
@@ -295,6 +298,14 @@ def rank_confounder_clusters(
         Combine the cluster-level ``g0`` and ``g1`` importance by their mean or
         maximum. ``"max"`` is more conservative for features important in only
         one treatment arm.
+    ranking_method : {"mixed", "joint"}, default "mixed"
+        ``"mixed"`` selects two clusters by joint score, then the strongest
+        remaining treatment cluster, followed by the rest in joint-score
+        order. Treatment-importance ties favor higher joint score, then
+        original cluster order. With fewer than three clusters, all are
+        returned in joint-score order. ``"joint"`` preserves the legacy
+        descending joint-score ordering for every cluster. The initial
+        joint-score sort preserves original cluster order for tied scores.
 
     Returns
     -------
@@ -303,15 +314,27 @@ def rank_confounder_clusters(
         ``n_features``, ``importance_d``, ``importance_g0``,
         ``importance_g1``, ``importance_y``, and ``score``. Row zero is the
         highest-ranked cluster; ``features`` can be passed directly to
-        ``sensitivity_benchmark_group``.
+        ``sensitivity_benchmark_group``. Every cluster appears once, and
+        scores are unchanged by the ranking method. Mixed ordering is not
+        necessarily globally descending by ``score``.
+
+    Notes
+    -----
+    Ranking reuses native feature importances without fitting additional
+    models. These importances are screening heuristics, not calibrated
+    sensitivity strengths; mixed ranking does not guarantee higher benchmark
+    ``r2_d``.
 
     Examples
     --------
     >>> ranking = rank_confounder_clusters(data, estimate)
-    >>> top_group = ranking.loc[0, "features"]
+    >>> top3 = ranking.head(3)  # Two by joint score, one by treatment importance.
+    >>> joint_ranking = rank_confounder_clusters(data, estimate, ranking_method="joint")
     """
     if outcome_importance not in {"mean", "max"}:
         raise ValueError("outcome_importance must be 'mean' or 'max'.")
+    if ranking_method not in {"mixed", "joint"}:
+        raise ValueError("ranking_method must be 'mixed' or 'joint'.")
 
     clusters = cluster_confounders(
         data,
@@ -398,11 +421,25 @@ def rank_confounder_clusters(
         "score",
     ]
     ranking = pd.DataFrame(rows, columns=columns)
-    return ranking.sort_values(
+    ranking = ranking.sort_values(
         "score",
         ascending=False,
         kind="mergesort",
     ).reset_index(drop=True)
+    if ranking_method == "mixed" and len(ranking) > 2:
+        remaining = ranking.iloc[2:]
+        # idxmax selects the first maximum, preserving joint-score and
+        # original-cluster ordering when treatment importances are tied.
+        treatment_index = remaining["importance_d"].idxmax()
+        ranking = pd.concat(
+            [
+                ranking.iloc[:2],
+                ranking.loc[[treatment_index]],
+                remaining.drop(index=treatment_index),
+            ],
+            ignore_index=True,
+        )
+    return ranking
 
 
 __all__ = ["cluster_confounders", "rank_confounder_clusters"]

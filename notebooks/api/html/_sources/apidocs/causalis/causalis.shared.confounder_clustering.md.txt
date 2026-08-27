@@ -88,7 +88,7 @@
 ```
 ````
 
-````{py:function} rank_confounder_clusters(data: causalis.dgp.causaldata.CausalData | causalis.dgp.multicausaldata.MultiCausalData, effect_estimation: typing.Any, *, min_abs_correlation: float = 0.7, correlation_method: causalis.shared.confounder_clustering.CorrelationMethod = 'pearson', linkage_method: causalis.shared.confounder_clustering.LinkageMethod = 'complete', max_samples: typing.Optional[int] = 200000, random_state: typing.Optional[int] = 42, outcome_importance: causalis.shared.confounder_clustering.OutcomeImportanceMethod = 'mean') -> pandas.DataFrame
+````{py:function} rank_confounder_clusters(data: causalis.dgp.causaldata.CausalData | causalis.dgp.multicausaldata.MultiCausalData, effect_estimation: typing.Any, *, min_abs_correlation: float = 0.7, correlation_method: causalis.shared.confounder_clustering.CorrelationMethod = 'pearson', linkage_method: causalis.shared.confounder_clustering.LinkageMethod = 'complete', max_samples: typing.Optional[int] = 200000, random_state: typing.Optional[int] = 42, outcome_importance: causalis.shared.confounder_clustering.OutcomeImportanceMethod = 'mean', ranking_method: typing.Literal[mixed, joint] = 'mixed') -> pandas.DataFrame
 :canonical: causalis.shared.confounder_clustering.rank_confounder_clusters
 
 ```{autodoc2-docstring} causalis.shared.confounder_clustering.rank_confounder_clusters
